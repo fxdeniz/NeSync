@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/sql/ff_database.db3</file>
+    </qresource>
+</RCC>
