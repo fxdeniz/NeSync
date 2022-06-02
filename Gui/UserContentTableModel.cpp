@@ -1,0 +1,132 @@
+#include "UserContentTableModel.h"
+
+#include <QFileIconProvider>
+#include <QPixmap>
+#include <QColor>
+
+UserContentTableModel::UserContentTableModel(QObject *parent)
+    : QAbstractTableModel(parent)
+{
+}
+
+UserContentTableModel::UserContentTableModel(const QList<TableItem> &_itemList, QObject *parent)
+    : QAbstractTableModel(parent), itemList(_itemList)
+{
+}
+
+int UserContentTableModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : this->itemList.size();
+}
+
+int UserContentTableModel::columnCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : 2;
+}
+
+QVariant UserContentTableModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    if (index.row() >= this->itemList.size() || index.row() < 0)
+        return QVariant();
+
+    if (role == Qt::ItemDataRole::DisplayRole) {
+        const auto &item = this->itemList.at(index.row());
+
+        switch (index.column()) {
+        case 0:
+            return item.name;
+        case 1:
+            return item.itemCount;
+        default:
+            break;
+        }
+    }
+    else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
+    {
+        QFileIconProvider provider;
+        auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+
+        return result;
+    }
+
+    return QVariant();
+}
+
+QVariant UserContentTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal) {
+        switch (section) {
+        case 0:
+            return tr("File Name");
+        case 1:
+            return tr("Extension");
+        default:
+            break;
+        }
+    }
+    return QVariant();
+}
+
+Qt::ItemFlags UserContentTableModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool UserContentTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && role == Qt::EditRole)
+    {
+        const int row = index.row();
+        auto item = this->itemList.value(row);
+
+        switch (index.column()) {
+        case 0:
+            item.name = value.toString();
+            break;
+        case 1:
+            item.itemCount = value.toString();
+            break;
+        default:
+            return false;
+        }
+        this->itemList.replace(row, item);
+        emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+
+        return true;
+    }
+
+    return false;
+}
+
+bool UserContentTableModel::insertRows(int position, int rows, const QModelIndex &index)
+{
+    Q_UNUSED(index);
+    beginInsertRows(QModelIndex(), position, position + rows - 1);
+
+    for (int row = 0; row < rows; ++row)
+        this->itemList.insert(position, { QString(), QString() });
+
+    endInsertRows();
+    return true;
+}
+
+bool UserContentTableModel::removeRows(int position, int rows, const QModelIndex &index)
+{
+    Q_UNUSED(index);
+    beginRemoveRows(QModelIndex(), position, position + rows - 1);
+
+    for (int row = 0; row < rows; ++row)
+        this->itemList.removeAt(position);
+
+    endRemoveRows();
+    return true;
+}

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "UserContentTableModel.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -17,6 +19,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    UserContentTableModel *userContentTableModel;
 };
 
 #endif // MAINWINDOW_H
