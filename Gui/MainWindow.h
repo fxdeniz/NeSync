@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "UserContentTableModel.h"
+#include "UserContentListModel.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,7 @@ public:
 private:
     Ui::MainWindow *ui;
     UserContentTableModel *userContentTableModel;
+    UserContentListModel *userContentListModel;
 };
 
 #endif // MAINWINDOW_H

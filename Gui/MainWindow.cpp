@@ -7,15 +7,22 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QList<UserContentTableModel::TableItem> sampleData;
+    QList<UserContentTableModel::TableItem> sampleTableData;
 
-    sampleData.insert(0, {"first_file", ".txt"});
-    sampleData.insert(1, {"second_file", ".zip"});
-    sampleData.insert(2, {"third_file", ".pdf"});
-    sampleData.insert(3, {"fourth_file", ".mp4"});
+    sampleTableData.insert(0, {"first_file", ".txt"});
+    sampleTableData.insert(1, {"second_file", ".zip"});
+    sampleTableData.insert(2, {"third_file", ".pdf"});
+    sampleTableData.insert(3, {"fourth_file", ".mp4"});
 
-    this->userContentTableModel = new UserContentTableModel(sampleData, this);
+    this->userContentTableModel = new UserContentTableModel(sampleTableData, this);
     this->ui->tableView->setModel(this->userContentTableModel);
+
+
+    QStringList sampleListData;
+    sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
+
+    this->userContentListModel = new UserContentListModel(sampleListData, this);
+    this->ui->listView->setModel(this->userContentListModel);
 }
 
 MainWindow::~MainWindow()
