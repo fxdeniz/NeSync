@@ -19,7 +19,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void showContextMenuListView(const QPoint &pos);
+    void showContextMenuListView(const QPoint &argPos);
+    void showContextMenuTableView(const QPoint &argPos);
 
 private:
     Ui::MainWindow *ui;

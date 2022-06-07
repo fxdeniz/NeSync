@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->listView->setModel(this->userContentListModel);
 
     QObject::connect(this->ui->listView, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenuListView);
+    QObject::connect(this->ui->tableView, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenuTableView);
 }
 
 MainWindow::~MainWindow()
@@ -32,16 +33,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showContextMenuListView(const QPoint &pos)
+void MainWindow::showContextMenuListView(const QPoint &argPos)
 {
-    QModelIndex index=this->ui->listView->indexAt(pos);
+    QAbstractItemView *subjectView = this->ui->listView;
+    QModelIndex index = subjectView->indexAt(argPos);
 
     if(index.isValid()) // If user selected an item from list.
     {
         QMenu *ptrMenu = new QMenu(this);
-        ptrMenu->addAction(new QAction("Action 1", ptrMenu));
-        ptrMenu->addAction(new QAction("Action 2", ptrMenu));
-        ptrMenu->addAction(new QAction("Action 3", ptrMenu));
-        ptrMenu->popup(this->ui->listView->viewport()->mapToGlobal(pos));
+        ptrMenu->addAction(new QAction("List Action 1", ptrMenu));
+        ptrMenu->addAction(new QAction("List Action 2", ptrMenu));
+        ptrMenu->addAction(new QAction("List Action 3", ptrMenu));
+
+        ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
+    }
+}
+
+void MainWindow::showContextMenuTableView(const QPoint &argPos)
+{
+    QAbstractItemView *subjectView = this->ui->tableView;
+    QModelIndex index = subjectView->indexAt(argPos);
+
+    if(index.isValid()) // If user selected an item from table.
+    {
+        QMenu *ptrMenu = new QMenu(this);
+        ptrMenu->addAction(new QAction("Table Action 1", ptrMenu));
+        ptrMenu->addAction(new QAction("Table Action 2", ptrMenu));
+        ptrMenu->addAction(new QAction("Table Action 3", ptrMenu));
+
+        ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
