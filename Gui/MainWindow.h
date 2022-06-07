@@ -18,6 +18,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void showContextMenuListView(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
     UserContentTableModel *userContentTableModel;
