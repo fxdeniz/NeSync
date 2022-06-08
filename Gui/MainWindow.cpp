@@ -56,10 +56,10 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from table.
     {
-        QMenu *ptrMenu = new QMenu(this);
-        ptrMenu->addAction(new QAction("Table Action 1", ptrMenu));
-        ptrMenu->addAction(new QAction("Table Action 2", ptrMenu));
-        ptrMenu->addAction(new QAction("Table Action 3", ptrMenu));
+        QMenu *ptrMenu = new QMenu(this->ui->tableView);
+        ptrMenu->addAction(new QAction("Rename", ptrMenu));
+        ptrMenu->addAction(new QAction("Cut", ptrMenu));
+        ptrMenu->addAction(new QAction("Delete", ptrMenu));
 
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
