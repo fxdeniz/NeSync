@@ -41,7 +41,10 @@ void MainWindow::showContextMenuListView(const QPoint &argPos)
     if(index.isValid()) // If user selected an item from list.
     {
         QMenu *ptrMenu = new QMenu(this->ui->listView);
+        ptrMenu->addAction(new QAction("Preview", ptrMenu));
         ptrMenu->addAction(new QAction("Edit", ptrMenu));
+        ptrMenu->addAction(new QAction("Schedule for independent copy", ptrMenu));
+        ptrMenu->addAction(new QAction("Schedule and open indepented copy menu", ptrMenu));
         ptrMenu->addAction(new QAction("Delete", ptrMenu));
 
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
@@ -57,7 +60,9 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
     {
         QMenu *ptrMenu = new QMenu(this->ui->tableView);
         ptrMenu->addAction(new QAction("Rename", ptrMenu));
+        ptrMenu->addAction(new QAction("Edit", ptrMenu));
         ptrMenu->addAction(new QAction("Cut", ptrMenu));
+        ptrMenu->addAction(new QAction("Freeze", ptrMenu));
         ptrMenu->addAction(new QAction("Delete", ptrMenu));
 
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
