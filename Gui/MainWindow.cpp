@@ -63,3 +63,9 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
+
+void MainWindow::on_buttonSelectControl_clicked()
+{
+    this->ui->tableView->selectAll();
+}
+

@@ -22,6 +22,8 @@ private slots:
     void showContextMenuListView(const QPoint &argPos);
     void showContextMenuTableView(const QPoint &argPos);
 
+    void on_buttonSelectControl_clicked();
+
 private:
     Ui::MainWindow *ui;
     UserContentTableModel *userContentTableModel;
