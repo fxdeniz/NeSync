@@ -1,5 +1,7 @@
 #include "UserContentListModel.h"
 
+#include <QColor>
+
 UserContentListModel::UserContentListModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -34,6 +36,13 @@ QVariant UserContentListModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole)
         return stringList.at(index.row());
+    else if(role == Qt::ItemDataRole::CheckStateRole)
+    {
+        if(this->checkedItems.contains(index))
+            return Qt::CheckState::Checked;
+        else
+            return Qt::CheckState::Unchecked;
+    }
     else
         return QVariant();
 }
@@ -69,7 +78,7 @@ Qt::ItemFlags UserContentListModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    return QAbstractItemModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
 }
 
 
@@ -85,17 +94,32 @@ Qt::ItemFlags UserContentListModel::flags(const QModelIndex &index) const
         */
 
 
-    bool UserContentListModel::setData(const QModelIndex &index,
-                                  const QVariant &value, int role)
+bool UserContentListModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole)
+    bool result = false;
+
+    if (index.isValid())
     {
-        stringList.replace(index.row(), value.toString());
-        emit dataChanged(index, index);
-        return true;
+        if(role == Qt::ItemDataRole::EditRole)
+        {
+            stringList.replace(index.row(), value.toString());
+
+            emit dataChanged(index, index);
+            result = true;
+        }
+        else if(role == Qt::ItemDataRole::CheckStateRole)
+        {
+            if(value == Qt::CheckState::Checked)
+                this->checkedItems.insert(index);
+            else
+                this->checkedItems.remove(index);
+
+            emit dataChanged(index, index);
+            result = true;
+        }
     }
 
-    return false;
+    return result;
 }
 
 

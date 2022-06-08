@@ -4,14 +4,14 @@
 #include <QAbstractListModel>
 
 // code here is taken from
-//  http://www.java2s.com/Code/Cpp/Qt/stringlistmodelexample.htm
+// http://www.java2s.com/Code/Cpp/Qt/stringlistmodelexample.htm
+// https://www.walletfox.com/course/qtcheckablelist.php
 class UserContentListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
     UserContentListModel(QObject *parent = nullptr);
     UserContentListModel(const QStringList &itemList, QObject *parent = nullptr);
-
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -23,6 +23,7 @@ public:
 
 private:
     QStringList stringList;
+    QSet<QPersistentModelIndex> checkedItems;
 };
 
 #endif // USERCONTENTLISTMODEL_H
