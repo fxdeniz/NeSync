@@ -44,6 +44,13 @@ QVariant UserContentTableModel::data(const QModelIndex &index, int role) const
             break;
         }
     }
+    else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == 0)
+    {
+        if(this->checkedItems.contains(index))
+            return Qt::CheckState::Checked;
+        else
+            return Qt::CheckState::Unchecked;
+    }
     else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
     {
         QFileIconProvider provider;
@@ -78,30 +85,44 @@ Qt::ItemFlags UserContentTableModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
 }
 
 bool UserContentTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole)
+    if (index.isValid())
     {
-        const int row = index.row();
-        auto item = this->itemList.value(row);
+        if(role == Qt::ItemDataRole::EditRole)
+        {
+            const int row = index.row();
+            auto item = this->itemList.value(row);
 
-        switch (index.column()) {
-        case 0:
-            item.name = value.toString();
-            break;
-        case 1:
-            item.itemCount = value.toString();
-            break;
-        default:
-            return false;
+            switch (index.column())
+            {
+            case 0:
+                item.name = value.toString();
+                break;
+            case 1:
+                item.itemCount = value.toString();
+                break;
+            default:
+                return false;
+            }
+            this->itemList.replace(row, item);
+            emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+
+            return true;
         }
-        this->itemList.replace(row, item);
-        emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+        else if(role == Qt::ItemDataRole::CheckStateRole)
+        {
+            if(value == Qt::CheckState::Checked)
+                this->checkedItems.insert(index);
+            else
+                this->checkedItems.remove(index);
 
-        return true;
+            emit dataChanged(index, index);
+            return true;
+        }
     }
 
     return false;
