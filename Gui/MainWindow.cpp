@@ -40,10 +40,9 @@ void MainWindow::showContextMenuListView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from list.
     {
-        QMenu *ptrMenu = new QMenu(this);
-        ptrMenu->addAction(new QAction("List Action 1", ptrMenu));
-        ptrMenu->addAction(new QAction("List Action 2", ptrMenu));
-        ptrMenu->addAction(new QAction("List Action 3", ptrMenu));
+        QMenu *ptrMenu = new QMenu(this->ui->listView);
+        ptrMenu->addAction(new QAction("Edit", ptrMenu));
+        ptrMenu->addAction(new QAction("Delete", ptrMenu));
 
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
