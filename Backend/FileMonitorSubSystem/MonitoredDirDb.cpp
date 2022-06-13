@@ -1,5 +1,6 @@
 #include "MonitoredDirDb.h"
 
+#include <QStandardPaths>
 #include <QSqlRecord>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -13,7 +14,9 @@ MonitoredDirDb::MonitoredDirDb()
     // db.setDatabaseName(":memory:");
 
     this->db = QSqlDatabase::addDatabase("QSQLITE", "file_monitor_in_mem_db");
-    db.setDatabaseName("C:\\Users\\MiniDeniz\\Desktop\\zmem.db3");
+    auto desktopPath =  QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+    desktopPath += "/";
+    db.setDatabaseName(desktopPath + "zmem.db3");
 
     db.open();
 

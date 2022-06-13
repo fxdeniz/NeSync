@@ -5,9 +5,11 @@
 
 #include "UserContentTableModel.h"
 #include "UserContentListModel.h"
+#include "DialogTableItemEditor.h"
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -23,9 +25,11 @@ private slots:
     void showContextMenuTableView(const QPoint &argPos);
 
     void on_buttonSelectControl_clicked();
+    void on_actionEditTableItem_clicked();
 
 private:
     Ui::MainWindow *ui;
+    DialogTableItemEditor *dialogTableItemEditor;
     UserContentTableModel *userContentTableModel;
     UserContentListModel *userContentListModel;
 };

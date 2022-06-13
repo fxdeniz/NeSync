@@ -1,3 +1,4 @@
+#include <QStandardPaths>
 #include <QApplication>
 #include <QDebug>
 #include "Gui/MainWindow.h"
@@ -11,8 +12,11 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
 
+    auto testFolderPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+    testFolderPath += "/test/";
+
     QStringList predictionList;
-    predictionList << "C:/Users/MiniDeniz/Desktop/test/";
+    predictionList << testFolderPath;
     predictionList << "not_exist";
 
     FileMonitoringManagerIntegrationTest fmmITest(predictionList);

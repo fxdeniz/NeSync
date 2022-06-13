@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->dialogTableItemEditor = new DialogTableItemEditor(this);
+
     QList<UserContentTableModel::TableItem> sampleTableData;
 
     sampleTableData.insert(0, {"first_file", ".txt"});
@@ -59,11 +61,17 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
     if(index.isValid()) // If user selected an item from table.
     {
         QMenu *ptrMenu = new QMenu(this->ui->tableView);
-        ptrMenu->addAction(new QAction("Rename", ptrMenu));
-        ptrMenu->addAction(new QAction("Edit", ptrMenu));
-        ptrMenu->addAction(new QAction("Cut", ptrMenu));
-        ptrMenu->addAction(new QAction("Freeze", ptrMenu));
-        ptrMenu->addAction(new QAction("Delete", ptrMenu));
+        QAction *actionEdit = new QAction("Edit", ptrMenu);
+        QAction *actionCut = new QAction("Cut", ptrMenu);
+        QAction *actionFreeze = new QAction("Freeze", ptrMenu);
+        QAction *actionDelete = new QAction("Delete", ptrMenu);
+
+        ptrMenu->addAction(actionEdit);
+        ptrMenu->addAction(actionCut);
+        ptrMenu->addAction(actionFreeze);
+        ptrMenu->addAction(actionDelete);
+
+        QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEditTableItem_clicked);
 
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
@@ -72,5 +80,11 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
 void MainWindow::on_buttonSelectControl_clicked()
 {
     this->ui->tableView->selectAll();
+}
+
+void MainWindow::on_actionEditTableItem_clicked()
+{
+    this->dialogTableItemEditor->setModal(true);
+    this->dialogTableItemEditor->show();
 }
 
