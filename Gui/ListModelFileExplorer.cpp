@@ -1,18 +1,18 @@
-#include "UserContentListModel.h"
+#include "ListModelFileExplorer.h"
 
 #include <QColor>
 
-UserContentListModel::UserContentListModel(QObject *parent) : QAbstractListModel(parent)
+ListModelFileExplorer::ListModelFileExplorer(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
-UserContentListModel::UserContentListModel(const QStringList &itemList, QObject *parent)
+ListModelFileExplorer::ListModelFileExplorer(const QStringList &itemList, QObject *parent)
     : QAbstractListModel(parent)
 {
     this->stringList = itemList;
 }
 
-int UserContentListModel::rowCount(const QModelIndex &parent) const
+int ListModelFileExplorer::rowCount(const QModelIndex &parent) const
 {
     return stringList.count();
 }
@@ -26,7 +26,7 @@ int UserContentListModel::rowCount(const QModelIndex &parent) const
 */
 
 
-QVariant UserContentListModel::data(const QModelIndex &index, int role) const
+QVariant ListModelFileExplorer::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -55,7 +55,7 @@ QVariant UserContentListModel::data(const QModelIndex &index, int role) const
 */
 
 
-QVariant UserContentListModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ListModelFileExplorer::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -73,7 +73,7 @@ QVariant UserContentListModel::headerData(int section, Qt::Orientation orientati
 */
 
 
-Qt::ItemFlags UserContentListModel::flags(const QModelIndex &index) const
+Qt::ItemFlags ListModelFileExplorer::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::ItemIsEnabled;
@@ -94,7 +94,7 @@ Qt::ItemFlags UserContentListModel::flags(const QModelIndex &index) const
         */
 
 
-bool UserContentListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ListModelFileExplorer::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     bool result = false;
 
@@ -128,7 +128,7 @@ bool UserContentListModel::setData(const QModelIndex &index, const QVariant &val
 */
 
 
-bool UserContentListModel::insertRows(int position, int rows, const QModelIndex &parent)
+bool ListModelFileExplorer::insertRows(int position, int rows, const QModelIndex &parent)
 {
     beginInsertRows(QModelIndex(), position, position+rows-1);
 
@@ -148,7 +148,7 @@ bool UserContentListModel::insertRows(int position, int rows, const QModelIndex 
 */
 
 
-bool UserContentListModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool ListModelFileExplorer::removeRows(int position, int rows, const QModelIndex &parent)
 {
     beginRemoveRows(QModelIndex(), position, position+rows-1);
 

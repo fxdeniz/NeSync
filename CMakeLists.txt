@@ -27,8 +27,9 @@ include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/ef
 set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
     Gui/DialogTableItemEditor.h Gui/DialogTableItemEditor.cpp Gui/DialogTableItemEditor.ui
-    Gui/UserContentTableModel.h Gui/UserContentTableModel.cpp
-    Gui/UserContentListModel.h Gui/UserContentListModel.cpp
+    Gui/TableModelFileExplorer.h Gui/TableModelFileExplorer.cpp
+    Gui/ListModelFileExplorer.h Gui/ListModelFileExplorer.cpp
+    Gui/TableModelFileMonitor.h Gui/TableModelFileMonitor.cpp
     main.cpp
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h

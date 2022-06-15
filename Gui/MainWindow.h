@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 
-#include "UserContentTableModel.h"
-#include "UserContentListModel.h"
+#include "TableModelFileExplorer.h"
+#include "TableModelFileMonitor.h"
+#include "ListModelFileExplorer.h"
 #include "DialogTableItemEditor.h"
 
 namespace Ui
@@ -30,8 +31,10 @@ private slots:
 private:
     Ui::MainWindow *ui;
     DialogTableItemEditor *dialogTableItemEditor;
-    UserContentTableModel *userContentTableModel;
-    UserContentListModel *userContentListModel;
+    TableModelFileExplorer *tableModelFileExplorer;
+    ListModelFileExplorer *listModelFileExplorer;
+    TableModelFileMonitor *tableModelFileMonitor;
+
 };
 
 #endif // MAINWINDOW_H

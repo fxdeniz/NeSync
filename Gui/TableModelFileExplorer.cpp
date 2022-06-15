@@ -1,30 +1,30 @@
-#include "UserContentTableModel.h"
+#include "TableModelFileExplorer.h"
 
 #include <QFileIconProvider>
 #include <QPixmap>
 #include <QColor>
 
-UserContentTableModel::UserContentTableModel(QObject *parent)
+TableModelFileExplorer::TableModelFileExplorer(QObject *parent)
     : QAbstractTableModel(parent)
 {
 }
 
-UserContentTableModel::UserContentTableModel(const QList<TableItem> &_itemList, QObject *parent)
+TableModelFileExplorer::TableModelFileExplorer(const QList<TableItem> &_itemList, QObject *parent)
     : QAbstractTableModel(parent), itemList(_itemList)
 {
 }
 
-int UserContentTableModel::rowCount(const QModelIndex &parent) const
+int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : this->itemList.size();
 }
 
-int UserContentTableModel::columnCount(const QModelIndex &parent) const
+int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : 2;
 }
 
-QVariant UserContentTableModel::data(const QModelIndex &index, int role) const
+QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -62,7 +62,7 @@ QVariant UserContentTableModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QVariant UserContentTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -80,7 +80,7 @@ QVariant UserContentTableModel::headerData(int section, Qt::Orientation orientat
     return QVariant();
 }
 
-Qt::ItemFlags UserContentTableModel::flags(const QModelIndex &index) const
+Qt::ItemFlags TableModelFileExplorer::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::ItemIsEnabled;
@@ -88,7 +88,7 @@ Qt::ItemFlags UserContentTableModel::flags(const QModelIndex &index) const
     return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
 }
 
-bool UserContentTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool TableModelFileExplorer::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid())
     {
@@ -128,7 +128,7 @@ bool UserContentTableModel::setData(const QModelIndex &index, const QVariant &va
     return false;
 }
 
-bool UserContentTableModel::insertRows(int position, int rows, const QModelIndex &index)
+bool TableModelFileExplorer::insertRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
     beginInsertRows(QModelIndex(), position, position + rows - 1);
@@ -140,7 +140,7 @@ bool UserContentTableModel::insertRows(int position, int rows, const QModelIndex
     return true;
 }
 
-bool UserContentTableModel::removeRows(int position, int rows, const QModelIndex &index)
+bool TableModelFileExplorer::removeRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
     beginRemoveRows(QModelIndex(), position, position + rows - 1);

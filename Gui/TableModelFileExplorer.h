@@ -1,9 +1,9 @@
-#ifndef USERCONTENTTABLEMODEL_H
-#define USERCONTENTTABLEMODEL_H
+#ifndef TABLEMODELFILEEXPLORER_H
+#define TABLEMODELFILEEXPLORER_H
 
 #include <QAbstractTableModel>
 
-class UserContentTableModel : public QAbstractTableModel
+class TableModelFileExplorer : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -20,8 +20,8 @@ public:
     };
 
 public:
-    UserContentTableModel(QObject *parent = nullptr);
-    UserContentTableModel(const QList<TableItem> &_itemList, QObject *parent = nullptr);
+    TableModelFileExplorer(QObject *parent = nullptr);
+    TableModelFileExplorer(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
     // QAbstractTableModel interface
 public:
@@ -40,4 +40,4 @@ private:
 
 };
 
-#endif // USERCONTENTTABLEMODEL_H
+#endif // TABLEMODELFILEEXPLORER_H

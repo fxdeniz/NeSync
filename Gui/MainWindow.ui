@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>928</width>
+    <width>950</width>
     <height>647</height>
    </rect>
   </property>
@@ -248,7 +248,7 @@
           <item row="2" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QTableView" name="tableView">
+             <widget class="QTableView" name="tableViewFileExplorer">
               <property name="contextMenuPolicy">
                <enum>Qt::CustomContextMenu</enum>
               </property>
@@ -472,6 +472,18 @@
        <attribute name="title">
         <string>File Monitor</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QTableView" name="tableViewFileMonitor">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -482,7 +494,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>928</width>
+     <width>950</width>
      <height>21</height>
     </rect>
    </property>

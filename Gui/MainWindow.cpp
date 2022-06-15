@@ -9,25 +9,35 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->dialogTableItemEditor = new DialogTableItemEditor(this);
 
-    QList<UserContentTableModel::TableItem> sampleTableData;
+    QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
 
-    sampleTableData.insert(0, {"first_file", ".txt"});
-    sampleTableData.insert(1, {"second_file", ".zip"});
-    sampleTableData.insert(2, {"third_file", ".pdf"});
-    sampleTableData.insert(3, {"fourth_file", ".mp4"});
+    sampleFileExplorerTableData.insert(0, {"first_file", ".txt"});
+    sampleFileExplorerTableData.insert(1, {"second_file", ".zip"});
+    sampleFileExplorerTableData.insert(2, {"third_file", ".pdf"});
+    sampleFileExplorerTableData.insert(3, {"fourth_file", ".mp4"});
 
-    this->userContentTableModel = new UserContentTableModel(sampleTableData, this);
-    this->ui->tableView->setModel(this->userContentTableModel);
-
+    this->tableModelFileExplorer = new TableModelFileExplorer(sampleFileExplorerTableData, this);
+    this->ui->tableViewFileExplorer->setModel(this->tableModelFileExplorer);
 
     QStringList sampleListData;
     sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
 
-    this->userContentListModel = new UserContentListModel(sampleListData, this);
-    this->ui->listView->setModel(this->userContentListModel);
+    this->listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
+    this->ui->listView->setModel(this->listModelFileExplorer);
+
+    QList<TableModelFileMonitor::MonitorTableItem> sampleFileMonitorTableData;
+
+    sampleFileMonitorTableData.insert(0, {"first_file.txt", "C:/Users/<USER>/AppData/Roaming/<APPNAME>", "Deleted"});
+    sampleFileMonitorTableData.insert(1, {"second_file.zip", 	"C:/Users/<USER>/Desktop", "Moved"});
+    sampleFileMonitorTableData.insert(2, {"third_file.pdf", "C:/Users/<USER>/Desktop", "Updated"});
+    sampleFileMonitorTableData.insert(3, {"fourth_file.mp4", "C:/Users/<USER>/Videos", "New Added"});
+
+    this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
+    this->ui->tableViewFileMonitor->setModel(this->tableModelFileMonitor);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Stretch);
 
     QObject::connect(this->ui->listView, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenuListView);
-    QObject::connect(this->ui->tableView, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenuTableView);
+    QObject::connect(this->ui->tableViewFileExplorer, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenuTableView);
 }
 
 MainWindow::~MainWindow()
@@ -55,12 +65,12 @@ void MainWindow::showContextMenuListView(const QPoint &argPos)
 
 void MainWindow::showContextMenuTableView(const QPoint &argPos)
 {
-    QAbstractItemView *subjectView = this->ui->tableView;
+    QAbstractItemView *subjectView = this->ui->tableViewFileExplorer;
     QModelIndex index = subjectView->indexAt(argPos);
 
     if(index.isValid()) // If user selected an item from table.
     {
-        QMenu *ptrMenu = new QMenu(this->ui->tableView);
+        QMenu *ptrMenu = new QMenu(this->ui->tableViewFileExplorer);
         QAction *actionEdit = new QAction("Edit", ptrMenu);
         QAction *actionCut = new QAction("Cut", ptrMenu);
         QAction *actionFreeze = new QAction("Freeze", ptrMenu);
@@ -79,7 +89,7 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
 
 void MainWindow::on_buttonSelectControl_clicked()
 {
-    this->ui->tableView->selectAll();
+    this->ui->tableViewFileExplorer->selectAll();
 }
 
 void MainWindow::on_actionEditTableItem_clicked()

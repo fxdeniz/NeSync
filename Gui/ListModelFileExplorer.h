@@ -1,17 +1,17 @@
-#ifndef USERCONTENTLISTMODEL_H
-#define USERCONTENTLISTMODEL_H
+#ifndef LISTMODELFILEEXPLORER_H
+#define LISTMODELFILEEXPLORER_H
 
 #include <QAbstractListModel>
 
 // code here is taken from
 // http://www.java2s.com/Code/Cpp/Qt/stringlistmodelexample.htm
 // https://www.walletfox.com/course/qtcheckablelist.php
-class UserContentListModel : public QAbstractListModel
+class ListModelFileExplorer : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    UserContentListModel(QObject *parent = nullptr);
-    UserContentListModel(const QStringList &itemList, QObject *parent = nullptr);
+    ListModelFileExplorer(QObject *parent = nullptr);
+    ListModelFileExplorer(const QStringList &itemList, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -26,4 +26,4 @@ private:
     QSet<QPersistentModelIndex> checkedItems;
 };
 
-#endif // USERCONTENTLISTMODEL_H
+#endif // LISTMODELFILEEXPLORER_H
