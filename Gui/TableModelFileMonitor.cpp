@@ -145,6 +145,7 @@ bool TableModelFileMonitor::insertRows(int position, int rows, const QModelIndex
         this->itemList.insert(position, { QString(), QString() });
 
     endInsertRows();
+
     return true;
 }
 

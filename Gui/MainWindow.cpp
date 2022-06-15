@@ -34,7 +34,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
     this->ui->tableViewFileMonitor->setModel(this->tableModelFileMonitor);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Stretch);
+    //this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    //this->ui->tableViewFileMonitor->setColumnWidth(3, 50);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeMode::Fixed);
+
+    this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this->ui->tableViewFileMonitor);
+
+    for(int rowIndex = 0; rowIndex < sampleFileMonitorTableData.size(); rowIndex++)
+    {
+        this->ui->tableViewFileMonitor->setItemDelegateForColumn(4, this->comboBoxItemDelegateFileAction);
+        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, 4));
+    }
+
+
+    this->ui->tableViewFileMonitor->resizeColumnsToContents();
+    this->ui->tabWidget->setCurrentIndex(0);
 
     QObject::connect(this->ui->listView, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenuListView);
     QObject::connect(this->ui->tableViewFileExplorer, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenuTableView);

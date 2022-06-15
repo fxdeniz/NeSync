@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 
-// code here is taken from
+// code here is adapted from
 // http://www.java2s.com/Code/Cpp/Qt/stringlistmodelexample.htm
 // https://www.walletfox.com/course/qtcheckablelist.php
 class ListModelFileExplorer : public QAbstractListModel
