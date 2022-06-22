@@ -78,9 +78,9 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
         case 2:
             return tr("Event");
         case 3:
-            return tr("Note");
-        case 4:
             return tr("Action");
+        case 4:
+            return tr("Note");
         default:
             break;
         }

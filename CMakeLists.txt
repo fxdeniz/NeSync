@@ -31,6 +31,7 @@ set(PROJECT_SOURCES
     Gui/ListModelFileExplorer.h Gui/ListModelFileExplorer.cpp
     Gui/TableModelFileMonitor.h Gui/TableModelFileMonitor.cpp
     Gui/ComboBoxItemDelegateFileAction.h Gui/ComboBoxItemDelegateFileAction.cpp
+    Gui/ComboBoxItemDelegateNote.h Gui/ComboBoxItemDelegateNote.cpp
     main.cpp
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "ComboBoxItemDelegateFileAction.h"
+#include "ComboBoxItemDelegateNote.h"
 #include "TableModelFileExplorer.h"
 #include "TableModelFileMonitor.h"
 #include "ListModelFileExplorer.h"
@@ -35,6 +36,7 @@ private:
     TableModelFileExplorer *tableModelFileExplorer;
     ListModelFileExplorer *listModelFileExplorer;
     TableModelFileMonitor *tableModelFileMonitor;
+    ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
 };
 

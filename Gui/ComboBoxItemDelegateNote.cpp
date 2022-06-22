@@ -1,20 +1,21 @@
-#include "ComboBoxItemDelegateFileAction.h"
+#include "ComboBoxItemDelegateNote.h"
 
 #include <QComboBox>
 
-ComboBoxItemDelegateFileAction::ComboBoxItemDelegateFileAction(QObject *parent)
+ComboBoxItemDelegateNote::ComboBoxItemDelegateNote(QObject *parent)
     : QStyledItemDelegate(parent)
 {
 }
 
 
-ComboBoxItemDelegateFileAction::~ComboBoxItemDelegateFileAction()
+ComboBoxItemDelegateNote::~ComboBoxItemDelegateNote()
 {
 }
 
 
-QWidget *ComboBoxItemDelegateFileAction::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    qDebug() << "I ran ";
     // Create the combobox and populate it
     QComboBox *cb = new QComboBox(parent);
     const int row = index.row();
@@ -25,7 +26,7 @@ QWidget *ComboBoxItemDelegateFileAction::createEditor(QWidget *parent, const QSt
 }
 
 
-void ComboBoxItemDelegateFileAction::setEditorData(QWidget *editor, const QModelIndex &index) const
+void ComboBoxItemDelegateNote::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
@@ -38,9 +39,10 @@ void ComboBoxItemDelegateFileAction::setEditorData(QWidget *editor, const QModel
 }
 
 
-void ComboBoxItemDelegateFileAction::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+void ComboBoxItemDelegateNote::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
     model->setData(index, cb->currentText(), Qt::EditRole);
 }
+

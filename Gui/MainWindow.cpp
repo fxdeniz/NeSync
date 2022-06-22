@@ -34,17 +34,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
     this->ui->tableViewFileMonitor->setModel(this->tableModelFileMonitor);
-    //this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    //this->ui->tableViewFileMonitor->setColumnWidth(3, 50);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeMode::Fixed);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeMode::Fixed);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
 
+    this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this->ui->tableViewFileMonitor);
     this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this->ui->tableViewFileMonitor);
 
     for(int rowIndex = 0; rowIndex < sampleFileMonitorTableData.size(); rowIndex++)
     {
-        this->ui->tableViewFileMonitor->setItemDelegateForColumn(4, this->comboBoxItemDelegateFileAction);
-        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, 4));
+        int columnActionIndex = 3;
+        int columnNoteIndex = 4;
+
+        this->ui->tableViewFileMonitor->setItemDelegateForColumn(columnNoteIndex, this->comboBoxItemDelegateNote);
+        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, columnNoteIndex));
+
+
+        this->ui->tableViewFileMonitor->setItemDelegateForColumn(columnActionIndex, this->comboBoxItemDelegateFileAction);
+        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, columnActionIndex));
     }
 
 
