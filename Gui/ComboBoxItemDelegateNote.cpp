@@ -15,7 +15,6 @@ ComboBoxItemDelegateNote::~ComboBoxItemDelegateNote()
 
 QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    qDebug() << "I ran ";
     // Create the combobox and populate it
     QComboBox *cb = new QComboBox(parent);
     const int row = index.row();
