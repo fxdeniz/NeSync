@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
@@ -30,22 +30,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="5,0">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>200</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="layoutNavigation">
             <item>
@@ -92,160 +76,23 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="layoutQuickControls">
-            <item>
-             <spacer name="horizontalSpacer_6">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonNewFolder">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>New Folder</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonAddFile">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Add File</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_7">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonClipboard">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Clipboard</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonPaste">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Paste Here</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonSelectControl">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Select All</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_8">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonImport">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Import</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="buttonExport">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Export</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_9">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>200</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
-          <item row="2" column="0" colspan="2">
+          <item row="1" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QTableView" name="tableViewFileExplorer">
@@ -655,8 +502,117 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuNew">
+    <property name="title">
+     <string>Add</string>
+    </property>
+    <addaction name="actionNew_Folder"/>
+    <addaction name="actionAdd_File"/>
+   </widget>
+   <widget class="QMenu" name="menuSelect">
+    <property name="title">
+     <string>Select</string>
+    </property>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionDe_select_all"/>
+   </widget>
+   <widget class="QMenu" name="menuClipboard">
+    <property name="title">
+     <string>Clipboard</string>
+    </property>
+    <addaction name="actionPaste_Here"/>
+    <addaction name="actionView_Contents"/>
+    <addaction name="actionClear"/>
+   </widget>
+   <widget class="QMenu" name="menuTransfer">
+    <property name="title">
+     <string>Transfer</string>
+    </property>
+    <addaction name="actionImport"/>
+    <addaction name="actionExport"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+   </widget>
+   <addaction name="menuNew"/>
+   <addaction name="menuSelect"/>
+   <addaction name="menuClipboard"/>
+   <addaction name="menuTransfer"/>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew_Folder"/>
+   <addaction name="actionAdd_File"/>
+   <addaction name="separator"/>
+   <addaction name="actionSelect_All"/>
+   <addaction name="actionDe_select_all"/>
+   <addaction name="separator"/>
+   <addaction name="actionPaste_Here"/>
+   <addaction name="actionView_Contents"/>
+   <addaction name="separator"/>
+   <addaction name="actionImport"/>
+   <addaction name="actionExport"/>
+  </widget>
+  <action name="actionNew_Folder">
+   <property name="text">
+    <string>New Folder</string>
+   </property>
+  </action>
+  <action name="actionAdd_File">
+   <property name="text">
+    <string>Add File</string>
+   </property>
+  </action>
+  <action name="actionPaste_Here">
+   <property name="text">
+    <string>Paste Here</string>
+   </property>
+  </action>
+  <action name="actionView_Contents">
+   <property name="text">
+    <string>View Clipboard</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionDe_select_all">
+   <property name="text">
+    <string>De-select all</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
