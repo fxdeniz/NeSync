@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
+
     this->dialogTableItemEditor = new DialogTableItemEditor(this);
 
     QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
@@ -113,5 +115,32 @@ void MainWindow::on_actionEditTableItem_clicked()
 {
     this->dialogTableItemEditor->setModal(true);
     this->dialogTableItemEditor->show();
+}
+
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    QToolBar *toolBar = this->ui->toolBar;
+    toolBar->clear();
+
+    if(index == 0)
+    {
+        toolBar->addAction(this->ui->tab1Action_NewFolder);
+        toolBar->addAction(this->ui->tab1Action_AddFile);
+
+        toolBar->addAction(this->ui->tab1Action_SelectAll);
+        toolBar->addAction(this->ui->tab1Action_UnSelectAll);
+
+        toolBar->addAction(this->ui->tab1Action_PasteHere);
+        toolBar->addAction(this->ui->tab1Action_ViewClipboard);
+
+        toolBar->addAction(this->ui->tab1Action_Import);
+        toolBar->addAction(this->ui->tab1Action_Export);
+    }
+    else if(index == 1)
+    {
+        toolBar->addAction(this->ui->tab2Action_SaveAll);
+        toolBar->addAction(this->ui->tab2Action_SaveSelected);
+    }
 }
 
