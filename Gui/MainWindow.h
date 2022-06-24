@@ -27,7 +27,6 @@ private slots:
     void showContextMenuListView(const QPoint &argPos);
     void showContextMenuTableView(const QPoint &argPos);
 
-    void on_buttonSelectControl_clicked();
     void on_actionEditTableItem_clicked();
 
 private:

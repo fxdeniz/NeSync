@@ -109,11 +109,6 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
     }
 }
 
-void MainWindow::on_buttonSelectControl_clicked()
-{
-    this->ui->tableViewFileExplorer->selectAll();
-}
-
 void MainWindow::on_actionEditTableItem_clicked()
 {
     this->dialogTableItemEditor->setModal(true);
