@@ -622,10 +622,10 @@
   </action>
   <action name="contextActionListFileExplorer_EditVersion">
    <property name="text">
-    <string>Edit Version</string>
+    <string>Edit version</string>
    </property>
    <property name="toolTip">
-    <string>Edit Version</string>
+    <string>Edit version</string>
    </property>
   </action>
   <action name="contextActionListFileExplorer_Schedule">
@@ -650,6 +650,14 @@
    </property>
    <property name="toolTip">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="contextActionListFileExplorer_SetAsCurrentVersion">
+   <property name="text">
+    <string>Set as current version</string>
+   </property>
+   <property name="toolTip">
+    <string>Set as current version</string>
    </property>
   </action>
  </widget>

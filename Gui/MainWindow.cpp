@@ -170,12 +170,14 @@ void MainWindow::buildContextMenuListFileExplorer()
     QAction *actionEditVersion = this->ui->contextActionListFileExplorer_EditVersion;
     QAction *actionSchedule = this->ui->contextActionListFileExplorer_Schedule;
     QAction *actionScheduleAndOpenClipboard = this->ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
+    QAction *actionSetAsCurrentVerion = this->ui->contextActionListFileExplorer_SetAsCurrentVersion;
     QAction *actionDelete = this->ui->contextActionListFileExplorer_Delete;
 
     ptrMenu->addAction(actionPreview);
     ptrMenu->addAction(actionEditVersion);
     ptrMenu->addAction(actionSchedule);
     ptrMenu->addAction(actionScheduleAndOpenClipboard);
+    ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
 }
 
