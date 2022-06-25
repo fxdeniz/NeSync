@@ -32,6 +32,16 @@ private slots:
     void on_tabWidget_currentChanged(int index);
 
 private:
+    QMenu *contextMenuTableFileExplorer;
+    QMenu *contextMenuListFileExplorer;
+    QAction *separator1, *separator2, *separator3;
+
+private:
+    void allocateSeparators();
+    void buildContextMenuTableFileExplorer();
+    void buildContextMenuListFileExplorer();
+
+private:
     Ui::MainWindow *ui;
     DialogTableItemEditor *dialogTableItemEditor;
     TableModelFileExplorer *tableModelFileExplorer;

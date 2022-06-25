@@ -6,10 +6,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
-
     this->dialogTableItemEditor = new DialogTableItemEditor(this);
+
+    this->allocateSeparators();
+    this->buildContextMenuTableFileExplorer();
+    this->buildContextMenuListFileExplorer();
+    this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
 
     QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
 
@@ -76,13 +78,7 @@ void MainWindow::showContextMenuListView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from list.
     {
-        QMenu *ptrMenu = new QMenu(this->ui->listView);
-        ptrMenu->addAction(new QAction("Preview", ptrMenu));
-        ptrMenu->addAction(new QAction("Edit", ptrMenu));
-        ptrMenu->addAction(new QAction("Schedule for independent copy", ptrMenu));
-        ptrMenu->addAction(new QAction("Schedule and open indepented copy menu", ptrMenu));
-        ptrMenu->addAction(new QAction("Delete", ptrMenu));
-
+        QMenu *ptrMenu = this->contextMenuListFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
@@ -94,19 +90,7 @@ void MainWindow::showContextMenuTableView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from table.
     {
-        QMenu *ptrMenu = new QMenu(this->ui->tableViewFileExplorer);
-        QAction *actionEdit = new QAction("Edit", ptrMenu);
-        QAction *actionCut = new QAction("Cut", ptrMenu);
-        QAction *actionFreeze = new QAction("Freeze", ptrMenu);
-        QAction *actionDelete = new QAction("Delete", ptrMenu);
-
-        ptrMenu->addAction(actionEdit);
-        ptrMenu->addAction(actionCut);
-        ptrMenu->addAction(actionFreeze);
-        ptrMenu->addAction(actionDelete);
-
-        QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEditTableItem_clicked);
-
+        QMenu *ptrMenu = this->contextMenuTableFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
@@ -127,12 +111,15 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         toolBar->addAction(this->ui->tab1Action_NewFolder);
         toolBar->addAction(this->ui->tab1Action_AddFile);
+        toolBar->addAction(this->separator1);
 
         toolBar->addAction(this->ui->tab1Action_SelectAll);
         toolBar->addAction(this->ui->tab1Action_UnSelectAll);
+        toolBar->addAction(this->separator2);
 
         toolBar->addAction(this->ui->tab1Action_PasteHere);
         toolBar->addAction(this->ui->tab1Action_ViewClipboard);
+        toolBar->addAction(this->separator3);
 
         toolBar->addAction(this->ui->tab1Action_Import);
         toolBar->addAction(this->ui->tab1Action_Export);
@@ -142,5 +129,53 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         toolBar->addAction(this->ui->tab2Action_SaveAll);
         toolBar->addAction(this->ui->tab2Action_SaveSelected);
     }
+}
+
+void MainWindow::allocateSeparators()
+{
+    this->separator1 = new QAction(this);
+    this->separator1->setSeparator(true);
+
+    this->separator2 = new QAction(this);
+    this->separator2->setSeparator(true);
+
+    this->separator3 = new QAction(this);
+    this->separator3->setSeparator(true);
+}
+
+void MainWindow::buildContextMenuTableFileExplorer()
+{
+    this->contextMenuTableFileExplorer = new QMenu(this->ui->tableViewFileExplorer);
+    QMenu *ptrMenu = this->contextMenuTableFileExplorer;
+
+    QAction *actionEdit = this->ui->contextActionTableFileExplorer_Edit;
+    QAction *actionCut = this->ui->contextActionTableFileExplorer_Cut;
+    QAction *actionFreeze = this->ui->contextActionTableFileExplorer_Freeze;
+    QAction *actionDelete = this->ui->contextActionTableFileExplorer_Delete;
+
+    ptrMenu->addAction(actionEdit);
+    ptrMenu->addAction(actionCut);
+    ptrMenu->addAction(actionFreeze);
+    ptrMenu->addAction(actionDelete);
+
+    QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEditTableItem_clicked);
+}
+
+void MainWindow::buildContextMenuListFileExplorer()
+{
+    this->contextMenuListFileExplorer = new QMenu(this->ui->listView);
+    QMenu *ptrMenu = this->contextMenuListFileExplorer;
+
+    QAction *actionPreview = this->ui->contextActionListFileExplorer_Preview;
+    QAction *actionEditVersion = this->ui->contextActionListFileExplorer_EditVersion;
+    QAction *actionSchedule = this->ui->contextActionListFileExplorer_Schedule;
+    QAction *actionScheduleAndOpenClipboard = this->ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
+    QAction *actionDelete = this->ui->contextActionListFileExplorer_Delete;
+
+    ptrMenu->addAction(actionPreview);
+    ptrMenu->addAction(actionEditVersion);
+    ptrMenu->addAction(actionSchedule);
+    ptrMenu->addAction(actionScheduleAndOpenClipboard);
+    ptrMenu->addAction(actionDelete);
 }
 
