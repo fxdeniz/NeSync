@@ -1,6 +1,7 @@
 #ifndef TABLEMODELFILEMONITOR_H
 #define TABLEMODELFILEMONITOR_H
 
+#include <QDateTime>
 #include <QAbstractTableModel>
 
 class TableModelFileMonitor : public QAbstractTableModel
@@ -13,6 +14,7 @@ public:
         QString fileName;
         QString folderPath;
         QString eventType;
+        QDateTime timestamp;
 
         bool operator==(const MonitorTableItem &other) const
         {

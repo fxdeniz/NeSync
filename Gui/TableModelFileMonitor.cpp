@@ -21,7 +21,7 @@ int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
 
 int TableModelFileMonitor::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 5;
+    return parent.isValid() ? 0 : 6;
 }
 
 QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
@@ -37,11 +37,13 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 
         switch (index.column()) {
         case 0:
-            return item.fileName;
-        case 1:
             return item.folderPath;
+        case 1:
+            return item.fileName;
         case 2:
             return item.eventType;
+        case 3:
+            return item.timestamp;
         default:
             break;
         }
@@ -53,12 +55,16 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         else
             return Qt::CheckState::Unchecked;
     }
-    else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
+    else if(role == Qt::ItemDataRole::DecorationRole && (index.column() == 0 || index.column() == 1))
     {
         QFileIconProvider provider;
         auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
 
         return result;
+    }
+    else if(role == Qt::ItemDataRole::TextAlignmentRole && (index.column() == 2 || index.column() == 3))
+    {
+        return Qt::AlignmentFlag::AlignCenter;
     }
 
     return QVariant();
@@ -72,14 +78,16 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
     if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
-            return tr("File Name");
-        case 1:
             return tr("Location");
+        case 1:
+            return tr("File Name");
         case 2:
             return tr("Event");
         case 3:
-            return tr("Action");
+            return tr("Timestamp");
         case 4:
+            return tr("Action");
+        case 5:
             return tr("Note");
         default:
             break;
