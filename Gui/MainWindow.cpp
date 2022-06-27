@@ -175,11 +175,13 @@ void MainWindow::buildContextMenuTableFileExplorer()
     this->contextMenuTableFileExplorer = new QMenu(this->ui->tableViewFileExplorer);
     QMenu *ptrMenu = this->contextMenuTableFileExplorer;
 
+    QAction *actionOpenFolderInNewTab = this->ui->contextActionTableFileExplorer_OpenFolderInNewTab;
     QAction *actionEdit = this->ui->contextActionTableFileExplorer_Edit;
     QAction *actionCut = this->ui->contextActionTableFileExplorer_Cut;
     QAction *actionFreeze = this->ui->contextActionTableFileExplorer_Freeze;
     QAction *actionDelete = this->ui->contextActionTableFileExplorer_Delete;
 
+    ptrMenu->addAction(actionOpenFolderInNewTab);
     ptrMenu->addAction(actionEdit);
     ptrMenu->addAction(actionCut);
     ptrMenu->addAction(actionFreeze);

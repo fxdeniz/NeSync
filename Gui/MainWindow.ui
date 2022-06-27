@@ -718,6 +718,14 @@
     <string>Refresh</string>
    </property>
   </action>
+  <action name="contextActionTableFileExplorer_OpenFolderInNewTab">
+   <property name="text">
+    <string>Open folder in new tab</string>
+   </property>
+   <property name="toolTip">
+    <string>Open folder in new tab</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
