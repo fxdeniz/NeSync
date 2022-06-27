@@ -188,6 +188,7 @@ void MainWindow::buildContextMenuListFileExplorer()
 
     QAction *actionPreview = this->ui->contextActionListFileExplorer_Preview;
     QAction *actionEditVersion = this->ui->contextActionListFileExplorer_EditVersion;
+    QAction *actionShowRelatedFiles = this->ui->contextActionListFileExplorer_ShowRelatedFiles;
     QAction *actionSchedule = this->ui->contextActionListFileExplorer_Schedule;
     QAction *actionScheduleAndOpenClipboard = this->ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
     QAction *actionSetAsCurrentVerion = this->ui->contextActionListFileExplorer_SetAsCurrentVersion;
@@ -195,6 +196,7 @@ void MainWindow::buildContextMenuListFileExplorer()
 
     ptrMenu->addAction(actionPreview);
     ptrMenu->addAction(actionEditVersion);
+    ptrMenu->addAction(actionShowRelatedFiles);
     ptrMenu->addAction(actionSchedule);
     ptrMenu->addAction(actionScheduleAndOpenClipboard);
     ptrMenu->addAction(actionSetAsCurrentVerion);
