@@ -23,6 +23,9 @@
       <property name="documentMode">
        <bool>true</bool>
       </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
       <widget class="QWidget" name="tabFileExplorer">
        <attribute name="title">
         <string>File Explorer</string>
@@ -705,6 +708,14 @@
    </property>
    <property name="toolTip">
     <string>Show related files</string>
+   </property>
+  </action>
+  <action name="tabRelatedFilesAction_Refresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh</string>
    </property>
   </action>
  </widget>

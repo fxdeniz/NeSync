@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "TabRelatedFiles.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -11,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->allocateSeparators();
     this->buildContextMenuTableFileExplorer();
     this->buildContextMenuListFileExplorer();
+    this->disableCloseButtonOfPredefinedTabs();
     this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
 
     QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
@@ -149,6 +152,10 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         toolBar->addAction(this->ui->tab2Action_SaveAll);
         toolBar->addAction(this->ui->tab2Action_SaveSelected);
     }
+    else // If TabRelatedFiles accessed at runtime.
+    {
+        toolBar->addAction(this->ui->tabRelatedFilesAction_Refresh);
+    }
 }
 
 void MainWindow::allocateSeparators()
@@ -201,5 +208,25 @@ void MainWindow::buildContextMenuListFileExplorer()
     ptrMenu->addAction(actionScheduleAndOpenClipboard);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
+}
+
+void MainWindow::disableCloseButtonOfPredefinedTabs()
+{
+    QTabBar *tabBar = this->ui->tabWidget->tabBar();
+    tabBar->tabButton(0, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(0, QTabBar::ButtonPosition::RightSide, nullptr);
+
+    tabBar->tabButton(1, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
+}
+
+
+void MainWindow::on_contextActionListFileExplorer_ShowRelatedFiles_triggered()
+{
+    TabRelatedFiles *tab = new TabRelatedFiles(this->ui->tabWidget);
+    QTabWidget *tabWidget = this->ui->tabWidget;
+    tabWidget->addTab(tab, "Related Files");
+
+    QObject::connect(tabWidget->tabBar(), &QTabBar::tabCloseRequested, tabWidget->tabBar(), &QTabBar::removeTab);
 }
 

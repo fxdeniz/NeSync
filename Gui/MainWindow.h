@@ -31,6 +31,8 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
+
 private:
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
@@ -40,6 +42,7 @@ private:
     void allocateSeparators();
     void buildContextMenuTableFileExplorer();
     void buildContextMenuListFileExplorer();
+    void disableCloseButtonOfPredefinedTabs();
 
 private:
     Ui::MainWindow *ui;
