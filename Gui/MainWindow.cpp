@@ -11,26 +11,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->dialogTableItemEditor = new DialogTableItemEditor(this);
 
     this->allocateSeparators();
-    this->buildContextMenuTableFileExplorer();
-    this->buildContextMenuListFileExplorer();
+    this->buildTabWidget();
     this->disableCloseButtonOfPredefinedTabs();
     this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
-
-    QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
-
-    sampleFileExplorerTableData.insert(0, {"first_file", ".txt"});
-    sampleFileExplorerTableData.insert(1, {"second_file", ".zip"});
-    sampleFileExplorerTableData.insert(2, {"third_file", ".pdf"});
-    sampleFileExplorerTableData.insert(3, {"fourth_file", ".mp4"});
-
-    this->tableModelFileExplorer = new TableModelFileExplorer(sampleFileExplorerTableData, this);
-    this->ui->tableViewFileExplorer->setModel(this->tableModelFileExplorer);
-
-    QStringList sampleListData;
-    sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
-
-    this->listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
-    this->ui->listView->setModel(this->listModelFileExplorer);
 
     QList<TableModelFileMonitor::MonitorTableItem> sampleFileMonitorTableData;
 
@@ -84,46 +67,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     this->ui->tabWidget->setCurrentIndex(0);
-
-    QObject::connect(this->ui->listView, &QListView::customContextMenuRequested, this, &MainWindow::showContextMenuListView);
-    QObject::connect(this->ui->tableViewFileExplorer, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenuTableView);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-void MainWindow::showContextMenuListView(const QPoint &argPos)
-{
-    QAbstractItemView *subjectView = this->ui->listView;
-    QModelIndex index = subjectView->indexAt(argPos);
-
-    if(index.isValid()) // If user selected an item from list.
-    {
-        QMenu *ptrMenu = this->contextMenuListFileExplorer;
-        ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
-    }
-}
-
-void MainWindow::showContextMenuTableView(const QPoint &argPos)
-{
-    QAbstractItemView *subjectView = this->ui->tableViewFileExplorer;
-    QModelIndex index = subjectView->indexAt(argPos);
-
-    if(index.isValid()) // If user selected an item from table.
-    {
-        QMenu *ptrMenu = this->contextMenuTableFileExplorer;
-        ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
-    }
-}
-
-void MainWindow::on_actionEditTableItem_clicked()
-{
-    this->dialogTableItemEditor->setModal(true);
-    this->dialogTableItemEditor->show();
-}
-
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
@@ -170,46 +119,10 @@ void MainWindow::allocateSeparators()
     this->separator3->setSeparator(true);
 }
 
-void MainWindow::buildContextMenuTableFileExplorer()
+void MainWindow::buildTabWidget()
 {
-    this->contextMenuTableFileExplorer = new QMenu(this->ui->tableViewFileExplorer);
-    QMenu *ptrMenu = this->contextMenuTableFileExplorer;
-
-    QAction *actionOpenFolderInNewTab = this->ui->contextActionTableFileExplorer_OpenFolderInNewTab;
-    QAction *actionEdit = this->ui->contextActionTableFileExplorer_Edit;
-    QAction *actionCut = this->ui->contextActionTableFileExplorer_Cut;
-    QAction *actionFreeze = this->ui->contextActionTableFileExplorer_Freeze;
-    QAction *actionDelete = this->ui->contextActionTableFileExplorer_Delete;
-
-    ptrMenu->addAction(actionOpenFolderInNewTab);
-    ptrMenu->addAction(actionEdit);
-    ptrMenu->addAction(actionCut);
-    ptrMenu->addAction(actionFreeze);
-    ptrMenu->addAction(actionDelete);
-
-    QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEditTableItem_clicked);
-}
-
-void MainWindow::buildContextMenuListFileExplorer()
-{
-    this->contextMenuListFileExplorer = new QMenu(this->ui->listView);
-    QMenu *ptrMenu = this->contextMenuListFileExplorer;
-
-    QAction *actionPreview = this->ui->contextActionListFileExplorer_Preview;
-    QAction *actionEditVersion = this->ui->contextActionListFileExplorer_EditVersion;
-    QAction *actionShowRelatedFiles = this->ui->contextActionListFileExplorer_ShowRelatedFiles;
-    QAction *actionSchedule = this->ui->contextActionListFileExplorer_Schedule;
-    QAction *actionScheduleAndOpenClipboard = this->ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
-    QAction *actionSetAsCurrentVerion = this->ui->contextActionListFileExplorer_SetAsCurrentVersion;
-    QAction *actionDelete = this->ui->contextActionListFileExplorer_Delete;
-
-    ptrMenu->addAction(actionPreview);
-    ptrMenu->addAction(actionEditVersion);
-    ptrMenu->addAction(actionShowRelatedFiles);
-    ptrMenu->addAction(actionSchedule);
-    ptrMenu->addAction(actionScheduleAndOpenClipboard);
-    ptrMenu->addAction(actionSetAsCurrentVerion);
-    ptrMenu->addAction(actionDelete);
+    this->tabFileExplorer = new TabFileExplorer(this->ui->tabWidget);
+    this->ui->tabWidget->addTab(tabFileExplorer, "File Explorer");
 }
 
 void MainWindow::disableCloseButtonOfPredefinedTabs()
