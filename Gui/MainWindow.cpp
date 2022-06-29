@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "TabRelatedFiles.h"
+#include "TabRelatedFiles/TabRelatedFiles.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

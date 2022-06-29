@@ -28,7 +28,6 @@ include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/ef
 set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
     Gui/TabFileExplorer.h Gui/TabFileExplorer.cpp Gui/TabFileExplorer.ui
-    Gui/TabRelatedFiles.h Gui/TabRelatedFiles.cpp Gui/TabRelatedFiles.ui
     Gui/TableModelFileExplorer.h Gui/TableModelFileExplorer.cpp
     Gui/ListModelFileExplorer.h Gui/ListModelFileExplorer.cpp
 
@@ -51,6 +50,12 @@ set(PROJECT_SOURCES
         #
         Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.h
         Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.cpp
+    #
+
+    # TabReleatedFiles
+        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.h
+        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.cpp
+        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.ui
     #
 
     main.cpp
