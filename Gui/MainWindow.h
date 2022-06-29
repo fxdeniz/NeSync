@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 
-#include "Dialogs/DialogFileOrDirEditor/DialogFileOrDirEditor.h"
-#include "Tabs/TabFileMonitor/TabFileMonitor.h"
-#include "TabFileExplorer.h"
+#include "Dialogs/DialogFileOrDirEditor.h"
+#include "Tabs/TabFileExplorer.h"
+#include "Tabs/TabFileMonitor.h"
 
 namespace Ui
 {

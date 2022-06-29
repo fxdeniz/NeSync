@@ -4,9 +4,8 @@
 #include <QWidget>
 #include <QMenu>
 
-#include "ListModelFileExplorer.h"
-#include "TableModelFileExplorer.h"
-
+#include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
+#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 
 namespace Ui {
 class TabFileExplorer;

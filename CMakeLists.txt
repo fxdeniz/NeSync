@@ -27,35 +27,44 @@ include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/ef
 
 set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
-    Gui/TabFileExplorer.h Gui/TabFileExplorer.cpp Gui/TabFileExplorer.ui
-    Gui/TableModelFileExplorer.h Gui/TableModelFileExplorer.cpp
-    Gui/ListModelFileExplorer.h Gui/ListModelFileExplorer.cpp
 
     # DialogFileOrDirEditor
-        Gui/Dialogs/DialogFileOrDirEditor/DialogFileOrDirEditor.h
-        Gui/Dialogs/DialogFileOrDirEditor/DialogFileOrDirEditor.cpp
-        Gui/Dialogs/DialogFileOrDirEditor/DialogFileOrDirEditor.ui
+        Gui/Dialogs/DialogFileOrDirEditor.h
+        Gui/Dialogs/DialogFileOrDirEditor.cpp
+        Gui/Dialogs/DialogFileOrDirEditor.ui
     #
+	
+	# TabFileExplorer
+	    Gui/Tabs/TabFileExplorer.h 
+		Gui/Tabs/TabFileExplorer.cpp 
+		Gui/Tabs/TabFileExplorer.ui
+		#
+		Gui/DataModels/TabFileExplorer/TableModelFileExplorer.h 
+		Gui/DataModels/TabFileExplorer/TableModelFileExplorer.cpp
+		#
+		Gui/DataModels/TabFileExplorer/ListModelFileExplorer.h 
+		Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
+	#
 
     # TabFileMonitor
-        Gui/Tabs/TabFileMonitor/TabFileMonitor.h
-        Gui/Tabs/TabFileMonitor/TabFileMonitor.cpp
-        Gui/Tabs/TabFileMonitor/TabFileMonitor.ui
+        Gui/Tabs/TabFileMonitor.h
+        Gui/Tabs/TabFileMonitor.cpp
+        Gui/Tabs/TabFileMonitor.ui
         #
-        Gui/Tabs/TabFileMonitor/DataModels/TableModelFileMonitor.h
-        Gui/Tabs/TabFileMonitor/DataModels/TableModelFileMonitor.cpp
+        Gui/DataModels/TabFileMonitor/TableModelFileMonitor.h
+        Gui/DataModels/TabFileMonitor/TableModelFileMonitor.cpp
         #
-        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateFileAction.h
-        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateFileAction.cpp
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.cpp
         #
-        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.h
-        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.cpp
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.cpp
     #
 
     # TabReleatedFiles
-        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.h
-        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.cpp
-        Gui/Tabs/TabRelatedFiles/TabRelatedFiles.ui
+        Gui/Tabs/TabRelatedFiles.h
+        Gui/Tabs/TabRelatedFiles.cpp
+        Gui/Tabs/TabRelatedFiles.ui
     #
 
     main.cpp
