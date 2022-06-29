@@ -7,6 +7,7 @@
 #include "ComboBoxItemDelegateNote.h"
 #include "TableModelFileMonitor.h"
 #include "DialogTableItemEditor.h"
+#include "TabFileMonitor.h"
 #include "TabFileExplorer.h"
 
 namespace Ui
@@ -29,6 +30,7 @@ private slots:
 
 private:
     TabFileExplorer *tabFileExplorer;
+    TabFileMonitor *tabFileMonitor;
     QAction *separator1, *separator2, *separator3;
 
 private:
@@ -39,9 +41,6 @@ private:
 private:
     Ui::MainWindow *ui;
     DialogTableItemEditor *dialogTableItemEditor;
-    TableModelFileMonitor *tableModelFileMonitor;
-    ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
-    ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
 };
 
 #endif // MAINWINDOW_H
