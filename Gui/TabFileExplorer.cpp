@@ -1,5 +1,7 @@
-#include "TabFileExplorer.h"
+#include "TableModelFileExplorer.h"
 #include "ui_TabFileExplorer.h"
+
+#include "TabFileExplorer.h"
 
 TabFileExplorer::TabFileExplorer(QWidget *parent) :
     QWidget(parent),
@@ -46,16 +48,6 @@ void TabFileExplorer::buildContextMenuTableFileExplorer()
     ptrMenu->addAction(actionCut);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
-
-    QObject::connect(actionEdit, &QAction::triggered, this, &TabFileExplorer::on_actionEditTableItem_clicked);
-}
-
-
-void TabFileExplorer::on_actionEditTableItem_clicked()
-{
-    // TODO move this to router
-    //this->dialogTableItemEditor->setModal(true);
-    //this->dialogTableItemEditor->show();
 }
 
 void TabFileExplorer::buildContextMenuListFileExplorer()
@@ -108,4 +100,14 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
 TabFileExplorer::~TabFileExplorer()
 {
     delete ui;
+}
+
+void TabFileExplorer::on_contextActionListFileExplorer_ShowRelatedFiles_triggered()
+{
+    emit signalToRouter_ShowRelatedFiles();
+}
+
+void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
+{
+    emit signalToRouter_ShowDialogTableItemEditor();
 }

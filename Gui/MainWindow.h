@@ -26,7 +26,8 @@ public:
 private slots:
     void on_tabWidget_currentChanged(int index);
 
-    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
+    void on_router_ShowRelatedFiles();
+    void on_router_ShowDialogTableItemEditor();
 
 private:
     TabFileExplorer *tabFileExplorer;

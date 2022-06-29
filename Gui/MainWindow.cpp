@@ -16,6 +16,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->on_tabWidget_currentChanged(this->ui->tabWidget->currentIndex());
 
     this->ui->tabWidget->setCurrentIndex(0);
+
+    TabFileExplorer *tabFileExplorer = this->tabFileExplorer;
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
+                     this, &MainWindow::on_router_ShowRelatedFiles);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
+                     this, &MainWindow::on_router_ShowDialogTableItemEditor);
 }
 
 MainWindow::~MainWindow()
@@ -88,12 +96,18 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 }
 
 
-void MainWindow::on_contextActionListFileExplorer_ShowRelatedFiles_triggered()
+void MainWindow::on_router_ShowRelatedFiles()
 {
     TabRelatedFiles *tab = new TabRelatedFiles(this->ui->tabWidget);
     QTabWidget *tabWidget = this->ui->tabWidget;
     tabWidget->addTab(tab, "Related Files");
 
     QObject::connect(tabWidget->tabBar(), &QTabBar::tabCloseRequested, tabWidget->tabBar(), &QTabBar::removeTab);
+}
+
+void MainWindow::on_router_ShowDialogTableItemEditor()
+{
+    this->dialogTableItemEditor->setModal(true);
+    this->dialogTableItemEditor->show();
 }
 

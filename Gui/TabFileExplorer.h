@@ -20,9 +20,14 @@ public:
     explicit TabFileExplorer(QWidget *parent = nullptr);
     ~TabFileExplorer();
 
-private slots:
-    void on_actionEditTableItem_clicked();
+signals:
+    void signalToRouter_ShowRelatedFiles();
+    void signalToRouter_ShowDialogTableItemEditor();
 
+private slots:
+    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
+
+    void on_contextActionTableFileExplorer_Edit_triggered();
 
 private:
     void showContextMenuTableView(const QPoint &argPos);
