@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "DialogTableItemEditor.h"
+#include "Dialogs/DialogFileOrDirEditor/DialogFileOrDirEditor.h"
 #include "Tabs/TabFileMonitor/TabFileMonitor.h"
 #include "TabFileExplorer.h"
 
@@ -38,7 +38,7 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    DialogTableItemEditor *dialogTableItemEditor;
+    DialogFileOrDirEditor *dialogTableItemEditor;
 };
 
 #endif // MAINWINDOW_H

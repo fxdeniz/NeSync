@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->dialogTableItemEditor = new DialogTableItemEditor(this);
+    this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
 
     this->allocateSeparators();
     this->buildTabWidget();
