@@ -15,6 +15,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Sql)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Sql)
 
 include_directories(Gui/)
+include_directories(Gui/Tabs/)
 include_directories(Backend/)
 include_directories(Backend/FileMonitorSubSystem/)
 include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/)
@@ -28,13 +29,25 @@ set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
     Gui/DialogTableItemEditor.h Gui/DialogTableItemEditor.cpp Gui/DialogTableItemEditor.ui
     Gui/TabFileExplorer.h Gui/TabFileExplorer.cpp Gui/TabFileExplorer.ui
-    Gui/TabFileMonitor.h Gui/TabFileMonitor.cpp Gui/TabFileMonitor.ui
     Gui/TabRelatedFiles.h Gui/TabRelatedFiles.cpp Gui/TabRelatedFiles.ui
     Gui/TableModelFileExplorer.h Gui/TableModelFileExplorer.cpp
     Gui/ListModelFileExplorer.h Gui/ListModelFileExplorer.cpp
-    Gui/TableModelFileMonitor.h Gui/TableModelFileMonitor.cpp
-    Gui/ComboBoxItemDelegateFileAction.h Gui/ComboBoxItemDelegateFileAction.cpp
-    Gui/ComboBoxItemDelegateNote.h Gui/ComboBoxItemDelegateNote.cpp
+
+    # TabFileMonitor
+        Gui/Tabs/TabFileMonitor/TabFileMonitor.h
+        Gui/Tabs/TabFileMonitor/TabFileMonitor.cpp
+        Gui/Tabs/TabFileMonitor/TabFileMonitor.ui
+        #
+        Gui/Tabs/TabFileMonitor/DataModels/TableModelFileMonitor.h
+        Gui/Tabs/TabFileMonitor/DataModels/TableModelFileMonitor.cpp
+        #
+        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateFileAction.h
+        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateFileAction.cpp
+        #
+        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.h
+        Gui/Tabs/TabFileMonitor/DataModels/ItemDelegates/ComboBoxItemDelegateNote.cpp
+    #
+
     main.cpp
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h

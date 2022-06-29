@@ -3,9 +3,9 @@
 
 #include <QWidget>
 
-#include "ComboBoxItemDelegateFileAction.h"
-#include "ComboBoxItemDelegateNote.h"
-#include "TableModelFileMonitor.h"
+#include "DataModels/ItemDelegates/ComboBoxItemDelegateFileAction.h"
+#include "DataModels/ItemDelegates/ComboBoxItemDelegateNote.h"
+#include "DataModels/TableModelFileMonitor.h"
 
 namespace Ui {
 class TabFileMonitor;

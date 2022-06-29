@@ -3,11 +3,8 @@
 
 #include <QMainWindow>
 
-#include "ComboBoxItemDelegateFileAction.h"
-#include "ComboBoxItemDelegateNote.h"
-#include "TableModelFileMonitor.h"
 #include "DialogTableItemEditor.h"
-#include "TabFileMonitor.h"
+#include "Tabs/TabFileMonitor/TabFileMonitor.h"
 #include "TabFileExplorer.h"
 
 namespace Ui
