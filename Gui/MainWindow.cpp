@@ -1,7 +1,13 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Tabs/TabRelatedFiles.h"
+
+#include <QStandardPaths>
+#include <QtConcurrent>
+#include <QDir>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
+    this->dialogAddNewFile = new DialogAddNewFile(this);
 
     this->allocateSeparators();
     this->buildTabWidget();
@@ -109,5 +116,23 @@ void MainWindow::on_router_ShowDialogTableItemEditor()
 {
     this->dialogTableItemEditor->setModal(true);
     this->dialogTableItemEditor->show();
+}
+
+
+void MainWindow::on_tab1Action_AddFile_triggered()
+{
+    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
+    appDataDir += QDir::separator();
+
+    auto backupDir = appDataDir + "backup" + QDir::separator();
+    auto symbolDir = appDataDir + "symbols" + QDir::separator();
+
+    FileStorageManager fileStorageManager(backupDir, symbolDir);
+
+    Qt::WindowFlags flags = this->dialogAddNewFile->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    this->dialogAddNewFile->setWindowFlags(flags);
+    this->dialogAddNewFile->setModal(true);
+    this->dialogAddNewFile->show();
 }
 

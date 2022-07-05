@@ -11,8 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Sql)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Sql)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql Concurrent Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent Widgets)
 
 include_directories(Gui/)
 include_directories(Gui/Tabs/)
@@ -28,23 +28,32 @@ include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/ef
 set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
 
+    # DialogAddNewFile
+        Gui/Dialogs/DialogAddNewFile.h
+        Gui/Dialogs/DialogAddNewFile.cpp
+        Gui/Dialogs/DialogAddNewFile.ui
+        #
+        Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.h
+        Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.cpp
+    #
+
     # DialogFileOrDirEditor
         Gui/Dialogs/DialogFileOrDirEditor.h
         Gui/Dialogs/DialogFileOrDirEditor.cpp
         Gui/Dialogs/DialogFileOrDirEditor.ui
     #
 	
-	# TabFileExplorer
-	    Gui/Tabs/TabFileExplorer.h 
-		Gui/Tabs/TabFileExplorer.cpp 
-		Gui/Tabs/TabFileExplorer.ui
-		#
-		Gui/DataModels/TabFileExplorer/TableModelFileExplorer.h 
-		Gui/DataModels/TabFileExplorer/TableModelFileExplorer.cpp
-		#
-		Gui/DataModels/TabFileExplorer/ListModelFileExplorer.h 
-		Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
-	#
+    # TabFileExplorer
+        Gui/Tabs/TabFileExplorer.h
+        Gui/Tabs/TabFileExplorer.cpp
+        Gui/Tabs/TabFileExplorer.ui
+        #
+        Gui/DataModels/TabFileExplorer/TableModelFileExplorer.h
+        Gui/DataModels/TabFileExplorer/TableModelFileExplorer.cpp
+        #
+        Gui/DataModels/TabFileExplorer/ListModelFileExplorer.h
+        Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
+    #
 
     # TabFileMonitor
         Gui/Tabs/TabFileMonitor.h
@@ -213,7 +222,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(XdBackup PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql)
+target_link_libraries(XdBackup PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(XdBackup PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
