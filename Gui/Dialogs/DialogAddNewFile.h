@@ -21,6 +21,10 @@ private slots:
     void on_buttonSelectNewFile_clicked();
 
 private:
+    void showStatusWarning(const QString &message);
+    void showStatusError(const QString &message);
+
+private:
     Ui::DialogAddNewFile *ui;
     TableModelNewAddedFiles *tableModelNewAddedFiles;
 };

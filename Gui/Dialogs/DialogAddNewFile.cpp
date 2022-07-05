@@ -33,6 +33,52 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
     dialog.setFileMode(QFileDialog::FileMode::ExistingFiles);
 
     if(dialog.exec())
-        qInfo() << "result = " << dialog.selectedFiles();
+    {
+        auto selectedFiles = dialog.selectedFiles();
+
+        for(const QString &currentFilePath : selectedFiles)
+        {
+            QFile currentFile(currentFilePath);
+            if(!currentFile.exists())
+            {
+                this->showStatusWarning("File not found: " + currentFilePath);
+                return;
+            }
+
+            bool isFileOpened = currentFile.open(QFile::OpenModeFlag::ReadOnly);
+
+            if(!isFileOpened)
+            {
+                this->showStatusWarning("File couldn't opened: " + currentFilePath);
+                return;
+            }
+        }
+    }
+}
+
+void DialogAddNewFile::showStatusWarning(const QString &message)
+{
+    auto labelStatus = this->ui->labelStatus;
+
+    QPalette palette;
+    palette.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::yellow);
+    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
+
+    labelStatus->setPalette(palette);
+    labelStatus->setAutoFillBackground(true);
+    labelStatus->setText(message);
+}
+
+void DialogAddNewFile::showStatusError(const QString &message)
+{
+    auto labelStatus = this->ui->labelStatus;
+
+    QPalette palette;
+    palette.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::red);
+    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
+
+    labelStatus->setPalette(palette);
+    labelStatus->setAutoFillBackground(true);
+    labelStatus->setText(message);
 }
 
