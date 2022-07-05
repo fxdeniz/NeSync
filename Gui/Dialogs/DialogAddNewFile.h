@@ -17,6 +17,9 @@ public:
     explicit DialogAddNewFile(QWidget *parent = nullptr);
     ~DialogAddNewFile();
 
+private slots:
+    void on_buttonSelectNewFile_clicked();
+
 private:
     Ui::DialogAddNewFile *ui;
     TableModelNewAddedFiles *tableModelNewAddedFiles;
