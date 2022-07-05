@@ -380,6 +380,13 @@ void FileStorageManager::incrementSaveGroupNumber()
     this->currentSaveGroupNumber += 1;
 }
 
+bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) const
+{
+    bool queryResult = QueryFileRecord(this->db).isRowExistByUserFilePath(userFilePath);
+
+    return queryResult;
+}
+
 QStringList FileStorageManager::getMonitoredFilePathList() const
 {
     auto queryResult = QueryFileRecord(this->db).selectUserFilePathListFromActiveFiles();

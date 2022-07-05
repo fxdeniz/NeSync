@@ -51,6 +51,8 @@ public:
     bool markFileAsFavorite(const QString &pathToSymbolFile, bool status);
     void incrementSaveGroupNumber();
 
+    bool isFileExistByUserFilePath(const QString &userFilePath) const;
+
     QStringList getMonitoredFilePathList() const;
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
