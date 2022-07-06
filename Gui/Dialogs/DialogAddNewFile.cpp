@@ -74,6 +74,14 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
             this->showStatusWarning("File already selected: " + selectedFilePath);
             return;
         }
+
+        bool isAlreadyAddedToDb = this->fileStorageManager->isFileExistByUserFilePath(selectedFilePath);
+
+        if(isAlreadyAddedToDb)
+        {
+            this->showStatusWarning("File already added to database: " + selectedFilePath);
+            return;
+        }
     }
 }
 
