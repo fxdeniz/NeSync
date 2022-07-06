@@ -15,13 +15,9 @@ DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, QWidget *parent) :
 
     QList<TableModelNewAddedFiles::TableItem> sampleFileExplorerTableData;
 
-    sampleFileExplorerTableData.insert(0, {"first_file", ".txt"});
-    sampleFileExplorerTableData.insert(1, {"second_file", ".zip"});
-    sampleFileExplorerTableData.insert(2, {"third_file", ".pdf"});
-    sampleFileExplorerTableData.insert(3, {"fourth_file", ".mp4"});
-
     this->tableModelNewAddedFiles = new TableModelNewAddedFiles(sampleFileExplorerTableData, this);
     this->ui->tableView->setModel(this->tableModelNewAddedFiles);
+    this->showStatusInfo("Please select files from your local file system");
 }
 
 DialogAddNewFile::~DialogAddNewFile()
@@ -82,7 +78,45 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
             this->showStatusWarning("File already added to database: " + selectedFilePath);
             return;
         }
+
+        auto tableModel = this->tableModelNewAddedFiles;
+        tableModel->insertRows(0, 1, QModelIndex());
+
+        QModelIndex index = tableModel->index(0, 0, QModelIndex());
+        tableModel->setData(index, item.fileName, Qt::EditRole);
+        index = tableModel->index(0, 1, QModelIndex());
+        tableModel->setData(index, item.location, Qt::EditRole);
+
+        this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+        this->ui->tableView->resizeColumnsToContents();
+        this->showStatusNormal(""); // Clean status message
     }
+}
+
+void DialogAddNewFile::showStatusNormal(const QString &message)
+{
+    auto labelStatus = this->ui->labelStatus;
+
+    QPalette palette;
+    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
+    labelStatus->setPalette(palette);
+
+    labelStatus->setPalette(palette);
+    labelStatus->setAutoFillBackground(true);
+    labelStatus->setText(message);
+}
+
+void DialogAddNewFile::showStatusInfo(const QString &message)
+{
+    auto labelStatus = this->ui->labelStatus;
+
+    QPalette palette;
+    palette.setColor(QPalette::ColorRole::Window, "#7ed6df");
+    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
+
+    labelStatus->setPalette(palette);
+    labelStatus->setAutoFillBackground(true);
+    labelStatus->setText(message);
 }
 
 void DialogAddNewFile::showStatusWarning(const QString &message)
@@ -90,7 +124,7 @@ void DialogAddNewFile::showStatusWarning(const QString &message)
     auto labelStatus = this->ui->labelStatus;
 
     QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::yellow);
+    palette.setColor(QPalette::ColorRole::Window, "#f6e58d");
     palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
 
     labelStatus->setPalette(palette);
@@ -103,11 +137,29 @@ void DialogAddNewFile::showStatusError(const QString &message)
     auto labelStatus = this->ui->labelStatus;
 
     QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::red);
+    palette.setColor(QPalette::ColorRole::Window, "#ff3838");
     palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
 
     labelStatus->setPalette(palette);
     labelStatus->setAutoFillBackground(true);
     labelStatus->setText(message);
+}
+
+
+void DialogAddNewFile::on_buttonRemoveFile_clicked()
+{
+    QItemSelectionModel *selectionModel = this->ui->tableView->selectionModel();
+    const QModelIndexList indices = selectionModel->selectedRows();
+
+    // Start deleting from last item to first item.
+    for(int i = indices.count() - 1; i >= 0; i--)
+    {
+        QModelIndex index = indices.at(i);
+        int row = index.row();
+        this->tableModelNewAddedFiles->removeRows(row, 1);
+    }
+
+    if(!indices.isEmpty())
+        this->showStatusNormal(""); // Clean status message
 }
 

@@ -113,6 +113,12 @@
    </item>
    <item>
     <widget class="QLabel" name="labelStatus">
+     <property name="styleSheet">
+      <string notr="true">QLabel
+ {
+padding:  5px 5px 5px 5px;
+}</string>
+     </property>
      <property name="text">
       <string>Status Here</string>
      </property>

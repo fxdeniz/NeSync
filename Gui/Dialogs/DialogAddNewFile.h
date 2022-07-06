@@ -21,7 +21,11 @@ public:
 private slots:
     void on_buttonSelectNewFile_clicked();
 
+    void on_buttonRemoveFile_clicked();
+
 private:
+    void showStatusNormal(const QString &message);
+    void showStatusInfo(const QString &message);
     void showStatusWarning(const QString &message);
     void showStatusError(const QString &message);
 

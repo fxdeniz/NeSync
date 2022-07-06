@@ -1,5 +1,7 @@
 #include "TableModelNewAddedFiles.h"
 
+#include <QFileIconProvider>
+
 TableModelNewAddedFiles::TableModelNewAddedFiles(QObject *parent)
     : QAbstractTableModel(parent)
 {
@@ -28,18 +30,31 @@ QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
     if (index.row() >= itemList.size() || index.row() < 0)
         return QVariant();
 
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole)
+    {
         const auto &item = itemList.at(index.row());
 
-        switch (index.column()) {
-        case 0:
-            return item.fileName;
-        case 1:
-            return item.location;
-        default:
-            break;
+        switch (index.column())
+        {
+            case 0:
+                return item.fileName;
+            case 1:
+                return item.location;
+            default:
+                break;
         }
     }
+    else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
+    {
+        const auto &item = itemList.at(index.row());
+
+        QFileIconProvider provider;
+        QFileInfo fileInfo(item.location + item.fileName);
+        auto result = provider.icon(fileInfo).pixmap(16, 16);
+
+        return result;
+    }
+
     return QVariant();
 }
 
@@ -51,9 +66,9 @@ QVariant TableModelNewAddedFiles::headerData(int section, Qt::Orientation orient
     if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
-            return tr("Name");
+            return tr("File Name");
         case 1:
-            return tr("Address");
+            return tr("Location");
         default:
             break;
         }
