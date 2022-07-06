@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Dialogs/DialogAddNewFile.h"
 #include "Tabs/TabFileExplorer.h"
@@ -43,6 +44,7 @@ private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFile *dialogAddNewFile;
+    FileStorageManager *fileStorageManager;
 };
 
 #endif // MAINWINDOW_H

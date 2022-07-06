@@ -2,13 +2,15 @@
 #include "ui_DialogAddNewFile.h"
 
 #include <QStandardPaths>
+#include <QStorageInfo>
 #include <QFileDialog>
 
-DialogAddNewFile::DialogAddNewFile(QWidget *parent) :
+DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddNewFile)
 {
     ui->setupUi(this);
+    this->fileStorageManager = fsm;
 
     QList<TableModelNewAddedFiles::TableItem> sampleFileExplorerTableData;
 
@@ -30,28 +32,35 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 {
     QFileDialog dialog(this);
     dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation));
-    dialog.setFileMode(QFileDialog::FileMode::ExistingFiles);
+    dialog.setFileMode(QFileDialog::FileMode::ExistingFile);
 
     if(dialog.exec())
     {
-        auto selectedFiles = dialog.selectedFiles();
+        auto selectedFilePath = dialog.selectedFiles().at(0);
 
-        for(const QString &currentFilePath : selectedFiles)
+        QFile selectedFile(selectedFilePath);
+        if(!selectedFile.exists())
         {
-            QFile currentFile(currentFilePath);
-            if(!currentFile.exists())
-            {
-                this->showStatusWarning("File not found: " + currentFilePath);
-                return;
-            }
+            this->showStatusWarning("File not found: " + selectedFilePath);
+            return;
+        }
 
-            bool isFileOpened = currentFile.open(QFile::OpenModeFlag::ReadOnly);
+        bool isFileOpened = selectedFile.open(QFile::OpenModeFlag::ReadOnly);
 
-            if(!isFileOpened)
-            {
-                this->showStatusWarning("File couldn't opened: " + currentFilePath);
-                return;
-            }
+        if(!isFileOpened)
+        {
+            this->showStatusWarning("File couldn't opened: " + selectedFilePath);
+            return;
+        }
+
+        QStorageInfo info(this->fileStorageManager->getBackupDirectory());
+        auto fileSize = selectedFile.size();
+        auto availableSize = info.bytesFree();
+
+        if(fileSize > availableSize)
+        {
+            this->showStatusWarning("Not enough free space available for: " + selectedFilePath);
+            return;
         }
     }
 }

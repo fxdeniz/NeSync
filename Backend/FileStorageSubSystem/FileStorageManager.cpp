@@ -22,8 +22,8 @@ const QString FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR = "/";
 FileStorageManager::FileStorageManager(const QString &backupDirectory, const QString &symbolDirectory, QObject *parent)
     : QObject{parent}
 {
-    this->backupDirectory = backupDirectory + QDir::fromNativeSeparators("/");
-    this->symbolDirectory = symbolDirectory + QDir::fromNativeSeparators("/");
+    this->backupDirectory = backupDirectory;
+    this->symbolDirectory = symbolDirectory;
 
     this->extractSqliteDBIfNotExist();
 
