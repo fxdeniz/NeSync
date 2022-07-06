@@ -33,9 +33,9 @@ QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
 
         switch (index.column()) {
         case 0:
-            return item.name;
+            return item.fileName;
         case 1:
-            return item.extension;
+            return item.location;
         default:
             break;
         }
@@ -85,6 +85,11 @@ bool TableModelNewAddedFiles::removeRows(int position, int rows, const QModelInd
     return true;
 }
 
+const QList<TableModelNewAddedFiles::TableItem> &TableModelNewAddedFiles::getItemList() const
+{
+    return itemList;
+}
+
 bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole) {
@@ -93,10 +98,10 @@ bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &
 
         switch (index.column()) {
         case 0:
-            item.name = value.toString();
+            item.fileName = value.toString();
             break;
         case 1:
-            item.extension = value.toString();
+            item.location = value.toString();
             break;
         default:
             return false;

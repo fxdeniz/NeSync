@@ -10,12 +10,12 @@ class TableModelNewAddedFiles : public QAbstractTableModel
 public:
     struct TableItem
     {
-        QString name;
-        QString extension;
+        QString fileName;
+        QString location;
 
         bool operator==(const TableItem &other) const
         {
-            return name == other.name && extension == other.extension;
+            return fileName == other.fileName && location == other.location;
         }
     };
 
@@ -31,6 +31,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+    const QList<TableItem> &getItemList() const;
 
 private:
     QList<TableItem> itemList;

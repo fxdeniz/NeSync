@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 #include <QStorageInfo>
 #include <QFileDialog>
+#include <QFileInfo>
 
 DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, QWidget *parent) :
     QDialog(parent),
@@ -53,13 +54,24 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
             return;
         }
 
-        QStorageInfo info(this->fileStorageManager->getBackupDirectory());
+        QStorageInfo storageInfo(this->fileStorageManager->getBackupDirectory());
         auto fileSize = selectedFile.size();
-        auto availableSize = info.bytesFree();
+        auto availableSize = storageInfo.bytesFree();
 
         if(fileSize > availableSize)
         {
             this->showStatusWarning("Not enough free space available for: " + selectedFilePath);
+            return;
+        }
+
+        QFileInfo fileInfo(selectedFile);
+        auto absolutePath = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+        TableModelNewAddedFiles::TableItem item {fileInfo.fileName(), absolutePath};
+        bool isAlreadySelected = this->tableModelNewAddedFiles->getItemList().contains(item);
+
+        if(isAlreadySelected)
+        {
+            this->showStatusWarning("File already selected: " + selectedFilePath);
             return;
         }
     }
