@@ -25,7 +25,27 @@ void TaskAddNewFiles::addFile(const QString &pathToFile)
         fileSet.insert(pathToFile);
 }
 
+const QString &TaskAddNewFiles::getTargetSymbolFolder() const
+{
+    return targetSymbolFolder;
+}
+
+void TaskAddNewFiles::setTargetSymbolFolder(const QString &newTargetSymbolFolder)
+{
+    targetSymbolFolder = newTargetSymbolFolder;
+}
+
 void TaskAddNewFiles::run()
 {
+    for(const QString &currentFilePath : fileSet)
+    {
+        QFileInfo fileInfo(currentFilePath);
+        QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
 
+        bool requestResult = this->fsm->addNewFile(currentFilePath,
+                                                  this->getTargetSymbolFolder(),
+                                                  false,
+                                                  true,
+                                                  userDirectory);
+    }
 }

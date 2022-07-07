@@ -15,6 +15,7 @@ public:
     void addFile(const QString &pathToFile);
 
 private:
+    QString targetSymbolFolder;
     FileStorageManager *fsm;
     QSet<QString> fileSet;
 
@@ -24,6 +25,8 @@ signals:
     // QRunnable interface
 public:
     void run() override;
+    const QString &getTargetSymbolFolder() const;
+    void setTargetSymbolFolder(const QString &newTargetSymbolFolder);
 };
 
 #endif // TASKADDNEWFILES_H
