@@ -49,6 +49,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
     if(dialog.exec())
     {
         auto selectedFilePath = dialog.selectedFiles().at(0);
+        selectedFilePath = QDir::toNativeSeparators(selectedFilePath);
 
         QFile selectedFile(selectedFilePath);
         if(!selectedFile.exists())
@@ -232,11 +233,10 @@ void DialogAddNewFile::on_commandLinkButton_clicked()
 
     QList<QFuture<bool>> resultList;
 
-    auto localFSM = this->createFSM();
-
     for(const QString &currentFilePath : files)
     {
         QFuture<bool> result = QtConcurrent::run([&, this] {
+            auto localFSM = this->createFSM();
 
             QFileInfo fileInfo(currentFilePath);
             QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
@@ -256,14 +256,7 @@ void DialogAddNewFile::on_commandLinkButton_clicked()
     for(QFuture<bool> current : resultList)
     {
         current.waitForFinished();
-        qDebug() << "current = " << current.result();
     }
-
-//    for(const QString &currentFilePath : files)
-//    {
-//        qDebug() << "current (in same thread) = " << this->postToFSM(currentFilePath);
-//    }
-
 
     this->showStatusInfo("Everything complated");
 }

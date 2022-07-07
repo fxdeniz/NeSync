@@ -76,6 +76,12 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabRelatedFiles.ui
     #
 
+    # Tasks
+        # TaskAddNewFiles
+        Gui/Tasks/TaskAddNewFiles.h
+        Gui/Tasks/TaskAddNewFiles.cpp
+    #
+
     main.cpp
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
