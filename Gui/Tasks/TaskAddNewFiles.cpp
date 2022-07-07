@@ -3,9 +3,11 @@
 #include <QDir>
 #include <QStandardPaths>
 
-TaskAddNewFiles::TaskAddNewFiles(QObject *parent)
+TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QObject *parent)
     : QObject{parent}
 {
+    this->targetSymbolFolder = targetSymbolFolder;
+
     auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
     appDataDir = QDir::toNativeSeparators(appDataDir);
     appDataDir += QDir::separator();
@@ -25,19 +27,19 @@ void TaskAddNewFiles::addFile(const QString &pathToFile)
         fileSet.insert(pathToFile);
 }
 
+int TaskAddNewFiles::fileCount() const
+{
+    return this->fileSet.size();
+}
+
 const QString &TaskAddNewFiles::getTargetSymbolFolder() const
 {
     return targetSymbolFolder;
 }
 
-void TaskAddNewFiles::setTargetSymbolFolder(const QString &newTargetSymbolFolder)
-{
-    targetSymbolFolder = newTargetSymbolFolder;
-}
-
 void TaskAddNewFiles::run()
 {
-    for(const QString &currentFilePath : fileSet)
+    for(const QString &currentFilePath : qAsConst(fileSet))
     {
         QFileInfo fileInfo(currentFilePath);
         QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
@@ -47,5 +49,10 @@ void TaskAddNewFiles::run()
                                                   false,
                                                   true,
                                                   userDirectory);
+
+        if(requestResult == true)
+            emit signalFileAddedSuccessfully(currentFilePath);
+        else
+            emit signalFileAddingFailed(currentFilePath);
     }
 }
