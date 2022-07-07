@@ -3,33 +3,16 @@
 #include <QDir>
 #include <QStandardPaths>
 
-TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QObject *parent)
+TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent)
     : QObject{parent}
 {
     this->targetSymbolFolder = targetSymbolFolder;
-
-    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    appDataDir = QDir::toNativeSeparators(appDataDir);
-    appDataDir += QDir::separator();
-
-    auto backupDir = appDataDir + "backup" + QDir::separator();
-    auto symbolDir = appDataDir + "symbols" + QDir::separator();
-    QDir dir;
-    dir.mkdir(backupDir);
-    dir.mkdir(symbolDir);
-
-    this->fsm = new FileStorageManager(backupDir, symbolDir, this);
-}
-
-void TaskAddNewFiles::addFile(const QString &pathToFile)
-{
-    if(!fileSet.contains(pathToFile))
-        fileSet.insert(pathToFile);
+    this->fileList = fileList;
 }
 
 int TaskAddNewFiles::fileCount() const
 {
-    return this->fileSet.size();
+    return this->fileList.size();
 }
 
 const QString &TaskAddNewFiles::getTargetSymbolFolder() const
@@ -39,16 +22,18 @@ const QString &TaskAddNewFiles::getTargetSymbolFolder() const
 
 void TaskAddNewFiles::run()
 {
-    for(const QString &currentFilePath : qAsConst(fileSet))
+    auto fsm = FileStorageManager::instance();
+
+    for(const QString &currentFilePath : qAsConst(fileList))
     {
         QFileInfo fileInfo(currentFilePath);
         QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
 
-        bool requestResult = this->fsm->addNewFile(currentFilePath,
-                                                  this->getTargetSymbolFolder(),
-                                                  false,
-                                                  true,
-                                                  userDirectory);
+        bool requestResult = fsm->addNewFile(currentFilePath,
+                                             this->getTargetSymbolFolder(),
+                                             false,
+                                             true,
+                                             userDirectory);
 
         if(requestResult == true)
             emit signalFileAddedSuccessfully(currentFilePath);

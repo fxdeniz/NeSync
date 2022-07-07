@@ -8,7 +8,10 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
-DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, const QString &targetFolder, QWidget *parent) :
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
+#include "Tasks/TaskAddNewFiles.h"
+
+DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddNewFile)
 {
@@ -25,8 +28,6 @@ DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, const QString &targe
     auto pixmap = iconProvider.icon(QFileIconProvider::IconType::Folder).pixmap(24, 24);
     this->ui->labelTargetFolderIcon->setPixmap(pixmap);
     this->ui->labelTargetFolderIcon->setMask(pixmap.mask());
-
-    this->fileStorageManager = fsm;
 
     QList<TableModelNewAddedFiles::TableItem> sampleFileExplorerTableData;
 
@@ -66,7 +67,9 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
             return;
         }
 
-        QStorageInfo storageInfo(this->fileStorageManager->getBackupDirectory());
+        auto fsm = FileStorageManager::instance();
+
+        QStorageInfo storageInfo(fsm->getBackupDirectory());
         auto fileSize = selectedFile.size();
         auto availableSize = storageInfo.bytesFree();
 
@@ -87,7 +90,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
             return;
         }
 
-        bool isAlreadyAddedToDb = this->fileStorageManager->isFileExistByUserFilePath(selectedFilePath);
+        bool isAlreadyAddedToDb = fsm->isFileExistByUserFilePath(selectedFilePath);
 
         if(isAlreadyAddedToDb)
         {
@@ -168,35 +171,6 @@ void DialogAddNewFile::showStatusError(const QString &message)
     labelStatus->setText(message);
 }
 
-bool DialogAddNewFile::postToFSM(const QString &pathToFile)
-{
-    QFileInfo fileInfo(pathToFile);
-    QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    bool requestResult = this->fileStorageManager->addNewFile(pathToFile,
-                                                              this->targetSymbolFolder,
-                                                              false,
-                                                              true,
-                                                              userDirectory
-                                                              );
-
-    return requestResult;
-}
-
-QScopedPointer<FileStorageManager> DialogAddNewFile::createFSM() const
-{
-    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    appDataDir = QDir::toNativeSeparators(appDataDir);
-    appDataDir += QDir::separator();
-
-    auto backupDir = appDataDir + "backup" + QDir::separator();
-    auto symbolDir = appDataDir + "symbols" + QDir::separator();
-    QDir dir;
-    dir.mkdir(backupDir);
-    dir.mkdir(symbolDir);
-
-    return QScopedPointer<FileStorageManager>(new FileStorageManager(backupDir, symbolDir));
-}
-
 
 void DialogAddNewFile::on_buttonRemoveFile_clicked()
 {
@@ -228,36 +202,13 @@ void DialogAddNewFile::on_buttonRemoveFile_clicked()
 void DialogAddNewFile::on_commandLinkButton_clicked()
 {
     this->ui->progressBar->setVisible(true);
+    this->showStatusInfo("Files are being added in background...");
 
     auto files = this->tableModelNewAddedFiles->getFilePathList();
 
-    QList<QFuture<bool>> resultList;
+    TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, files, this);
+    //task->setAutoDelete(true);
 
-    for(const QString &currentFilePath : files)
-    {
-        QFuture<bool> result = QtConcurrent::run([&, this] {
-            auto localFSM = this->createFSM();
-
-            QFileInfo fileInfo(currentFilePath);
-            QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-
-            bool requestResult = localFSM->addNewFile(currentFilePath,
-                                                      this->targetSymbolFolder,
-                                                      false,
-                                                      true,
-                                                      userDirectory
-                                                      );
-            return requestResult;
-        });
-
-        resultList.append(result);
-    }
-
-    for(QFuture<bool> current : resultList)
-    {
-        current.waitForFinished();
-    }
-
-    this->showStatusInfo("Everything complated");
+    QThreadPool::globalInstance()->start(task);
 }
 

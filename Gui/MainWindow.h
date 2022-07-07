@@ -44,7 +44,7 @@ private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFile *dialogAddNewFile;
-    FileStorageManager *fileStorageManager;
+    //FileStorageManager *fileStorageManager;
 };
 
 #endif // MAINWINDOW_H

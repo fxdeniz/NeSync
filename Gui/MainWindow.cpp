@@ -24,11 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(backupDir);
     dir.mkdir(symbolDir);
 
-    this->fileStorageManager = new FileStorageManager(backupDir, symbolDir, this);
-
-
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    this->dialogAddNewFile = new DialogAddNewFile(this->fileStorageManager, "/test/target_folder/", this);
+    this->dialogAddNewFile = new DialogAddNewFile("/test/target_folder/", this);
 
     this->allocateSeparators();
     this->buildTabWidget();

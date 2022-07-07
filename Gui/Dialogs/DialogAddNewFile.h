@@ -4,7 +4,6 @@
 #include <QDialog>
 
 #include "DataModels/DialogAddNewFile/TableModelNewAddedFiles.h"
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 namespace Ui {
 class DialogAddNewFile;
@@ -15,7 +14,7 @@ class DialogAddNewFile : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogAddNewFile(FileStorageManager *fsm, const QString &targetFolder, QWidget *parent = nullptr);
+    explicit DialogAddNewFile(const QString &targetFolder, QWidget *parent = nullptr);
     ~DialogAddNewFile();
 
 private slots:
@@ -30,14 +29,10 @@ private:
     void showStatusInfo(const QString &message);
     void showStatusWarning(const QString &message);
     void showStatusError(const QString &message);
-    bool postToFSM(const QString &pathToFile);
-
-    QScopedPointer<FileStorageManager> createFSM() const;
 
 private:
     Ui::DialogAddNewFile *ui;
     TableModelNewAddedFiles *tableModelNewAddedFiles;
-    FileStorageManager *fileStorageManager;
     QString targetSymbolFolder;
 };
 
