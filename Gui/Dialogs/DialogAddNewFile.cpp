@@ -1,16 +1,31 @@
 #include "DialogAddNewFile.h"
 #include "ui_DialogAddNewFile.h"
 
+#include <QFileIconProvider>
 #include <QStandardPaths>
 #include <QStorageInfo>
+#include <QtConcurrent>
 #include <QFileDialog>
 #include <QFileInfo>
 
-DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, QWidget *parent) :
+DialogAddNewFile::DialogAddNewFile(FileStorageManager *fsm, const QString &targetFolder, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddNewFile)
 {
     ui->setupUi(this);
+
+    this->targetSymbolFolder = targetFolder;
+
+    this->ui->labelTargetFolder->setText(this->targetSymbolFolder);
+    this->ui->progressBar->setVisible(false);
+    this->ui->commandLinkButton->setEnabled(false);
+    this->ui->buttonRemoveFile->setEnabled(false);
+
+    QFileIconProvider iconProvider;
+    auto pixmap = iconProvider.icon(QFileIconProvider::IconType::Folder).pixmap(24, 24);
+    this->ui->labelTargetFolderIcon->setPixmap(pixmap);
+    this->ui->labelTargetFolderIcon->setMask(pixmap.mask());
+
     this->fileStorageManager = fsm;
 
     QList<TableModelNewAddedFiles::TableItem> sampleFileExplorerTableData;
@@ -91,6 +106,13 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
         this->ui->tableView->resizeColumnsToContents();
         this->showStatusNormal(""); // Clean status message
     }
+
+    if(this->tableModelNewAddedFiles->getItemList().size() > 0)
+    {
+        this->ui->buttonRemoveFile->setEnabled(true);
+        this->ui->commandLinkButton->setEnabled(true);
+        this->ui->progressBar->setVisible(false);
+    }
 }
 
 void DialogAddNewFile::showStatusNormal(const QString &message)
@@ -145,6 +167,35 @@ void DialogAddNewFile::showStatusError(const QString &message)
     labelStatus->setText(message);
 }
 
+bool DialogAddNewFile::postToFSM(const QString &pathToFile)
+{
+    QFileInfo fileInfo(pathToFile);
+    QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+    bool requestResult = this->fileStorageManager->addNewFile(pathToFile,
+                                                              this->targetSymbolFolder,
+                                                              false,
+                                                              true,
+                                                              userDirectory
+                                                              );
+
+    return requestResult;
+}
+
+QScopedPointer<FileStorageManager> DialogAddNewFile::createFSM() const
+{
+    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    appDataDir = QDir::toNativeSeparators(appDataDir);
+    appDataDir += QDir::separator();
+
+    auto backupDir = appDataDir + "backup" + QDir::separator();
+    auto symbolDir = appDataDir + "symbols" + QDir::separator();
+    QDir dir;
+    dir.mkdir(backupDir);
+    dir.mkdir(symbolDir);
+
+    return QScopedPointer<FileStorageManager>(new FileStorageManager(backupDir, symbolDir));
+}
+
 
 void DialogAddNewFile::on_buttonRemoveFile_clicked()
 {
@@ -161,5 +212,59 @@ void DialogAddNewFile::on_buttonRemoveFile_clicked()
 
     if(!indices.isEmpty())
         this->showStatusNormal(""); // Clean status message
+
+    if(this->tableModelNewAddedFiles->getItemList().size() > 0)
+        this->ui->commandLinkButton->setEnabled(true);
+    else
+    {
+        this->ui->buttonRemoveFile->setEnabled(false);
+        this->ui->commandLinkButton->setEnabled(false);
+        this->ui->progressBar->setVisible(false);
+    }
+}
+
+
+void DialogAddNewFile::on_commandLinkButton_clicked()
+{
+    this->ui->progressBar->setVisible(true);
+
+    auto files = this->tableModelNewAddedFiles->getFilePathList();
+
+    QList<QFuture<bool>> resultList;
+
+    auto localFSM = this->createFSM();
+
+    for(const QString &currentFilePath : files)
+    {
+        QFuture<bool> result = QtConcurrent::run([&, this] {
+
+            QFileInfo fileInfo(currentFilePath);
+            QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+
+            bool requestResult = localFSM->addNewFile(currentFilePath,
+                                                      this->targetSymbolFolder,
+                                                      false,
+                                                      true,
+                                                      userDirectory
+                                                      );
+            return requestResult;
+        });
+
+        resultList.append(result);
+    }
+
+    for(QFuture<bool> current : resultList)
+    {
+        current.waitForFinished();
+        qDebug() << "current = " << current.result();
+    }
+
+//    for(const QString &currentFilePath : files)
+//    {
+//        qDebug() << "current (in same thread) = " << this->postToFSM(currentFilePath);
+//    }
+
+
+    this->showStatusInfo("Everything complated");
 }
 

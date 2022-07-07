@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    this->dialogAddNewFile = new DialogAddNewFile(this->fileStorageManager, this);
+    this->dialogAddNewFile = new DialogAddNewFile(this->fileStorageManager, "/test/target_folder/", this);
 
     this->allocateSeparators();
     this->buildTabWidget();

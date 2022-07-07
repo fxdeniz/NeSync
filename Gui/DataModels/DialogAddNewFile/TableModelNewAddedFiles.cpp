@@ -105,6 +105,16 @@ const QList<TableModelNewAddedFiles::TableItem> &TableModelNewAddedFiles::getIte
     return itemList;
 }
 
+QStringList TableModelNewAddedFiles::getFilePathList() const
+{
+    QStringList result;
+
+    for(const TableItem &item : this->itemList)
+        result.append(item.location + item.fileName);
+
+    return result;
+}
+
 bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole) {
