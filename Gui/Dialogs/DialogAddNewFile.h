@@ -29,6 +29,7 @@ private:
     void showStatusInfo(const QString &message);
     void showStatusWarning(const QString &message);
     void showStatusError(const QString &message);
+    void showStatusSuccess(const QString &message);
 
 private:
     Ui::DialogAddNewFile *ui;

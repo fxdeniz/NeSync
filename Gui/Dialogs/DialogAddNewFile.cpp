@@ -171,6 +171,19 @@ void DialogAddNewFile::showStatusError(const QString &message)
     labelStatus->setText(message);
 }
 
+void DialogAddNewFile::showStatusSuccess(const QString &message)
+{
+    auto labelStatus = this->ui->labelStatus;
+
+    QPalette palette;
+    palette.setColor(QPalette::ColorRole::Window, "#b8e994");
+    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
+
+    labelStatus->setPalette(palette);
+    labelStatus->setAutoFillBackground(true);
+    labelStatus->setText(message);
+}
+
 
 void DialogAddNewFile::on_buttonRemoveFile_clicked()
 {
@@ -207,7 +220,10 @@ void DialogAddNewFile::on_commandLinkButton_clicked()
     auto files = this->tableModelNewAddedFiles->getFilePathList();
 
     TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, files, this);
-    //task->setAutoDelete(true);
+    task->setAutoDelete(true);
+    this->ui->progressBar->setMaximum(task->fileCount());
+    QObject::connect(task, &TaskAddNewFiles::signalFileProcessed,
+                     this->ui->progressBar, &QProgressBar::setValue);
 
     QThreadPool::globalInstance()->start(task);
 }

@@ -13,19 +13,25 @@ public:
     explicit TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent = nullptr);
 
     int fileCount() const;
-
-private:
-    QString targetSymbolFolder;
-    QStringList fileList;
+    const QString &getTargetSymbolFolder() const;
+    bool isAllRequestsSuccessful() const;
 
 signals:
     void signalFileAddedSuccessfully(const QString &pathToFile);
     void signalFileAddingFailed(const QString &pathToFile);
+    void signalFileProcessed(int fileNumber);
 
     // QRunnable interface
 public:
     void run() override;
-    const QString &getTargetSymbolFolder() const;
+
+private:
+    void setIsAllRequestsSuccessful(bool newIsAllRequestsSuccessful);
+
+private:
+    QString targetSymbolFolder;
+    QStringList fileList;
+    bool _isAllRequestsSuccessful;
 };
 
 #endif // TASKADDNEWFILES_H
