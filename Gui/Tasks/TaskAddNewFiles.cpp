@@ -4,11 +4,14 @@
 #include <QStandardPaths>
 
 TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent)
-    : QObject{parent}
+    : QThread{parent}
 {
     this->targetSymbolFolder = targetSymbolFolder;
     this->fileList = fileList;
-    this->setIsAllRequestsSuccessful(false);
+}
+
+TaskAddNewFiles::~TaskAddNewFiles()
+{
 }
 
 int TaskAddNewFiles::fileCount() const
@@ -21,21 +24,11 @@ const QString &TaskAddNewFiles::getTargetSymbolFolder() const
     return targetSymbolFolder;
 }
 
-bool TaskAddNewFiles::isAllRequestsSuccessful() const
-{
-    return _isAllRequestsSuccessful;
-}
-
-void TaskAddNewFiles::setIsAllRequestsSuccessful(bool newIsAllRequestsSuccessful)
-{
-    _isAllRequestsSuccessful = newIsAllRequestsSuccessful;
-}
-
 void TaskAddNewFiles::run()
 {
     auto fsm = FileStorageManager::instance();
     int fileNumber = 1;
-    bool local_isAllRequestSuccessful = true;
+    bool isAllRequestSuccessful = true;
 
     for(const QString &currentFilePath : qAsConst(fileList))
     {
@@ -52,7 +45,7 @@ void TaskAddNewFiles::run()
             emit signalFileAddedSuccessfully(currentFilePath);
         else
         {
-            local_isAllRequestSuccessful = false;
+            isAllRequestSuccessful = false;
             emit signalFileAddingFailed(currentFilePath);
         }
 
@@ -60,8 +53,8 @@ void TaskAddNewFiles::run()
         ++fileNumber;
     }
 
-    if(local_isAllRequestSuccessful == false)
-        this->setIsAllRequestsSuccessful(false);
+    if(isAllRequestSuccessful == false)
+        emit finished(false);
     else
-        this->setIsAllRequestsSuccessful(true);
+        emit finished(true);
 }

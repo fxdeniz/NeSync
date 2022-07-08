@@ -220,11 +220,25 @@ void DialogAddNewFile::on_commandLinkButton_clicked()
     auto files = this->tableModelNewAddedFiles->getFilePathList();
 
     TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, files, this);
-    task->setAutoDelete(true);
     this->ui->progressBar->setMaximum(task->fileCount());
+
     QObject::connect(task, &TaskAddNewFiles::signalFileProcessed,
                      this->ui->progressBar, &QProgressBar::setValue);
 
-    QThreadPool::globalInstance()->start(task);
+    QObject::connect(task, &TaskAddNewFiles::finished,
+                     this, &DialogAddNewFile::onTaskAddNewFilesFinished);
+
+    QObject::connect(task, &QThread::finished,
+                     task, &QThread::deleteLater);
+
+    task->start();
+}
+
+void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
+{
+    if(isAllRequestSuccessful)
+        this->showStatusSuccess("All files added successfully");
+    else
+        this->showStatusError("Not all files added successfully, check the results for details");
 }
 

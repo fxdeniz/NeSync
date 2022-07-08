@@ -24,6 +24,8 @@ private slots:
 
     void on_commandLinkButton_clicked();
 
+    void onTaskAddNewFilesFinished(bool isAllRequestSuccessful);
+
 private:
     void showStatusNormal(const QString &message);
     void showStatusInfo(const QString &message);

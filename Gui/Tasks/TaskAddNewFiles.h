@@ -1,37 +1,33 @@
 #ifndef TASKADDNEWFILES_H
 #define TASKADDNEWFILES_H
 
-#include <QObject>
-#include <QRunnable>
+#include <QThread>
 
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
-class TaskAddNewFiles : public QObject, public QRunnable
+class TaskAddNewFiles : public QThread
 {
     Q_OBJECT
 public:
     explicit TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent = nullptr);
+    virtual ~TaskAddNewFiles();
 
     int fileCount() const;
     const QString &getTargetSymbolFolder() const;
-    bool isAllRequestsSuccessful() const;
 
 signals:
     void signalFileAddedSuccessfully(const QString &pathToFile);
     void signalFileAddingFailed(const QString &pathToFile);
     void signalFileProcessed(int fileNumber);
+    void finished(bool isAllRequestsSuccessful); // Overloaded QThread::finished()
 
-    // QRunnable interface
+    // QThread interface
 public:
     void run() override;
 
 private:
-    void setIsAllRequestsSuccessful(bool newIsAllRequestsSuccessful);
-
-private:
     QString targetSymbolFolder;
     QStringList fileList;
-    bool _isAllRequestsSuccessful;
 };
 
 #endif // TASKADDNEWFILES_H
