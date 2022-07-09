@@ -22,9 +22,11 @@ private slots:
 
     void on_buttonRemoveFile_clicked();
 
-    void on_commandLinkButton_clicked();
+    void on_clbAddFilesToDb_clicked();
 
     void onTaskAddNewFilesFinished(bool isAllRequestSuccessful);
+
+    void on_clbAddNewFiles_clicked();
 
 private:
     void showStatusNormal(const QString &message);

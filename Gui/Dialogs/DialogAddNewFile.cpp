@@ -16,12 +16,13 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
     ui(new Ui::DialogAddNewFile)
 {
     ui->setupUi(this);
+    this->ui->clbAddNewFiles->setVisible(false);
 
     this->targetSymbolFolder = targetFolder;
 
     this->ui->labelTargetFolder->setText(this->targetSymbolFolder);
     this->ui->progressBar->setVisible(false);
-    this->ui->commandLinkButton->setEnabled(false);
+    this->ui->clbAddFilesToDb->setEnabled(false);
     this->ui->buttonRemoveFile->setEnabled(false);
 
     QFileIconProvider iconProvider;
@@ -114,7 +115,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
     if(this->tableModelNewAddedFiles->getItemList().size() > 0)
     {
         this->ui->buttonRemoveFile->setEnabled(true);
-        this->ui->commandLinkButton->setEnabled(true);
+        this->ui->clbAddFilesToDb->setEnabled(true);
         this->ui->progressBar->setVisible(false);
     }
 }
@@ -202,19 +203,22 @@ void DialogAddNewFile::on_buttonRemoveFile_clicked()
         this->showStatusNormal(""); // Clean status message
 
     if(this->tableModelNewAddedFiles->getItemList().size() > 0)
-        this->ui->commandLinkButton->setEnabled(true);
+        this->ui->clbAddFilesToDb->setEnabled(true);
     else
     {
         this->ui->buttonRemoveFile->setEnabled(false);
-        this->ui->commandLinkButton->setEnabled(false);
+        this->ui->clbAddFilesToDb->setEnabled(false);
         this->ui->progressBar->setVisible(false);
     }
 }
 
 
-void DialogAddNewFile::on_commandLinkButton_clicked()
+void DialogAddNewFile::on_clbAddFilesToDb_clicked()
 {
     this->ui->progressBar->setVisible(true);
+    this->ui->buttonSelectNewFile->setEnabled(false);
+    this->ui->buttonRemoveFile->setEnabled(false);
+    this->ui->clbAddFilesToDb->setEnabled(false);
     this->showStatusInfo("Files are being added in background...");
 
     auto files = this->tableModelNewAddedFiles->getFilePathList();
@@ -240,5 +244,31 @@ void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
         this->showStatusSuccess("All files added successfully");
     else
         this->showStatusError("Not all files added successfully, check the results for details");
+
+    this->ui->clbAddFilesToDb->setVisible(false);
+    this->ui->buttonSelectNewFile->setVisible(false);
+    this->ui->buttonRemoveFile->setVisible(false);
+
+    this->ui->clbAddNewFiles->setVisible(true);
+}
+
+
+void DialogAddNewFile::on_clbAddNewFiles_clicked()
+{
+    this->tableModelNewAddedFiles->removeRows(0, this->ui->tableView->model()->rowCount());
+
+    this->ui->clbAddNewFiles->setVisible(false);
+
+    this->ui->buttonSelectNewFile->setVisible(true);
+    this->ui->buttonSelectNewFile->setEnabled(true);
+
+    this->ui->buttonRemoveFile->setVisible(true);
+    this->ui->buttonRemoveFile->setEnabled(false);
+
+    this->ui->clbAddFilesToDb->setVisible(true);
+    this->ui->clbAddFilesToDb->setEnabled(false);
+
+    this->ui->progressBar->reset();
+    this->showStatusInfo("Please select files from your local file system");
 }
 

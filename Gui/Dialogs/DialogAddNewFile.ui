@@ -85,6 +85,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="layoutControls">
+     <property name="spacing">
+      <number>50</number>
+     </property>
      <item>
       <widget class="QPushButton" name="buttonSelectNewFile">
        <property name="maximumSize">
@@ -97,22 +100,6 @@
         <string>Select new file</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="buttonRemoveFile">
@@ -128,23 +115,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="commandLinkButton">
+      <widget class="QCommandLinkButton" name="clbAddFilesToDb">
        <property name="maximumSize">
         <size>
          <width>240</width>
@@ -156,12 +127,22 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCommandLinkButton" name="clbAddNewFiles">
+       <property name="text">
+        <string>Add new files</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
       <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
