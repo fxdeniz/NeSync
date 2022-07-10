@@ -251,7 +251,7 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
     QObject::connect(task, &TaskAddNewFiles::signalFileBeingProcessed,
                      this->tableModelNewAddedFiles, &TableModelNewAddedFiles::markItemAsPending);
 
-    QObject::connect(task, &TaskAddNewFiles::signalFileBeingProcessed,
+    QObject::connect(task, &TaskAddNewFiles::signalGenericFileEvent,
                      this, &DialogAddNewFile::refreshTableView);
 
     QObject::connect(task, &TaskAddNewFiles::signalFileAddedSuccessfully,
@@ -305,10 +305,9 @@ void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
     this->ui->clbAddNewFiles->setVisible(true);
 }
 
-void DialogAddNewFile::refreshTableView(const QString &dummy)
+void DialogAddNewFile::refreshTableView()
 {
-    Q_UNUSED(dummy);
-
     this->ui->tableView->viewport()->update();
+    this->ui->tableView->resizeColumnsToContents();
 }
 

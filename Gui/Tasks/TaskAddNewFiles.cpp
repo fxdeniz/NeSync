@@ -56,6 +56,7 @@ void TaskAddNewFiles::run()
         QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
 
         emit signalFileBeingProcessed(currentFilePath);
+        emit signalGenericFileEvent();
 
         bool requestResult = fsm->addNewFile(currentFilePath,
                                              this->getTargetSymbolFolder(),
@@ -72,6 +73,7 @@ void TaskAddNewFiles::run()
         }
 
         emit signalFileProcessed(fileNumber);
+        emit signalGenericFileEvent();
         ++fileNumber;
     }
 
