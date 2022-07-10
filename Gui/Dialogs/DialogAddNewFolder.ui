@@ -59,6 +59,11 @@
       </item>
       <item>
        <widget class="QLabel" name="labelSeparator">
+        <property name="font">
+         <font>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>-&gt;</string>
         </property>

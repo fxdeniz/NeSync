@@ -22,6 +22,16 @@ private slots:
 
     void on_lineEdit_textChanged(const QString &arg1);
 
+public Q_SLOTS:
+    void show();
+
+private:
+    QString expectingStatusText();
+    QString emptyFolderStatusText();
+    QString existStatusText(QString folderName);
+    QString successStatusText(QString folderName);
+    QString errorStatusText(QString folderName);
+
 private:
     Ui::DialogAddNewFolder *ui;
     QString parentFolderPath;
