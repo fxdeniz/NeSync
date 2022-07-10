@@ -32,16 +32,18 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
     if (index.row() >= this->itemList.size() || index.row() < 0)
         return QVariant();
 
-    if (role == Qt::ItemDataRole::DisplayRole) {
+    if (role == Qt::ItemDataRole::DisplayRole)
+    {
         const auto &item = this->itemList.at(index.row());
 
-        switch (index.column()) {
-        case 0:
-            return item.name;
-        case 1:
-            return item.itemCount;
-        default:
-            break;
+        switch (index.column())
+        {
+            case 0:
+                return item.name;
+            case 1:
+                return item.itemCount;
+            default:
+                break;
         }
     }
     else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == 0)

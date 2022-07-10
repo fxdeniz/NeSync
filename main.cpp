@@ -10,16 +10,16 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
+//    FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
 
-    auto testFolderPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-    testFolderPath += "/test/";
+//    auto testFolderPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+//    testFolderPath += "/test/";
 
-    QStringList predictionList;
-    predictionList << testFolderPath;
-    predictionList << "not_exist";
+//    QStringList predictionList;
+//    predictionList << testFolderPath;
+//    predictionList << "not_exist";
 
-    FileMonitoringManagerIntegrationTest fmmITest(predictionList);
+//    FileMonitoringManagerIntegrationTest fmmITest(predictionList);
 
     MainWindow w;
     w.show();

@@ -11,15 +11,17 @@
 
 #include <QSqlDatabase>
 
-class FileStorageManager : public QObject
+class FileStorageManager
 {
-    Q_OBJECT
+private:
+    FileStorageManager(const QString &backupDirectory);
+
 public:
     static const QString DB_FILE_NAME;
     static const QString INTERNAL_FILE_NAME_EXTENSION;
     static const QString CONST_SYMBOL_DIRECTORY_SEPARATOR;
 
-    explicit FileStorageManager(const QString &backupDirectory, const QString &symbolDirectory, QObject *parent = nullptr);
+    static QSharedPointer<FileStorageManager> instance();
 
     bool addNewFile(const QString &pathToFile,
                     const QString &symbolDirectory,
@@ -51,6 +53,8 @@ public:
     bool markFileAsFavorite(const QString &pathToSymbolFile, bool status);
     void incrementSaveGroupNumber();
 
+    bool isFileExistByUserFilePath(const QString &userFilePath) const;
+
     QStringList getMonitoredFilePathList() const;
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
@@ -73,15 +77,14 @@ public:
 
     virtual ~FileStorageManager();
 
-signals:
-    void signalMonitoredFileAddedByBackend(const QString &userFilePath);
-    void signalMonitoredFileRemovedByBackend(const QString &userFilePath);
-    void signalMonitoredFilePathChangedByBackend(const QString &oldUserFilePath, const QString &newUserFilePath);
+//signals:
+//    void signalMonitoredFileAddedByBackend(const QString &userFilePath);
+//    void signalMonitoredFileRemovedByBackend(const QString &userFilePath);
+//    void signalMonitoredFilePathChangedByBackend(const QString &oldUserFilePath, const QString &newUserFilePath);
 
 private:
     qlonglong currentSaveGroupNumber;
     QString backupDirectory;
-    QString symbolDirectory;
     QSqlDatabase db;
 
     PtrTo_RowFolderRecord getRootFolderSymbol() const;

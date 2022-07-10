@@ -9,6 +9,7 @@
 #include "SqlPrimitives/RowDeleter.h"
 
 #include <QCryptographicHash>
+#include <QStandardPaths>
 #include <QSqlRecord>
 #include <QSqlQuery>
 #include <QDateTime>
@@ -19,11 +20,9 @@ const QString FileStorageManager::DB_FILE_NAME = "ff_database.db3";
 const QString FileStorageManager::INTERNAL_FILE_NAME_EXTENSION = ".file";
 const QString FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR = "/";
 
-FileStorageManager::FileStorageManager(const QString &backupDirectory, const QString &symbolDirectory, QObject *parent)
-    : QObject{parent}
+FileStorageManager::FileStorageManager(const QString &backupDirectory)
 {
-    this->backupDirectory = backupDirectory + QDir::fromNativeSeparators("/");
-    this->symbolDirectory = symbolDirectory + QDir::fromNativeSeparators("/");
+    this->backupDirectory = backupDirectory;
 
     this->extractSqliteDBIfNotExist();
 
@@ -40,6 +39,22 @@ FileStorageManager::FileStorageManager(const QString &backupDirectory, const QSt
 
     QuerySaveGroupItem queries(this->db);
     this->currentSaveGroupNumber = queries.selectCurrentSaveGroupID();
+}
+
+QSharedPointer<FileStorageManager> FileStorageManager::instance()
+{
+    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    appDataDir = QDir::toNativeSeparators(appDataDir);
+    appDataDir += QDir::separator();
+
+    auto backupDir = appDataDir + "backup" + QDir::separator();
+    QDir dir;
+    dir.mkdir(backupDir);
+
+    auto *rawPtr = new FileStorageManager(backupDir);
+    QSharedPointer<FileStorageManager> result(rawPtr);
+
+    return result;
 }
 
 bool FileStorageManager::addNewFile(const QString &pathToFile,
@@ -93,7 +108,7 @@ bool FileStorageManager::addNewFile(const QString &pathToFile,
     if(result == true && isFrozenFile == false)
     {
         QString userFilePath = userDirectory + fileName + fileExtension;
-        emit signalMonitoredFileAddedByBackend(userFilePath);
+        //emit signalMonitoredFileAddedByBackend(userFilePath);
     }
 
     return result;
@@ -165,10 +180,10 @@ bool FileStorageManager::deleteFiles(const QStringList &symbolFilePathList)
 
     if(!events.isEmpty())
     {
-        for(const auto currentUserFilePath : userFilePathList)
-        {
-            emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
-        }
+//        for(const auto currentUserFilePath : userFilePathList)
+//        {
+//            emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
+//        }
 
         for(const auto currentEvent : events)
         {
@@ -238,8 +253,8 @@ bool FileStorageManager::updateNameOfFile(const QString &pathToSymbolFile, const
 
     bool result = rowRecord->setFileName(newName);
 
-    if(result == true)
-        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
+//    if(result == true)
+//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
 
     return result;
 }
@@ -257,8 +272,8 @@ bool FileStorageManager::updateExtensionOfFile(const QString &pathToSymbolFile, 
     auto oldUserFilePath = rowRecord->getUserFilePath();
     bool result = rowRecord->setFileExtension(newExtension);
 
-    if(result == true)
-        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
+//    if(result == true)
+//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
 
     return result;
 }
@@ -291,8 +306,8 @@ bool FileStorageManager::updateUserDirectoryOfFile(const QString &pathToSymbolFi
     auto oldUserFilePath = rowRecord->getUserFilePath();
     bool result = rowRecord->setUserDirectory(newUserDir);
 
-    if(result == true)
-        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
+//    if(result == true)
+//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
 
     return result;
 }
@@ -309,8 +324,8 @@ bool FileStorageManager::updateFrozenStatusOfFile(const QString &pathToSymbolFil
 
     bool result = rowRecord->setIsFrozen(isFrozen);
 
-    if(result == true && isFrozen == true)
-        emit signalMonitoredFileRemovedByBackend(rowRecord->getUserFilePath());
+    //if(result == true && isFrozen == true)
+        //emit signalMonitoredFileRemovedByBackend(rowRecord->getUserFilePath());
 
     return result;
 }
@@ -378,6 +393,13 @@ bool FileStorageManager::markFileAsFavorite(const QString &pathToSymbolFile, boo
 void FileStorageManager::incrementSaveGroupNumber()
 {
     this->currentSaveGroupNumber += 1;
+}
+
+bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) const
+{
+    bool queryResult = QueryFileRecord(this->db).isRowExistByUserFilePath(userFilePath);
+
+    return queryResult;
 }
 
 QStringList FileStorageManager::getMonitoredFilePathList() const
@@ -611,10 +633,10 @@ bool FileStorageManager::deleteFolder(const QString &directory)
     if(events.isEmpty())
         return false;
 
-    for(const auto currentUserFilePath : userFilePathList)
-    {
-        emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
-    }
+//    for(const auto currentUserFilePath : userFilePathList)
+//    {
+//        emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
+//    }
 
     for(const auto &currentEvent : events)
     {
@@ -1040,11 +1062,6 @@ QString FileStorageManager::generateInternalFileName() const
     while (true);
 
     return fileName;
-}
-
-const QString &FileStorageManager::getSymbolDirectory() const
-{
-    return symbolDirectory;
 }
 
 void FileStorageManager::extractSqliteDBIfNotExist()
