@@ -34,10 +34,13 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
 
     this->tableModelNewAddedFiles = new TableModelNewAddedFiles(sampleFileExplorerTableData, this);
     this->ui->tableView->setModel(this->tableModelNewAddedFiles);
-    this->showStatusInfo("Please select files from your local file system");
+    this->ui->tableView->horizontalHeader()->moveSection(3, 2);
+    this->ui->tableView->horizontalHeader()->setSectionHidden(3, true);
 
     this->comboBoxDelegateAutoSync = new ComboBoxItemDelegateAutoSync(this);
     this->ui->tableView->setItemDelegateForColumn(1, this->comboBoxDelegateAutoSync);
+
+    this->showStatusInfo("Please select files from your local file system");
 }
 
 DialogAddNewFile::~DialogAddNewFile()
@@ -232,6 +235,7 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
     this->ui->buttonSelectNewFile->setEnabled(false);
     this->ui->buttonRemoveFile->setEnabled(false);
     this->ui->clbAddFilesToDb->setEnabled(false);
+    this->ui->tableView->horizontalHeader()->setSectionHidden(3, false);
     emit signalDisableDelegatesOfAutoSyncColumn(true);
     this->showStatusInfo("Files are being added in background...");
 
