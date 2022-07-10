@@ -12,7 +12,7 @@ class DialogFileOrDirEditor : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogFileOrDirEditor(QWidget *parent = nullptr);
+     DialogFileOrDirEditor(QWidget *parent = nullptr);
     ~DialogFileOrDirEditor();
 
 private:

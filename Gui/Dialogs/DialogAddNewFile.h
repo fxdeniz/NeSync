@@ -15,7 +15,7 @@ class DialogAddNewFile : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogAddNewFile(const QString &targetFolder, QWidget *parent = nullptr);
+     DialogAddNewFile(const QString &targetFolder, QWidget *parent = nullptr);
     ~DialogAddNewFile();
 
 private slots:

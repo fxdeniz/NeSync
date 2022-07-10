@@ -12,7 +12,7 @@ class DialogAddNewFolder : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogAddNewFolder(const QString &parentFolderPath, QWidget *parent = nullptr);
+     DialogAddNewFolder(const QString &parentFolderPath, QWidget *parent = nullptr);
     ~DialogAddNewFolder();
 
 private slots:

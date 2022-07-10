@@ -28,6 +28,11 @@ include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/ef
 set(PROJECT_SOURCES
     Gui/MainWindow.h Gui/MainWindow.cpp Gui/MainWindow.ui
 
+    # BaseDialog
+        Gui/Dialogs/BaseDialog.h
+        Gui/Dialogs/BaseDialog.cpp
+    #
+
     # DialogAddNewFile
         Gui/Dialogs/DialogAddNewFile.h
         Gui/Dialogs/DialogAddNewFile.cpp
