@@ -16,6 +16,7 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
     ui(new Ui::DialogAddNewFile)
 {
     ui->setupUi(this);
+    this->labelStatus = this->ui->labelStatus;
     this->ui->clbAddNewFiles->setVisible(false);
 
     this->targetSymbolFolder = targetFolder;
@@ -45,7 +46,7 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
     this->comboBoxDelegateAutoSync = new ComboBoxItemDelegateAutoSync(this);
     this->ui->tableView->setItemDelegateForColumn(1, this->comboBoxDelegateAutoSync);
 
-    this->showStatusInfo("Please select files from your local file system");
+    this->showStatusInfo("Please select files from your local file system", this->labelStatus);
 }
 
 DialogAddNewFile::~DialogAddNewFile()
@@ -67,7 +68,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
         QFile selectedFile(selectedFilePath);
         if(!selectedFile.exists())
         {
-            this->showStatusWarning("File not found: " + selectedFilePath);
+            this->showStatusWarning("File not found: " + selectedFilePath, this->labelStatus);
             return;
         }
 
@@ -75,7 +76,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         if(!isFileOpened)
         {
-            this->showStatusWarning("File couldn't opened: " + selectedFilePath);
+            this->showStatusWarning("File couldn't opened: " + selectedFilePath, this->labelStatus);
             return;
         }
 
@@ -87,7 +88,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         if(fileSize > availableSize)
         {
-            this->showStatusWarning("Not enough free space available for: " + selectedFilePath);
+            this->showStatusWarning("Not enough free space available for: " + selectedFilePath, this->labelStatus);
             return;
         }
 
@@ -102,7 +103,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         if(isAlreadySelected)
         {
-            this->showStatusWarning("File already selected: " + selectedFilePath);
+            this->showStatusWarning("File already selected: " + selectedFilePath, this->labelStatus);
             return;
         }
 
@@ -110,7 +111,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         if(isAlreadyAddedToDb)
         {
-            this->showStatusWarning("File already added to database: " + selectedFilePath);
+            this->showStatusWarning("File already added to database: " + selectedFilePath, this->labelStatus);
             return;
         }
 
@@ -129,7 +130,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
         this->ui->tableView->openPersistentEditor(this->tableModelNewAddedFiles->index(index.row(), 1));
         this->ui->tableView->resizeColumnsToContents();
 
-        this->showStatusNormal(""); // Clean status message
+        this->showStatusNormal("", this->labelStatus); // Clean status message
     }
 
     if(this->tableModelNewAddedFiles->getItemList().size() > 0)
@@ -138,47 +139,6 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
         this->ui->clbAddFilesToDb->setEnabled(true);
         this->ui->progressBar->setVisible(false);
     }
-}
-
-void DialogAddNewFile::showStatusNormal(const QString &message)
-{
-    this->showStatus(message);
-}
-
-void DialogAddNewFile::showStatusInfo(const QString &message)
-{
-    this->showStatus(message, "#7ed6df");
-}
-
-void DialogAddNewFile::showStatusWarning(const QString &message)
-{
-    this->showStatus(message, "#f6e58d");
-}
-
-void DialogAddNewFile::showStatusError(const QString &message)
-{
-    this->showStatus(message, "#ff3838");
-}
-
-void DialogAddNewFile::showStatusSuccess(const QString &message)
-{
-    this->showStatus(message, "#b8e994");
-}
-
-void DialogAddNewFile::showStatus(const QString &message, const QString &bgColorCode)
-{
-    auto labelStatus = this->ui->labelStatus;
-
-    QPalette palette;
-
-    if(!bgColorCode.isEmpty())
-        palette.setColor(QPalette::ColorRole::Window, bgColorCode);
-
-    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
-
-    labelStatus->setPalette(palette);
-    labelStatus->setAutoFillBackground(true);
-    labelStatus->setText(message);
 }
 
 
@@ -196,7 +156,7 @@ void DialogAddNewFile::on_buttonRemoveFile_clicked()
     }
 
     if(!indices.isEmpty())
-        this->showStatusNormal(""); // Clean status message
+        this->showStatusNormal("", this->labelStatus); // Clean status message
 
     if(this->tableModelNewAddedFiles->getItemList().size() > 0)
         this->ui->clbAddFilesToDb->setEnabled(true);
@@ -217,7 +177,7 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
     this->ui->clbAddFilesToDb->setEnabled(false);
     this->ui->tableView->horizontalHeader()->setSectionHidden(3, false);
     emit signalDisableDelegatesOfAutoSyncColumn(true);
-    this->showStatusInfo("Files are being added in background...");
+    this->showStatusInfo("Files are being added in background...", this->labelStatus);
 
     TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, this);
 
@@ -274,15 +234,15 @@ void DialogAddNewFile::on_clbAddNewFiles_clicked()
     this->ui->clbAddFilesToDb->setEnabled(false);
 
     this->ui->progressBar->reset();
-    this->showStatusInfo("Please select files from your local file system");
+    this->showStatusInfo("Please select files from your local file system", this->labelStatus);
 }
 
 void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
 {
     if(isAllRequestSuccessful)
-        this->showStatusSuccess("All files added successfully");
+        this->showStatusSuccess("All files added successfully", this->labelStatus);
     else
-        this->showStatusError("Not all files added successfully, check the results for details");
+        this->showStatusError("Not all files added successfully, check the results for details", this->labelStatus);
 
     this->ui->clbAddFilesToDb->setVisible(false);
     this->ui->buttonSelectNewFile->setVisible(false);
