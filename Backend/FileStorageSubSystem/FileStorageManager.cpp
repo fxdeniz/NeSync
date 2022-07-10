@@ -590,7 +590,12 @@ bool FileStorageManager::markFolderAsFavorite(const QString &directory, bool sta
 
 bool FileStorageManager::isFolderExist(const QString &directory) const
 {
-    PtrTo_RowFolderRecord rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(directory);
+    QString dir = directory;
+
+    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
+        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
+
+    PtrTo_RowFolderRecord rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
 
     if(rowFolder->isExistInDB())
         return true;

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(symbolDir);
 
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    this->dialogAddNewFolder = new DialogAddNewFolder(this);
+    this->dialogAddNewFolder = new DialogAddNewFolder("/test/sub_folder/", this);
     this->dialogAddNewFile = new DialogAddNewFile("/test/target_folder/", this);
 
     this->allocateSeparators();
