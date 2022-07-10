@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "DataModels/DialogAddNewFile/TableModelNewAddedFiles.h"
+#include "ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.h"
 
 namespace Ui {
 class DialogAddNewFile;
@@ -24,9 +25,13 @@ private slots:
 
     void on_clbAddFilesToDb_clicked();
 
+    void on_clbAddNewFiles_clicked();
+
     void onTaskAddNewFilesFinished(bool isAllRequestSuccessful);
 
-    void on_clbAddNewFiles_clicked();
+signals:
+    void signalDisableDelegatesOfAutoSyncColumn(bool flag);
+
 
 private:
     void showStatusNormal(const QString &message);
@@ -38,6 +43,7 @@ private:
 private:
     Ui::DialogAddNewFile *ui;
     TableModelNewAddedFiles *tableModelNewAddedFiles;
+    ComboBoxItemDelegateAutoSync *comboBoxDelegateAutoSync;
     QString targetSymbolFolder;
 };
 

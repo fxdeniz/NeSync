@@ -9,8 +9,11 @@ class TaskAddNewFiles : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent = nullptr);
+    explicit TaskAddNewFiles(const QString &targetSymbolFolder, QObject *parent = nullptr);
     virtual ~TaskAddNewFiles();
+
+    void addAutoSyncEnabled(const QString &pathToFile);
+    void addAutoSyncDisabled(const QString &pathToFile);
 
     int fileCount() const;
     const QString &getTargetSymbolFolder() const;
@@ -27,7 +30,7 @@ public:
 
 private:
     QString targetSymbolFolder;
-    QStringList fileList;
+    QHash<QString, bool> fileMap;
 };
 
 #endif // TASKADDNEWFILES_H

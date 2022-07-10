@@ -3,20 +3,35 @@
 #include <QDir>
 #include <QStandardPaths>
 
-TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QStringList fileList, QObject *parent)
+TaskAddNewFiles::TaskAddNewFiles(const QString &targetSymbolFolder, QObject *parent)
     : QThread{parent}
 {
     this->targetSymbolFolder = targetSymbolFolder;
-    this->fileList = fileList;
 }
 
 TaskAddNewFiles::~TaskAddNewFiles()
 {
 }
 
+void TaskAddNewFiles::addAutoSyncEnabled(const QString &pathToFile)
+{
+    bool isContains = this->fileMap.contains(pathToFile);
+
+    if(!isContains)
+        this->fileMap.insert(pathToFile, true);
+}
+
+void TaskAddNewFiles::addAutoSyncDisabled(const QString &pathToFile)
+{
+    bool isContains = this->fileMap.contains(pathToFile);
+
+    if(!isContains)
+        this->fileMap.insert(pathToFile, false);
+}
+
 int TaskAddNewFiles::fileCount() const
 {
-    return this->fileList.size();
+    return this->fileMap.size();
 }
 
 const QString &TaskAddNewFiles::getTargetSymbolFolder() const
@@ -30,15 +45,20 @@ void TaskAddNewFiles::run()
     int fileNumber = 1;
     bool isAllRequestSuccessful = true;
 
-    for(const QString &currentFilePath : qAsConst(fileList))
+    QHashIterator<QString, bool> cursor(this->fileMap);
+    while(cursor.hasNext())
     {
+        cursor.next();
+
+        QString currentFilePath = cursor.key();
+        bool isAutoSyncEnabled = cursor.value();
         QFileInfo fileInfo(currentFilePath);
         QString userDirectory = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
 
         bool requestResult = fsm->addNewFile(currentFilePath,
                                              this->getTargetSymbolFolder(),
                                              false,
-                                             true,
+                                             isAutoSyncEnabled,
                                              userDirectory);
 
         if(requestResult == true)

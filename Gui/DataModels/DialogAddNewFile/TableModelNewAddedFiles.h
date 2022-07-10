@@ -11,6 +11,7 @@ public:
     struct TableItem
     {
         QString fileName;
+        bool isAutoSyncEnabled;
         QString location;
 
         bool operator==(const TableItem &other) const
@@ -33,10 +34,11 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
     const QList<TableItem> &getItemList() const;
-    QStringList getFilePathList() const;
 
 private:
     QList<TableItem> itemList;
+    bool _isAutoSyncColumnDisabled;
+
 };
 
 #endif // TABLEMODELNEWADDEDFILES_H

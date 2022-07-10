@@ -19,7 +19,7 @@ int TableModelNewAddedFiles::rowCount(const QModelIndex &parent) const
 
 int TableModelNewAddedFiles::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 2;
+    return parent.isValid() ? 0 : 3;
 }
 
 QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
@@ -38,7 +38,9 @@ QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
         {
             case 0:
                 return item.fileName;
-            case 1:
+//            case 1:
+//                return item.isAutoSyncEnabled;
+            case 2:
                 return item.location;
             default:
                 break;
@@ -68,6 +70,8 @@ QVariant TableModelNewAddedFiles::headerData(int section, Qt::Orientation orient
         case 0:
             return tr("File Name");
         case 1:
+            return tr("Auto-sync");
+        case 2:
             return tr("Location");
         default:
             break;
@@ -82,7 +86,7 @@ bool TableModelNewAddedFiles::insertRows(int position, int rows, const QModelInd
     beginInsertRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row)
-        itemList.insert(position, { QString(), QString() });
+        itemList.insert(position, { QString(), true, QString() });
 
     endInsertRows();
     return true;
@@ -105,27 +109,22 @@ const QList<TableModelNewAddedFiles::TableItem> &TableModelNewAddedFiles::getIte
     return itemList;
 }
 
-QStringList TableModelNewAddedFiles::getFilePathList() const
-{
-    QStringList result;
-
-    for(const TableItem &item : this->itemList)
-        result.append(item.location + item.fileName);
-
-    return result;
-}
-
 bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole) {
+    if (index.isValid() && role == Qt::EditRole)
+    {
         const int row = index.row();
         auto item = itemList.value(row);
 
-        switch (index.column()) {
+        switch (index.column())
+        {
         case 0:
             item.fileName = value.toString();
             break;
         case 1:
+            item.isAutoSyncEnabled = value.toBool();
+            break;
+        case 2:
             item.location = value.toString();
             break;
         default:

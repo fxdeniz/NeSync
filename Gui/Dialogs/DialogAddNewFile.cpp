@@ -35,6 +35,10 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
     this->tableModelNewAddedFiles = new TableModelNewAddedFiles(sampleFileExplorerTableData, this);
     this->ui->tableView->setModel(this->tableModelNewAddedFiles);
     this->showStatusInfo("Please select files from your local file system");
+
+    this->comboBoxDelegateAutoSync = new ComboBoxItemDelegateAutoSync(this);
+    this->ui->tableView->setItemDelegateForColumn(1, this->comboBoxDelegateAutoSync);
+
 }
 
 DialogAddNewFile::~DialogAddNewFile()
@@ -82,7 +86,7 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         QFileInfo fileInfo(selectedFile);
         auto absolutePath = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-        TableModelNewAddedFiles::TableItem item {fileInfo.fileName(), absolutePath};
+        TableModelNewAddedFiles::TableItem item {fileInfo.fileName(), true, absolutePath};
         bool isAlreadySelected = this->tableModelNewAddedFiles->getItemList().contains(item);
 
         if(isAlreadySelected)
@@ -104,8 +108,14 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         QModelIndex index = tableModel->index(0, 0, QModelIndex());
         tableModel->setData(index, item.fileName, Qt::EditRole);
+
         index = tableModel->index(0, 1, QModelIndex());
+        tableModel->setData(index, item.isAutoSyncEnabled, Qt::EditRole);
+
+        index = tableModel->index(0, 2, QModelIndex());
         tableModel->setData(index, item.location, Qt::EditRole);
+
+        this->ui->tableView->openPersistentEditor(this->tableModelNewAddedFiles->index(index.row(), 1));
 
         this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
         this->ui->tableView->resizeColumnsToContents();
@@ -219,11 +229,20 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
     this->ui->buttonSelectNewFile->setEnabled(false);
     this->ui->buttonRemoveFile->setEnabled(false);
     this->ui->clbAddFilesToDb->setEnabled(false);
+    emit signalDisableDelegatesOfAutoSyncColumn(true);
     this->showStatusInfo("Files are being added in background...");
 
-    auto files = this->tableModelNewAddedFiles->getFilePathList();
+    TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, this);
 
-    TaskAddNewFiles *task = new TaskAddNewFiles(this->targetSymbolFolder, files, this);
+    for(const TableModelNewAddedFiles::TableItem &item : this->tableModelNewAddedFiles->getItemList())
+    {
+        auto pathToFile = item.location + item.fileName;
+        if(item.isAutoSyncEnabled)
+            task->addAutoSyncEnabled(pathToFile);
+        else
+            task->addAutoSyncDisabled(pathToFile);
+    }
+
     this->ui->progressBar->setMaximum(task->fileCount());
 
     QObject::connect(task, &TaskAddNewFiles::signalFileProcessed,
@@ -237,21 +256,6 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
 
     task->start();
 }
-
-void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
-{
-    if(isAllRequestSuccessful)
-        this->showStatusSuccess("All files added successfully");
-    else
-        this->showStatusError("Not all files added successfully, check the results for details");
-
-    this->ui->clbAddFilesToDb->setVisible(false);
-    this->ui->buttonSelectNewFile->setVisible(false);
-    this->ui->buttonRemoveFile->setVisible(false);
-
-    this->ui->clbAddNewFiles->setVisible(true);
-}
-
 
 void DialogAddNewFile::on_clbAddNewFiles_clicked()
 {
@@ -270,5 +274,19 @@ void DialogAddNewFile::on_clbAddNewFiles_clicked()
 
     this->ui->progressBar->reset();
     this->showStatusInfo("Please select files from your local file system");
+}
+
+void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
+{
+    if(isAllRequestSuccessful)
+        this->showStatusSuccess("All files added successfully");
+    else
+        this->showStatusError("Not all files added successfully, check the results for details");
+
+    this->ui->clbAddFilesToDb->setVisible(false);
+    this->ui->buttonSelectNewFile->setVisible(false);
+    this->ui->buttonRemoveFile->setVisible(false);
+
+    this->ui->clbAddNewFiles->setVisible(true);
 }
 

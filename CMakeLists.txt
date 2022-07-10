@@ -35,6 +35,9 @@ set(PROJECT_SOURCES
         #
         Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.h
         Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.cpp
+        #
+        Gui/ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.h
+        Gui/ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.cpp
     #
 
     # DialogFileOrDirEditor
