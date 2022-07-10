@@ -12,6 +12,7 @@ DialogAddNewFolder::DialogAddNewFolder(const QString &parentFolderPath, QWidget 
     ui->setupUi(this);
     this->labelStatus = this->ui->labelStatus;
     this->parentFolderPath = parentFolderPath;
+    this->showStatusNormal("", this->labelStatus);
 
     this->ui->labelParentFolderPath->setText(parentFolderPath);
 
