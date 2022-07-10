@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(symbolDir);
 
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
+    this->dialogAddNewFolder = new DialogAddNewFolder(this);
     this->dialogAddNewFile = new DialogAddNewFile("/test/target_folder/", this);
 
     this->allocateSeparators();
@@ -136,5 +137,12 @@ void MainWindow::on_tab1Action_AddFile_triggered()
     this->dialogAddNewFile->setWindowFlags(flags);
     this->dialogAddNewFile->setModal(true);
     this->dialogAddNewFile->show();
+}
+
+
+void MainWindow::on_tab1Action_NewFolder_triggered()
+{
+    this->dialogAddNewFolder->setModal(true);
+    this->dialogAddNewFolder->show();
 }
 

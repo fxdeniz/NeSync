@@ -40,6 +40,12 @@ set(PROJECT_SOURCES
         Gui/ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.cpp
     #
 
+    # DialogAddNewFolder
+        Gui/Dialogs/DialogAddNewFolder.h
+        Gui/Dialogs/DialogAddNewFolder.cpp
+        Gui/Dialogs/DialogAddNewFolder.ui
+    #
+
     # DialogFileOrDirEditor
         Gui/Dialogs/DialogFileOrDirEditor.h
         Gui/Dialogs/DialogFileOrDirEditor.cpp

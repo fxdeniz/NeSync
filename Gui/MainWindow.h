@@ -5,6 +5,7 @@
 
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
+#include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogAddNewFile.h"
 #include "Tabs/TabFileExplorer.h"
 #include "Tabs/TabFileMonitor.h"
@@ -30,6 +31,8 @@ private slots:
 
     void on_tab1Action_AddFile_triggered();
 
+    void on_tab1Action_NewFolder_triggered();
+
 private:
     TabFileExplorer *tabFileExplorer;
     TabFileMonitor *tabFileMonitor;
@@ -43,8 +46,8 @@ private:
 private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
+    DialogAddNewFolder *dialogAddNewFolder;
     DialogAddNewFile *dialogAddNewFile;
-    //FileStorageManager *fileStorageManager;
 };
 
 #endif // MAINWINDOW_H
