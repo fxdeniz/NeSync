@@ -40,6 +40,7 @@ private:
     void showStatusWarning(const QString &message);
     void showStatusError(const QString &message);
     void showStatusSuccess(const QString &message);
+    void showStatus(const QString &message, const QString &bgColorCode = "");
 
 private:
     Ui::DialogAddNewFile *ui;

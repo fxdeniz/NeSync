@@ -34,8 +34,13 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
 
     this->tableModelNewAddedFiles = new TableModelNewAddedFiles(sampleFileExplorerTableData, this);
     this->ui->tableView->setModel(this->tableModelNewAddedFiles);
+    this->ui->tableView->horizontalHeader()->setMinimumSectionSize(110);
+    this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    this->ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Fixed);
+    this->ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeMode::Fixed);
     this->ui->tableView->horizontalHeader()->moveSection(3, 2);
     this->ui->tableView->horizontalHeader()->setSectionHidden(3, true);
+    this->ui->tableView->resizeColumnsToContents();
 
     this->comboBoxDelegateAutoSync = new ComboBoxItemDelegateAutoSync(this);
     this->ui->tableView->setItemDelegateForColumn(1, this->comboBoxDelegateAutoSync);
@@ -122,9 +127,8 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
         tableModel->setData(index, item.location, Qt::EditRole);
 
         this->ui->tableView->openPersistentEditor(this->tableModelNewAddedFiles->index(index.row(), 1));
-
-        this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
         this->ui->tableView->resizeColumnsToContents();
+
         this->showStatusNormal(""); // Clean status message
     }
 
@@ -138,62 +142,38 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
 void DialogAddNewFile::showStatusNormal(const QString &message)
 {
-    auto labelStatus = this->ui->labelStatus;
-
-    QPalette palette;
-    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
-    labelStatus->setPalette(palette);
-
-    labelStatus->setPalette(palette);
-    labelStatus->setAutoFillBackground(true);
-    labelStatus->setText(message);
+    this->showStatus(message);
 }
 
 void DialogAddNewFile::showStatusInfo(const QString &message)
 {
-    auto labelStatus = this->ui->labelStatus;
-
-    QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, "#7ed6df");
-    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
-
-    labelStatus->setPalette(palette);
-    labelStatus->setAutoFillBackground(true);
-    labelStatus->setText(message);
+    this->showStatus(message, "#7ed6df");
 }
 
 void DialogAddNewFile::showStatusWarning(const QString &message)
 {
-    auto labelStatus = this->ui->labelStatus;
-
-    QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, "#f6e58d");
-    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
-
-    labelStatus->setPalette(palette);
-    labelStatus->setAutoFillBackground(true);
-    labelStatus->setText(message);
+    this->showStatus(message, "#f6e58d");
 }
 
 void DialogAddNewFile::showStatusError(const QString &message)
 {
-    auto labelStatus = this->ui->labelStatus;
-
-    QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, "#ff3838");
-    palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
-
-    labelStatus->setPalette(palette);
-    labelStatus->setAutoFillBackground(true);
-    labelStatus->setText(message);
+    this->showStatus(message, "#ff3838");
 }
 
 void DialogAddNewFile::showStatusSuccess(const QString &message)
 {
+    this->showStatus(message, "#b8e994");
+}
+
+void DialogAddNewFile::showStatus(const QString &message, const QString &bgColorCode)
+{
     auto labelStatus = this->ui->labelStatus;
 
     QPalette palette;
-    palette.setColor(QPalette::ColorRole::Window, "#b8e994");
+
+    if(!bgColorCode.isEmpty())
+        palette.setColor(QPalette::ColorRole::Window, bgColorCode);
+
     palette.setColor(QPalette::ColorRole::WindowText, Qt::GlobalColor::black);
 
     labelStatus->setPalette(palette);
@@ -278,6 +258,8 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
 
 void DialogAddNewFile::on_clbAddNewFiles_clicked()
 {
+    this->ui->tableView->horizontalHeader()->setSectionHidden(3, true);
+
     this->tableModelNewAddedFiles->removeRows(0, this->ui->tableView->model()->rowCount());
 
     this->ui->clbAddNewFiles->setVisible(false);
