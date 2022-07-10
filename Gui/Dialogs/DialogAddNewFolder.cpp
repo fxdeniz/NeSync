@@ -10,6 +10,7 @@ DialogAddNewFolder::DialogAddNewFolder(const QString &parentFolderPath, QWidget 
     ui(new Ui::DialogAddNewFolder)
 {
     ui->setupUi(this);
+    this->labelStatus = this->ui->labelStatus;
     this->parentFolderPath = parentFolderPath;
 
     this->ui->labelParentFolderPath->setText(parentFolderPath);
@@ -33,16 +34,16 @@ void DialogAddNewFolder::on_pushButton_clicked()
 
     if(isFolderExist)
     {
-        this->ui->labelStatus->setText("Folder already exist");
+        this->showStatusWarning("Folder already exist", this->labelStatus);
         return;
     }
 
     bool isFolderAdded = fsm->addNewFolder(newFolderPath);
 
     if(isFolderAdded)
-        this->ui->labelStatus->setText("Folder created successfully");
+        this->showStatusSuccess("Folder created successfully", this->labelStatus);
     else
-        this->ui->labelStatus->setText("Error ocured while creating folder");
+        this->showStatusError("Error ocured while creating folder", this->labelStatus);
 }
 
 

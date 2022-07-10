@@ -1,13 +1,15 @@
 #ifndef DIALOGADDNEWFOLDER_H
 #define DIALOGADDNEWFOLDER_H
 
+#include "BaseDialog.h"
+
 #include <QDialog>
 
 namespace Ui {
 class DialogAddNewFolder;
 }
 
-class DialogAddNewFolder : public QDialog
+class DialogAddNewFolder : public QDialog, public BaseDialog
 {
     Q_OBJECT
 
@@ -23,6 +25,7 @@ private slots:
 private:
     Ui::DialogAddNewFolder *ui;
     QString parentFolderPath;
+    QLabel *labelStatus;
 };
 
 #endif // DIALOGADDNEWFOLDER_H
