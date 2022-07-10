@@ -19,6 +19,7 @@ public:
     const QString &getTargetSymbolFolder() const;
 
 signals:
+    void signalFileBeingProcessed(const QString &pathToFile);
     void signalFileAddedSuccessfully(const QString &pathToFile);
     void signalFileAddingFailed(const QString &pathToFile);
     void signalFileProcessed(int fileNumber);

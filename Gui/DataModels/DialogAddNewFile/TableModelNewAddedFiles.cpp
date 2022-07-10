@@ -1,6 +1,7 @@
 #include "TableModelNewAddedFiles.h"
 
 #include <QFileIconProvider>
+#include <QDir>
 
 TableModelNewAddedFiles::TableModelNewAddedFiles(QObject *parent)
     : QAbstractTableModel(parent)
@@ -19,7 +20,7 @@ int TableModelNewAddedFiles::rowCount(const QModelIndex &parent) const
 
 int TableModelNewAddedFiles::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 3;
+    return parent.isValid() ? 0 : 4;
 }
 
 QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
@@ -38,10 +39,25 @@ QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
         {
             case 0:
                 return item.fileName;
-//            case 1:
-//                return item.isAutoSyncEnabled;
+            case 1:
+                return item.isAutoSyncEnabled;
             case 2:
                 return item.location;
+            case 3:
+            {
+                TableItemStatus status = item.status;
+
+                if(status == TableItemStatus::Pending)
+                    return tr("Pending");
+                else if(status == TableItemStatus::Waiting)
+                    return tr("Waiting");
+                else if(status == TableItemStatus::Successful)
+                    return tr("Successful");
+                else if(status == TableItemStatus::Failed)
+                    return tr("Failed");
+                else
+                    return tr("NaN");
+            }
             default:
                 break;
         }
@@ -65,16 +81,20 @@ QVariant TableModelNewAddedFiles::headerData(int section, Qt::Orientation orient
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
-            return tr("File Name");
-        case 1:
-            return tr("Auto-sync");
-        case 2:
-            return tr("Location");
-        default:
-            break;
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:
+                return tr("File Name");
+            case 1:
+                return tr("Auto-sync");
+            case 2:
+                return tr("Location");
+            case 3:
+                return tr("Status");
+            default:
+                break;
         }
     }
     return QVariant();
@@ -86,7 +106,7 @@ bool TableModelNewAddedFiles::insertRows(int position, int rows, const QModelInd
     beginInsertRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row)
-        itemList.insert(position, { QString(), true, QString() });
+        itemList.insert(position, { QString(), true, TableItemStatus::Waiting, QString() });
 
     endInsertRows();
     return true;
@@ -109,6 +129,39 @@ const QList<TableModelNewAddedFiles::TableItem> &TableModelNewAddedFiles::getIte
     return itemList;
 }
 
+void TableModelNewAddedFiles::markItemAsPending(const QString &pathToFile)
+{
+    this->markItemAs(pathToFile, TableItemStatus::Pending);
+}
+
+void TableModelNewAddedFiles::markItemAsSuccessful(const QString &pathToFile)
+{
+    this->markItemAs(pathToFile, TableItemStatus::Successful);
+}
+
+void TableModelNewAddedFiles::markItemAsFailed(const QString &pathToFile)
+{
+    this->markItemAs(pathToFile, TableItemStatus::Failed);
+}
+
+void TableModelNewAddedFiles::markItemAs(const QString &pathToFile, TableItemStatus status)
+{
+
+    QFileInfo fileInfo(pathToFile);
+    auto location = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+    auto fileName = fileInfo.fileName();
+
+    for(TableItem &item : this->itemList)
+    {
+        if(item.fileName == fileName && item.location == location)
+        {
+            item.status = status;
+            //QModelIndex topLeft = createIndex(0,0);
+            //emit dataChanged(topLeft, topLeft);
+        }
+    }
+}
+
 bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole)
@@ -126,6 +179,9 @@ bool TableModelNewAddedFiles::setData(const QModelIndex &index, const QVariant &
             break;
         case 2:
             item.location = value.toString();
+            break;
+        case 3:
+            item.status = value.value<TableItemStatus>();
             break;
         default:
             return false;

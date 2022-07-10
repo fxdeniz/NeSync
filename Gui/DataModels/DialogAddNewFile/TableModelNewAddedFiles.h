@@ -8,10 +8,19 @@ class TableModelNewAddedFiles : public QAbstractTableModel
     Q_OBJECT
 
 public:
+    enum TableItemStatus
+    {
+        Waiting,
+        Pending,
+        Successful,
+        Failed,
+    };
+
     struct TableItem
     {
         QString fileName;
         bool isAutoSyncEnabled;
+        TableItemStatus status;
         QString location;
 
         bool operator==(const TableItem &other) const
@@ -35,9 +44,16 @@ public:
 
     const QList<TableItem> &getItemList() const;
 
+public slots:
+    void markItemAsPending(const QString &pathToFile);
+    void markItemAsSuccessful(const QString &pathToFile);
+    void markItemAsFailed(const QString &pathToFile);
+
+private:
+    void markItemAs(const QString &pathToFile, TableItemStatus status);
+
 private:
     QList<TableItem> itemList;
-    bool _isAutoSyncColumnDisabled;
 
 };
 

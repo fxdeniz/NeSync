@@ -28,6 +28,7 @@ private slots:
     void on_clbAddNewFiles_clicked();
 
     void onTaskAddNewFilesFinished(bool isAllRequestSuccessful);
+    void refreshTableView(const QString &dummy);
 
 signals:
     void signalDisableDelegatesOfAutoSyncColumn(bool flag);

@@ -38,7 +38,6 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
 
     this->comboBoxDelegateAutoSync = new ComboBoxItemDelegateAutoSync(this);
     this->ui->tableView->setItemDelegateForColumn(1, this->comboBoxDelegateAutoSync);
-
 }
 
 DialogAddNewFile::~DialogAddNewFile()
@@ -86,7 +85,11 @@ void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 
         QFileInfo fileInfo(selectedFile);
         auto absolutePath = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-        TableModelNewAddedFiles::TableItem item {fileInfo.fileName(), true, absolutePath};
+        TableModelNewAddedFiles::TableItem item {fileInfo.fileName(),
+                                                true,
+                                                TableModelNewAddedFiles::TableItemStatus::Waiting,
+                                                absolutePath};
+
         bool isAlreadySelected = this->tableModelNewAddedFiles->getItemList().contains(item);
 
         if(isAlreadySelected)
@@ -245,6 +248,18 @@ void DialogAddNewFile::on_clbAddFilesToDb_clicked()
 
     this->ui->progressBar->setMaximum(task->fileCount());
 
+    QObject::connect(task, &TaskAddNewFiles::signalFileBeingProcessed,
+                     this->tableModelNewAddedFiles, &TableModelNewAddedFiles::markItemAsPending);
+
+    QObject::connect(task, &TaskAddNewFiles::signalFileBeingProcessed,
+                     this, &DialogAddNewFile::refreshTableView);
+
+    QObject::connect(task, &TaskAddNewFiles::signalFileAddedSuccessfully,
+                     this->tableModelNewAddedFiles, &TableModelNewAddedFiles::markItemAsSuccessful);
+
+    QObject::connect(task, &TaskAddNewFiles::signalFileAddingFailed,
+                     this->tableModelNewAddedFiles, &TableModelNewAddedFiles::markItemAsFailed);
+
     QObject::connect(task, &TaskAddNewFiles::signalFileProcessed,
                      this->ui->progressBar, &QProgressBar::setValue);
 
@@ -288,5 +303,12 @@ void DialogAddNewFile::onTaskAddNewFilesFinished(bool isAllRequestSuccessful)
     this->ui->buttonRemoveFile->setVisible(false);
 
     this->ui->clbAddNewFiles->setVisible(true);
+}
+
+void DialogAddNewFile::refreshTableView(const QString &dummy)
+{
+    Q_UNUSED(dummy);
+
+    this->ui->tableView->viewport()->update();
 }
 
