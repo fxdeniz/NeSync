@@ -3,11 +3,11 @@
 
 #include "InMemoryDataTypes/SaveGroupItemMetaData.h"
 #include "InMemoryDataTypes/FileVersionMetaData.h"
-#include "SqlPrimitives/RowFolderRecord.h"
 #include "InMemoryDataTypes/FolderMetaData.h"
+#include "InMemoryDataTypes/FileMetaData.h"
+#include "SqlPrimitives/RowFolderRecord.h"
 #include "SqlPrimitives/RowFileRecord.h"
 #include "SqlPrimitives/RowFileEvent.h"
-#include "InMemoryDataTypes/FileMetaData.h"
 
 #include <QSqlDatabase>
 
@@ -66,6 +66,7 @@ public:
     FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 
+    static const QString &rootFolder();
     bool addNewFolder(const QString &directory);
     bool markFolderAsFavorite(const QString &directory, bool status);
     bool isFolderExist(const QString &directory) const;

@@ -533,6 +533,11 @@ SaveGroupItemMetaData FileStorageManager::getSaveGroupItemMetaData(const QString
     return result;
 }
 
+const QString &FileStorageManager::rootFolder()
+{
+    return CONST_SYMBOL_DIRECTORY_SEPARATOR;
+}
+
 bool FileStorageManager::addNewFolder(const QString &directory)
 {
     QString dir = directory;
