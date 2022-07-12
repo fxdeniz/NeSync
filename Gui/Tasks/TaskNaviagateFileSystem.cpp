@@ -5,17 +5,13 @@
 TaskNaviagateFileSystem::TaskNaviagateFileSystem(QObject *parent)
     : QObject{parent}
 {
-    fsm = FileStorageManager::instance().data();
+    fsm = FileStorageManager::instance();
 }
 
-TaskNaviagateFileSystem::~TaskNaviagateFileSystem()
-{
-    delete fsm;
-}
 
-void TaskNaviagateFileSystem::onDirContentRequested(const QString &directory)
+void TaskNaviagateFileSystem::slotOnDirContentRequested(const QString &directory)
 {
-    qDebug() << "TaskNaviagateFileSystem::onDirContentRequested() in " << QThread::currentThread()->objectName();
+    qDebug() << "TaskNaviagateFileSystem::slotOnDirContentRequested() in " << QThread::currentThread()->objectName();
     auto result = fsm->getFolderMetaData(directory);
-    emit dirContentFetched(result);
+    emit signalDirContentFetched(result);
 }

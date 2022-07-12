@@ -23,12 +23,12 @@ public:
 signals:
     void signalToRouter_ShowRelatedFiles();
     void signalToRouter_ShowDialogTableItemEditor();
-    void requestDirContent(const QString &directory);
+    void signalRequestDirContent(const QString &directory);
 
 private slots:
     void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
-    void onDirContentFetched(FolderMetaData data);
+    void slotOnDirContentFetched(FolderMetaData data);
 
 private:
     void showContextMenuTableView(const QPoint &argPos);
@@ -47,6 +47,7 @@ private:
     TableModelFileExplorer *tableModelFileExplorer;
     ListModelFileExplorer *listModelFileExplorer;
     QThread *navigationTaskControllerThread;
+
 };
 
 #endif // TABFILEEXPLORER_H

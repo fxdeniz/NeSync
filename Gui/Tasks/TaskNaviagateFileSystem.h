@@ -10,16 +10,15 @@ class TaskNaviagateFileSystem : public QObject
     Q_OBJECT
 public:
     explicit TaskNaviagateFileSystem(QObject *parent = nullptr);
-    virtual ~TaskNaviagateFileSystem();
 
 public slots:
-    void onDirContentRequested(const QString &directory);
+    void slotOnDirContentRequested(const QString &directory);
 
 signals:
-    void dirContentFetched(FolderMetaData data);
+    void signalDirContentFetched(FolderMetaData data);
 
 private:
-    FileStorageManager *fsm;
+    QSharedPointer<FileStorageManager> fsm;
 };
 
 #endif // TASKNAVIAGATEFILESYSTEM_H

@@ -32,13 +32,23 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
     ui->listView->setModel(listModelFileExplorer);
 
-    QObject::connect(ui->listView, &QListView::customContextMenuRequested, this, &TabFileExplorer::showContextMenuListView);
-    QObject::connect(ui->tableViewFileExplorer, &QTableView::customContextMenuRequested, this, &TabFileExplorer::showContextMenuTableView);
+    QObject::connect(ui->listView, &QListView::customContextMenuRequested,
+                     this, &TabFileExplorer::showContextMenuListView);
+
+    QObject::connect(ui->tableViewFileExplorer, &QTableView::customContextMenuRequested,
+                     this, &TabFileExplorer::showContextMenuTableView);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::rootFolderPath());
     fillFileExplorerWithRootFolderContents();
 
     createNavigationTask();
+}
+
+TabFileExplorer::~TabFileExplorer()
+{
+    navigationTaskControllerThread->quit();
+    navigationTaskControllerThread->wait();
+    delete ui;
 }
 
 void TabFileExplorer::buildContextMenuTableFileExplorer()
@@ -85,7 +95,7 @@ void TabFileExplorer::fillFileExplorerWithRootFolderContents()
 {
     auto rootPath = FileStorageManager::rootFolderPath();
     auto result = FileStorageManager::instance()->getFolderMetaData(rootPath);
-    onDirContentFetched(result);
+    slotOnDirContentFetched(result);
 }
 
 void TabFileExplorer::createNavigationTask()
@@ -94,11 +104,11 @@ void TabFileExplorer::createNavigationTask()
     navigationTaskControllerThread->setObjectName(navigationTaskControllerThreadName());
     TaskNaviagateFileSystem *task = new TaskNaviagateFileSystem();
 
-    QObject::connect(this, &TabFileExplorer::requestDirContent,
-                     task, &TaskNaviagateFileSystem::onDirContentRequested);
+    QObject::connect(this, &TabFileExplorer::signalRequestDirContent,
+                     task, &TaskNaviagateFileSystem::slotOnDirContentRequested);
 
-    QObject::connect(task, &TaskNaviagateFileSystem::dirContentFetched,
-                     this, &TabFileExplorer::onDirContentFetched);
+    QObject::connect(task, &TaskNaviagateFileSystem::signalDirContentFetched,
+                     this, &TabFileExplorer::slotOnDirContentFetched);
 
     QObject::connect(navigationTaskControllerThread, &QThread::finished,
                      task, &QObject::deleteLater);
@@ -111,7 +121,6 @@ QString TabFileExplorer::navigationTaskControllerThreadName() const
 {
     return "Navigation Task Controller Thread";
 }
-
 
 void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
 {
@@ -137,14 +146,6 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
     }
 }
 
-TabFileExplorer::~TabFileExplorer()
-{
-    navigationTaskControllerThread->quit();
-    navigationTaskControllerThread->wait();
-
-    delete ui;
-}
-
 void TabFileExplorer::on_contextActionListFileExplorer_ShowRelatedFiles_triggered()
 {
     emit signalToRouter_ShowRelatedFiles();
@@ -155,7 +156,7 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
     emit signalToRouter_ShowDialogTableItemEditor();
 }
 
-void TabFileExplorer::onDirContentFetched(FolderMetaData data)
+void TabFileExplorer::slotOnDirContentFetched(FolderMetaData data)
 {
-    qDebug() << "TabFileExplorer::onDirContentFetched() in " << QThread::currentThread()->objectName();
+    qDebug() << "TabFileExplorer::slotOnDirContentFetched() in " << QThread::currentThread()->objectName();
 }
