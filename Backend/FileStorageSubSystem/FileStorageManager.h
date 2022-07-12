@@ -66,7 +66,7 @@ public:
     FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 
-    static const QString &rootFolder();
+    static const QString &rootFolderPath();
     bool addNewFolder(const QString &directory);
     bool markFolderAsFavorite(const QString &directory, bool status);
     bool isFolderExist(const QString &directory) const;

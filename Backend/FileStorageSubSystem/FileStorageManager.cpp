@@ -533,7 +533,7 @@ SaveGroupItemMetaData FileStorageManager::getSaveGroupItemMetaData(const QString
     return result;
 }
 
-const QString &FileStorageManager::rootFolder()
+const QString &FileStorageManager::rootFolderPath()
 {
     return CONST_SYMBOL_DIRECTORY_SEPARATOR;
 }

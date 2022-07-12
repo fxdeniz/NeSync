@@ -14,6 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QThread::currentThread()->setObjectName("GUI Thread");
+    qDebug() << "MainWindow::MainWindow() in " << QThread::currentThread()->objectName();
+
     auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
     appDataDir = QDir::toNativeSeparators(appDataDir);
     appDataDir += QDir::separator();

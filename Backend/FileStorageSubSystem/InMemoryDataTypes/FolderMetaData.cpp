@@ -3,46 +3,46 @@
 
 FolderMetaData::FolderMetaData()
 {
-    this->exist = false;
-    this->_folderName = INVALID_FIELD_VALUE_QSTRING;
-    this->_directory = INVALID_FIELD_VALUE_QSTRING;
-    this->_parentDirectory = INVALID_FIELD_VALUE_QSTRING;
-    this->_favorite = INVALID_FIELD_VALUE_BOOL;
+    exist = false;
+    _folderName = INVALID_FIELD_VALUE_QSTRING;
+    _directory = INVALID_FIELD_VALUE_QSTRING;
+    _parentDirectory = INVALID_FIELD_VALUE_QSTRING;
+    _favorite = INVALID_FIELD_VALUE_BOOL;
 }
 
 FolderMetaData::FolderMetaData(PtrTo_RowFolderRecord row)
 {
-    this->exist = true;
-    this->_folderName = row->getSuffixDirectory();
-    this->_directory = row->getDirectory();
-    this->_parentDirectory = row->getParentDirectory();
-    this->_favorite = row->getIsFavorite();
+    exist = true;
+    _folderName = row->getSuffixDirectory();
+    _directory = row->getDirectory();
+    _parentDirectory = row->getParentDirectory();
+    _favorite = row->getIsFavorite();
 
     for(auto const childFolder : row->getAllChildRowFolderRecords())
-        this->_childFolderList.append(childFolder->getDirectory());
+        _childFolderList.append(childFolder->getDirectory());
 
     for(auto const childFile : row->getAllChildRowFileRecords())
-        this->_symbolFilePathList.append(childFile->getSymbolFilePath());
+        _symbolFilePathList.append(childFile->getSymbolFilePath());
 }
 
 bool FolderMetaData::isExist() const
 {
-    return this->exist;
+    return exist;
 }
 
 const QString &FolderMetaData::directory() const
 {
-    return this->_directory;
+    return _directory;
 }
 
 const QString &FolderMetaData::folderName() const
 {
-    return this->_folderName;
+    return _folderName;
 }
 
 const QString &FolderMetaData::parentDirectory() const
 {
-    return this->_parentDirectory;
+    return _parentDirectory;
 }
 
 bool FolderMetaData::isFavorite() const
@@ -52,10 +52,10 @@ bool FolderMetaData::isFavorite() const
 
 const QList<QString> &FolderMetaData::symbolFilePathList() const
 {
-    return this->_symbolFilePathList;
+    return _symbolFilePathList;
 }
 
 const QList<QString> &FolderMetaData::childFolderList() const
 {
-    return this->_childFolderList;
+    return _childFolderList;
 }
