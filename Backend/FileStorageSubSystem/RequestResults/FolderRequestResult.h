@@ -1,16 +1,16 @@
-#ifndef FOLDERMETADATA_H
-#define FOLDERMETADATA_H
+#ifndef FOLDERREQUESTRESULT_H
+#define FOLDERREQUESTRESULT_H
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.h"
 
 #include <QIcon>
 
-class FolderMetaData
+class FolderRequestResult
 {
 public:
     friend class FileStorageManager;
 
-    FolderMetaData();
+    FolderRequestResult();
 
     bool isExist() const;
 
@@ -18,14 +18,16 @@ public:
     const QString &directory() const;
     const QString &parentDirectory() const;
     bool isFavorite() const;
-    const QList<QString> &childFolderList() const;
+    const QList<FolderRequestResult> &childFolderList() const;
     const QList<QString> &symbolFilePathList() const;
 
     const QIcon &folderIcon() const;
 
 private:
-    FolderMetaData(PtrTo_RowFolderRecord row);
+    FolderRequestResult(PtrTo_RowFolderRecord row);
+    static FolderRequestResult leafFrom(PtrTo_RowFolderRecord row);
 
+private:
     bool exist;
 
     QString _folderName;
@@ -34,10 +36,10 @@ private:
 
     bool _favorite;
 
-    QList<QString> _childFolderList;
+    QList<FolderRequestResult> _childFolderList;
     QList<QString> _symbolFilePathList;
 
     QIcon _icon;
 };
 
-#endif // FOLDERMETADATA_H
+#endif // FOLDERREQUESTRESULT_H

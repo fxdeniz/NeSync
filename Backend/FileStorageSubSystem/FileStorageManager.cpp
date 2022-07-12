@@ -435,31 +435,31 @@ QList<SaveGroupItemMetaData> FileStorageManager::getSaveGroupItems(qlonglong sav
     return result;
 }
 
-FolderMetaData FileStorageManager::getFolderMetaData(const QString &directory) const
+FolderRequestResult FileStorageManager::getFolderMetaData(const QString &directory) const
 {
     QString dir = directory;
     if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
         dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
 
-    FolderMetaData result;
+    FolderRequestResult result;
 
     auto rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
 
     if(rowFolder->isExistInDB())
-        result = FolderMetaData(rowFolder);
+        result = FolderRequestResult(rowFolder);
 
     return result;
 }
 
-QList<FolderMetaData> FileStorageManager::getFavoriteFolderMetaDataList() const
+QList<FolderRequestResult> FileStorageManager::getFavoriteFolderMetaDataList() const
 {
-    QList<FolderMetaData> result;
+    QList<FolderRequestResult> result;
 
     auto queryResult = QueryFolderRecord(this->db).selectFavoriteFolderList();
 
     for(auto currentRow : queryResult)
     {
-        FolderMetaData item(currentRow);
+        FolderRequestResult item(currentRow);
         result.append(item);
     }
 

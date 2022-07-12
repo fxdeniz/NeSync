@@ -4,16 +4,10 @@
 #include <QPixmap>
 #include <QColor>
 
-TableModelFileExplorer::TableModelFileExplorer(const FolderMetaData &data, QObject *parent)
+TableModelFileExplorer::TableModelFileExplorer(const FolderRequestResult &result, QObject *parent)
     : QAbstractTableModel(parent)
 {
-    TableItem item {data.folderName(),
-                    data.directory(),
-                    TableItemType::Folder,
-                    data.folderIcon()};
-
-    if(!itemList.contains(item))
-        itemList.prepend(item);
+    itemList = tableItemListFrom(result);
 }
 
 int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
@@ -162,13 +156,26 @@ bool TableModelFileExplorer::removeRows(int position, int rows, const QModelInde
     return true;
 }
 
-void TableModelFileExplorer::displayFolderContents(const FolderMetaData &data)
+QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFrom(const FolderRequestResult &parentFolder)
 {
-    TableItem item {data.folderName(),
-                    data.directory(),
-                    TableItemType::Folder,
-                    data.folderIcon()};
+    QList<TableItem> result;
 
-    if(!itemList.contains(item))
-        itemList.prepend(item);
+    TableItem parentItem {parentFolder.folderName(),
+                          parentFolder.directory(),
+                          TableItemType::Folder,
+                          parentFolder.folderIcon()};
+
+    result.append(parentItem);
+
+    for(const FolderRequestResult &child : parentFolder.childFolderList())
+    {
+        TableItem item {child.folderName(),
+                        child.directory(),
+                        TableItemType::Folder,
+                        child.folderIcon()};
+
+        result.append(item);
+    }
+
+    return result;
 }

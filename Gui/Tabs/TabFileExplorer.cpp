@@ -153,7 +153,7 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
     emit signalToRouter_ShowDialogTableItemEditor();
 }
 
-void TabFileExplorer::slotOnDirContentFetched(FolderMetaData data)
+void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult data)
 {
     qDebug() << "TabFileExplorer::slotOnDirContentFetched() in " << QThread::currentThread()->objectName();
 

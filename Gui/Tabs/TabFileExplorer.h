@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QMenu>
 
-#include "FileStorageSubSystem/InMemoryDataTypes/FolderMetaData.h"
+#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 
 namespace Ui {
@@ -27,7 +27,7 @@ signals:
 private slots:
     void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
-    void slotOnDirContentFetched(FolderMetaData data);
+    void slotOnDirContentFetched(FolderRequestResult data);
 
 private:
     void showContextMenuTableView(const QPoint &argPos);

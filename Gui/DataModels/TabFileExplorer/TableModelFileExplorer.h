@@ -1,7 +1,7 @@
 #ifndef TABLEMODELFILEEXPLORER_H
 #define TABLEMODELFILEEXPLORER_H
 
-#include "FileStorageSubSystem/InMemoryDataTypes/FolderMetaData.h"
+#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include <QAbstractTableModel>
 #include <QIcon>
 
@@ -30,7 +30,8 @@ public:
     };
 
 public:
-    TableModelFileExplorer(const FolderMetaData &data, QObject *parent = nullptr);
+    TableModelFileExplorer(const FolderRequestResult &result, QObject *parent = nullptr);
+    static QList<TableItem> tableItemListFrom(const FolderRequestResult &parentFolder);
 
     // QAbstractTableModel interface
 public:
@@ -42,7 +43,8 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
-    void displayFolderContents(const FolderMetaData &data);
+
+private:
 
 private:
     QList<TableItem> itemList;

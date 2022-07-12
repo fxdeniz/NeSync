@@ -1,10 +1,10 @@
 #ifndef FILESTORAGEMANAGER_H
 #define FILESTORAGEMANAGER_H
 
-#include "InMemoryDataTypes/SaveGroupItemMetaData.h"
-#include "InMemoryDataTypes/FileVersionMetaData.h"
-#include "InMemoryDataTypes/FolderMetaData.h"
-#include "InMemoryDataTypes/FileMetaData.h"
+#include "RequestResults/SaveGroupItemMetaData.h"
+#include "RequestResults/FileVersionMetaData.h"
+#include "RequestResults/FolderRequestResult.h"
+#include "RequestResults/FileMetaData.h"
 #include "SqlPrimitives/RowFolderRecord.h"
 #include "SqlPrimitives/RowFileRecord.h"
 #include "SqlPrimitives/RowFileEvent.h"
@@ -59,8 +59,8 @@ public:
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;
-    FolderMetaData getFolderMetaData(const QString &directory) const;
-    QList<FolderMetaData> getFavoriteFolderMetaDataList() const;
+    FolderRequestResult getFolderMetaData(const QString &directory) const;
+    QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
     FileMetaData getFileMetaData(const QString &pathToSymbolFile) const;
     QList<FileMetaData> getFavoriteFileMetaDataList() const;
     FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;

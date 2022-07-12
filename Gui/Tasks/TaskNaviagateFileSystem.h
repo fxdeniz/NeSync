@@ -15,7 +15,7 @@ public slots:
     void slotOnDirContentRequested(const QString &directory);
 
 signals:
-    void signalDirContentFetched(FolderMetaData data);
+    void signalDirContentFetched(FolderRequestResult data);
 
 private:
     QSharedPointer<FileStorageManager> fsm;

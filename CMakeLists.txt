@@ -121,10 +121,10 @@ set(PROJECT_SOURCES
     Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.h Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.cpp
     Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.h Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.cpp
 
-    Backend/FileStorageSubSystem/InMemoryDataTypes/FolderMetaData.h Backend/FileStorageSubSystem/InMemoryDataTypes/FolderMetaData.cpp
-    Backend/FileStorageSubSystem/InMemoryDataTypes/FileMetaData.h Backend/FileStorageSubSystem/InMemoryDataTypes/FileMetaData.cpp
-    Backend/FileStorageSubSystem/InMemoryDataTypes/FileVersionMetaData.h Backend/FileStorageSubSystem/InMemoryDataTypes/FileVersionMetaData.cpp
-    Backend/FileStorageSubSystem/InMemoryDataTypes/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/InMemoryDataTypes/SaveGroupItemMetaData.cpp
+    Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.h Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.cpp
+    Backend/FileStorageSubSystem/RequestResults/FileMetaData.h Backend/FileStorageSubSystem/RequestResults/FileMetaData.cpp
+    Backend/FileStorageSubSystem/RequestResults/FileVersionMetaData.h Backend/FileStorageSubSystem/RequestResults/FileVersionMetaData.cpp
+    Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.cpp
     Backend/FileStorageSubSystem/FileStorageManager.h Backend/FileStorageSubSystem/FileStorageManager.cpp
 
 
