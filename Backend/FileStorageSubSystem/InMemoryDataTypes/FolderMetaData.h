@@ -3,6 +3,8 @@
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.h"
 
+#include <QIcon>
+
 class FolderMetaData
 {
 public:
@@ -19,6 +21,8 @@ public:
     const QList<QString> &childFolderList() const;
     const QList<QString> &symbolFilePathList() const;
 
+    const QIcon &folderIcon() const;
+
 private:
     FolderMetaData(PtrTo_RowFolderRecord row);
 
@@ -32,6 +36,8 @@ private:
 
     QList<QString> _childFolderList;
     QList<QString> _symbolFilePathList;
+
+    QIcon _icon;
 };
 
 #endif // FOLDERMETADATA_H

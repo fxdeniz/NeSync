@@ -4,14 +4,16 @@
 #include <QPixmap>
 #include <QColor>
 
-TableModelFileExplorer::TableModelFileExplorer(QObject *parent)
+TableModelFileExplorer::TableModelFileExplorer(const FolderMetaData &data, QObject *parent)
     : QAbstractTableModel(parent)
 {
-}
+    TableItem item {data.folderName(),
+                    data.directory(),
+                    TableItemType::Folder,
+                    data.folderIcon()};
 
-TableModelFileExplorer::TableModelFileExplorer(const QList<TableItem> &_itemList, QObject *parent)
-    : QAbstractTableModel(parent), itemList(_itemList)
-{
+    if(!itemList.contains(item))
+        itemList.prepend(item);
 }
 
 int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
@@ -21,7 +23,7 @@ int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 
 int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 2;
+    return parent.isValid() ? 0 : 3;
 }
 
 QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
@@ -41,7 +43,9 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
             case 0:
                 return item.name;
             case 1:
-                return item.itemCount;
+                return item.symbolPath;
+            case 2:
+                return item.type;
             default:
                 break;
         }
@@ -55,10 +59,9 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
     {
-        QFileIconProvider provider;
-        auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+        const auto &item = this->itemList.at(index.row());
 
-        return result;
+        return item.icon;
     }
 
     return QVariant();
@@ -72,9 +75,11 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
     if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
-            return tr("File Name");
+            return tr("Name");
         case 1:
-            return tr("Extension");
+            return tr("Symbol Path");
+        case 2:
+            return tr("Type");
         default:
             break;
         }
@@ -105,7 +110,10 @@ bool TableModelFileExplorer::setData(const QModelIndex &index, const QVariant &v
                 item.name = value.toString();
                 break;
             case 1:
-                item.itemCount = value.toString();
+                item.symbolPath = value.toString();
+                break;
+            case 2:
+                item.type = value.value<TableItemType>();
                 break;
             default:
                 return false;
@@ -152,4 +160,15 @@ bool TableModelFileExplorer::removeRows(int position, int rows, const QModelInde
 
     endRemoveRows();
     return true;
+}
+
+void TableModelFileExplorer::displayFolderContents(const FolderMetaData &data)
+{
+    TableItem item {data.folderName(),
+                    data.directory(),
+                    TableItemType::Folder,
+                    data.folderIcon()};
+
+    if(!itemList.contains(item))
+        itemList.prepend(item);
 }

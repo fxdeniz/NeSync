@@ -5,7 +5,6 @@
 #include <QMenu>
 
 #include "FileStorageSubSystem/InMemoryDataTypes/FolderMetaData.h"
-#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 
 namespace Ui {
@@ -38,15 +37,14 @@ private:
     void fillFileExplorerWithRootFolderContents();
     void createNavigationTask();
 
-    QString navigationTaskControllerThreadName() const;
+    QString navigationTaskThreadName() const;
 
 private:
     Ui::TabFileExplorer *ui;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
-    TableModelFileExplorer *tableModelFileExplorer;
     ListModelFileExplorer *listModelFileExplorer;
-    QThread *navigationTaskControllerThread;
+    QThread *navigationTaskThread;
 
 };
 

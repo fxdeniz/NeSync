@@ -1,3 +1,4 @@
+#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
 #include "Tasks/TaskNaviagateFileSystem.h"
@@ -15,16 +16,12 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
 
-
     QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
 
     sampleFileExplorerTableData.insert(0, {"first_file", ".txt"});
     sampleFileExplorerTableData.insert(1, {"second_file", ".zip"});
     sampleFileExplorerTableData.insert(2, {"third_file", ".pdf"});
     sampleFileExplorerTableData.insert(3, {"fourth_file", ".mp4"});
-
-    tableModelFileExplorer = new TableModelFileExplorer(sampleFileExplorerTableData, this);
-    ui->tableViewFileExplorer->setModel(tableModelFileExplorer);
 
     QStringList sampleListData;
     sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
@@ -46,8 +43,8 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 
 TabFileExplorer::~TabFileExplorer()
 {
-    navigationTaskControllerThread->quit();
-    navigationTaskControllerThread->wait();
+    navigationTaskThread->quit();
+    navigationTaskThread->wait();
     delete ui;
 }
 
@@ -100,8 +97,8 @@ void TabFileExplorer::fillFileExplorerWithRootFolderContents()
 
 void TabFileExplorer::createNavigationTask()
 {
-    navigationTaskControllerThread = new QThread(this);
-    navigationTaskControllerThread->setObjectName(navigationTaskControllerThreadName());
+    navigationTaskThread = new QThread(this);
+    navigationTaskThread->setObjectName(navigationTaskThreadName());
     TaskNaviagateFileSystem *task = new TaskNaviagateFileSystem();
 
     QObject::connect(this, &TabFileExplorer::signalRequestDirContent,
@@ -110,14 +107,14 @@ void TabFileExplorer::createNavigationTask()
     QObject::connect(task, &TaskNaviagateFileSystem::signalDirContentFetched,
                      this, &TabFileExplorer::slotOnDirContentFetched);
 
-    QObject::connect(navigationTaskControllerThread, &QThread::finished,
+    QObject::connect(navigationTaskThread, &QThread::finished,
                      task, &QObject::deleteLater);
 
-    task->moveToThread(navigationTaskControllerThread);
-    navigationTaskControllerThread->start();
+    task->moveToThread(navigationTaskThread);
+    navigationTaskThread->start();
 }
 
-QString TabFileExplorer::navigationTaskControllerThreadName() const
+QString TabFileExplorer::navigationTaskThreadName() const
 {
     return "Navigation Task Controller Thread";
 }
@@ -159,4 +156,13 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
 void TabFileExplorer::slotOnDirContentFetched(FolderMetaData data)
 {
     qDebug() << "TabFileExplorer::slotOnDirContentFetched() in " << QThread::currentThread()->objectName();
+
+    if(ui->tableViewFileExplorer->model() != nullptr)
+        delete ui->tableViewFileExplorer->model();
+
+    auto tableModel = new TableModelFileExplorer(data, this);
+    ui->tableViewFileExplorer->setModel(tableModel);
+
+    ui->tableViewFileExplorer->viewport()->update();
+    ui->tableViewFileExplorer->resizeColumnsToContents();
 }

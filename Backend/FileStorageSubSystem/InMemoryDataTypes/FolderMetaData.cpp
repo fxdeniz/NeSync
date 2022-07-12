@@ -1,6 +1,8 @@
 #include "FolderMetaData.h"
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h"
 
+#include <QFileIconProvider>
+
 FolderMetaData::FolderMetaData()
 {
     exist = false;
@@ -23,6 +25,14 @@ FolderMetaData::FolderMetaData(PtrTo_RowFolderRecord row)
 
     for(auto const childFile : row->getAllChildRowFileRecords())
         _symbolFilePathList.append(childFile->getSymbolFilePath());
+
+    QFileIconProvider provider;
+    _icon = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+}
+
+const QIcon &FolderMetaData::folderIcon() const
+{
+    return _icon;
 }
 
 bool FolderMetaData::isExist() const
