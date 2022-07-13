@@ -40,7 +40,10 @@ QVariant TableModelNewAddedFiles::data(const QModelIndex &index, int role) const
             case 0:
                 return item.fileName;
             case 1:
-                return item.isAutoSyncEnabled;
+                if(item.isAutoSyncEnabled)
+                    return tr("Enabled");
+                else
+                    return tr("Disabled");
             case 2:
                 return item.location;
             case 3:

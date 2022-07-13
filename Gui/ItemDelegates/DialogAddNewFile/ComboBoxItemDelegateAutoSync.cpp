@@ -17,14 +17,13 @@ ComboBoxItemDelegateAutoSync::~ComboBoxItemDelegateAutoSync()
 
 QWidget *ComboBoxItemDelegateAutoSync::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    // Create the combobox and populate it
     QComboBox *cb = new QComboBox(parent);
 
     cb->addItem(QString("Enabled"));
     cb->addItem(QString("Disabled"));
 
     QObject::connect(dialog, &DialogAddNewFile::signalDisableDelegatesOfAutoSyncColumn,
-                     cb, &QComboBox::setDisabled);
+                     cb, &QComboBox::deleteLater);
 
     return cb;
 }
