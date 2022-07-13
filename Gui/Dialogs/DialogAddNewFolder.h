@@ -24,6 +24,10 @@ private slots:
     void on_pushButton_clicked();
     void on_lineEdit_textChanged(const QString &arg1);
 
+    // QDialog interface
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private:
     QString expectingStatusText();
     QString emptyFolderStatusText();
@@ -34,6 +38,7 @@ private:
 private:
     Ui::DialogAddNewFolder *ui;
     QString parentFolderPath;
+
 };
 
 #endif // DIALOGADDNEWFOLDER_H

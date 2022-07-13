@@ -21,6 +21,9 @@ public:
 
     QString currentDir() const;
 
+public slots:
+    void slotRefreshFileExplorer();
+
 signals:
     void signalToRouter_ShowRelatedFiles();
     void signalToRouter_ShowDialogTableItemEditor();
@@ -40,7 +43,7 @@ private:
     void showContextMenuListView(const QPoint &argPos);
     void buildContextMenuTableFileExplorer();
     void buildContextMenuListFileExplorer();
-    void fillFileExplorerWithRootFolderContents();
+    void fillTableFileExplorerWith(const QString &symbolDirPath);
     void createNavigationTask();
 
     void createNavigationHistoryIndex(const QString &path);

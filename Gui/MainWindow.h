@@ -25,14 +25,10 @@ public:
 
 private slots:
     void on_tabWidget_currentChanged(int index);
-
     void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
     void on_tab1Action_AddFile_triggered();
     void on_tab1Action_NewFolder_triggered();
-
-signals:
-    void signalRequestNavigationTaskToStop();
 
 private:
     TabFileExplorer *tabFileExplorer;
