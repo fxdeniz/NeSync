@@ -41,7 +41,7 @@ void DialogAddNewFolder::on_pushButton_clicked()
 {
     auto fsm = FileStorageManager::instance();
     QString lineEditText = ui->lineEdit->text();
-    auto newFolderPath = parentFolderPath + lineEditText;
+    auto newFolderPath = parentFolderPath + lineEditText + FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
     bool isFolderExist = fsm->isFolderExist(newFolderPath);
 
     if(lineEditText.isEmpty() || lineEditText.isNull())
@@ -78,6 +78,12 @@ void DialogAddNewFolder::on_lineEdit_textChanged(const QString &arg1)
         ui->labelFolderName->setText(arg1);
     else
         ui->labelFolderName->setText("New Folder Name");
+}
+
+void DialogAddNewFolder::closeEvent(QCloseEvent *event)
+{
+    emit accepted();
+    QDialog::closeEvent(event);
 }
 
 QString DialogAddNewFolder::expectingStatusText()

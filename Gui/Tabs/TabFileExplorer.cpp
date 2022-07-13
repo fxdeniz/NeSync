@@ -30,7 +30,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     ui->listView->setModel(listModelFileExplorer);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::rootFolderPath());
-    fillFileExplorerWithRootFolderContents();
+    fillTableFileExplorerWith(FileStorageManager::rootFolderPath());
 
     createNavigationTask();
 }
@@ -88,10 +88,9 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
                      this, &TabFileExplorer::showContextMenuListView);
 }
 
-void TabFileExplorer::fillFileExplorerWithRootFolderContents()
+void TabFileExplorer::fillTableFileExplorerWith(const QString &symbolDirPath)
 {
-    auto rootPath = FileStorageManager::rootFolderPath();
-    auto result = FileStorageManager::instance()->getFolderMetaData(rootPath);
+    auto result = FileStorageManager::instance()->getFolderMetaData(symbolDirPath);
     slotOnDirContentFetched(result);
 }
 
@@ -151,6 +150,11 @@ void TabFileExplorer::displayInTableViewFileExplorer(const FolderRequestResult &
 QString TabFileExplorer::currentDir() const
 {
     return ui->lineEditWorkingDir->text();
+}
+
+void TabFileExplorer::slotRefreshFileExplorer()
+{
+    fillTableFileExplorerWith(ui->lineEditWorkingDir->text());
 }
 
 void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult result)
