@@ -4,14 +4,30 @@
 #include <QPixmap>
 #include <QColor>
 
-TableModelFileExplorer::TableModelFileExplorer(QObject *parent)
+TableModelFileExplorer::TableModelFileExplorer(const FolderRequestResult &result, QObject *parent)
     : QAbstractTableModel(parent)
 {
+    itemList = tableItemListFrom(result);
 }
 
-TableModelFileExplorer::TableModelFileExplorer(const QList<TableItem> &_itemList, QObject *parent)
-    : QAbstractTableModel(parent), itemList(_itemList)
+QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &index) const
 {
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).symbolPath;
+
+    return result;
+}
+
+TableModelFileExplorer::TableItemType TableModelFileExplorer::itemTypeFromModelIndex(const QModelIndex &index) const
+{
+    TableItemType result = TableItemType::Invalid;
+
+    if(index.isValid())
+        result = itemList.at(index.row()).type;
+
+    return result;
 }
 
 int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
@@ -21,7 +37,7 @@ int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 
 int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 2;
+    return parent.isValid() ? 0 : 3;
 }
 
 QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
@@ -41,7 +57,9 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
             case 0:
                 return item.name;
             case 1:
-                return item.itemCount;
+                return item.symbolPath;
+            case 2:
+                return item.type;
             default:
                 break;
         }
@@ -55,10 +73,9 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
     {
-        QFileIconProvider provider;
-        auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+        const auto &item = this->itemList.at(index.row());
 
-        return result;
+        return item.icon;
     }
 
     return QVariant();
@@ -72,9 +89,11 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
     if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
-            return tr("File Name");
+            return tr("Name");
         case 1:
-            return tr("Extension");
+            return tr("Symbol Path");
+        case 2:
+            return tr("Type");
         default:
             break;
         }
@@ -105,7 +124,10 @@ bool TableModelFileExplorer::setData(const QModelIndex &index, const QVariant &v
                 item.name = value.toString();
                 break;
             case 1:
-                item.itemCount = value.toString();
+                item.symbolPath = value.toString();
+                break;
+            case 2:
+                item.type = value.value<TableItemType>();
                 break;
             default:
                 return false;
@@ -152,4 +174,34 @@ bool TableModelFileExplorer::removeRows(int position, int rows, const QModelInde
 
     endRemoveRows();
     return true;
+}
+
+QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFrom(const FolderRequestResult &parentFolder)
+{
+    QList<TableItem> result;
+
+
+    for(const FolderRequestResult &child : parentFolder.childFolderList())
+    {
+
+        TableItem item {child.folderName().chopped(1), // Remove / character at end
+                        child.directory(),
+                        TableItemType::Folder,
+                        child.folderIcon()};
+
+        result.append(item);
+    }
+
+    for(const FileRequestResult &child : parentFolder.childFileList())
+    {
+
+        TableItem item {child.fileName() + child.fileExtension(),
+                        child.symbolFilePath(),
+                        TableItemType::File,
+                        child.fileIcon()};
+
+        result.append(item);
+    }
+
+    return result;
 }

@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QMenu>
 
+#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
-#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 
 namespace Ui {
 class TabFileExplorer;
@@ -17,29 +17,43 @@ class TabFileExplorer : public QWidget
 
 public:
     explicit TabFileExplorer(QWidget *parent = nullptr);
-    ~TabFileExplorer();
+    virtual ~TabFileExplorer();
+
+    QString currentDir() const;
 
 signals:
     void signalToRouter_ShowRelatedFiles();
     void signalToRouter_ShowDialogTableItemEditor();
+    void signalRequestDirContent(const QString &directory);
 
 private slots:
-    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
+    void slotOnDirContentFetched(FolderRequestResult result);
 
+    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
+    void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
+    void on_buttonBack_clicked();
+    void on_buttonForward_clicked();
 
 private:
     void showContextMenuTableView(const QPoint &argPos);
     void showContextMenuListView(const QPoint &argPos);
     void buildContextMenuTableFileExplorer();
     void buildContextMenuListFileExplorer();
+    void fillFileExplorerWithRootFolderContents();
+    void createNavigationTask();
+
+    void createNavigationHistoryIndex(const QString &path);
+    QString navigationTaskThreadName() const;
+    void displayInTableViewFileExplorer(const FolderRequestResult &result);
 
 private:
     Ui::TabFileExplorer *ui;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
-    TableModelFileExplorer *tableModelFileExplorer;
     ListModelFileExplorer *listModelFileExplorer;
+    QThread *navigationTaskThread;
+    QStringList navigationHistoryIndices;
 
 };
 

@@ -435,58 +435,58 @@ QList<SaveGroupItemMetaData> FileStorageManager::getSaveGroupItems(qlonglong sav
     return result;
 }
 
-FolderMetaData FileStorageManager::getFolderMetaData(const QString &directory) const
+FolderRequestResult FileStorageManager::getFolderMetaData(const QString &directory) const
 {
     QString dir = directory;
     if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
         dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
 
-    FolderMetaData result;
+    FolderRequestResult result;
 
     auto rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
 
     if(rowFolder->isExistInDB())
-        result = FolderMetaData(rowFolder);
+        result = FolderRequestResult(rowFolder);
 
     return result;
 }
 
-QList<FolderMetaData> FileStorageManager::getFavoriteFolderMetaDataList() const
+QList<FolderRequestResult> FileStorageManager::getFavoriteFolderMetaDataList() const
 {
-    QList<FolderMetaData> result;
+    QList<FolderRequestResult> result;
 
     auto queryResult = QueryFolderRecord(this->db).selectFavoriteFolderList();
 
     for(auto currentRow : queryResult)
     {
-        FolderMetaData item(currentRow);
+        FolderRequestResult item(currentRow);
         result.append(item);
     }
 
     return result;
 }
 
-FileMetaData FileStorageManager::getFileMetaData(const QString &pathToSymbolFile) const
+FileRequestResult FileStorageManager::getFileMetaData(const QString &pathToSymbolFile) const
 {
-    FileMetaData result;
+    FileRequestResult result;
 
     auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
 
     if(rowRecord->isExistInDB())
-        result = FileMetaData(rowRecord);
+        result = FileRequestResult(rowRecord);
 
     return result;
 }
 
-QList<FileMetaData> FileStorageManager::getFavoriteFileMetaDataList() const
+QList<FileRequestResult> FileStorageManager::getFavoriteFileMetaDataList() const
 {
-    QList<FileMetaData> result;
+    QList<FileRequestResult> result;
 
     auto queryResult = QueryFileRecord(this->db).selectFavoriteFileList();
 
     for(auto currentRow : queryResult)
     {
-        FileMetaData item(currentRow);
+        FileRequestResult item(currentRow);
         result.append(item);
     }
 
@@ -533,7 +533,7 @@ SaveGroupItemMetaData FileStorageManager::getSaveGroupItemMetaData(const QString
     return result;
 }
 
-const QString &FileStorageManager::rootFolder()
+const QString &FileStorageManager::rootFolderPath()
 {
     return CONST_SYMBOL_DIRECTORY_SEPARATOR;
 }

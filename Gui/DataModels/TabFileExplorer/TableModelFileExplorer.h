@@ -1,27 +1,39 @@
 #ifndef TABLEMODELFILEEXPLORER_H
 #define TABLEMODELFILEEXPLORER_H
 
+#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include <QAbstractTableModel>
+#include <QIcon>
 
 class TableModelFileExplorer : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
+    enum TableItemType
+    {
+        Invalid,
+        Folder,
+        File
+    };
+
     struct TableItem
     {
         QString name;
-        QString itemCount;
+        QString symbolPath;
+        TableItemType type;
+        QIcon icon;
 
         bool operator==(const TableItem &other) const
         {
-            return name == other.name && itemCount == other.itemCount;
+            return name == other.name && symbolPath == other.symbolPath;
         }
     };
 
 public:
-    TableModelFileExplorer(QObject *parent = nullptr);
-    TableModelFileExplorer(const QList<TableItem> &_itemList, QObject *parent = nullptr);
+    TableModelFileExplorer(const FolderRequestResult &result, QObject *parent = nullptr);
+    QString symbolPathFromModelIndex(const QModelIndex &index) const;
+    TableItemType itemTypeFromModelIndex(const QModelIndex &index) const;
 
     // QAbstractTableModel interface
 public:
@@ -33,6 +45,9 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+
+private:
+    static QList<TableItem> tableItemListFrom(const FolderRequestResult &parentFolder);
 
 private:
     QList<TableItem> itemList;

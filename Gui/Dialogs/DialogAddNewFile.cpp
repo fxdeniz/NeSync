@@ -11,7 +11,7 @@
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Tasks/TaskAddNewFiles.h"
 
-DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent) :
+DialogAddNewFile::DialogAddNewFile(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddNewFile)
 {
@@ -19,9 +19,6 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
     this->labelStatus = this->ui->labelStatus;
     this->ui->clbAddNewFiles->setVisible(false);
 
-    this->targetSymbolFolder = targetFolder;
-
-    this->ui->labelTargetFolder->setText(this->targetSymbolFolder);
     this->ui->progressBar->setVisible(false);
     this->ui->clbAddFilesToDb->setEnabled(false);
     this->ui->buttonRemoveFile->setEnabled(false);
@@ -52,6 +49,14 @@ DialogAddNewFile::DialogAddNewFile(const QString &targetFolder, QWidget *parent)
 DialogAddNewFile::~DialogAddNewFile()
 {
     delete ui;
+}
+
+void DialogAddNewFile::show(const QString &targetFolder)
+{
+    this->targetSymbolFolder = targetFolder;
+    this->ui->labelTargetFolder->setText(this->targetSymbolFolder);
+
+    QWidget::show();
 }
 
 void DialogAddNewFile::on_buttonSelectNewFile_clicked()
