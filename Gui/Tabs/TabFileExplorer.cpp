@@ -16,24 +16,14 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
 
-    QList<TableModelFileExplorer::TableItem> sampleFileExplorerTableData;
-
-    sampleFileExplorerTableData.insert(0, {"first_file", ".txt"});
-    sampleFileExplorerTableData.insert(1, {"second_file", ".zip"});
-    sampleFileExplorerTableData.insert(2, {"third_file", ".pdf"});
-    sampleFileExplorerTableData.insert(3, {"fourth_file", ".mp4"});
+    ui->buttonBack->setDisabled(true);
+    ui->buttonForward->setDisabled(true);
 
     QStringList sampleListData;
     sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
 
     listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
     ui->listView->setModel(listModelFileExplorer);
-
-    QObject::connect(ui->listView, &QListView::customContextMenuRequested,
-                     this, &TabFileExplorer::showContextMenuListView);
-
-    QObject::connect(ui->tableViewFileExplorer, &QTableView::customContextMenuRequested,
-                     this, &TabFileExplorer::showContextMenuTableView);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::rootFolderPath());
     fillFileExplorerWithRootFolderContents();
@@ -64,6 +54,9 @@ void TabFileExplorer::buildContextMenuTableFileExplorer()
     ptrMenu->addAction(actionCut);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
+
+    QObject::connect(ui->tableViewFileExplorer, &QTableView::customContextMenuRequested,
+                     this, &TabFileExplorer::showContextMenuTableView);
 }
 
 void TabFileExplorer::buildContextMenuListFileExplorer()
@@ -86,6 +79,9 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     ptrMenu->addAction(actionScheduleAndOpenClipboard);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
+
+    QObject::connect(ui->listView, &QListView::customContextMenuRequested,
+                     this, &TabFileExplorer::showContextMenuListView);
 }
 
 void TabFileExplorer::fillFileExplorerWithRootFolderContents()
@@ -116,7 +112,7 @@ void TabFileExplorer::createNavigationTask()
 
 QString TabFileExplorer::navigationTaskThreadName() const
 {
-    return "Navigation Task Controller Thread";
+    return "Navigation Task Thread";
 }
 
 QString TabFileExplorer::currentDir() const
@@ -158,16 +154,29 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
     emit signalToRouter_ShowDialogTableItemEditor();
 }
 
-void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult data)
+void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult result)
 {
-    qDebug() << "TabFileExplorer::slotOnDirContentFetched() in " << QThread::currentThread()->objectName();
-
     if(ui->tableViewFileExplorer->model() != nullptr)
         delete ui->tableViewFileExplorer->model();
 
-    auto tableModel = new TableModelFileExplorer(data, this);
+    auto tableModel = new TableModelFileExplorer(result, this);
     ui->tableViewFileExplorer->setModel(tableModel);
 
+    ui->lineEditWorkingDir->setText(result.directory());
     ui->tableViewFileExplorer->viewport()->update();
     ui->tableViewFileExplorer->resizeColumnsToContents();
 }
+
+void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &index)
+{
+    if(index.isValid()) // If user double clicked an item
+    {
+        auto model = (TableModelFileExplorer *)index.model();
+        auto symbolPath = model->symbolPathFromModelIndex(index);
+        TableModelFileExplorer::TableItemType type = model->itemTypeFromModelIndex(index);
+
+        if(type == TableModelFileExplorer::TableItemType::Folder)
+            emit signalRequestDirContent(symbolPath);
+    }
+}
+

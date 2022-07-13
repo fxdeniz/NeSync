@@ -12,6 +12,7 @@ class TableModelFileExplorer : public QAbstractTableModel
 public:
     enum TableItemType
     {
+        Invalid,
         Folder,
         File
     };
@@ -31,6 +32,8 @@ public:
 
 public:
     TableModelFileExplorer(const FolderRequestResult &result, QObject *parent = nullptr);
+    QString symbolPathFromModelIndex(const QModelIndex &index) const;
+    TableItemType itemTypeFromModelIndex(const QModelIndex &index) const;
 
     // QAbstractTableModel interface
 public:

@@ -29,7 +29,9 @@ signals:
 private slots:
     void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
-    void slotOnDirContentFetched(FolderRequestResult data);
+    void slotOnDirContentFetched(FolderRequestResult result);
+
+    void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
 
 private:
     void showContextMenuTableView(const QPoint &argPos);

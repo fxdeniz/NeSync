@@ -10,6 +10,26 @@ TableModelFileExplorer::TableModelFileExplorer(const FolderRequestResult &result
     itemList = tableItemListFrom(result);
 }
 
+QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &index) const
+{
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).symbolPath;
+
+    return result;
+}
+
+TableModelFileExplorer::TableItemType TableModelFileExplorer::itemTypeFromModelIndex(const QModelIndex &index) const
+{
+    TableItemType result = TableItemType::Invalid;
+
+    if(index.isValid())
+        result = itemList.at(index.row()).type;
+
+    return result;
+}
+
 int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : this->itemList.size();
