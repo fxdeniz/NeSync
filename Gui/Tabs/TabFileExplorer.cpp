@@ -13,11 +13,15 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     ui(new Ui::TabFileExplorer)
 {
     ui->setupUi(this);
+
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
 
     ui->buttonBack->setDisabled(true);
     ui->buttonForward->setDisabled(true);
+
+    this->ui->tableViewFileExplorer->horizontalHeader()->setMinimumSectionSize(110);
+    this->ui->tableViewFileExplorer->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
 
     QStringList sampleListData;
     sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
@@ -110,14 +114,52 @@ void TabFileExplorer::createNavigationTask()
     navigationTaskThread->start();
 }
 
+void TabFileExplorer::createNavigationHistoryIndex(const QString &path)
+{
+    auto tokenList = path.split(FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    tokenList.removeLast();
+
+    for(QString &token : tokenList)
+        token.append(FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+
+    QString aggregator;
+    int index = 0;
+
+    navigationHistoryIndices.clear();
+
+    for(QString &token : tokenList)
+    {
+        aggregator.append(token);
+        navigationHistoryIndices.append(aggregator);
+    }
+}
+
 QString TabFileExplorer::navigationTaskThreadName() const
 {
     return "Navigation Task Thread";
 }
 
+void TabFileExplorer::displayInTableViewFileExplorer(const FolderRequestResult &result)
+{
+    if(ui->tableViewFileExplorer->model() != nullptr)
+        delete ui->tableViewFileExplorer->model();
+
+    auto tableModel = new TableModelFileExplorer(result, this);
+    ui->tableViewFileExplorer->setModel(tableModel);
+}
+
 QString TabFileExplorer::currentDir() const
 {
     return ui->lineEditWorkingDir->text();
+}
+
+void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult result)
+{
+    displayInTableViewFileExplorer(result);
+
+    ui->lineEditWorkingDir->setText(result.directory());
+    ui->tableViewFileExplorer->viewport()->update();
+    ui->tableViewFileExplorer->resizeColumnsToContents();
 }
 
 void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
@@ -154,19 +196,6 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
     emit signalToRouter_ShowDialogTableItemEditor();
 }
 
-void TabFileExplorer::slotOnDirContentFetched(FolderRequestResult result)
-{
-    if(ui->tableViewFileExplorer->model() != nullptr)
-        delete ui->tableViewFileExplorer->model();
-
-    auto tableModel = new TableModelFileExplorer(result, this);
-    ui->tableViewFileExplorer->setModel(tableModel);
-
-    ui->lineEditWorkingDir->setText(result.directory());
-    ui->tableViewFileExplorer->viewport()->update();
-    ui->tableViewFileExplorer->resizeColumnsToContents();
-}
-
 void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &index)
 {
     if(index.isValid()) // If user double clicked an item
@@ -176,7 +205,47 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
         TableModelFileExplorer::TableItemType type = model->itemTypeFromModelIndex(index);
 
         if(type == TableModelFileExplorer::TableItemType::Folder)
+        {
+            createNavigationHistoryIndex(symbolPath);
+            ui->buttonForward->setDisabled(true);
+
+            // Enable back button whenever item is double clicked.
+            ui->buttonBack->setEnabled(true);
+
             emit signalRequestDirContent(symbolPath);
+        }
+    }
+}
+
+
+void TabFileExplorer::on_buttonBack_clicked()
+{
+    if(ui->lineEditWorkingDir->text() != navigationHistoryIndices.first())
+    {
+        auto currentIndex = navigationHistoryIndices.indexOf(ui->lineEditWorkingDir->text());
+        auto newIndex = currentIndex - 1;
+
+        if(newIndex == 0)
+            ui->buttonBack->setDisabled(true);
+
+        ui->buttonForward->setEnabled(true);
+        emit signalRequestDirContent(navigationHistoryIndices.at(newIndex));
+    }
+}
+
+
+void TabFileExplorer::on_buttonForward_clicked()
+{
+    if(ui->lineEditWorkingDir->text() != navigationHistoryIndices.last())
+    {
+        auto currentIndex = navigationHistoryIndices.indexOf(ui->lineEditWorkingDir->text());
+        auto newIndex = currentIndex + 1;
+
+        if(newIndex == navigationHistoryIndices.size() - 1)
+            ui->buttonForward->setDisabled(true);
+
+        ui->buttonBack->setEnabled(true);
+        emit signalRequestDirContent(navigationHistoryIndices.at(newIndex));
     }
 }
 
