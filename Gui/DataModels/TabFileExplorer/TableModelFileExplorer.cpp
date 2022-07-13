@@ -160,19 +160,25 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
 {
     QList<TableItem> result;
 
-    TableItem parentItem {parentFolder.folderName(),
-                          parentFolder.directory(),
-                          TableItemType::Folder,
-                          parentFolder.folderIcon()};
-
-    result.append(parentItem);
 
     for(const FolderRequestResult &child : parentFolder.childFolderList())
     {
-        TableItem item {child.folderName(),
+
+        TableItem item {child.folderName().chopped(1), // Remove / character at end
                         child.directory(),
                         TableItemType::Folder,
                         child.folderIcon()};
+
+        result.append(item);
+    }
+
+    for(const FileRequestResult &child : parentFolder.childFileList())
+    {
+
+        TableItem item {child.fileName() + child.fileExtension(),
+                        child.symbolFilePath(),
+                        TableItemType::File,
+                        child.fileIcon()};
 
         result.append(item);
     }

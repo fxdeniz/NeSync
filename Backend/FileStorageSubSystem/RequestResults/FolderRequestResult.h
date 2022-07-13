@@ -2,6 +2,7 @@
 #define FOLDERREQUESTRESULT_H
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.h"
+#include "FileStorageSubSystem/RequestResults/FileRequestResult.h"
 
 #include <QIcon>
 
@@ -10,8 +11,6 @@ class FolderRequestResult
 public:
     friend class FileStorageManager;
 
-    FolderRequestResult();
-
     bool isExist() const;
 
     const QString &folderName() const;
@@ -19,13 +18,14 @@ public:
     const QString &parentDirectory() const;
     bool isFavorite() const;
     const QList<FolderRequestResult> &childFolderList() const;
-    const QList<QString> &symbolFilePathList() const;
+    const QList<FileRequestResult> &childFileList() const;
 
     const QIcon &folderIcon() const;
 
 private:
+    FolderRequestResult();
     FolderRequestResult(PtrTo_RowFolderRecord row);
-    static FolderRequestResult leafFrom(PtrTo_RowFolderRecord row);
+    static FolderRequestResult leafFolderFrom(PtrTo_RowFolderRecord row);
 
 private:
     bool exist;
@@ -37,7 +37,7 @@ private:
     bool _favorite;
 
     QList<FolderRequestResult> _childFolderList;
-    QList<QString> _symbolFilePathList;
+    QList<FileRequestResult> _childFileList;
 
     QIcon _icon;
 };

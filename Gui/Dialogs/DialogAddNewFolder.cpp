@@ -5,20 +5,16 @@
 
 #include <QFileIconProvider>
 
-DialogAddNewFolder::DialogAddNewFolder(const QString &parentFolderPath, QWidget *parent) :
+DialogAddNewFolder::DialogAddNewFolder(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogAddNewFolder)
 {
     ui->setupUi(this);
-    this->labelStatus = this->ui->labelStatus;
-    this->parentFolderPath = parentFolderPath;
-
-    this->ui->labelParentFolderPath->setText(parentFolderPath);
 
     QFileIconProvider iconProvider;
     auto pixmap = iconProvider.icon(QFileIconProvider::IconType::Folder).pixmap(24, 24);
-    this->ui->labelFolderIcon->setPixmap(pixmap);
-    this->ui->labelFolderIcon->setMask(pixmap.mask());
+    ui->labelFolderIcon->setPixmap(pixmap);
+    ui->labelFolderIcon->setMask(pixmap.mask());
 }
 
 DialogAddNewFolder::~DialogAddNewFolder()
@@ -26,22 +22,37 @@ DialogAddNewFolder::~DialogAddNewFolder()
     delete ui;
 }
 
+void DialogAddNewFolder::show(const QString &_parentFolderPath)
+{
+    this->parentFolderPath = _parentFolderPath;
+    ui->labelParentFolderPath->setText(_parentFolderPath);
+
+    showStatusInfo(expectingStatusText(), ui->labelStatus);
+    if(ui->lineEdit->text().isEmpty())
+        ui->labelFolderName->setText("New Folder Name");
+
+    ui->lineEdit->setFocus();
+    ui->lineEdit->selectedText();
+
+    QWidget::show();
+}
+
 void DialogAddNewFolder::on_pushButton_clicked()
 {
     auto fsm = FileStorageManager::instance();
-    QString lineEditText = this->ui->lineEdit->text();
-    auto newFolderPath = this->parentFolderPath + lineEditText;
+    QString lineEditText = ui->lineEdit->text();
+    auto newFolderPath = parentFolderPath + lineEditText;
     bool isFolderExist = fsm->isFolderExist(newFolderPath);
 
     if(lineEditText.isEmpty() || lineEditText.isNull())
     {
-        this->showStatusWarning(this->emptyFolderStatusText(), this->labelStatus);
+        showStatusWarning(emptyFolderStatusText(), ui->labelStatus);
         return;
     }
 
     if(isFolderExist)
     {
-        this->showStatusWarning(this->existStatusText(lineEditText), this->labelStatus);
+        showStatusWarning(existStatusText(lineEditText), ui->labelStatus);
         return;
     }
 
@@ -49,36 +60,24 @@ void DialogAddNewFolder::on_pushButton_clicked()
 
     if(isFolderAdded)
     {
-        this->showStatusSuccess(this->successStatusText(lineEditText), this->labelStatus);
-        this->ui->lineEdit->clear();
-        this->ui->lineEdit->setFocus();
+        showStatusSuccess(successStatusText(lineEditText), ui->labelStatus);
+        ui->lineEdit->clear();
+        ui->lineEdit->setFocus();
 
-        if(this->ui->checkBox->isChecked())
-            this->close();
+        if(ui->checkBox->isChecked())
+            close();
     }
     else
-        this->showStatusError(this->errorStatusText(lineEditText), this->labelStatus);
+        showStatusError(errorStatusText(lineEditText), ui->labelStatus);
 }
 
 
 void DialogAddNewFolder::on_lineEdit_textChanged(const QString &arg1)
 {
     if(!arg1.isEmpty())
-        this->ui->labelFolderName->setText(arg1);
+        ui->labelFolderName->setText(arg1);
     else
-        this->ui->labelFolderName->setText("New Folder Name");
-}
-
-void DialogAddNewFolder::show()
-{
-    this->showStatusInfo(this->expectingStatusText(), this->labelStatus);
-    if(this->ui->lineEdit->text().isEmpty())
-        this->ui->labelFolderName->setText("New Folder Name");
-
-    this->ui->lineEdit->setFocus();
-    this->ui->lineEdit->selectedText();
-
-    QWidget::show();
+        ui->labelFolderName->setText("New Folder Name");
 }
 
 QString DialogAddNewFolder::expectingStatusText()

@@ -119,6 +119,11 @@ QString TabFileExplorer::navigationTaskThreadName() const
     return "Navigation Task Controller Thread";
 }
 
+QString TabFileExplorer::currentDir() const
+{
+    return ui->lineEditWorkingDir->text();
+}
+
 void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
 {
     QAbstractItemView *subjectView = ui->tableViewFileExplorer;

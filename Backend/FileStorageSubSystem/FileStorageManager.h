@@ -4,7 +4,7 @@
 #include "RequestResults/SaveGroupItemMetaData.h"
 #include "RequestResults/FileVersionMetaData.h"
 #include "RequestResults/FolderRequestResult.h"
-#include "RequestResults/FileMetaData.h"
+#include "RequestResults/FileRequestResult.h"
 #include "SqlPrimitives/RowFolderRecord.h"
 #include "SqlPrimitives/RowFileRecord.h"
 #include "SqlPrimitives/RowFileEvent.h"
@@ -61,8 +61,8 @@ public:
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;
     FolderRequestResult getFolderMetaData(const QString &directory) const;
     QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
-    FileMetaData getFileMetaData(const QString &pathToSymbolFile) const;
-    QList<FileMetaData> getFavoriteFileMetaDataList() const;
+    FileRequestResult getFileMetaData(const QString &pathToSymbolFile) const;
+    QList<FileRequestResult> getFavoriteFileMetaDataList() const;
     FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 

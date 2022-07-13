@@ -14,16 +14,15 @@ class DialogAddNewFolder : public QDialog, public BaseDialog
     Q_OBJECT
 
 public:
-     DialogAddNewFolder(const QString &parentFolderPath, QWidget *parent = nullptr);
+     DialogAddNewFolder(QWidget *parent = nullptr);
     ~DialogAddNewFolder();
+
+ public slots:
+     void show(const QString &_parentFolderPath);
 
 private slots:
     void on_pushButton_clicked();
-
     void on_lineEdit_textChanged(const QString &arg1);
-
-public Q_SLOTS:
-    void show();
 
 private:
     QString expectingStatusText();
@@ -35,7 +34,6 @@ private:
 private:
     Ui::DialogAddNewFolder *ui;
     QString parentFolderPath;
-    QLabel *labelStatus;
 };
 
 #endif // DIALOGADDNEWFOLDER_H

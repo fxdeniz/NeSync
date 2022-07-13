@@ -31,7 +31,6 @@ public:
 
 public:
     TableModelFileExplorer(const FolderRequestResult &result, QObject *parent = nullptr);
-    static QList<TableItem> tableItemListFrom(const FolderRequestResult &parentFolder);
 
     // QAbstractTableModel interface
 public:
@@ -45,6 +44,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
 private:
+    static QList<TableItem> tableItemListFrom(const FolderRequestResult &parentFolder);
 
 private:
     QList<TableItem> itemList;

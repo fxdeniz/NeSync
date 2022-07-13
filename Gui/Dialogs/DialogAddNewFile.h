@@ -16,23 +16,23 @@ class DialogAddNewFile : public QDialog, public BaseDialog
     Q_OBJECT
 
 public:
-     DialogAddNewFile(const QString &targetFolder, QWidget *parent = nullptr);
+     DialogAddNewFile(QWidget *parent = nullptr);
     ~DialogAddNewFile();
+
+ public slots:
+    void show(const QString &targetFolder);
+
+ signals:
+     void signalDisableDelegatesOfAutoSyncColumn(bool flag);
 
 private slots:
     void on_buttonSelectNewFile_clicked();
-
     void on_buttonRemoveFile_clicked();
-
     void on_clbAddFilesToDb_clicked();
-
     void on_clbAddNewFiles_clicked();
 
     void onTaskAddNewFilesFinished(bool isAllRequestSuccessful);
     void refreshTableView();
-
-signals:
-    void signalDisableDelegatesOfAutoSyncColumn(bool flag);
 
 private:
     QLabel *labelStatus;

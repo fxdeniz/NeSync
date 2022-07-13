@@ -27,8 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(symbolDir);
 
     this->dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    this->dialogAddNewFolder = new DialogAddNewFolder("/test/sub_folder/", this);
-    this->dialogAddNewFile = new DialogAddNewFile("/test/target_folder/", this);
+    this->dialogAddNewFolder = new DialogAddNewFolder(this);
+    this->dialogAddNewFile = new DialogAddNewFile(this);
 
     this->allocateSeparators();
     this->buildTabWidget();
@@ -138,13 +138,13 @@ void MainWindow::on_tab1Action_AddFile_triggered()
     flags |= Qt::WindowMaximizeButtonHint;
     this->dialogAddNewFile->setWindowFlags(flags);
     this->dialogAddNewFile->setModal(true);
-    this->dialogAddNewFile->show();
+    this->dialogAddNewFile->show(tabFileExplorer->currentDir());
 }
 
 
 void MainWindow::on_tab1Action_NewFolder_triggered()
 {
     this->dialogAddNewFolder->setModal(true);
-    this->dialogAddNewFolder->show();
+    this->dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
 

@@ -12,24 +12,6 @@ FolderRequestResult::FolderRequestResult()
     _favorite = INVALID_FIELD_VALUE_BOOL;
 }
 
-//FolderRequestResult::FolderRequestResult(PtrTo_RowFolderRecord row)
-//{
-//    exist = true;
-//    _folderName = row->getSuffixDirectory();
-//    _directory = row->getDirectory();
-//    _parentDirectory = row->getParentDirectory();
-//    _favorite = row->getIsFavorite();
-
-//    for(auto const childFolder : row->getAllChildRowFolderRecords())
-//        _childFolderList.append(childFolder->getDirectory());
-
-//    for(auto const childFile : row->getAllChildRowFileRecords())
-//        _symbolFilePathList.append(childFile->getSymbolFilePath());
-
-//    QFileIconProvider provider;
-//    _icon = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
-//}
-
 FolderRequestResult::FolderRequestResult(PtrTo_RowFolderRecord row)
 {
     exist = true;
@@ -39,16 +21,16 @@ FolderRequestResult::FolderRequestResult(PtrTo_RowFolderRecord row)
     _favorite = row->getIsFavorite();
 
     for(const PtrTo_RowFolderRecord &childFolder : row->getAllChildRowFolderRecords())
-        _childFolderList.append(FolderRequestResult::leafFrom(childFolder));
+        _childFolderList.append(FolderRequestResult::leafFolderFrom(childFolder));
 
-    for(auto const childFile : row->getAllChildRowFileRecords())
-        _symbolFilePathList.append(childFile->getSymbolFilePath());
+    for(const PtrTo_RowFileRecord &childFile : row->getAllChildRowFileRecords())
+        _childFileList.append(childFile);
 
     QFileIconProvider provider;
-    _icon = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+    _icon = provider.icon(QFileIconProvider::IconType::Folder);
 }
 
-FolderRequestResult FolderRequestResult::leafFrom(PtrTo_RowFolderRecord row)
+FolderRequestResult FolderRequestResult::leafFolderFrom(PtrTo_RowFolderRecord row)
 {
     FolderRequestResult result;
     result.exist = true;
@@ -93,9 +75,9 @@ bool FolderRequestResult::isFavorite() const
     return _favorite;
 }
 
-const QList<QString> &FolderRequestResult::symbolFilePathList() const
+const QList<FileRequestResult> &FolderRequestResult::childFileList() const
 {
-    return _symbolFilePathList;
+    return _childFileList;
 }
 
 const QList<FolderRequestResult> &FolderRequestResult::childFolderList() const

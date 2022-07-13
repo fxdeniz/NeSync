@@ -466,27 +466,27 @@ QList<FolderRequestResult> FileStorageManager::getFavoriteFolderMetaDataList() c
     return result;
 }
 
-FileMetaData FileStorageManager::getFileMetaData(const QString &pathToSymbolFile) const
+FileRequestResult FileStorageManager::getFileMetaData(const QString &pathToSymbolFile) const
 {
-    FileMetaData result;
+    FileRequestResult result;
 
     auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
 
     if(rowRecord->isExistInDB())
-        result = FileMetaData(rowRecord);
+        result = FileRequestResult(rowRecord);
 
     return result;
 }
 
-QList<FileMetaData> FileStorageManager::getFavoriteFileMetaDataList() const
+QList<FileRequestResult> FileStorageManager::getFavoriteFileMetaDataList() const
 {
-    QList<FileMetaData> result;
+    QList<FileRequestResult> result;
 
     auto queryResult = QueryFileRecord(this->db).selectFavoriteFileList();
 
     for(auto currentRow : queryResult)
     {
-        FileMetaData item(currentRow);
+        FileRequestResult item(currentRow);
         result.append(item);
     }
 

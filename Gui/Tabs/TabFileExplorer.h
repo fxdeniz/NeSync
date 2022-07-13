@@ -19,6 +19,8 @@ public:
     explicit TabFileExplorer(QWidget *parent = nullptr);
     virtual ~TabFileExplorer();
 
+    QString currentDir() const;
+
 signals:
     void signalToRouter_ShowRelatedFiles();
     void signalToRouter_ShowDialogTableItemEditor();

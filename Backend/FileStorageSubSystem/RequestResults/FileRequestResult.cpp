@@ -1,8 +1,8 @@
-#include "FileMetaData.h"
+#include "FileRequestResult.h"
 
 #include <QFileIconProvider>
 
-FileMetaData::FileMetaData()
+FileRequestResult::FileRequestResult()
 {
     this->exist = false;
     this->_fileName = INVALID_FIELD_VALUE_QSTRING;
@@ -16,7 +16,7 @@ FileMetaData::FileMetaData()
     this->_autoSyncEnabled = INVALID_FIELD_VALUE_BOOL;
 }
 
-FileMetaData::FileMetaData(PtrTo_RowFileRecord row)
+FileRequestResult::FileRequestResult(PtrTo_RowFileRecord row)
 {
     this->exist = true;
     this->_fileExtension = row->getFileExtension();
@@ -29,69 +29,69 @@ FileMetaData::FileMetaData(PtrTo_RowFileRecord row)
     this->_frozen = row->getIsFrozen();
     this->_autoSyncEnabled = row->getIsAutoSyncEnabled();
 
-    QFileInfo info(row->getSymbolDirectory());
+    QFileInfo info(row->getFileName() + row->getFileExtension());
     QFileIconProvider provider;
     this->_icon = provider.icon(info);
 
     this->_versionNumbers = row->getVersionNumbers();
 }
 
-bool FileMetaData::isExist() const
+bool FileRequestResult::isExist() const
 {
     return exist;
 }
 
-const QString &FileMetaData::fileName() const
+const QString &FileRequestResult::fileName() const
 {
     return this->_fileName;
 }
 
-const QString &FileMetaData::fileExtension() const
+const QString &FileRequestResult::fileExtension() const
 {
     return _fileExtension;
 }
 
-const QString &FileMetaData::symbolDirectory() const
+const QString &FileRequestResult::symbolDirectory() const
 {
     return _symbolDirectory;
 }
 
-const QString &FileMetaData::symbolFilePath() const
+const QString &FileRequestResult::symbolFilePath() const
 {
     return this->_symbolFilePath;
 }
 
-const QString &FileMetaData::userDirectory() const
+const QString &FileRequestResult::userDirectory() const
 {
     return _userDirectory;
 }
 
-const QString &FileMetaData::userFilePath() const
+const QString &FileRequestResult::userFilePath() const
 {
     return this->_userFilePath;
 }
 
-bool FileMetaData::isFavorite() const
+bool FileRequestResult::isFavorite() const
 {
     return _favorite;
 }
 
-bool FileMetaData::isFrozen() const
+bool FileRequestResult::isFrozen() const
 {
     return this->_frozen;
 }
 
-bool FileMetaData::isAutoSyncEnabled() const
+bool FileRequestResult::isAutoSyncEnabled() const
 {
     return _autoSyncEnabled;
 }
 
-const QIcon &FileMetaData::fileIcon() const
+const QIcon &FileRequestResult::fileIcon() const
 {
     return this->_icon;
 }
 
-QList<qlonglong> FileMetaData::versionNumbers()
+QList<qlonglong> FileRequestResult::versionNumbers()
 {
     return this->_versionNumbers;
 }

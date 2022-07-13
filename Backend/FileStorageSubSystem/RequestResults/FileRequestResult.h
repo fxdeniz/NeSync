@@ -1,15 +1,16 @@
-#ifndef FILEMETADATA_H
-#define FILEMETADATA_H
+#ifndef FILEREQUESTRESULT_H
+#define FILEREQUESTRESULT_H
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h"
 #include "FileVersionMetaData.h"
 
 #include <QIcon>
 
-class FileMetaData
+class FileRequestResult
 {
 public:
     friend class FileStorageManager;
+    friend class FolderRequestResult;
 
     bool isExist() const;
 
@@ -26,8 +27,8 @@ public:
     QList<qlonglong> versionNumbers();
 
 private:
-    FileMetaData();
-    FileMetaData(PtrTo_RowFileRecord row);
+    FileRequestResult();
+    FileRequestResult(PtrTo_RowFileRecord row);
 
     bool exist;
 
@@ -45,4 +46,4 @@ private:
     QList<qlonglong> _versionNumbers;
 };
 
-#endif // FILEMETADATA_H
+#endif // FILEREQUESTRESULT_H
