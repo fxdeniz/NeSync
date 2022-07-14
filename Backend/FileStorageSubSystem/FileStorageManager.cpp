@@ -23,10 +23,10 @@ const QString FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR = "/";
 FileStorageManager::FileStorageManager(const QString &backupDirectory)
 {
     this->backupDirectory = backupDirectory;
-
+    QString connectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
     this->extractSqliteDBIfNotExist();
 
-    this->db = QSqlDatabase::addDatabase("QSQLITE");
+    this->db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
     QString dbFilePath = getBackupDirectory() + DB_FILE_NAME;
     this->db.setDatabaseName(dbFilePath);
     this->db.open();

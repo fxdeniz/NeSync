@@ -1,7 +1,6 @@
 #ifndef TASKNAVIAGATEFILESYSTEM_H
 #define TASKNAVIAGATEFILESYSTEM_H
 
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QObject>
 
@@ -16,9 +15,6 @@ public slots:
 
 signals:
     void signalDirContentFetched(FolderRequestResult data);
-
-private:
-    QSharedPointer<FileStorageManager> fsm;
 };
 
 #endif // TASKNAVIAGATEFILESYSTEM_H
