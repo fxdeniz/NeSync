@@ -132,18 +132,24 @@ void MainWindow::createFileMonitorThread()
 {
     auto queryResult = FileStorageManager::instance()->getMonitoredFilePathList();
     //new FileMonitoringManagerIntegrationTest(list);
-    FileMonitoringManager *monitor = new FileMonitoringManager();
-    monitor->setPredictionList(queryResult);
-
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
+
+    QTimer *timer = new QTimer();
+    FileMonitoringManager *monitor = new FileMonitoringManager(timer);
+    monitor->setPredictionList(queryResult);
+
+    timer->moveToThread(fileMonitorThread);
+    monitor->moveToThread(fileMonitorThread);
 
     QObject::connect(fileMonitorThread, &QThread::started,
                      monitor, &FileMonitoringManager::start);
 
     QObject::connect(fileMonitorThread, &QThread::finished,
-                     monitor, &QObject::deleteLater);
+                     timer, &QObject::deleteLater);
 
+    QObject::connect(fileMonitorThread, &QThread::finished,
+                     monitor, &QObject::deleteLater);
 
     QObject::connect(monitor, &FileMonitoringManager::signalPredictedFileNotFound,
                      this, &MainWindow::slotOnPredictedFileNotFound);
@@ -187,9 +193,6 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(monitor, &FileMonitoringManager::signalFileMovedAndModified,
                      this, &MainWindow::slotOnFileMovedAndModified);
 
-
-
-    monitor->moveToThread(fileMonitorThread);
     fileMonitorThread->start();
 }
 
@@ -235,70 +238,84 @@ void MainWindow::on_tab1Action_NewFolder_triggered()
 
 void MainWindow::slotOnPredictedFileNotFound(const QString &pathToFile)
 {
-    qDebug() << "slotOnPredictedFileNotFound = " << pathToFile;
+    qDebug() << "slotOnPredictedFileNotFound = " << pathToFile << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnPredictedFolderNotFound(const QString &pathToFolder)
 {
-    qDebug() << "slotPredictedFolderNotFound = " << pathToFolder;
+    qDebug() << "slotPredictedFolderNotFound = " << pathToFolder << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnPredictionTargetNotRecognized(const QString &pathToTaget)
 {
-    qDebug() << "slotOnPredictionTargetNotRecognized = " << pathToTaget;
+    qDebug() << "slotOnPredictionTargetNotRecognized = " << pathToTaget << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnUnPredictedFolderDetected(const QString &pathToFolder)
 {
-    qDebug() << "slotOnUnPredictedFolderDetected = " << pathToFolder;
+    qDebug() << "slotOnUnPredictedFolderDetected = " << pathToFolder << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnUnPredictedFileDetected(const QString &pathToFile)
 {
-    qDebug() << "slotOnUnPredictedFileDetected = " << pathToFile;
+    qDebug() << "slotOnUnPredictedFileDetected = " << pathToFile << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFileSystemEventAnalysisStarted()
 {
-    qDebug() << "slotOnFileSystemEventAnalysisStarted(void)";
+    qDebug() << "slotOnFileSystemEventAnalysisStarted(void)" << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnNewFolderAdded(const QString &pathToFolder)
 {
-    qDebug() << "slotOnNewFolderAdded = " << pathToFolder;
+    qDebug() << "slotOnNewFolderAdded = " << pathToFolder << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFolderDeleted(const QString &pathToFolder)
 {
-    qDebug() << "slotOnFolderDeleted = " << pathToFolder;
+    qDebug() << "slotOnFolderDeleted = " << pathToFolder << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
 {
-    qDebug() << "slotOnFolderMoved()    pathToFolder = " << pathToFolder << "    oldFolderName = " << oldFolderName;
+    qDebug() << "slotOnFolderMoved()    pathToFolder = " << pathToFolder << "    oldFolderName = " << oldFolderName << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnNewFileAdded(const QString &pathToFile)
 {
-    qDebug() << "slotOnNewFileAdded = " << pathToFile;
+    qDebug() << "slotOnNewFileAdded = " << pathToFile << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFileDeleted(const QString &pathToFile)
 {
-    qDebug() << "slotOnFileDeleted = " << pathToFile;
+    qDebug() << "slotOnFileDeleted = " << pathToFile << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFileModified(const QString &pathToFile)
 {
-    qDebug() << "slotOnFileModified = " << pathToFile;
+    qDebug() << "slotOnFileModified = " << pathToFile << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
 {
-    qDebug() << "slotOnFileMoved()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
+    qDebug() << "slotOnFileMoved()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName << " in " << QThread::currentThread();
+    qDebug() << "";
 }
 
 void MainWindow::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
 {
-    qDebug() << "slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
+    qDebug() << "slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName << " in " << QThread::currentThread();
+    qDebug() << "";
 }

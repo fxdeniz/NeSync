@@ -15,6 +15,7 @@ class FileMonitoringManager : public QObject
     Q_OBJECT
 public:
     explicit FileMonitoringManager(int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
+    explicit FileMonitoringManager(QTimer *_timer, int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
 
     void startMonitoringOn(const QStringList &predictedTargetList);
     int getSnapshotDelay() const;
@@ -72,7 +73,7 @@ private:
     efsw::FileWatcher fileWatcher;
     FileSystemEventListener fileSystemEventListener;
     MonitoredDirDb mddb;
-    QTimer timer;
+    QTimer *timer;
     int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY * 1000;
     QStringList predictionList;
 };

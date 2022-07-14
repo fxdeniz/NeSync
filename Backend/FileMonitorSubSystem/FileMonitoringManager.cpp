@@ -22,9 +22,33 @@ FileMonitoringManager::FileMonitoringManager(int snapshotDelay, QObject *parent)
     QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalMoveEventDetected,
                      this, &FileMonitoringManager::slotOnMoveEventDetected);
 
-    QObject::connect(&this->timer, &QTimer::timeout,
+    QObject::connect(timer, &QTimer::timeout,
                      this, &FileMonitoringManager::slotReleaseScheduledEvents);
 
+    timer = new QTimer(this);
+    this->setSnapshotDelay(snapshotDelay);
+    this->fileWatcher.watch();
+}
+
+FileMonitoringManager::FileMonitoringManager(QTimer *_timer, int snapshotDelay, QObject *parent)
+    : QObject{parent}
+{
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalAddEventDetected,
+                     this, &FileMonitoringManager::slotOnAddEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalDeleteEventDetected,
+                     this, &FileMonitoringManager::slotOnDeleteEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalModificationEventDetected,
+                     this, &FileMonitoringManager::slotOnModificationEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalMoveEventDetected,
+                     this, &FileMonitoringManager::slotOnMoveEventDetected);
+
+    QObject::connect(_timer, &QTimer::timeout,
+                     this, &FileMonitoringManager::slotReleaseScheduledEvents);
+
+    this->timer = _timer;
     this->setSnapshotDelay(snapshotDelay);
     this->fileWatcher.watch();
 }
@@ -388,7 +412,9 @@ bool FileMonitoringManager::isFileReadyToRelease(const QString currentFilePath, 
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+    qDebug() << "FileMonitoringManager::slotOnAddEventDetected() in = " << QThread::currentThread();
+    qDebug() << "";
+    this->timer->stop();
     QString _dir = this->mddb.standardizeDir(dir);
 
     QFileInfo info(_dir + fileName);
@@ -410,12 +436,14 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         this->mddb.scheduleDirAs(dirPath, MonitoredDirDb::MonitoredItemState::NewAdded);
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+    qDebug() << "FileMonitoringManager::slotOnDeleteEventDetected() in = " << QThread::currentThread();
+    qDebug() << "";
+    this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
     auto _dir = this->mddb.standardizeDir(dir);
@@ -434,12 +462,14 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
         this->mddb.scheduleDirAs(dirPath, MonitoredDirDb::MonitoredItemState::Deleted);
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+    qDebug() << "FileMonitoringManager::slotOnModificationEventDetected() in = " << QThread::currentThread();
+    qDebug() << "";
+    this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
 
@@ -463,12 +493,14 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
         this->mddb.updateEventTimestampOfFileInDir(fileName, dir, QDateTime::currentDateTime());
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
 {
-    this->timer.stop();
+    qDebug() << "FileMonitoringManager::slotOnMoveEventDetected() in = " << QThread::currentThread();
+    qDebug() << "";
+    this->timer->stop();
 
     auto _dir = this->mddb.standardizeDir(dir);
     QFileInfo info(_dir + fileName);
@@ -527,12 +559,14 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         }
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotReleaseScheduledEvents()
 {
-    this->timer.stop();
+    qDebug() << "FileMonitoringManager::slotReleaseScheduledEvents() in = " << QThread::currentThread();
+    qDebug() << "";
+    this->timer->stop();
     emit signalFileSystemEventAnalysisStarted();
 
     this->releaseNewAddedFolders();
