@@ -7,7 +7,7 @@
 #include "Backend/FileMonitorSubSystem/FileSystemEventListener.h"
 #include "Backend/FileMonitorSubSystem/MonitoredDirDb.h"
 
-#define CONST_MIN_SNAPSHOT_DELAY 10
+#define CONST_MIN_SNAPSHOT_DELAY 3
 #define CONST_DEFAULT_SLEEP_DURATION_FOR_RELEASABLE_FILE_CHECK 1
 
 class FileMonitoringManager : public QObject
@@ -19,6 +19,12 @@ public:
     void startMonitoringOn(const QStringList &predictedTargetList);
     int getSnapshotDelay() const;
     void setSnapshotDelay(int newSnapshotDelay);
+
+    const QStringList &getPredictionList() const;
+    void setPredictionList(const QStringList &newPredictionList);
+
+public slots:
+    void start();
 
 signals:
     void signalPredictedFileNotFound(const QString &pathToFile);
@@ -68,6 +74,7 @@ private:
     MonitoredDirDb mddb;
     QTimer timer;
     int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY * 1000;
+    QStringList predictionList;
 };
 
 #endif // FILEMONITORINGMANAGER_H

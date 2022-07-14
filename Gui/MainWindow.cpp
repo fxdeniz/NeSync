@@ -7,6 +7,7 @@
 #include <QtConcurrent>
 #include <QDir>
 
+#include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,10 +48,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
+
+    createFileMonitorThread();
 }
 
 MainWindow::~MainWindow()
 {
+    fileMonitorThread->quit();
+    fileMonitorThread->wait();
     delete ui;
 }
 
@@ -123,6 +128,76 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
+void MainWindow::createFileMonitorThread()
+{
+    auto queryResult = FileStorageManager::instance()->getMonitoredFilePathList();
+    //new FileMonitoringManagerIntegrationTest(list);
+    FileMonitoringManager *monitor = new FileMonitoringManager();
+    monitor->setPredictionList(queryResult);
+
+    fileMonitorThread = new QThread(this);
+    fileMonitorThread->setObjectName(fileMonitorThreadName());
+
+    QObject::connect(fileMonitorThread, &QThread::started,
+                     monitor, &FileMonitoringManager::start);
+
+    QObject::connect(fileMonitorThread, &QThread::finished,
+                     monitor, &QObject::deleteLater);
+
+
+    QObject::connect(monitor, &FileMonitoringManager::signalPredictedFileNotFound,
+                     this, &MainWindow::slotOnPredictedFileNotFound);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalPredictedFolderNotFound,
+                     this, &MainWindow::slotOnPredictedFolderNotFound);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotRecognized,
+                     this, &MainWindow::slotOnPredictionTargetNotRecognized);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFolderDetected,
+                     this, &MainWindow::slotOnUnPredictedFolderDetected);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFileDetected,
+                     this, &MainWindow::slotOnUnPredictedFileDetected);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFileSystemEventAnalysisStarted,
+                     this, &MainWindow::slotOnFileSystemEventAnalysisStarted);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalNewFolderAdded,
+                     this, &MainWindow::slotOnNewFolderAdded);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFolderDeleted,
+                     this, &MainWindow::slotOnFolderDeleted);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFolderMoved,
+                     this, &MainWindow::slotOnFolderMoved);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalNewFileAdded,
+                     this, &MainWindow::slotOnNewFileAdded);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFileDeleted,
+                     this, &MainWindow::slotOnFileDeleted);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFileModified,
+                     this, &MainWindow::slotOnFileModified);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFileMoved,
+                     this, &MainWindow::slotOnFileMoved);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFileMovedAndModified,
+                     this, &MainWindow::slotOnFileMovedAndModified);
+
+
+
+    monitor->moveToThread(fileMonitorThread);
+    fileMonitorThread->start();
+}
+
+QString MainWindow::fileMonitorThreadName() const
+{
+    return "File Monitor Thread";
+}
+
 
 void MainWindow::on_router_ShowRelatedFiles()
 {
@@ -154,4 +229,76 @@ void MainWindow::on_tab1Action_NewFolder_triggered()
 {
     dialogAddNewFolder->setModal(true);
     dialogAddNewFolder->show(tabFileExplorer->currentDir());
+}
+
+
+
+void MainWindow::slotOnPredictedFileNotFound(const QString &pathToFile)
+{
+    qDebug() << "slotOnPredictedFileNotFound = " << pathToFile;
+}
+
+void MainWindow::slotOnPredictedFolderNotFound(const QString &pathToFolder)
+{
+    qDebug() << "slotPredictedFolderNotFound = " << pathToFolder;
+}
+
+void MainWindow::slotOnPredictionTargetNotRecognized(const QString &pathToTaget)
+{
+    qDebug() << "slotOnPredictionTargetNotRecognized = " << pathToTaget;
+}
+
+void MainWindow::slotOnUnPredictedFolderDetected(const QString &pathToFolder)
+{
+    qDebug() << "slotOnUnPredictedFolderDetected = " << pathToFolder;
+}
+
+void MainWindow::slotOnUnPredictedFileDetected(const QString &pathToFile)
+{
+    qDebug() << "slotOnUnPredictedFileDetected = " << pathToFile;
+}
+
+void MainWindow::slotOnFileSystemEventAnalysisStarted()
+{
+    qDebug() << "slotOnFileSystemEventAnalysisStarted(void)";
+}
+
+void MainWindow::slotOnNewFolderAdded(const QString &pathToFolder)
+{
+    qDebug() << "slotOnNewFolderAdded = " << pathToFolder;
+}
+
+void MainWindow::slotOnFolderDeleted(const QString &pathToFolder)
+{
+    qDebug() << "slotOnFolderDeleted = " << pathToFolder;
+}
+
+void MainWindow::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
+{
+    qDebug() << "slotOnFolderMoved()    pathToFolder = " << pathToFolder << "    oldFolderName = " << oldFolderName;
+}
+
+void MainWindow::slotOnNewFileAdded(const QString &pathToFile)
+{
+    qDebug() << "slotOnNewFileAdded = " << pathToFile;
+}
+
+void MainWindow::slotOnFileDeleted(const QString &pathToFile)
+{
+    qDebug() << "slotOnFileDeleted = " << pathToFile;
+}
+
+void MainWindow::slotOnFileModified(const QString &pathToFile)
+{
+    qDebug() << "slotOnFileModified = " << pathToFile;
+}
+
+void MainWindow::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
+{
+    qDebug() << "slotOnFileMoved()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
+}
+
+void MainWindow::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
+{
+    qDebug() << "slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
 }

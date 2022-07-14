@@ -51,6 +51,21 @@ void FileMonitoringManager::setSnapshotDelay(int newSnapshotDelay)
         this->snapshotDelay = newSnapshotDelay * 1000;
 }
 
+const QStringList &FileMonitoringManager::getPredictionList() const
+{
+    return predictionList;
+}
+
+void FileMonitoringManager::setPredictionList(const QStringList &newPredictionList)
+{
+    predictionList = newPredictionList;
+}
+
+void FileMonitoringManager::start()
+{
+    startMonitoringOn(getPredictionList());
+}
+
 void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predictedItemList)
 {
     QSet<QString> predictedFiles, predictedFolders;

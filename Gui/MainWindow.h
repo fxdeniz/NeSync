@@ -40,12 +40,31 @@ private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
+    void createFileMonitorThread();
+    QString fileMonitorThreadName() const;
 
 private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
     DialogAddNewFile *dialogAddNewFile;
+    QThread *fileMonitorThread;
+
+private slots:
+    void slotOnPredictedFileNotFound(const QString &pathToFile);
+    void slotOnPredictedFolderNotFound(const QString &pathToFolder);
+    void slotOnPredictionTargetNotRecognized(const QString &pathToTaget);
+    void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
+    void slotOnUnPredictedFileDetected(const QString &pathToFile);
+    void slotOnFileSystemEventAnalysisStarted();
+    void slotOnNewFolderAdded(const QString &pathToFolder);
+    void slotOnFolderDeleted(const QString &pathToFolder);
+    void slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName);
+    void slotOnNewFileAdded(const QString &pathToFile);
+    void slotOnFileDeleted(const QString &pathToFile);
+    void slotOnFileModified(const QString &pathToFile);
+    void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
+    void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
 };
 
