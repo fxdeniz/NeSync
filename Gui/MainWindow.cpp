@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QThread::currentThread()->setObjectName(guiThreadName());
 
     auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
     appDataDir = QDir::toNativeSeparators(appDataDir);
@@ -38,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
+    QObject::connect(dialogAddNewFile, &QDialog::accepted,
+                     tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
+
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
                      this, &MainWindow::on_router_ShowRelatedFiles);
 
@@ -48,6 +52,11 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+QString MainWindow::guiThreadName() const
+{
+    return "GUI Thread";
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
