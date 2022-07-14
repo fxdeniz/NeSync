@@ -137,7 +137,7 @@ PtrTo_RowFileVersion RowInserter::insertFileVersion(qlonglong parentRecordID,
                                                     const QString &description,
                                                     const QDateTime &timestamp)
 {
-    QSqlQuery query(this->getTableName());
+    QSqlQuery query(this->getDb());
     QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6, %7, %8) "
                             "VALUES(:2, :3, :4, :5, :6, :7, :8);" ;
 
