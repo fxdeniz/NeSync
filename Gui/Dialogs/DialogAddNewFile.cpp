@@ -59,6 +59,12 @@ void DialogAddNewFile::show(const QString &targetFolder)
     QWidget::show();
 }
 
+void DialogAddNewFile::closeEvent(QCloseEvent *event)
+{
+    emit accepted();
+    QDialog::closeEvent(event);
+}
+
 void DialogAddNewFile::on_buttonSelectNewFile_clicked()
 {
     QFileDialog dialog(this);

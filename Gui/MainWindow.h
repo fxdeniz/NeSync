@@ -22,6 +22,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QString guiThreadName() const;
 
 private slots:
     void on_tabWidget_currentChanged(int index);

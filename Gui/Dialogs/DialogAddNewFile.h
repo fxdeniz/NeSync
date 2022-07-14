@@ -19,11 +19,15 @@ public:
      DialogAddNewFile(QWidget *parent = nullptr);
     ~DialogAddNewFile();
 
- public slots:
+public slots:
     void show(const QString &targetFolder);
 
- signals:
+signals:
      void signalDisableDelegatesOfAutoSyncColumn(bool flag);
+
+     // QDialog interface
+protected:
+     void closeEvent(QCloseEvent *event);
 
 private slots:
     void on_buttonSelectNewFile_clicked();
