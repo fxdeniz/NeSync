@@ -19,6 +19,9 @@ public:
     explicit TabFileMonitor(QWidget *parent = nullptr);
     ~TabFileMonitor();
 
+public slots:
+    void slotOnPredictedFileNotFound(const QString &pathToFile);
+
 private:
     Ui::TabFileMonitor *ui;
     TableModelFileMonitor *tableModelFileMonitor;

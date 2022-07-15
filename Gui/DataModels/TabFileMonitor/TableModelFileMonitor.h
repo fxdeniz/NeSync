@@ -9,14 +9,24 @@ class TableModelFileMonitor : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    struct MonitorTableItem
+    enum TableItemStatus
+    {
+        Invalid,
+        Missing,
+        NewAdded,
+        Updated,
+        Moved,
+        Deleted
+    };
+
+    struct TableItem
     {
         QString fileName;
         QString folderPath;
-        QString eventType;
+        TableItemStatus eventType;
         QDateTime timestamp;
 
-        bool operator==(const MonitorTableItem &other) const
+        bool operator==(const TableItem &other) const
         {
             return fileName == other.fileName && folderPath == other.folderPath;
         }
@@ -24,7 +34,7 @@ public:
 
 public:
     TableModelFileMonitor(QObject *parent = nullptr);
-    TableModelFileMonitor(const QList<MonitorTableItem> &_itemList, QObject *parent = nullptr);
+    TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
     // QAbstractTableModel interface
 public:
@@ -38,7 +48,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
 private:
-    QList<MonitorTableItem> itemList;
+    QList<TableItem> itemList;
     QSet<QPersistentModelIndex> checkedItems;
 
 };

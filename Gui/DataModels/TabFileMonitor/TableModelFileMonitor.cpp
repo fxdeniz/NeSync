@@ -9,7 +9,7 @@ TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
 {
 }
 
-TableModelFileMonitor::TableModelFileMonitor(const QList<MonitorTableItem> &_itemList, QObject *parent)
+TableModelFileMonitor::TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent)
     : QAbstractTableModel(parent), itemList(_itemList)
 {
 }
@@ -41,7 +41,20 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         case 1:
             return item.fileName;
         case 2:
-            return item.eventType;
+            if(item.eventType == TableItemStatus::Updated)
+                return tr("Updated");
+            else if(item.eventType == TableItemStatus::NewAdded)
+                return tr("New Added");
+            else if(item.eventType == TableItemStatus::Deleted)
+                return tr("Deleted");
+            else if(item.eventType == TableItemStatus::Moved)
+                return tr("Moved");
+            else if(item.eventType == TableItemStatus::Missing)
+                return tr("Missing");
+            else if(item.eventType == TableItemStatus::Invalid)
+                return tr("Invalid");
+            else
+                return tr("NaN");
         case 3:
             return item.timestamp;
         default:
