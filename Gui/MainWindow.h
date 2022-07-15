@@ -51,9 +51,7 @@ private:
     QThread *fileMonitorThread;
 
 private slots:
-    void slotOnPredictedFileNotFound(const QString &pathToFile);
-    void slotOnPredictedFolderNotFound(const QString &pathToFolder);
-    void slotOnPredictionTargetNotRecognized(const QString &pathToTaget);
+    void slotOnPredictionTargetNotFound(const QString &pathToTaget);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
     void slotOnUnPredictedFileDetected(const QString &pathToFile);
     void slotOnFileSystemEventAnalysisStarted();

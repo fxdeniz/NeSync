@@ -5,14 +5,8 @@ FileMonitoringManagerIntegrationTest::FileMonitoringManagerIntegrationTest(QStri
 {
     this->dut = new FileMonitoringManager(snapshotDelay);
 
-    QObject::connect(this->dut, &FileMonitoringManager::signalPredictedFileNotFound,
-                     this, &FileMonitoringManagerIntegrationTest::slotOnPredictedFileNotFound);
-
-    QObject::connect(this->dut, &FileMonitoringManager::signalPredictedFolderNotFound,
-                     this, &FileMonitoringManagerIntegrationTest::slotOnPredictedFolderNotFound);
-
-    QObject::connect(this->dut, &FileMonitoringManager::signalPredictionTargetNotRecognized,
-                     this, &FileMonitoringManagerIntegrationTest::slotOnPredictionTargetNotRecognized);
+    QObject::connect(this->dut, &FileMonitoringManager::signalPredictionTargetNotFound,
+                     this, &FileMonitoringManagerIntegrationTest::slotOnPredictionTargetNotFound);
 
     QObject::connect(this->dut, &FileMonitoringManager::signalUnPredictedFolderDetected,
                      this, &FileMonitoringManagerIntegrationTest::slotOnUnPredictedFolderDetected);
@@ -57,19 +51,9 @@ FileMonitoringManagerIntegrationTest::~FileMonitoringManagerIntegrationTest()
         delete this->dut;
 }
 
-void FileMonitoringManagerIntegrationTest::slotOnPredictedFileNotFound(const QString &pathToFile)
+void FileMonitoringManagerIntegrationTest::slotOnPredictionTargetNotFound(const QString &pathToTaget)
 {
-    qDebug() << "slotOnPredictedFileNotFound = " << pathToFile;
-}
-
-void FileMonitoringManagerIntegrationTest::slotOnPredictedFolderNotFound(const QString &pathToFolder)
-{
-    qDebug() << "slotPredictedFolderNotFound = " << pathToFolder;
-}
-
-void FileMonitoringManagerIntegrationTest::slotOnPredictionTargetNotRecognized(const QString &pathToTaget)
-{
-    qDebug() << "slotOnPredictionTargetNotRecognized = " << pathToTaget;
+    qDebug() << "slotOnPredictionTargetNotFound = " << pathToTaget;
 }
 
 void FileMonitoringManagerIntegrationTest::slotOnUnPredictedFolderDetected(const QString &pathToFolder)

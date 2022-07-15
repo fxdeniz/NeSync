@@ -20,7 +20,7 @@ public:
     ~TabFileMonitor();
 
 public slots:
-    void slotOnPredictionTargetNotRecognized(const QString &pathToFile);
+    void slotOnPredictionTargetNotFound(const QString &pathToFile);
 
 private:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);

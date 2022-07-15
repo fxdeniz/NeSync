@@ -131,6 +131,7 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 void MainWindow::createFileMonitorThread()
 {
     auto queryResult = FileStorageManager::instance()->getMonitoredFilePathList();
+    queryResult << "not_exist";
     //new FileMonitoringManagerIntegrationTest(list);
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
@@ -154,14 +155,11 @@ void MainWindow::createFileMonitorThread()
 //    QObject::connect(monitor, &FileMonitoringManager::signalPredictedFileNotFound,
 //                     this, &MainWindow::slotOnPredictedFileNotFound);
 
-    QObject::connect(monitor, &FileMonitoringManager::signalPredictedFileNotFound,
-                     tabFileMonitor, &TabFileMonitor::slotOnPredictionTargetNotRecognized);
+    QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotFound,
+                     tabFileMonitor, &TabFileMonitor::slotOnPredictionTargetNotFound);
 
-    QObject::connect(monitor, &FileMonitoringManager::signalPredictedFolderNotFound,
-                     this, &MainWindow::slotOnPredictedFolderNotFound);
-
-    QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotRecognized,
-                     this, &MainWindow::slotOnPredictionTargetNotRecognized);
+    QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotFound,
+                     this, &MainWindow::slotOnPredictionTargetNotFound);
 
     QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFolderDetected,
                      this, &MainWindow::slotOnUnPredictedFolderDetected);
@@ -237,23 +235,9 @@ void MainWindow::on_tab1Action_NewFolder_triggered()
     dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
 
-
-
-void MainWindow::slotOnPredictedFileNotFound(const QString &pathToFile)
+void MainWindow::slotOnPredictionTargetNotFound(const QString &pathToTaget)
 {
-    qDebug() << "slotOnPredictedFileNotFound = " << pathToFile << " in " << QThread::currentThread();
-    qDebug() << "";
-}
-
-void MainWindow::slotOnPredictedFolderNotFound(const QString &pathToFolder)
-{
-    qDebug() << "slotPredictedFolderNotFound = " << pathToFolder << " in " << QThread::currentThread();
-    qDebug() << "";
-}
-
-void MainWindow::slotOnPredictionTargetNotRecognized(const QString &pathToTaget)
-{
-    qDebug() << "slotOnPredictionTargetNotRecognized = " << pathToTaget << " in " << QThread::currentThread();
+    qDebug() << "slotOnPredictionTargetNotFound = " << pathToTaget << " in " << QThread::currentThread();
     qDebug() << "";
 }
 

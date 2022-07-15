@@ -99,9 +99,9 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
     {
         QFileInfo info(currentPath);
 
-        if(info.isFile())
+        if(info.exists())
         {
-            if(info.exists())
+            if(info.isFile())
             {
                 predictedFiles.insert(currentPath);
                 this->addTargetFromFilePath(currentPath);
@@ -109,25 +109,17 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
                 unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
                 unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
             }
-            else
-                emit signalPredictedFileNotFound(currentPath);
-        }
-        else if(info.isDir())
-        {
-            if(info.exists())
+            else if(info.isDir())
             {
                 predictedFolders.insert(currentPath);
                 this->addTargetFromDirPath(currentPath);
 
                 unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
                 unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
-
             }
-            else
-                emit signalPredictedFolderNotFound(currentPath);
         }
         else
-            emit signalPredictionTargetNotRecognized(currentPath);
+            emit signalPredictionTargetNotFound(currentPath);
     }
 
     unPredictedFiles -= predictedFiles;

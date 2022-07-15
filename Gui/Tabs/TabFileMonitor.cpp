@@ -67,7 +67,7 @@ TabFileMonitor::~TabFileMonitor()
     delete ui;
 }
 
-void TabFileMonitor::slotOnPredictionTargetNotRecognized(const QString &pathToFile)
+void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
 {
     QFileInfo fileInfo(pathToFile);
     auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();

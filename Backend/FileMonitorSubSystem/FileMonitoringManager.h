@@ -28,9 +28,7 @@ public slots:
     void start();
 
 signals:
-    void signalPredictedFileNotFound(const QString &pathToFile);
-    void signalPredictedFolderNotFound(const QString &pathToFolder);
-    void signalPredictionTargetNotRecognized(const QString &pathToTaget);
+    void signalPredictionTargetNotFound(const QString &pathToTaget);
     void signalUnPredictedFolderDetected(const QString &pathToFolder);
     void signalUnPredictedFileDetected(const QString &pathToFile);
     void signalFileSystemEventAnalysisStarted();
