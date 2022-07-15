@@ -93,10 +93,12 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
     index = tableModel->index(0, 2, QModelIndex());
     tableModel->setData(index, item.eventType, Qt::EditRole);
 
+    qDebug() << "added event = " << item.eventType;
+
     index = tableModel->index(0, 3, QModelIndex());
     tableModel->setData(index, item.timestamp, Qt::EditRole);
 
-    this->ui->tableViewFileMonitor->resizeColumnsToContents();
+    ui->tableViewFileMonitor->resizeColumnsToContents();
 //    auto tableModel = new TableModelFileExplorer(result, this);
 //    ui->tableViewFileExplorer->setModel(tableModel);
 }

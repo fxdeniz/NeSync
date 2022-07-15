@@ -131,7 +131,7 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 void MainWindow::createFileMonitorThread()
 {
     auto queryResult = FileStorageManager::instance()->getMonitoredFilePathList();
-    queryResult << "not_exist";
+    queryResult << "not_exist.txt";
     //new FileMonitoringManagerIntegrationTest(list);
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());

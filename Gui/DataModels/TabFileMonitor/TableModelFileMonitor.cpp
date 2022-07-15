@@ -32,33 +32,35 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
     if (index.row() >= this->itemList.size() || index.row() < 0)
         return QVariant();
 
-    if (role == Qt::ItemDataRole::DisplayRole) {
+    if (role == Qt::ItemDataRole::DisplayRole)
+    {
         const auto &item = this->itemList.at(index.row());
 
-        switch (index.column()) {
-        case 0:
-            return item.folderPath;
-        case 1:
-            return item.fileName;
-        case 2:
-            if(item.eventType == TableItemStatus::Updated)
-                return tr("Updated");
-            else if(item.eventType == TableItemStatus::NewAdded)
-                return tr("New Added");
-            else if(item.eventType == TableItemStatus::Deleted)
-                return tr("Deleted");
-            else if(item.eventType == TableItemStatus::Moved)
-                return tr("Moved");
-            else if(item.eventType == TableItemStatus::Missing)
-                return tr("Missing");
-            else if(item.eventType == TableItemStatus::Invalid)
-                return tr("Invalid");
-            else
-                return tr("NaN");
-        case 3:
-            return item.timestamp;
-        default:
-            break;
+        switch (index.column())
+        {
+            case 0:
+                return item.fileName;
+            case 1:
+                return item.folderPath;
+            case 2:
+                if(item.eventType == TableItemStatus::Updated)
+                    return tr("Updated");
+                else if(item.eventType == TableItemStatus::NewAdded)
+                    return tr("New Added");
+                else if(item.eventType == TableItemStatus::Deleted)
+                    return tr("Deleted");
+                else if(item.eventType == TableItemStatus::Moved)
+                    return tr("Moved");
+                else if(item.eventType == TableItemStatus::Missing)
+                    return tr("Missing");
+                else if(item.eventType == TableItemStatus::Invalid)
+                    return tr("Invalid");
+                else
+                    return tr("NaN");
+            case 3:
+                return item.timestamp;
+            default:
+                break;
         }
     }
     else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == 0)
@@ -68,12 +70,25 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         else
             return Qt::CheckState::Unchecked;
     }
-    else if(role == Qt::ItemDataRole::DecorationRole && (index.column() == 0 || index.column() == 1))
+    else if(role == Qt::ItemDataRole::DecorationRole)
     {
-        QFileIconProvider provider;
-        auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+        if(index.column() == 0)
+        {
+            const auto &item = this->itemList.at(index.row());
 
-        return result;
+            QFileIconProvider provider;
+            QFileInfo info(item.fileName);
+            auto result = provider.icon(info);
+
+            return result;
+        }
+        else if(index.column() == 1)
+        {
+            QFileIconProvider provider;
+            auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(32, 32);
+
+            return result;
+        }
     }
     else if(role == Qt::ItemDataRole::TextAlignmentRole && (index.column() == 2 || index.column() == 3))
     {
@@ -91,9 +106,9 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
     if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
-            return tr("Location");
-        case 1:
             return tr("File Name");
+        case 1:
+            return tr("Location");
         case 2:
             return tr("Event");
         case 3:
@@ -133,6 +148,12 @@ bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &va
                 break;
             case 1:
                 item.folderPath = value.toString();
+                break;
+            case 2:
+                item.eventType = value.value<TableItemStatus>();
+                break;
+            case 3:
+                item.timestamp = value.toDateTime();
                 break;
             default:
                 return false;

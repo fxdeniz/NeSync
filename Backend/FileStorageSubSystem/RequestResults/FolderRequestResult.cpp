@@ -40,7 +40,7 @@ FolderRequestResult FolderRequestResult::leafFolderFrom(PtrTo_RowFolderRecord ro
     result._favorite = row->getIsFavorite();
 
     QFileIconProvider provider;
-    result._icon = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
+    result._icon = provider.icon(QFileIconProvider::IconType::Folder);
 
     return result;
 }
