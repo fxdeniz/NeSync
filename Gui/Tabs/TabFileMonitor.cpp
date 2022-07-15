@@ -36,7 +36,8 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
                                           QDateTime::fromString("2022-01-15 07:00:00", "yyyy-MM-dd HH:mm:ss")
                                          });
 
-    this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
+    //this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
+    this->tableModelFileMonitor = new TableModelFileMonitor(this);
     this->ui->tableViewFileMonitor->setModel(this->tableModelFileMonitor);
     this->ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
     this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -66,7 +67,7 @@ TabFileMonitor::~TabFileMonitor()
     delete ui;
 }
 
-void TabFileMonitor::slotOnPredictedFileNotFound(const QString &pathToFile)
+void TabFileMonitor::slotOnPredictionTargetNotRecognized(const QString &pathToFile)
 {
     QFileInfo fileInfo(pathToFile);
     auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
@@ -74,4 +75,28 @@ void TabFileMonitor::slotOnPredictedFileNotFound(const QString &pathToFile)
                                            fileDir,
                                            TableModelFileMonitor::TableItemStatus::Missing,
                                            QDateTime::currentDateTime()};
+
+    addRowToTableViewFileMonitor(item);
+}
+
+void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)
+{
+    auto tableModel = this->tableModelFileMonitor;
+    tableModel->insertRows(0, 1, QModelIndex());
+
+    QModelIndex index = tableModel->index(0, 0, QModelIndex());
+    tableModel->setData(index, item.fileName, Qt::EditRole);
+
+    index = tableModel->index(0, 1, QModelIndex());
+    tableModel->setData(index, item.folderPath, Qt::EditRole);
+
+    index = tableModel->index(0, 2, QModelIndex());
+    tableModel->setData(index, item.eventType, Qt::EditRole);
+
+    index = tableModel->index(0, 3, QModelIndex());
+    tableModel->setData(index, item.timestamp, Qt::EditRole);
+
+    this->ui->tableViewFileMonitor->resizeColumnsToContents();
+//    auto tableModel = new TableModelFileExplorer(result, this);
+//    ui->tableViewFileExplorer->setModel(tableModel);
 }
