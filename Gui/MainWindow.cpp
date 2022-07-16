@@ -161,6 +161,10 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFolderDetected,
                      tabFileMonitor, &TabFileMonitor::slotOnUnPredictedFolderDetected);
 
+    QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFileDetected,
+                     tabFileMonitor, &TabFileMonitor::slotOnUnPredictedFileDetected);
+
+
 
     QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotFound,
                      this, &MainWindow::slotOnPredictionTargetNotFound);

@@ -146,7 +146,7 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
         switch (section)
         {
             case 0:
-                return tr("File Name");
+                return tr("Name");
             case 1:
                 return tr("Location");
             case 2:
