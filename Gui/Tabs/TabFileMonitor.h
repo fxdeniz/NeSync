@@ -29,6 +29,7 @@ public slots:
     void slotOnFileDeleted(const QString &pathToFile);
     void slotOnFolderMoved(const QString &pathToFolder);
     void slotOnFileMoved(const QString &pathToFile);
+    void slotOnFileModified(const QString &pathToFile);
 
 private:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);
