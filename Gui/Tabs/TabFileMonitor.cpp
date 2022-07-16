@@ -153,7 +153,7 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
     tableModel->insertRows(0, 1, QModelIndex());
 
     QModelIndex index = tableModel->index(0, 0, QModelIndex());
-    tableModel->setData(index, item.fileName, Qt::EditRole);
+    tableModel->setData(index, item.name, Qt::EditRole);
 
     index = tableModel->index(0, 1, QModelIndex());
     tableModel->setData(index, item.folderPath, Qt::EditRole);

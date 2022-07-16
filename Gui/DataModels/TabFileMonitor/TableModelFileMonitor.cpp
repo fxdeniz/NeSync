@@ -80,15 +80,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         switch (index.column())
         {
             case 0:
-                if(item.itemType == TableItemType::File)
-                    return item.fileName;
-                else if(item.itemType == TableItemType::Folder)
-                {
-                    QFileInfo info(item.folderPath);
-                    return info.absoluteDir().dirName() + QDir::separator();
-                }
-                else
-                    return "NaN";
+                return item.name;
             case 1:
                 if(item.itemType == TableItemType::File)
                     return item.folderPath;
@@ -148,7 +140,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
             if(item.itemType == TableItemType::File)
             {
                 QFileIconProvider provider;
-                QFileInfo info(item.fileName);
+                QFileInfo info(item.name);
                 auto result = provider.icon(info);
 
                 return result;
@@ -228,7 +220,7 @@ bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &va
             switch (index.column())
             {
             case 0:
-                item.fileName = value.toString();
+                item.name = value.toString();
                 break;
             case 1:
                 item.folderPath = value.toString();
@@ -293,12 +285,13 @@ bool TableModelFileMonitor::removeRows(int position, int rows, const QModelIndex
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFolderFrom(const QString &pathToFolder,
                                                                             TableItemStatus status)
 {
-    QFileInfo fileInfo(pathToFolder);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+    QDir dir(pathToFolder);
+    QString dirName = dir.dirName() + QDir::separator();
+    QString parentDirPath = QDir::toNativeSeparators(dir.absolutePath()) + QDir::separator();
 
     TableModelFileMonitor::TableItem result {
-        "",
-        fileDir,
+        dirName,
+        parentDirPath,
         TableModelFileMonitor::TableItemType::Folder,
         status,
         QDateTime::currentDateTime()

@@ -29,7 +29,7 @@ public:
 
     struct TableItem
     {
-        QString fileName;
+        QString name;
         QString folderPath;
         TableItemType itemType;
         TableItemStatus eventType;
@@ -38,7 +38,7 @@ public:
 
         bool operator==(const TableItem &other) const
         {
-            return fileName == other.fileName && folderPath == other.folderPath;
+            return name == other.name && folderPath == other.folderPath;
         }
     };
 
