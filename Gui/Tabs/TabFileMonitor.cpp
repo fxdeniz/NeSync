@@ -161,6 +161,21 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
     addRowToTableViewFileMonitor(item);
 }
 
+void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
+{
+    QFileInfo fileInfo(pathToFile);
+    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+    TableModelFileMonitor::TableItem item {
+        fileInfo.fileName(),
+        fileDir,
+        TableModelFileMonitor::TableItemType::File,
+        TableModelFileMonitor::TableItemStatus::Deleted,
+        QDateTime::currentDateTime()
+    };
+
+    addRowToTableViewFileMonitor(item);
+}
+
 void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)
 {
     auto tableModel = this->tableModelFileMonitor;
