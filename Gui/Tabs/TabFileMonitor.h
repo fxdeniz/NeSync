@@ -25,6 +25,7 @@ public slots:
     void slotOnUnPredictedFileDetected(const QString &pathToFile);
     void slotOnNewFolderAdded(const QString &pathToFolder);
     void slotOnNewFileAdded(const QString &pathToFile);
+    void slotOnFolderDeleted(const QString &pathToFolder);
 
 private:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);

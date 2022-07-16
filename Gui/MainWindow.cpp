@@ -170,6 +170,9 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(monitor, &FileMonitoringManager::signalNewFileAdded,
                      tabFileMonitor, &TabFileMonitor::slotOnNewFileAdded);
 
+    QObject::connect(monitor, &FileMonitoringManager::signalFolderDeleted,
+                     tabFileMonitor, &TabFileMonitor::slotOnFolderDeleted);
+
 
 
 
