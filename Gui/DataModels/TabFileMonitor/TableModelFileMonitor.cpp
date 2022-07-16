@@ -3,6 +3,7 @@
 #include <QFileIconProvider>
 #include <QPixmap>
 #include <QColor>
+#include <QDir>
 
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
     : QAbstractTableModel(parent)
@@ -21,7 +22,7 @@ int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
 
 int TableModelFileMonitor::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 6;
+    return parent.isValid() ? 0 : 7;
 }
 
 QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
@@ -39,10 +40,36 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         switch (index.column())
         {
             case 0:
-                return item.fileName;
+                if(item.itemType == TableItemType::File)
+                    return item.fileName;
+                else if(item.itemType == TableItemType::Folder)
+                {
+                    QFileInfo info(item.folderPath);
+                    return info.absoluteDir().dirName() + QDir::separator();
+                }
+                else
+                    return "NaN";
             case 1:
-                return item.folderPath;
+                if(item.itemType == TableItemType::File)
+                    return item.folderPath;
+                else if(item.itemType == TableItemType::Folder)
+                {
+                    QFileInfo info(item.folderPath);
+                    QDir dir = info.dir();
+                    dir.cdUp();
+                    QString parentDir = QDir::toNativeSeparators(dir.absolutePath()) + QDir::separator();
+                    return parentDir;
+                }
+                else
+                    return "NaN";
             case 2:
+                if(item.itemType == TableItemType::Folder)
+                    return tr("Folder");
+                else if(item.itemType == TableItemType::File)
+                    return tr("File");
+                else
+                    return "NaN";
+            case 3:
                 if(item.eventType == TableItemStatus::Updated)
                     return tr("Updated");
                 else if(item.eventType == TableItemStatus::NewAdded)
@@ -57,7 +84,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                     return tr("Invalid");
                 else
                     return tr("NaN");
-            case 3:
+            case 4:
                 return item.timestamp;
             default:
                 break;
@@ -76,11 +103,21 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         {
             const auto &item = this->itemList.at(index.row());
 
-            QFileIconProvider provider;
-            QFileInfo info(item.fileName);
-            auto result = provider.icon(info);
+            if(item.itemType == TableItemType::File)
+            {
+                QFileIconProvider provider;
+                QFileInfo info(item.fileName);
+                auto result = provider.icon(info);
 
-            return result;
+                return result;
+            }
+            else if(item.itemType == TableItemType::Folder)
+            {
+                QFileIconProvider provider;
+                auto result = provider.icon(QFileIconProvider::IconType::Folder);
+
+                return result;
+            }
         }
         else if(index.column() == 1)
         {
@@ -90,9 +127,10 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
             return result;
         }
     }
-    else if(role == Qt::ItemDataRole::TextAlignmentRole && (index.column() == 2 || index.column() == 3))
+    else if(role == Qt::ItemDataRole::TextAlignmentRole)
     {
-        return Qt::AlignmentFlag::AlignCenter;
+        if(index.column() == 2 || index.column() == 3 || index.column() == 4)
+            return Qt::AlignmentFlag::AlignCenter;
     }
 
     return QVariant();
@@ -103,22 +141,26 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
-            return tr("File Name");
-        case 1:
-            return tr("Location");
-        case 2:
-            return tr("Event");
-        case 3:
-            return tr("Timestamp");
-        case 4:
-            return tr("Action");
-        case 5:
-            return tr("Note");
-        default:
-            break;
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:
+                return tr("File Name");
+            case 1:
+                return tr("Location");
+            case 2:
+                return tr("Type");
+            case 3:
+                return tr("Event");
+            case 4:
+                return tr("Timestamp");
+            case 5:
+                return tr("Action");
+            case 6:
+                return tr("Note");
+            default:
+                break;
         }
     }
     return QVariant();
@@ -150,9 +192,12 @@ bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &va
                 item.folderPath = value.toString();
                 break;
             case 2:
-                item.eventType = value.value<TableItemStatus>();
+                item.itemType = value.value<TableItemType>();
                 break;
             case 3:
+                item.eventType = value.value<TableItemStatus>();
+                break;
+            case 4:
                 item.timestamp = value.toDateTime();
                 break;
             default:

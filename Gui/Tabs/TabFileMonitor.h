@@ -21,6 +21,7 @@ public:
 
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFile);
+    void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
 
 private:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);

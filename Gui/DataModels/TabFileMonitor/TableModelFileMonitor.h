@@ -19,12 +19,21 @@ public:
         Deleted
     };
 
+    enum TableItemType
+    {
+        Undefined,
+        Folder,
+        File
+    };
+
     struct TableItem
     {
         QString fileName;
         QString folderPath;
+        TableItemType itemType;
         TableItemStatus eventType;
         QDateTime timestamp;
+
 
         bool operator==(const TableItem &other) const
         {
