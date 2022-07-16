@@ -10,6 +10,9 @@
 #include "Tabs/TabFileExplorer.h"
 #include "Tabs/TabFileMonitor.h"
 
+#define DEBUG_FSM_TO_GUI
+#define DEBUG_FSM_TO_GUI_WITHOUT_THREAD_INFO
+
 namespace Ui
 {
     class MainWindow;
@@ -50,6 +53,7 @@ private:
     DialogAddNewFile *dialogAddNewFile;
     QThread *fileMonitorThread;
 
+#ifdef DEBUG_FSM_TO_GUI
 private slots:
     void slotOnPredictionTargetNotFound(const QString &pathToTaget);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
@@ -63,6 +67,7 @@ private slots:
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
+#endif
 
 };
 

@@ -404,8 +404,12 @@ bool FileMonitoringManager::isFileReadyToRelease(const QString currentFilePath, 
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    qDebug() << "FileMonitoringManager::slotOnAddEventDetected() in = " << QThread::currentThread();
-    qDebug() << "";
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnAddEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
     this->timer->stop();
     QString _dir = this->mddb.standardizeDir(dir);
 
@@ -433,8 +437,12 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
-    qDebug() << "FileMonitoringManager::slotOnDeleteEventDetected() in = " << QThread::currentThread();
-    qDebug() << "";
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnDeleteEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
     this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
@@ -459,8 +467,12 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
 {
-    qDebug() << "FileMonitoringManager::slotOnModificationEventDetected() in = " << QThread::currentThread();
-    qDebug() << "";
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnModificationEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
     this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
@@ -490,8 +502,13 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
 {
-    qDebug() << "FileMonitoringManager::slotOnMoveEventDetected() in = " << QThread::currentThread();
-    qDebug() << "";
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnMoveEventDetected() \t\t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t oldFileName = " << oldFileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
     this->timer->stop();
 
     auto _dir = this->mddb.standardizeDir(dir);
@@ -556,8 +573,10 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
 void FileMonitoringManager::slotReleaseScheduledEvents()
 {
-    qDebug() << "FileMonitoringManager::slotReleaseScheduledEvents() in = " << QThread::currentThread();
-    qDebug() << "";
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "-----> FileMonitoringManager::slotReleaseScheduledEvents() \t in = " << QThread::currentThread();
+#endif
+
     this->timer->stop();
     emit signalFileSystemEventAnalysisStarted();
 

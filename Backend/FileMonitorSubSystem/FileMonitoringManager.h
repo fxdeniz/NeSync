@@ -10,6 +10,8 @@
 #define CONST_MIN_SNAPSHOT_DELAY 3
 #define CONST_DEFAULT_SLEEP_DURATION_FOR_RELEASABLE_FILE_CHECK 1
 
+#define DEBUG_FSM_SLOTS
+
 class FileMonitoringManager : public QObject
 {
     Q_OBJECT
