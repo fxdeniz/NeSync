@@ -11,7 +11,7 @@ class TableModelFileMonitor : public QAbstractTableModel
 public:
     enum TableItemStatus
     {
-        Invalid,
+        InvalidStatus,
         Missing,
         NewAdded,
         Updated,
@@ -22,7 +22,7 @@ public:
 
     enum TableItemType
     {
-        Undefined,
+        UndefinedType,
         Folder,
         File
     };
@@ -46,6 +46,15 @@ public:
     TableModelFileMonitor(QObject *parent = nullptr);
     TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
+    static TableItem tableItemNewAddedFolderFrom(const QString &pathToFolder);
+    static TableItem tableItemDeletedFolderFrom(const QString &pathToFolder);
+    static TableItem tableItemMovedFolderFrom(const QString &pathToFolder);
+    static TableItem tableItemNewAddedFileFrom(const QString &pathToFile);
+    static TableItem tableItemDeletedFileFrom(const QString &pathToFile);
+    static TableItem tableItemMovedFileFrom(const QString &pathToFile);
+    static TableItem tableItemUpdatedFileFrom(const QString &pathToFile);
+    static TableItem tableItemMovedAndUpdatedFileFrom(const QString &pathToFile);
+
     // QAbstractTableModel interface
 public:
     int rowCount(const QModelIndex &parent) const override;
@@ -56,6 +65,10 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+
+private:
+    static TableItem tableItemFolderFrom(const QString &pathToFolder, TableItemStatus status);
+    static TableItem tableItemFileFrom(const QString &pathToFile, TableItemStatus status);
 
 private:
     QList<TableItem> itemList;

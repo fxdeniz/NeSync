@@ -158,26 +158,26 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(monitor, &FileMonitoringManager::signalPredictionTargetNotFound,
                      tabFileMonitor, &TabFileMonitor::slotOnPredictionTargetNotFound);
 
+    QObject::connect(monitor, &FileMonitoringManager::signalNewFolderAdded,
+                     tabFileMonitor, &TabFileMonitor::slotOnNewFolderAdded);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFolderDeleted,
+                     tabFileMonitor, &TabFileMonitor::slotOnFolderDeleted);
+
+    QObject::connect(monitor, &FileMonitoringManager::signalFolderMoved,
+                     tabFileMonitor, &TabFileMonitor::slotOnFolderMoved);
+
     QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFolderDetected,
                      tabFileMonitor, &TabFileMonitor::slotOnUnPredictedFolderDetected);
 
     QObject::connect(monitor, &FileMonitoringManager::signalUnPredictedFileDetected,
                      tabFileMonitor, &TabFileMonitor::slotOnUnPredictedFileDetected);
 
-    QObject::connect(monitor, &FileMonitoringManager::signalNewFolderAdded,
-                     tabFileMonitor, &TabFileMonitor::slotOnNewFolderAdded);
-
     QObject::connect(monitor, &FileMonitoringManager::signalNewFileAdded,
                      tabFileMonitor, &TabFileMonitor::slotOnNewFileAdded);
 
-    QObject::connect(monitor, &FileMonitoringManager::signalFolderDeleted,
-                     tabFileMonitor, &TabFileMonitor::slotOnFolderDeleted);
-
     QObject::connect(monitor, &FileMonitoringManager::signalFileDeleted,
                      tabFileMonitor, &TabFileMonitor::slotOnFileDeleted);
-
-    QObject::connect(monitor, &FileMonitoringManager::signalFolderMoved,
-                     tabFileMonitor, &TabFileMonitor::slotOnFolderMoved);
 
     QObject::connect(monitor, &FileMonitoringManager::signalFileMoved,
                      tabFileMonitor, &TabFileMonitor::slotOnFileMoved);

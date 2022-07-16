@@ -22,12 +22,12 @@ public:
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFile);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
-    void slotOnUnPredictedFileDetected(const QString &pathToFile);
     void slotOnNewFolderAdded(const QString &pathToFolder);
-    void slotOnNewFileAdded(const QString &pathToFile);
     void slotOnFolderDeleted(const QString &pathToFolder);
-    void slotOnFileDeleted(const QString &pathToFile);
     void slotOnFolderMoved(const QString &pathToFolder);
+    void slotOnUnPredictedFileDetected(const QString &pathToFile);
+    void slotOnNewFileAdded(const QString &pathToFile);
+    void slotOnFileDeleted(const QString &pathToFile);
     void slotOnFileMoved(const QString &pathToFile);
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMovedAndModified(const QString &pathToFile);

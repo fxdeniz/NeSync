@@ -15,6 +15,46 @@ TableModelFileMonitor::TableModelFileMonitor(const QList<TableItem> &_itemList, 
 {
 }
 
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemNewAddedFolderFrom(const QString &pathToFolder)
+{
+    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::NewAdded);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemDeletedFolderFrom(const QString &pathToFolder)
+{
+    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Deleted);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFolderFrom(const QString &pathToFolder)
+{
+    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Moved);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemNewAddedFileFrom(const QString &pathToFile)
+{
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::NewAdded);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemDeletedFileFrom(const QString &pathToFile)
+{
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Deleted);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFileFrom(const QString &pathToFile)
+{
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Moved);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemUpdatedFileFrom(const QString &pathToFile)
+{
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Updated);
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(const QString &pathToFile)
+{
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::MovedAndUpdated);
+}
+
 int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : this->itemList.size();
@@ -82,7 +122,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                     return tr("Moved & Updated");
                 else if(item.eventType == TableItemStatus::Missing)
                     return tr("Missing");
-                else if(item.eventType == TableItemStatus::Invalid)
+                else if(item.eventType == TableItemStatus::InvalidStatus)
                     return tr("Invalid");
                 else
                     return tr("NaN");
@@ -250,3 +290,35 @@ bool TableModelFileMonitor::removeRows(int position, int rows, const QModelIndex
     return true;
 }
 
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFolderFrom(const QString &pathToFolder,
+                                                                            TableItemStatus status)
+{
+    QFileInfo fileInfo(pathToFolder);
+    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+
+    TableModelFileMonitor::TableItem result {
+        "",
+        fileDir,
+        TableModelFileMonitor::TableItemType::Folder,
+        status,
+        QDateTime::currentDateTime()
+    };
+
+    return result;
+}
+
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFileFrom(const QString &pathToFile,
+                                                                          TableItemStatus status)
+{
+    QFileInfo fileInfo(pathToFile);
+    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
+    TableModelFileMonitor::TableItem result {
+        fileInfo.fileName(),
+        fileDir,
+        TableModelFileMonitor::TableItemType::File,
+        status,
+        QDateTime::currentDateTime()
+    };
+
+    return result;
+}

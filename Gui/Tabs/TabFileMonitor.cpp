@@ -73,6 +73,7 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
 {
+    // TODO this will probably require another item
     QFileInfo fileInfo(pathToFile);
     auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
     TableModelFileMonitor::TableItem item {
@@ -88,151 +89,61 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
 
 void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder)
 {
-    QFileInfo fileInfo(pathToFolder);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        "",
-        fileDir,
-        TableModelFileMonitor::TableItemType::Folder,
-        TableModelFileMonitor::TableItemStatus::NewAdded,
-        QDateTime::currentDateTime()
-    };
-
-    addRowToTableViewFileMonitor(item);
-}
-
-void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
-{
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::NewAdded,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 {
-    QFileInfo fileInfo(pathToFolder);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        "",
-        fileDir,
-        TableModelFileMonitor::TableItemType::Folder,
-        TableModelFileMonitor::TableItemStatus::NewAdded,
-        QDateTime::currentDateTime()
-    };
-
-    addRowToTableViewFileMonitor(item);
-}
-
-void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
-{
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::NewAdded,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 {
-    QFileInfo fileInfo(pathToFolder);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        "",
-        fileDir,
-        TableModelFileMonitor::TableItemType::Folder,
-        TableModelFileMonitor::TableItemStatus::Deleted,
-        QDateTime::currentDateTime()
-    };
-
-    addRowToTableViewFileMonitor(item);
-}
-
-void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
-{
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::Deleted,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder)
 {
-    QFileInfo fileInfo(pathToFolder);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        "",
-        fileDir,
-        TableModelFileMonitor::TableItemType::Folder,
-        TableModelFileMonitor::TableItemStatus::Moved,
-        QDateTime::currentDateTime()
-    };
+    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder);
+    addRowToTableViewFileMonitor(item);
+}
 
+void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
+{
+    auto item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
+    addRowToTableViewFileMonitor(item);
+}
+
+void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
+{
+    auto item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
+    addRowToTableViewFileMonitor(item);
+}
+
+void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
+{
+    auto item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMoved(const QString &pathToFile)
 {
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::Moved,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::Updated,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
     addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile)
 {
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::MovedAndUpdated,
-        QDateTime::currentDateTime()
-    };
-
+    auto item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile);
     addRowToTableViewFileMonitor(item);
 }
 
