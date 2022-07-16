@@ -78,6 +78,8 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                     return tr("Deleted");
                 else if(item.eventType == TableItemStatus::Moved)
                     return tr("Moved");
+                else if(item.eventType == TableItemStatus::MovedAndUpdated)
+                    return tr("Moved & Updated");
                 else if(item.eventType == TableItemStatus::Missing)
                     return tr("Missing");
                 else if(item.eventType == TableItemStatus::Invalid)
@@ -152,7 +154,7 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
             case 2:
                 return tr("Type");
             case 3:
-                return tr("Event");
+                return tr("Status");
             case 4:
                 return tr("Timestamp");
             case 5:

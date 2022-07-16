@@ -16,6 +16,7 @@ public:
         NewAdded,
         Updated,
         Moved,
+        MovedAndUpdated,
         Deleted
     };
 
