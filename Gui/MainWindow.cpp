@@ -130,7 +130,9 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 
 void MainWindow::createFileMonitorThread()
 {
-    auto queryResult = FileStorageManager::instance()->getMonitoredFilePathList();
+    auto fsm = FileStorageManager::instance();
+    auto queryResult = fsm->getMonitoredFilePathList();
+    queryResult.append(fsm->getMonitoredFolderPathList());
     //new FileMonitoringManagerIntegrationTest(list);
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());

@@ -19,6 +19,7 @@ public:
     PtrTo_RowFileRecord selectRowByID(qlonglong recordID) const;
 
     QStringList selectUserFilePathListFromActiveFiles() const;
+    QStringList selectUserFolderPathListFromActiveFiles() const;
     QList<PtrTo_RowFileRecord> selectFavoriteFileList() const;
     QList<PtrTo_RowFileRecord> selectRowsBySymbolDirectory(const QString &symbolDirectory) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFileName(const QString &searchTerm) const;

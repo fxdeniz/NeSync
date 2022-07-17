@@ -56,6 +56,7 @@ public:
     bool isFileExistByUserFilePath(const QString &userFilePath) const;
 
     QStringList getMonitoredFilePathList() const;
+    QStringList getMonitoredFolderPathList() const;
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;

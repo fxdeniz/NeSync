@@ -409,6 +409,13 @@ QStringList FileStorageManager::getMonitoredFilePathList() const
     return queryResult;
 }
 
+QStringList FileStorageManager::getMonitoredFolderPathList() const
+{
+    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromActiveFiles();
+
+    return queryResult;
+}
+
 qlonglong FileStorageManager::getCurrentSaveGroupNumber() const
 {
     return this->currentSaveGroupNumber;
