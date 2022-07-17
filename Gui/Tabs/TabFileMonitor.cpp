@@ -14,6 +14,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 
     sampleFileMonitorTableData.insert(0, {"first_file.txt",
                                           "C:/Users/<USER>/AppData/Roaming/<APPNAME>/",
+                                          "old location here",
                                           TableModelFileMonitor::TableItemType::File,
                                           TableModelFileMonitor::TableItemStatus::Deleted,
                                           QDateTime::currentDateTime()
@@ -21,6 +22,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 
     sampleFileMonitorTableData.insert(1, {"second_file.zip",
                                           "C:/Users/<USER>/Desktop/",
+                                          "old location here",
                                           TableModelFileMonitor::TableItemType::File,
                                           TableModelFileMonitor::TableItemStatus::Moved,
                                           QDateTime::fromString("2021-03-19 10:40:30", "yyyy-MM-dd HH:mm:ss")
@@ -28,6 +30,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 
     sampleFileMonitorTableData.insert(2, {"third_file.pdf",
                                           "C:/Users/<USER>/Desktop/",
+                                          "old location here",
                                           TableModelFileMonitor::TableItemType::File,
                                           TableModelFileMonitor::TableItemStatus::Updated,
                                           QDateTime::fromString("2019-12-27 03:50:00", "yyyy-MM-dd HH:mm:ss")
@@ -35,6 +38,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 
     sampleFileMonitorTableData.insert(3, {"fourth_file.mp4",
                                           "C:/Users/<USER>/Videos/",
+                                          "old location here",
                                           TableModelFileMonitor::TableItemType::File,
                                           TableModelFileMonitor::TableItemStatus::NewAdded,
                                           QDateTime::fromString("2022-01-15 07:00:00", "yyyy-MM-dd HH:mm:ss")
@@ -79,6 +83,7 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
     TableModelFileMonitor::TableItem item {
         fileInfo.fileName(),
         fileDir,
+        "",
         TableModelFileMonitor::TableItemType::File,
         TableModelFileMonitor::TableItemStatus::Missing,
         QDateTime::currentDateTime()
@@ -105,9 +110,9 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
     addRowToTableViewFileMonitor(item);
 }
 
-void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder)
+void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
 {
-    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder);
+    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
     addRowToTableViewFileMonitor(item);
 }
 
@@ -129,9 +134,9 @@ void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
     addRowToTableViewFileMonitor(item);
 }
 
-void TabFileMonitor::slotOnFileMoved(const QString &pathToFile)
+void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
 {
-    auto item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile);
+    auto item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile, oldFileName);
     addRowToTableViewFileMonitor(item);
 }
 
@@ -141,9 +146,9 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     addRowToTableViewFileMonitor(item);
 }
 
-void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile)
+void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
 {
-    auto item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile);
+    auto item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile, oldFileName);
     addRowToTableViewFileMonitor(item);
 }
 
@@ -156,15 +161,18 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
     tableModel->setData(index, item.name, Qt::EditRole);
 
     index = tableModel->index(0, 1, QModelIndex());
-    tableModel->setData(index, item.folderPath, Qt::EditRole);
+    tableModel->setData(index, item.parentDirPath, Qt::EditRole);
 
     index = tableModel->index(0, 2, QModelIndex());
-    tableModel->setData(index, item.itemType, Qt::EditRole);
+    tableModel->setData(index, item.oldName, Qt::EditRole);
 
     index = tableModel->index(0, 3, QModelIndex());
-    tableModel->setData(index, item.eventType, Qt::EditRole);
+    tableModel->setData(index, item.itemType, Qt::EditRole);
 
     index = tableModel->index(0, 4, QModelIndex());
+    tableModel->setData(index, item.eventType, Qt::EditRole);
+
+    index = tableModel->index(0, 5, QModelIndex());
     tableModel->setData(index, item.timestamp, Qt::EditRole);
 
     ui->tableViewFileMonitor->resizeColumnsToContents();

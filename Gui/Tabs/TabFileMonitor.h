@@ -24,13 +24,13 @@ public slots:
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
     void slotOnNewFolderAdded(const QString &pathToFolder);
     void slotOnFolderDeleted(const QString &pathToFolder);
-    void slotOnFolderMoved(const QString &pathToFolder);
+    void slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName);
     void slotOnUnPredictedFileDetected(const QString &pathToFile);
     void slotOnNewFileAdded(const QString &pathToFile);
     void slotOnFileDeleted(const QString &pathToFile);
-    void slotOnFileMoved(const QString &pathToFile);
+    void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
     void slotOnFileModified(const QString &pathToFile);
-    void slotOnFileMovedAndModified(const QString &pathToFile);
+    void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
 private:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);

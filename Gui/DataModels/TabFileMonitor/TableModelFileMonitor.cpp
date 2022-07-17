@@ -25,9 +25,10 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemDeletedFolderFr
     return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Deleted);
 }
 
-TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFolderFrom(const QString &pathToFolder)
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFolderFrom(const QString &pathToFolder,
+                                                                                 const QString &oldLocation)
 {
-    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Moved);
+    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Moved, oldLocation);
 }
 
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemNewAddedFileFrom(const QString &pathToFile)
@@ -40,9 +41,10 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemDeletedFileFrom
     return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Deleted);
 }
 
-TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFileFrom(const QString &pathToFile)
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFileFrom(const QString &pathToFile,
+                                                                               const QString &oldLocation)
 {
-    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Moved);
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Moved, oldLocation);
 }
 
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemUpdatedFileFrom(const QString &pathToFile)
@@ -50,9 +52,10 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemUpdatedFileFrom
     return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Updated);
 }
 
-TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(const QString &pathToFile)
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(const QString &pathToFile,
+                                                                                         const QString &oldLocation)
 {
-    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::MovedAndUpdated);
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::MovedAndUpdated, oldLocation);
 }
 
 int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
@@ -62,7 +65,7 @@ int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
 
 int TableModelFileMonitor::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 7;
+    return parent.isValid() ? 0 : 8;
 }
 
 QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
@@ -83,10 +86,10 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 return item.name;
             case 1:
                 if(item.itemType == TableItemType::File)
-                    return item.folderPath;
+                    return item.parentDirPath;
                 else if(item.itemType == TableItemType::Folder)
                 {
-                    QFileInfo info(item.folderPath);
+                    QFileInfo info(item.parentDirPath);
                     QDir dir = info.dir();
                     dir.cdUp();
                     QString parentDir = QDir::toNativeSeparators(dir.absolutePath()) + QDir::separator();
@@ -95,13 +98,20 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 else
                     return "NaN";
             case 2:
+                if(item.itemType == TableItemType::File)
+                    return item.oldName;
+                else if (item.itemType == TableItemType::Folder && !item.oldName.isEmpty())
+                    return item.oldName + QDir::separator();
+                else
+                    return "";
+            case 3:
                 if(item.itemType == TableItemType::Folder)
                     return tr("Folder");
                 else if(item.itemType == TableItemType::File)
                     return tr("File");
                 else
                     return "NaN";
-            case 3:
+            case 4:
                 if(item.eventType == TableItemStatus::Updated)
                     return tr("Updated");
                 else if(item.eventType == TableItemStatus::NewAdded)
@@ -118,7 +128,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                     return tr("Invalid");
                 else
                     return tr("NaN");
-            case 4:
+            case 5:
                 return item.timestamp;
             default:
                 break;
@@ -163,7 +173,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::ItemDataRole::TextAlignmentRole)
     {
-        if(index.column() == 2 || index.column() == 3 || index.column() == 4)
+        if(index.column() == 2 || index.column() == 3 || index.column() == 4 || index.column() == 5)
             return Qt::AlignmentFlag::AlignCenter;
     }
 
@@ -184,14 +194,16 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
             case 1:
                 return tr("Location");
             case 2:
-                return tr("Type");
+                return tr("Old Name");
             case 3:
-                return tr("Status");
+                return tr("Type");
             case 4:
-                return tr("Timestamp");
+                return tr("Status");
             case 5:
-                return tr("Action");
+                return tr("Timestamp");
             case 6:
+                return tr("Action");
+            case 7:
                 return tr("Note");
             default:
                 break;
@@ -223,15 +235,18 @@ bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &va
                 item.name = value.toString();
                 break;
             case 1:
-                item.folderPath = value.toString();
+                item.parentDirPath = value.toString();
                 break;
             case 2:
-                item.itemType = value.value<TableItemType>();
+                item.oldName = value.toString();
                 break;
             case 3:
-                item.eventType = value.value<TableItemStatus>();
+                item.itemType = value.value<TableItemType>();
                 break;
             case 4:
+                item.eventType = value.value<TableItemStatus>();
+                break;
+            case 5:
                 item.timestamp = value.toDateTime();
                 break;
             default:
@@ -283,7 +298,8 @@ bool TableModelFileMonitor::removeRows(int position, int rows, const QModelIndex
 }
 
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFolderFrom(const QString &pathToFolder,
-                                                                            TableItemStatus status)
+                                                                            TableItemStatus status,
+                                                                            const QString &oldLocation)
 {
     QDir dir(pathToFolder);
     QString dirName = dir.dirName() + QDir::separator();
@@ -292,6 +308,7 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFolderFrom(cons
     TableModelFileMonitor::TableItem result {
         dirName,
         parentDirPath,
+        oldLocation,
         TableModelFileMonitor::TableItemType::Folder,
         status,
         QDateTime::currentDateTime()
@@ -301,13 +318,15 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFolderFrom(cons
 }
 
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemFileFrom(const QString &pathToFile,
-                                                                          TableItemStatus status)
+                                                                          TableItemStatus status,
+                                                                          const QString &oldLocation)
 {
     QFileInfo fileInfo(pathToFile);
     auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
     TableModelFileMonitor::TableItem result {
         fileInfo.fileName(),
         fileDir,
+        oldLocation,
         TableModelFileMonitor::TableItemType::File,
         status,
         QDateTime::currentDateTime()

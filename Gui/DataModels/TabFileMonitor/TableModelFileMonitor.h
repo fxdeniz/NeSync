@@ -30,7 +30,8 @@ public:
     struct TableItem
     {
         QString name;
-        QString folderPath;
+        QString parentDirPath;
+        QString oldName;
         TableItemType itemType;
         TableItemStatus eventType;
         QDateTime timestamp;
@@ -38,7 +39,7 @@ public:
 
         bool operator==(const TableItem &other) const
         {
-            return name == other.name && folderPath == other.folderPath;
+            return name == other.name && parentDirPath == other.parentDirPath;
         }
     };
 
@@ -48,12 +49,12 @@ public:
 
     static TableItem tableItemNewAddedFolderFrom(const QString &pathToFolder);
     static TableItem tableItemDeletedFolderFrom(const QString &pathToFolder);
-    static TableItem tableItemMovedFolderFrom(const QString &pathToFolder);
+    static TableItem tableItemMovedFolderFrom(const QString &pathToFolder, const QString &oldLocation);
     static TableItem tableItemNewAddedFileFrom(const QString &pathToFile);
     static TableItem tableItemDeletedFileFrom(const QString &pathToFile);
-    static TableItem tableItemMovedFileFrom(const QString &pathToFile);
+    static TableItem tableItemMovedFileFrom(const QString &pathToFile, const QString &oldLocation);
     static TableItem tableItemUpdatedFileFrom(const QString &pathToFile);
-    static TableItem tableItemMovedAndUpdatedFileFrom(const QString &pathToFile);
+    static TableItem tableItemMovedAndUpdatedFileFrom(const QString &pathToFile, const QString &oldLocation);
 
     // QAbstractTableModel interface
 public:
@@ -67,8 +68,8 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
 private:
-    static TableItem tableItemFolderFrom(const QString &pathToFolder, TableItemStatus status);
-    static TableItem tableItemFileFrom(const QString &pathToFile, TableItemStatus status);
+    static TableItem tableItemFolderFrom(const QString &pathToFolder, TableItemStatus status, const QString &oldLocation = "");
+    static TableItem tableItemFileFrom(const QString &pathToFile, TableItemStatus status, const QString &oldLocation = "");
 
 private:
     QList<TableItem> itemList;
