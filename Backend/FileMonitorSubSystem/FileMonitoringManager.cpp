@@ -156,7 +156,8 @@ QSet<QString> FileMonitoringManager::unPredictedFilesWithRespectTo(QString pathT
     while(iterator.hasNext())
         result.insert(iterator.next());
 
-    result.remove(pathToDirOrFile);
+    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
+    result.remove(standardizedPath);
 
     return result;
 }
