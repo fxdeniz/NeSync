@@ -97,25 +97,27 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
 
     for(const QString &currentPath : predictedItemList)
     {
+        auto standarizedPath = QDir::fromNativeSeparators(currentPath);
+
         QFileInfo info(currentPath);
 
         if(info.exists())
         {
             if(info.isFile())
             {
-                predictedFiles.insert(currentPath);
-                this->addTargetFromFilePath(currentPath);
+                predictedFiles.insert(standarizedPath);
+                this->addTargetFromFilePath(standarizedPath);
 
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
             }
             else if(info.isDir())
             {
-                predictedFolders.insert(currentPath);
-                this->addTargetFromDirPath(currentPath);
+                predictedFolders.insert(standarizedPath);
+                this->addTargetFromDirPath(standarizedPath);
 
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
             }
         }
         else
@@ -174,7 +176,8 @@ QSet<QString> FileMonitoringManager::unPredictedFoldersWithRespectTo(QString pat
     while(iterator.hasNext())
         result.insert(iterator.next());
 
-    result.remove(pathToDirOrFile);
+    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
+    result.remove(standardizedPath);
 
     return result;
 }
