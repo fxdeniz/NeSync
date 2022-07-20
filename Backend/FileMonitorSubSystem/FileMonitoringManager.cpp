@@ -543,11 +543,11 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
                     this->mddb.scheduleFileInDirAs(fileName, dir, MonitoredDirDb::MonitoredItemState::Moved);
                 }
             }
-            else
-            {
-                // If newly added file overwrites existing file then, consider that file modified
-                this->mddb.scheduleFileInDirAs(fileName, dir, MonitoredDirDb::MonitoredItemState::Modified);
-            }
+//            else
+//            {
+//                // If newly added file overwrites existing file then, consider that file modified
+//                this->mddb.scheduleFileInDirAs(fileName, dir, MonitoredDirDb::MonitoredItemState::Modified);
+//            }
 
             this->mddb.updateEventTimestampOfFileInDir(fileName, dir, QDateTime::currentDateTime());
         }
