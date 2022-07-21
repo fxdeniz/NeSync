@@ -141,6 +141,8 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 
         if(isFileExistInDb)
             item = TableModelFileMonitor::tableItemUpdatedFileFrom(_path);
+        else
+            item = TableModelFileMonitor::tableItemNewAddedFileFrom(_path);
 
         return item;
     });
