@@ -1,6 +1,8 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
+#include <QtConcurrent>
 #include <QFileInfo>
 #include <QDir>
 
@@ -124,8 +126,29 @@ void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
 
 void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 {
-    auto item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([&]{
+
+        QString _path(pathToFile);
+        TableModelFileMonitor::TableItem item;
+        auto fsm = FileStorageManager::instance();
+
+        bool isFileExistInDb = fsm->isFileExistByUserFilePath(_path);
+
+        if(isFileExistInDb)
+            item = TableModelFileMonitor::tableItemUpdatedFileFrom(_path);
+
+        return item;
+    });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
@@ -150,6 +173,19 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
 {
     auto item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile, oldFileName);
     addRowToTableViewFileMonitor(item);
+}
+
+void TabFileMonitor::slotRefreshTableViewFileMonitor()
+{
+    for(QFutureWatcher<TableModelFileMonitor::TableItem> *watcher : qAsConst(resultSet))
+    {
+        if(watcher->isFinished())
+        {
+            addRowToTableViewFileMonitor(watcher->result());
+            watcher->deleteLater();
+            resultSet.remove(watcher);
+        }
+    }
 }
 
 void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)

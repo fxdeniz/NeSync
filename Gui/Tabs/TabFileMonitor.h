@@ -1,6 +1,7 @@
 #ifndef TABFILEMONITOR_H
 #define TABFILEMONITOR_H
 
+#include <QFuture>
 #include <QWidget>
 
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h"
@@ -32,7 +33,11 @@ public slots:
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
-private:
+signals:
+    void signalTableItemReady(TableModelFileMonitor::TableItem item);
+
+private slots:
+    void slotRefreshTableViewFileMonitor();
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);
 
 private:
@@ -40,6 +45,7 @@ private:
     TableModelFileMonitor *tableModelFileMonitor;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
+    QSet<QFutureWatcher<TableModelFileMonitor::TableItem> *> resultSet;
 
 };
 
