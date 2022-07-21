@@ -48,6 +48,7 @@ QSharedPointer<FileStorageManager> FileStorageManager::instance()
     appDataDir += QDir::separator();
 
     auto backupDir = appDataDir + "backup" + QDir::separator();
+
     QDir dir;
     dir.mkdir(backupDir);
 

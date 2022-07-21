@@ -131,18 +131,17 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
     QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([&]{
+    auto future = QtConcurrent::run([=]{
 
-        QString _path(pathToFile);
         TableModelFileMonitor::TableItem item;
         auto fsm = FileStorageManager::instance();
 
-        bool isFileExistInDb = fsm->isFileExistByUserFilePath(_path);
+        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
 
         if(isFileExistInDb)
-            item = TableModelFileMonitor::tableItemUpdatedFileFrom(_path);
+            item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
         else
-            item = TableModelFileMonitor::tableItemNewAddedFileFrom(_path);
+            item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
 
         return item;
     });
@@ -155,8 +154,28 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 
 void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
 {
-    auto item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+
+        TableModelFileMonitor::TableItem item;
+        auto fsm = FileStorageManager::instance();
+
+        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
+
+        if(isFileExistInDb)
+            item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
+
+        return item;
+    });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
@@ -192,26 +211,29 @@ void TabFileMonitor::slotRefreshTableViewFileMonitor()
 
 void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)
 {
-    auto tableModel = this->tableModelFileMonitor;
-    tableModel->insertRows(0, 1, QModelIndex());
+    if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
+    {
+        auto tableModel = this->tableModelFileMonitor;
+        tableModel->insertRows(0, 1, QModelIndex());
 
-    QModelIndex index = tableModel->index(0, 0, QModelIndex());
-    tableModel->setData(index, item.name, Qt::EditRole);
+        QModelIndex index = tableModel->index(0, 0, QModelIndex());
+        tableModel->setData(index, item.name, Qt::EditRole);
 
-    index = tableModel->index(0, 1, QModelIndex());
-    tableModel->setData(index, item.parentDirPath, Qt::EditRole);
+        index = tableModel->index(0, 1, QModelIndex());
+        tableModel->setData(index, item.parentDirPath, Qt::EditRole);
 
-    index = tableModel->index(0, 2, QModelIndex());
-    tableModel->setData(index, item.oldName, Qt::EditRole);
+        index = tableModel->index(0, 2, QModelIndex());
+        tableModel->setData(index, item.oldName, Qt::EditRole);
 
-    index = tableModel->index(0, 3, QModelIndex());
-    tableModel->setData(index, item.itemType, Qt::EditRole);
+        index = tableModel->index(0, 3, QModelIndex());
+        tableModel->setData(index, item.itemType, Qt::EditRole);
 
-    index = tableModel->index(0, 4, QModelIndex());
-    tableModel->setData(index, item.eventType, Qt::EditRole);
+        index = tableModel->index(0, 4, QModelIndex());
+        tableModel->setData(index, item.status, Qt::EditRole);
 
-    index = tableModel->index(0, 5, QModelIndex());
-    tableModel->setData(index, item.timestamp, Qt::EditRole);
+        index = tableModel->index(0, 5, QModelIndex());
+        tableModel->setData(index, item.timestamp, Qt::EditRole);
 
-    ui->tableViewFileMonitor->resizeColumnsToContents();
+        ui->tableViewFileMonitor->resizeColumnsToContents();
+    }
 }

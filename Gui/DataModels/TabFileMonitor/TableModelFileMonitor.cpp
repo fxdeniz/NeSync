@@ -112,19 +112,19 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 else
                     return "NaN";
             case 4:
-                if(item.eventType == TableItemStatus::Updated)
+                if(item.status == TableItemStatus::Updated)
                     return tr("Updated");
-                else if(item.eventType == TableItemStatus::NewAdded)
+                else if(item.status == TableItemStatus::NewAdded)
                     return tr("New Added");
-                else if(item.eventType == TableItemStatus::Deleted)
+                else if(item.status == TableItemStatus::Deleted)
                     return tr("Deleted");
-                else if(item.eventType == TableItemStatus::Moved)
+                else if(item.status == TableItemStatus::Moved)
                     return tr("Moved");
-                else if(item.eventType == TableItemStatus::MovedAndUpdated)
+                else if(item.status == TableItemStatus::MovedAndUpdated)
                     return tr("Moved & Updated");
-                else if(item.eventType == TableItemStatus::Missing)
+                else if(item.status == TableItemStatus::Missing)
                     return tr("Missing");
-                else if(item.eventType == TableItemStatus::InvalidStatus)
+                else if(item.status == TableItemStatus::InvalidStatus)
                     return tr("Invalid");
                 else
                     return tr("NaN");
@@ -244,7 +244,7 @@ bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &va
                 item.itemType = value.value<TableItemType>();
                 break;
             case 4:
-                item.eventType = value.value<TableItemStatus>();
+                item.status = value.value<TableItemStatus>();
                 break;
             case 5:
                 item.timestamp = value.toDateTime();

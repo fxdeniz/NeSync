@@ -33,7 +33,7 @@ public:
         QString parentDirPath;
         QString oldName;
         TableItemType itemType;
-        TableItemStatus eventType;
+        TableItemStatus status = TableItemStatus::InvalidStatus;
         QDateTime timestamp;
 
 
