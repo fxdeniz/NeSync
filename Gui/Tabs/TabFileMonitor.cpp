@@ -158,8 +158,35 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 
 void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
 {
-    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
-    addRowToTableViewFileMonitor(item);
+    QDir parentDir = QFileInfo(pathToFolder).absoluteDir();
+    parentDir.cdUp();
+
+    auto pathToOldFolder = QDir::toNativeSeparators(parentDir.absolutePath()) + QDir::separator();
+    pathToOldFolder += oldFolderName + QDir::separator();
+
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+                      auto fsm = FileStorageManager::instance();
+                      bool isFolderExistInDb = fsm->isFolderExistByUserFolderPath(pathToOldFolder);
+                      return isFolderExistInDb;
+
+                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+                          TableModelFileMonitor::TableItem item;
+
+                          if(previous.result() == true)
+                              item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
+
+                          return item;
+                      });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
