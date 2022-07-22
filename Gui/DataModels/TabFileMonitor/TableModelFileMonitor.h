@@ -47,6 +47,8 @@ public:
     TableModelFileMonitor(QObject *parent = nullptr);
     TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
+    QList<TableItem> getItemList();
+
     static TableItem tableItemNewAddedFolderFrom(const QString &pathToFolder);
     static TableItem tableItemModifiedFolderFrom(const QString &pathToFolder);
     static TableItem tableItemDeletedFolderFrom(const QString &pathToFolder);

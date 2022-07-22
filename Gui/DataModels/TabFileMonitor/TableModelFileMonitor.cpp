@@ -15,6 +15,11 @@ TableModelFileMonitor::TableModelFileMonitor(const QList<TableItem> &_itemList, 
 {
 }
 
+QList<TableModelFileMonitor::TableItem> TableModelFileMonitor::getItemList()
+{
+    return itemList;
+}
+
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemNewAddedFolderFrom(const QString &pathToFolder)
 {
     return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::NewAdded);

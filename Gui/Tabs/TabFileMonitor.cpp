@@ -12,64 +12,8 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QList<TableModelFileMonitor::TableItem> sampleFileMonitorTableData;
-
-    sampleFileMonitorTableData.insert(0, {"first_file.txt",
-                                          "C:/Users/<USER>/AppData/Roaming/<APPNAME>/",
-                                          "old location here",
-                                          TableModelFileMonitor::TableItemType::File,
-                                          TableModelFileMonitor::TableItemStatus::Deleted,
-                                          QDateTime::currentDateTime()
-                                         });
-
-    sampleFileMonitorTableData.insert(1, {"second_file.zip",
-                                          "C:/Users/<USER>/Desktop/",
-                                          "old location here",
-                                          TableModelFileMonitor::TableItemType::File,
-                                          TableModelFileMonitor::TableItemStatus::Moved,
-                                          QDateTime::fromString("2021-03-19 10:40:30", "yyyy-MM-dd HH:mm:ss")
-                                         });
-
-    sampleFileMonitorTableData.insert(2, {"third_file.pdf",
-                                          "C:/Users/<USER>/Desktop/",
-                                          "old location here",
-                                          TableModelFileMonitor::TableItemType::File,
-                                          TableModelFileMonitor::TableItemStatus::Modified,
-                                          QDateTime::fromString("2019-12-27 03:50:00", "yyyy-MM-dd HH:mm:ss")
-                                         });
-
-    sampleFileMonitorTableData.insert(3, {"fourth_file.mp4",
-                                          "C:/Users/<USER>/Videos/",
-                                          "old location here",
-                                          TableModelFileMonitor::TableItemType::File,
-                                          TableModelFileMonitor::TableItemStatus::NewAdded,
-                                          QDateTime::fromString("2022-01-15 07:00:00", "yyyy-MM-dd HH:mm:ss")
-                                         });
-
-    //this->tableModelFileMonitor = new TableModelFileMonitor(sampleFileMonitorTableData, this);
-    this->tableModelFileMonitor = new TableModelFileMonitor(this);
-    this->ui->tableViewFileMonitor->setModel(this->tableModelFileMonitor);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
-    this->ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
-    this->ui->tableViewFileMonitor->resizeColumnsToContents();
-
     this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this->ui->tableViewFileMonitor);
     this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this->ui->tableViewFileMonitor);
-
-    for(int rowIndex = 0; rowIndex < sampleFileMonitorTableData.size(); rowIndex++)
-    {
-        int columnActionIndex = 4;
-        int columnNoteIndex = 5;
-
-        this->ui->tableViewFileMonitor->setItemDelegateForColumn(columnNoteIndex, this->comboBoxItemDelegateNote);
-        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, columnNoteIndex));
-
-
-        this->ui->tableViewFileMonitor->setItemDelegateForColumn(columnActionIndex, this->comboBoxItemDelegateFileAction);
-        this->ui->tableViewFileMonitor->openPersistentEditor(this->tableModelFileMonitor->index(rowIndex, columnActionIndex));
-    }
 }
 
 TabFileMonitor::~TabFileMonitor()
@@ -355,27 +299,35 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
 {
     if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
     {
-        auto tableModel = this->tableModelFileMonitor;
-        tableModel->insertRows(0, 1, QModelIndex());
+        TableModelFileMonitor *tableModel = (TableModelFileMonitor *) ui->tableViewFileMonitor->model();
 
-        QModelIndex index = tableModel->index(0, 0, QModelIndex());
-        tableModel->setData(index, item.name, Qt::EditRole);
+        if(tableModel == nullptr)
+        {
+            tableModel = new TableModelFileMonitor({item}, ui->tableViewFileMonitor);
+            ui->tableViewFileMonitor->setModel(tableModel);
+        }
+        else
+        {
+            QList<TableModelFileMonitor::TableItem> itemList = tableModel->getItemList();
+            bool isExist = itemList.contains(item);
 
-        index = tableModel->index(0, 1, QModelIndex());
-        tableModel->setData(index, item.parentDirPath, Qt::EditRole);
+            if(isExist)
+            {
+                auto index = itemList.indexOf(item);
+                itemList.replace(index, item);
+            }
+            else
+                itemList.append(item);
 
-        index = tableModel->index(0, 2, QModelIndex());
-        tableModel->setData(index, item.oldName, Qt::EditRole);
+            delete tableModel;
+            tableModel = new TableModelFileMonitor(itemList, ui->tableViewFileMonitor);
+            ui->tableViewFileMonitor->setModel(tableModel);
+        }
 
-        index = tableModel->index(0, 3, QModelIndex());
-        tableModel->setData(index, item.itemType, Qt::EditRole);
-
-        index = tableModel->index(0, 4, QModelIndex());
-        tableModel->setData(index, item.status, Qt::EditRole);
-
-        index = tableModel->index(0, 5, QModelIndex());
-        tableModel->setData(index, item.timestamp, Qt::EditRole);
-
+        ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
+        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
         ui->tableViewFileMonitor->resizeColumnsToContents();
     }
 }

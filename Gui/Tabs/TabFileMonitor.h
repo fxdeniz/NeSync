@@ -42,7 +42,6 @@ private slots:
 
 private:
     Ui::TabFileMonitor *ui;
-    TableModelFileMonitor *tableModelFileMonitor;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<TableModelFileMonitor::TableItem> *> resultSet;
