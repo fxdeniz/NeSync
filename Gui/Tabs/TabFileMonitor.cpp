@@ -186,8 +186,29 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
-    auto item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+        auto fsm = FileStorageManager::instance();
+        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
+        return isFileExistInDb;
+
+    }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+        TableModelFileMonitor::TableItem item;
+
+        if(previous.result() == true)
+            item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
+
+        return item;
+    });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
