@@ -14,9 +14,9 @@ public:
         InvalidStatus,
         Missing,
         NewAdded,
-        Updated,
+        Modified,
         Moved,
-        MovedAndUpdated,
+        MovedAndModified,
         Deleted
     };
 
@@ -48,13 +48,14 @@ public:
     TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
     static TableItem tableItemNewAddedFolderFrom(const QString &pathToFolder);
+    static TableItem tableItemModifiedFolderFrom(const QString &pathToFolder);
     static TableItem tableItemDeletedFolderFrom(const QString &pathToFolder);
     static TableItem tableItemMovedFolderFrom(const QString &pathToFolder, const QString &oldLocation);
     static TableItem tableItemNewAddedFileFrom(const QString &pathToFile);
     static TableItem tableItemDeletedFileFrom(const QString &pathToFile);
     static TableItem tableItemMovedFileFrom(const QString &pathToFile, const QString &oldLocation);
-    static TableItem tableItemUpdatedFileFrom(const QString &pathToFile);
-    static TableItem tableItemMovedAndUpdatedFileFrom(const QString &pathToFile, const QString &oldLocation);
+    static TableItem tableItemModifiedFileFrom(const QString &pathToFile);
+    static TableItem tableItemMovedAndModifiedFileFrom(const QString &pathToFile, const QString &oldLocation);
 
     // QAbstractTableModel interface
 public:

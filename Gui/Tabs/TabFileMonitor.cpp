@@ -34,7 +34,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
                                           "C:/Users/<USER>/Desktop/",
                                           "old location here",
                                           TableModelFileMonitor::TableItemType::File,
-                                          TableModelFileMonitor::TableItemStatus::Updated,
+                                          TableModelFileMonitor::TableItemStatus::Modified,
                                           QDateTime::fromString("2019-12-27 03:50:00", "yyyy-MM-dd HH:mm:ss")
                                          });
 
@@ -102,8 +102,31 @@ void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder
 
 void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 {
-    auto item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+                      auto fsm = FileStorageManager::instance();
+                      bool isFolderExistInDb = fsm->isFolderExistByUserFolderPath(pathToFolder);
+                      return isFolderExistInDb;
+
+                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+                          TableModelFileMonitor::TableItem item;
+
+                          if(previous.result() == true)
+                              item = TableModelFileMonitor::tableItemModifiedFolderFrom(pathToFolder);
+                          else
+                              item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
+
+                          return item;
+                      });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
@@ -139,7 +162,7 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
         bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
 
         if(isFileExistInDb)
-            item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
+            item = TableModelFileMonitor::tableItemModifiedFileFrom(pathToFile);
         else
             item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
 
@@ -225,7 +248,7 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
         TableModelFileMonitor::TableItem item;
 
         if(previous.result() == true)
-            item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
+            item = TableModelFileMonitor::tableItemModifiedFileFrom(pathToFile);
 
         return item;
     });
@@ -256,7 +279,7 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
                           TableModelFileMonitor::TableItem item;
 
                           if(previous.result() == true)
-                              item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile, oldFileName);
+                              item = TableModelFileMonitor::tableItemMovedAndModifiedFileFrom(pathToFile, oldFileName);
 
                           return item;
                       });

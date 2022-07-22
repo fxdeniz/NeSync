@@ -403,6 +403,24 @@ bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) 
     return queryResult;
 }
 
+bool FileStorageManager::isFolderExistByUserFolderPath(const QString &userFolderPath) const
+{
+    bool result = false;
+    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromAllFiles();
+
+    // TODO: Replace for loop with db query.
+    for(const QString &currentPath : queryResult)
+    {
+        if(userFolderPath == currentPath)
+        {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
 QStringList FileStorageManager::getMonitoredFilePathList() const
 {
     auto queryResult = QueryFileRecord(this->db).selectUserFilePathListFromActiveFiles();

@@ -105,6 +105,31 @@ QStringList QueryFileRecord::selectUserFolderPathListFromActiveFiles() const
     return result;
 }
 
+QStringList QueryFileRecord::selectUserFolderPathListFromAllFiles() const
+{
+    QStringList result;
+
+    QString columnName = "result_column";
+    QString queryTemplate = "SELECT DISTINCT %1 AS %2 FROM %3 WHERE %1 IS NOT NULL;" ;
+
+    queryTemplate = queryTemplate.arg(TABLE_FILE_RECORD_COLNAME_USER_DIRECTORY,  // 1
+                                      columnName,                                // 2
+                                      this->getTableName());                     // 3
+
+    QSqlQuery query(this->getDb());
+    query.prepare(queryTemplate);
+
+    query.exec();
+
+    while(query.next())
+    {
+        QString item = query.record().value(columnName).toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
 QList<PtrTo_RowFileRecord> QueryFileRecord::selectFavoriteFileList() const
 {
     QList< PtrTo_RowFileRecord> result;

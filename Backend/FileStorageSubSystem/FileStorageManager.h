@@ -54,6 +54,7 @@ public:
     void incrementSaveGroupNumber();
 
     bool isFileExistByUserFilePath(const QString &userFilePath) const;
+    bool isFolderExistByUserFolderPath(const QString &userFolderPath) const;
 
     QStringList getMonitoredFilePathList() const;
     QStringList getMonitoredFolderPathList() const;

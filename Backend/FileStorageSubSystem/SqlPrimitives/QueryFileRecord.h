@@ -20,6 +20,7 @@ public:
 
     QStringList selectUserFilePathListFromActiveFiles() const;
     QStringList selectUserFolderPathListFromActiveFiles() const;
+    QStringList selectUserFolderPathListFromAllFiles() const;
     QList<PtrTo_RowFileRecord> selectFavoriteFileList() const;
     QList<PtrTo_RowFileRecord> selectRowsBySymbolDirectory(const QString &symbolDirectory) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFileName(const QString &searchTerm) const;

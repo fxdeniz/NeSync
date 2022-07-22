@@ -20,6 +20,11 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemNewAddedFolderF
     return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::NewAdded);
 }
 
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemModifiedFolderFrom(const QString &pathToFolder)
+{
+    return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Modified);
+}
+
 TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemDeletedFolderFrom(const QString &pathToFolder)
 {
     return TableModelFileMonitor::tableItemFolderFrom(pathToFolder, TableItemStatus::Deleted);
@@ -47,15 +52,15 @@ TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedFileFrom(c
     return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Moved, oldLocation);
 }
 
-TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemUpdatedFileFrom(const QString &pathToFile)
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemModifiedFileFrom(const QString &pathToFile)
 {
-    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Updated);
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::Modified);
 }
 
-TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(const QString &pathToFile,
+TableModelFileMonitor::TableItem TableModelFileMonitor::tableItemMovedAndModifiedFileFrom(const QString &pathToFile,
                                                                                          const QString &oldLocation)
 {
-    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::MovedAndUpdated, oldLocation);
+    return TableModelFileMonitor::tableItemFileFrom(pathToFile, TableItemStatus::MovedAndModified, oldLocation);
 }
 
 int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
@@ -112,7 +117,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 else
                     return "NaN";
             case 4:
-                if(item.status == TableItemStatus::Updated)
+                if(item.status == TableItemStatus::Modified)
                     return tr("Updated");
                 else if(item.status == TableItemStatus::NewAdded)
                     return tr("New Added");
@@ -120,7 +125,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                     return tr("Deleted");
                 else if(item.status == TableItemStatus::Moved)
                     return tr("Moved");
-                else if(item.status == TableItemStatus::MovedAndUpdated)
+                else if(item.status == TableItemStatus::MovedAndModified)
                     return tr("Moved & Updated");
                 else if(item.status == TableItemStatus::Missing)
                     return tr("Missing");
