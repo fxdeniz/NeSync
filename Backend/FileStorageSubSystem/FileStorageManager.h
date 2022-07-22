@@ -71,7 +71,7 @@ public:
     static const QString &rootFolderPath();
     bool addNewFolder(const QString &directory);
     bool markFolderAsFavorite(const QString &directory, bool status);
-    bool isFolderExist(const QString &directory) const;
+    bool isFolderSymbolExist(const QString &directory) const;
     bool deleteFolder(const QString &directory);
     bool renameFolder(const QString &directory, const QString &newSuffix);
 

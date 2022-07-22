@@ -570,7 +570,7 @@ bool FileStorageManager::addNewFolder(const QString &directory)
     if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
         dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
 
-    if(!this->isFolderExist(dir))
+    if(!this->isFolderSymbolExist(dir))
     {
         dir.truncate(dir.lastIndexOf(CONST_SYMBOL_DIRECTORY_SEPARATOR));
 
@@ -619,7 +619,7 @@ bool FileStorageManager::markFolderAsFavorite(const QString &directory, bool sta
     return result;
 }
 
-bool FileStorageManager::isFolderExist(const QString &directory) const
+bool FileStorageManager::isFolderSymbolExist(const QString &directory) const
 {
     QString dir = directory;
 

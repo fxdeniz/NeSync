@@ -131,8 +131,29 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 
 void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 {
-    auto item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+                      auto fsm = FileStorageManager::instance();
+                      bool isFolderExistInDb = fsm->isFolderExistByUserFolderPath(pathToFolder);
+                      return isFolderExistInDb;
+
+                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+                          TableModelFileMonitor::TableItem item;
+
+                          if(previous.result() == true)
+                              item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
+
+                          return item;
+                      });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)

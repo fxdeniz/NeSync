@@ -42,7 +42,7 @@ void DialogAddNewFolder::on_pushButton_clicked()
     auto fsm = FileStorageManager::instance();
     QString lineEditText = ui->lineEdit->text();
     auto newFolderPath = parentFolderPath + lineEditText + FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
-    bool isFolderExist = fsm->isFolderExist(newFolderPath);
+    bool isFolderExist = fsm->isFolderSymbolExist(newFolderPath);
 
     if(lineEditText.isEmpty() || lineEditText.isNull())
     {
