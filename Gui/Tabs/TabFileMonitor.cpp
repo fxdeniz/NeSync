@@ -180,8 +180,35 @@ void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
 
 void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
 {
-    auto item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile, oldFileName);
-    addRowToTableViewFileMonitor(item);
+    QString pathToOldFile = QFileInfo(pathToFile).absolutePath();
+    pathToOldFile = QDir::toNativeSeparators(pathToOldFile) + QDir::separator();
+    pathToOldFile += oldFileName;
+
+    qDebug() << "pathToOldFile = " << pathToOldFile;
+
+    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+    resultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    auto future = QtConcurrent::run([=]{
+                      auto fsm = FileStorageManager::instance();
+                      bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToOldFile);
+                      return isFileExistInDb;
+
+                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+                          TableModelFileMonitor::TableItem item;
+
+                          if(previous.result() == true)
+                              item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile, oldFileName);
+
+                          return item;
+                      });
+
+    watcher->setFuture(future);
+
+//    auto item = TableModelFileMonitor::tableItemMovedFileFrom(pathToFile, oldFileName);
+//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
