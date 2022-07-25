@@ -53,6 +53,7 @@ private:
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<TableModelFileMonitor::TableItem> *> resultSet;
+    QSet<QFutureWatcher<void> *> newResultSet;
 
 };
 

@@ -239,9 +239,30 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
-    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+//    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
+//    resultSet.insert(watcher);
+//    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+//                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+//    auto future = QtConcurrent::run([=]{
+//        auto fsm = FileStorageManager::instance();
+//        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
+//        return isFileExistInDb;
+
+//    }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
+//        TableModelFileMonitor::TableItem item;
+
+//        if(previous.result() == true)
+//            item = TableModelFileMonitor::tableItemModifiedFileFrom(pathToFile);
+
+//        return item;
+//    });
+
+//    watcher->setFuture(future);
+
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
     auto future = QtConcurrent::run([=]{
@@ -253,9 +274,18 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
         TableModelFileMonitor::TableItem item;
 
         if(previous.result() == true)
-            item = TableModelFileMonitor::tableItemModifiedFileFrom(pathToFile);
+        {
+            QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+            QSqlDatabase db = QSqlDatabase::cloneDatabase(dbConnectionName(), newConnectionName);
+            db.open();
 
-        return item;
+            QString queryTemplate = "INSERT INTO TableItem(\"parent_dir\", \"name\", \"type\", \"status\", \"timestamp\") "
+                                    "VALUES(\"Location\", \"data.txt\", \"1\", \"2\", \"date_time_here\");";
+
+            QSqlQuery insertQuery(db);
+            insertQuery.prepare(queryTemplate);
+            insertQuery.exec();
+        }
     });
 
     watcher->setFuture(future);
@@ -297,13 +327,24 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
 
 void TabFileMonitor::slotRefreshTableViewFileMonitor()
 {
-    for(QFutureWatcher<TableModelFileMonitor::TableItem> *watcher : qAsConst(resultSet))
+//    for(QFutureWatcher<TableModelFileMonitor::TableItem> *watcher : qAsConst(resultSet))
+//    {
+//        if(watcher->isFinished())
+//        {
+//            addRowToTableViewFileMonitor(watcher->result());
+//            watcher->deleteLater();
+//            resultSet.remove(watcher);
+//        }
+//    }
+
+    for(QFutureWatcher<void> *watcher : qAsConst(newResultSet))
     {
         if(watcher->isFinished())
         {
-            addRowToTableViewFileMonitor(watcher->result());
+            TableModelFileMonitor::TableItem dummy;
+            addRowToTableViewFileMonitor(dummy);
             watcher->deleteLater();
-            resultSet.remove(watcher);
+            newResultSet.remove(watcher);
         }
     }
 }
