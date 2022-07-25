@@ -240,27 +240,6 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
-//    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-//    resultSet.insert(watcher);
-//    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
-//                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
-
-//    auto future = QtConcurrent::run([=]{
-//        auto fsm = FileStorageManager::instance();
-//        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
-//        return isFileExistInDb;
-
-//    }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
-//        TableModelFileMonitor::TableItem item;
-
-//        if(previous.result() == true)
-//            item = TableModelFileMonitor::tableItemModifiedFileFrom(pathToFile);
-
-//        return item;
-//    });
-
-//    watcher->setFuture(future);
-
     auto *watcher = new QFutureWatcher<void>(this);
     newResultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
@@ -278,21 +257,20 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 
             if(isExistInModelDb)
             {
-                qDebug() << "will update the file row";
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
             }
             else
             {
-                std::function<void (QString, QString)> lambdaInsertIntoModelDb;
-                lambdaInsertIntoModelDb = LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb();
-                lambdaInsertIntoModelDb(dbConnectionName(), pathToFile);
+                std::function<void (QString, QString)> lambdaInsert;
+                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb();
+                lambdaInsert(dbConnectionName(), pathToFile);
             }
         }
     });
 
     watcher->setFuture(future);
-
-//    auto item = TableModelFileMonitor::tableItemUpdatedFileFrom(pathToFile);
-//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)

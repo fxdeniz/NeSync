@@ -1,6 +1,5 @@
 #include "LambdaFactoryTabFileMonitor.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
-#include "DataModels/TabFileMonitor/V2TableModelFileMonitor.h"
 
 #include <QFileInfo>
 #include <QUuid>
@@ -9,6 +8,7 @@
 std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb()
 {
     return [](QString pathToFile) -> bool{
+
         auto fsm = FileStorageManager::instance();
         bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
         return isFileExistInDb;
@@ -17,7 +17,7 @@ std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb
 
 std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFileRowExistInModelDb()
 {
-    return [] (QString connectionName, QString pathToFile) {
+    return [] (QString connectionName, QString pathToFile) -> bool {
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -47,7 +47,7 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
 
 std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchFileRowFromModelDb()
 {
-    return [] (QString connectionName, QString pathToFile) {
+    return [] (QString connectionName, QString pathToFile) -> QSqlQuery {
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -69,6 +69,7 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
 std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb()
 {
     return [](QString connectionName, QString pathToFile){
+
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
@@ -95,5 +96,30 @@ std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaInsert
         insertQuery.bindValue(":5", V2TableModelFileMonitor::TableItemStatus::Modified);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
         insertQuery.exec();
+    };
+}
+
+std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb()
+{
+    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3 WHERE %4 = :4;" ;
+
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,              // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_STATUS,      // 2
+                                          V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,   // 3
+                                          pathToFile);                                      // 4
+
+        QSqlQuery updateQuery(db);
+        updateQuery.prepare(queryTemplate);
+
+        updateQuery.bindValue(":2", status);
+        updateQuery.bindValue(":3", QDateTime::currentDateTime());
+        updateQuery.bindValue(":4", pathToFile);
+        updateQuery.exec();
     };
 }
