@@ -3,6 +3,7 @@
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QtConcurrent>
+#include <QSqlQuery>
 #include <QFileInfo>
 #include <QDir>
 
@@ -11,6 +12,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui(new Ui::TabFileMonitor)
 {
     ui->setupUi(this);
+    createDb();
 
     this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this->ui->tableViewFileMonitor);
     this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this->ui->tableViewFileMonitor);
@@ -19,6 +21,16 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 TabFileMonitor::~TabFileMonitor()
 {
     delete ui;
+}
+
+QString TabFileMonitor::dbConnectionName()
+{
+    return "TabFileMonitorSqlFile";
+}
+
+QString TabFileMonitor::dbFileName()
+{
+    return "file:TabFileMonitorSqlFile?mode=memory&cache=shared";
 }
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
@@ -330,4 +342,30 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
         ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
         ui->tableViewFileMonitor->resizeColumnsToContents();
     }
+}
+
+void TabFileMonitor::createDb()
+{
+    db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName());
+    db.setConnectOptions("QSQLITE_OPEN_URI;QSQLITE_ENABLE_SHARED_CACHE");
+
+    db.setDatabaseName(dbFileName());
+    db.open();
+
+    QString queryString = "CREATE TABLE \"TableItem\" (";
+    queryString += " \"name\" TEXT NOT NULL,";
+    queryString += " \"parent_dir\" TEXT NOT NULL,";
+    queryString += " \"path\" TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (\"parent_dir\" || \"name\") VIRTUAL,";
+    queryString += " \"old_name\" TEXT,";
+    queryString += " \"type\" INTEGER NOT NULL CHECK(\"type\" >= 0 AND \"type\" <= 2),";
+    queryString += " \"status\"	INTEGER NOT NULL CHECK(\"status\" >= 0 AND \"status\" <= 6),";
+    queryString += " \"timestamp\" TEXT NOT NULL,";
+    queryString += " \"action\"	INTEGER,";
+    queryString += " \"note_number\" INTEGER,";
+    queryString += " PRIMARY KEY(\"parent_dir\", \"name\")";
+    queryString += ");";
+
+    QSqlQuery query(db);
+    query.prepare(queryString);
+    query.exec();
 }

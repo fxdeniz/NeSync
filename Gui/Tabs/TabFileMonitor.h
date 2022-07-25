@@ -1,6 +1,7 @@
 #ifndef TABFILEMONITOR_H
 #define TABFILEMONITOR_H
 
+#include <QSqlDatabase>
 #include <QFuture>
 #include <QWidget>
 
@@ -19,6 +20,9 @@ class TabFileMonitor : public QWidget
 public:
     explicit TabFileMonitor(QWidget *parent = nullptr);
     ~TabFileMonitor();
+
+    static QString dbConnectionName();
+    static QString dbFileName();
 
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFile);
@@ -41,7 +45,11 @@ private slots:
     void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);
 
 private:
+    void createDb();
+
+private:
     Ui::TabFileMonitor *ui;
+    QSqlDatabase db;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<TableModelFileMonitor::TableItem> *> resultSet;
