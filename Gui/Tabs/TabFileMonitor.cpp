@@ -362,8 +362,12 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
 
     ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
-    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
+
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::Name,
+                                                                       QHeaderView::ResizeMode::Interactive);
+
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::ParentDir,
+                                                                       QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
 
 

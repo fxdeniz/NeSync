@@ -18,21 +18,23 @@ QVariant V2TableModelFileMonitor::headerData(int section, Qt::Orientation orient
     {
         switch (section)
         {
-        case 0:
+        case ColumnIndex::Name:
             return tr("Name");
-        case 1:
+        case ColumnIndex::ParentDir:
             return tr("Location");
-        case 2:
+        case ColumnIndex::Path:
+            return tr("Path");
+        case ColumnIndex::OldName:
             return tr("Old Name");
-        case 3:
+        case ColumnIndex::Type:
             return tr("Type");
-        case 4:
+        case ColumnIndex::Status:
             return tr("Status");
-        case 5:
+        case ColumnIndex::Timestamp:
             return tr("Timestamp");
-        case 6:
+        case ColumnIndex::Action:
             return tr("Action");
-        case 7:
+        case ColumnIndex::NoteNumber:
             return tr("Note");
         default:
             break;
@@ -47,16 +49,19 @@ QVariant V2TableModelFileMonitor::data(const QModelIndex &index, int role) const
 
     if (value.isValid() && role == Qt::DisplayRole)
     {
-        if (index.column() == 0)
+        if (index.column() == ColumnIndex::Name)
             return value.toString();
 
-        else if (index.column() == 1)
+        else if (index.column() == ColumnIndex::ParentDir)
             return value.toString();
 
-        else if(index.column() == 2)
+        else if(index.column() == ColumnIndex::Path)
             return value.toString();
 
-        else if(index.column() == 3)
+        else if(index.column() == ColumnIndex::OldName)
+            return value.toString();
+
+        else if(index.column() == ColumnIndex::Type)
         {
             if(value.value<TableItemType>() == TableItemType::File)
                 return tr("File");
@@ -65,7 +70,7 @@ QVariant V2TableModelFileMonitor::data(const QModelIndex &index, int role) const
             else
                 return "NaN";
         }
-        else if(index.column() == 4)
+        else if(index.column() == ColumnIndex::Status)
         {
             if(value.value<TableItemStatus>() == TableItemStatus::Modified)
                 return tr("Updated");
@@ -91,7 +96,7 @@ QVariant V2TableModelFileMonitor::data(const QModelIndex &index, int role) const
             else
                 return tr("NaN");
         }
-        else if(index.column() == 5)
+        else if(index.column() == ColumnIndex::Timestamp)
             return value.toDateTime();
     }
 

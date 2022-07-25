@@ -7,6 +7,19 @@ class V2TableModelFileMonitor : public QSqlQueryModel
 {
     Q_OBJECT
 public:
+    enum ColumnIndex
+    {
+        Name,
+        ParentDir,
+        Path,
+        OldName,
+        Type,
+        Status,
+        Timestamp,
+        Action,
+        NoteNumber
+    };
+
     enum TableItemStatus
     {
         InvalidStatus,
