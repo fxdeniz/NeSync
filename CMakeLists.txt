@@ -71,8 +71,8 @@ set(PROJECT_SOURCES
         Gui/DataModels/TabFileExplorer/ListModelFileExplorer.h
         Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
         #
-        Gui/Tasks/TabFileMonitorLambdaFactory.h
-        Gui/Tasks/TabFileMonitorLambdaFactory.cpp
+        Gui/Tasks/LambdaFactoryTabFileMonitor.h
+        Gui/Tasks/LambdaFactoryTabFileMonitor.cpp
     #
 
     # TabFileMonitor

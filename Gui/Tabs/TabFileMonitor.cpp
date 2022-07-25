@@ -1,6 +1,6 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
-#include "Tasks/TabFileMonitorLambdaFactory.h"
+#include "Tasks/LambdaFactoryTabFileMonitor.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "DataModels/TabFileMonitor/V2TableModelFileMonitor.h"
 
@@ -266,35 +266,26 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    QFuture<void> future = QtConcurrent::run([=, &future]{
+    QFuture<void> future = QtConcurrent::run([=]{
 
-            std::function<bool (QString)> lambda = TabFileMonitorLambdaFactory::lambdaIsFileExistInDb();
-            bool result =  lambda(pathToFile);
-            if(result == false)
-                future.cancel();
-
-       }).then(QtFuture::Launch::Inherit, [=]{
-
-            std::function<QSqlQuery (QString, QString)> lambda;
-            lambda = TabFileMonitorLambdaFactory::lambdaFetchFileRowFromModelDb();
-            QSqlQuery result = lambda(dbConnectionName(), pathToFile);
-            return result;
-
-     }).then(QtFuture::Launch::Inherit, [=](QFuture<QSqlQuery> previous){
-
-        qDebug() << "executed query = " << previous.result().executedQuery();
-        qDebug() << "size = " << previous.result().size();
-        qDebug() << "error = " << previous.result().lastError();
-
-        if(previous.result().size() == -1)
+        std::function<bool (QString)> lambdaIsExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
+        bool isExistInDb = lambdaIsExistInDb(pathToFile);
+        if(isExistInDb == true)
         {
-            std::function<void (QString, QString)> lambda;
-            lambda = TabFileMonitorLambdaFactory::lambdaInsertModifiedFileIntoModelDb();
-            lambda(dbConnectionName(), pathToFile);
-        }
-        else
-        {
-            qDebug() << "will insert into table";
+            std::function<bool (QString, QString)> lambdaIsExistInModelDb;
+            lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsFileRowExistInModelDb();
+            bool isExistInModelDb = lambdaIsExistInModelDb(dbConnectionName(), pathToFile);
+
+            if(isExistInModelDb)
+            {
+                qDebug() << "will update the file row";
+            }
+            else
+            {
+                std::function<void (QString, QString)> lambdaInsertIntoModelDb;
+                lambdaInsertIntoModelDb = LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb();
+                lambdaInsertIntoModelDb(dbConnectionName(), pathToFile);
+            }
         }
     });
 
