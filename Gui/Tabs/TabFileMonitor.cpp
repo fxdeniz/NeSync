@@ -1,6 +1,7 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
+#include "DataModels/TabFileMonitor/V2TableModelFileMonitor.h"
 
 #include <QtConcurrent>
 #include <QSqlQuery>
@@ -309,39 +310,55 @@ void TabFileMonitor::slotRefreshTableViewFileMonitor()
 
 void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)
 {
-    if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
+    V2TableModelFileMonitor *tableModel = (V2TableModelFileMonitor *) ui->tableViewFileMonitor->model();
+
+    if(tableModel == nullptr)
     {
-        TableModelFileMonitor *tableModel = (TableModelFileMonitor *) ui->tableViewFileMonitor->model();
-
-        if(tableModel == nullptr)
-        {
-            tableModel = new TableModelFileMonitor({item}, ui->tableViewFileMonitor);
-            ui->tableViewFileMonitor->setModel(tableModel);
-        }
-        else
-        {
-            QList<TableModelFileMonitor::TableItem> itemList = tableModel->getItemList();
-            bool isExist = itemList.contains(item);
-
-            if(isExist)
-            {
-                auto index = itemList.indexOf(item);
-                itemList.replace(index, item);
-            }
-            else
-                itemList.append(item);
-
-            delete tableModel;
-            tableModel = new TableModelFileMonitor(itemList, ui->tableViewFileMonitor);
-            ui->tableViewFileMonitor->setModel(tableModel);
-        }
-
-        ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
-        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
-        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
-        ui->tableViewFileMonitor->resizeColumnsToContents();
+        tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
+        ui->tableViewFileMonitor->setModel(tableModel);
+        tableModel->setQuery("SELECT * FROM TableItem;", db);
     }
+
+    ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
+    ui->tableViewFileMonitor->resizeColumnsToContents();
+
+
+//    if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
+//    {
+//        TableModelFileMonitor *tableModel = (TableModelFileMonitor *) ui->tableViewFileMonitor->model();
+
+//        if(tableModel == nullptr)
+//        {
+//            tableModel = new TableModelFileMonitor({item}, ui->tableViewFileMonitor);
+//            ui->tableViewFileMonitor->setModel(tableModel);
+//        }
+//        else
+//        {
+//            QList<TableModelFileMonitor::TableItem> itemList = tableModel->getItemList();
+//            bool isExist = itemList.contains(item);
+
+//            if(isExist)
+//            {
+//                auto index = itemList.indexOf(item);
+//                itemList.replace(index, item);
+//            }
+//            else
+//                itemList.append(item);
+
+//            delete tableModel;
+//            tableModel = new TableModelFileMonitor(itemList, ui->tableViewFileMonitor);
+//            ui->tableViewFileMonitor->setModel(tableModel);
+//        }
+
+//        ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
+//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
+//        ui->tableViewFileMonitor->resizeColumnsToContents();
+//    }
 }
 
 void TabFileMonitor::createDb()
