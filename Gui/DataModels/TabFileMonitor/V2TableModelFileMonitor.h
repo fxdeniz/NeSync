@@ -7,6 +7,17 @@ class V2TableModelFileMonitor : public QSqlQueryModel
 {
     Q_OBJECT
 public:
+    static const QString TABLE_NAME;
+    static const QString COLUMN_NAME_NAME;
+    static const QString COLUMN_NAME_PARENT_DIR;
+    static const QString COLUMN_NAME_PATH;
+    static const QString COLUMN_NAME_OLD_NAME;
+    static const QString COLUMN_NAME_TYPE;
+    static const QString COLUMN_NAME_STATUS;
+    static const QString COLUMN_NAME_TIMESTAMP;
+    static const QString COLUMN_NAME_ACTION;
+    static const QString COLUMN_NAME_NOTE_NUMBER;
+
     enum ColumnIndex
     {
         Name,

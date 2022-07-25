@@ -1,5 +1,6 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
+#include "Tasks/TabFileMonitorLambdaFactory.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "DataModels/TabFileMonitor/V2TableModelFileMonitor.h"
 
@@ -265,26 +266,35 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([=]{
-        auto fsm = FileStorageManager::instance();
-        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
-        return isFileExistInDb;
+    QFuture<void> future = QtConcurrent::run([=, &future]{
 
-    }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
-        TableModelFileMonitor::TableItem item;
+            std::function<bool (QString)> lambda = TabFileMonitorLambdaFactory::lambdaIsFileExistInDb();
+            bool result =  lambda(pathToFile);
+            if(result == false)
+                future.cancel();
 
-        if(previous.result() == true)
+       }).then(QtFuture::Launch::Inherit, [=]{
+
+            std::function<QSqlQuery (QString, QString)> lambda;
+            lambda = TabFileMonitorLambdaFactory::lambdaFetchFileRowFromModelDb();
+            QSqlQuery result = lambda(dbConnectionName(), pathToFile);
+            return result;
+
+     }).then(QtFuture::Launch::Inherit, [=](QFuture<QSqlQuery> previous){
+
+        qDebug() << "executed query = " << previous.result().executedQuery();
+        qDebug() << "size = " << previous.result().size();
+        qDebug() << "error = " << previous.result().lastError();
+
+        if(previous.result().size() == -1)
         {
-            QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-            QSqlDatabase db = QSqlDatabase::cloneDatabase(dbConnectionName(), newConnectionName);
-            db.open();
-
-            QString queryTemplate = "INSERT INTO TableItem(\"parent_dir\", \"name\", \"type\", \"status\", \"timestamp\") "
-                                    "VALUES(\"Location\", \"data.txt\", \"1\", \"2\", \"date_time_here\");";
-
-            QSqlQuery insertQuery(db);
-            insertQuery.prepare(queryTemplate);
-            insertQuery.exec();
+            std::function<void (QString, QString)> lambda;
+            lambda = TabFileMonitorLambdaFactory::lambdaInsertModifiedFileIntoModelDb();
+            lambda(dbConnectionName(), pathToFile);
+        }
+        else
+        {
+            qDebug() << "will insert into table";
         }
     });
 
@@ -411,7 +421,13 @@ void TabFileMonitor::createDb()
     db = QSqlDatabase::addDatabase("QSQLITE", dbConnectionName());
     db.setConnectOptions("QSQLITE_OPEN_URI;QSQLITE_ENABLE_SHARED_CACHE");
 
-    db.setDatabaseName(dbFileName());
+//    db.setDatabaseName(dbFileName());
+
+    auto path = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+    path = QDir::toNativeSeparators(path) + QDir::separator();
+    path += "tableMonitor.db";
+    db.setDatabaseName(path);
+
     db.open();
 
     QString queryString = "CREATE TABLE \"TableItem\" (";

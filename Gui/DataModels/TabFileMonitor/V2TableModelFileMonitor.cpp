@@ -3,10 +3,20 @@
 #include <QColor>
 #include <QDateTime>
 
+const QString V2TableModelFileMonitor::TABLE_NAME = "TableItem";
+const QString V2TableModelFileMonitor::COLUMN_NAME_NAME = "name";
+const QString V2TableModelFileMonitor::COLUMN_NAME_PARENT_DIR = "parent_dir";
+const QString V2TableModelFileMonitor::COLUMN_NAME_PATH = "path";
+const QString V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME = "old_name";
+const QString V2TableModelFileMonitor::COLUMN_NAME_TYPE = "type";
+const QString V2TableModelFileMonitor::COLUMN_NAME_STATUS = "status";
+const QString V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP = "timestamp";
+const QString V2TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
+const QString V2TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
+
 V2TableModelFileMonitor::V2TableModelFileMonitor(QObject *parent)
     : QSqlQueryModel(parent)
 {
-
 }
 
 QVariant V2TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
