@@ -340,11 +340,12 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
 {
     V2TableModelFileMonitor *tableModel = (V2TableModelFileMonitor *) ui->tableViewFileMonitor->model();
 
-    if(tableModel != nullptr)
-        delete tableModel;
+    if(tableModel == nullptr)
+    {
+        tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
+        ui->tableViewFileMonitor->setModel(tableModel);
+    }
 
-    tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
-    ui->tableViewFileMonitor->setModel(tableModel);
     tableModel->setQuery("SELECT * FROM TableItem;", db);
 
     ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
