@@ -109,10 +109,10 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
 
         QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3 WHERE %4 = :4;" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,              // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_STATUS,      // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,   // 3
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);       // 4
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,            // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_STATUS,    // 2
+                                          V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP, // 3
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);     // 4
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);
@@ -120,6 +120,52 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         updateQuery.bindValue(":2", status);
         updateQuery.bindValue(":3", QDateTime::currentDateTime());
         updateQuery.bindValue(":4", pathToFile);
+        updateQuery.exec();
+    };
+}
+
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb()
+{
+    return [](QString connectionName, QString pathToFile, QString oldName){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,           // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME, // 2
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);    // 3
+
+        QSqlQuery updateQuery(db);
+        updateQuery.prepare(queryTemplate);
+
+        updateQuery.bindValue(":2", oldName);
+        updateQuery.bindValue(":3", pathToFile);
+        updateQuery.exec();
+    };
+}
+
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateNameOfFileRowInModelDb()
+{
+    return [](QString connectionName, QString pathToFile, QString oldName){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_NAME,  // 2
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 3
+
+        QSqlQuery updateQuery(db);
+        updateQuery.prepare(queryTemplate);
+
+        updateQuery.bindValue(":2", oldName);
+        updateQuery.bindValue(":3", pathToFile);
         updateQuery.exec();
     };
 }
