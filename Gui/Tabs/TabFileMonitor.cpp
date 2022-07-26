@@ -263,9 +263,9 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
             }
             else
             {
-                std::function<void (QString, QString)> lambdaInsert;
-                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb();
-                lambdaInsert(dbConnectionName(), pathToFile);
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb();
+                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
             }
         }
     });

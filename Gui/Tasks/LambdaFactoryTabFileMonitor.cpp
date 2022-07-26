@@ -66,9 +66,9 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
     };
 }
 
-std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaInsertModifiedFileIntoModelDb()
+std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb()
 {
-    return [](QString connectionName, QString pathToFile){
+    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -93,7 +93,7 @@ std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaInsert
         insertQuery.bindValue(":2", info.fileName());
         insertQuery.bindValue(":3", parentDir);
         insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::File);
-        insertQuery.bindValue(":5", V2TableModelFileMonitor::TableItemStatus::Modified);
+        insertQuery.bindValue(":5", status);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
         insertQuery.exec();
     };
