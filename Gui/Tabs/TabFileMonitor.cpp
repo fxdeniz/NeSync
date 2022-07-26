@@ -183,28 +183,37 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 
 void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
 {
-    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([=]{
+    QFuture<void> future = QtConcurrent::run([=]{
 
-        TableModelFileMonitor::TableItem item;
-        auto fsm = FileStorageManager::instance();
+        std::function<bool (QString)> lambdaIsExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
+        bool isExistInDb = lambdaIsExistInDb(pathToFile);
+        if(isExistInDb == true)
+        {
+            std::function<bool (QString, QString)> lambdaIsExistInModelDb;
+            lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsFileRowExistInModelDb();
+            bool isExistInModelDb = lambdaIsExistInModelDb(dbConnectionName(), pathToFile);
 
-        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
-
-        if(isFileExistInDb)
-            item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
-
-        return item;
+            if(isExistInModelDb)
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Deleted);
+            }
+            else
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb();
+                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Deleted);
+            }
+        }
     });
 
     watcher->setFuture(future);
-
-//    auto item = TableModelFileMonitor::tableItemDeletedFileFrom(pathToFile);
-//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &oldFileName)
@@ -315,7 +324,6 @@ void TabFileMonitor::slotRefreshTableViewFileMonitor()
 //            resultSet.remove(watcher);
 //        }
 //    }
-
     for(QFutureWatcher<void> *watcher : qAsConst(newResultSet))
     {
         if(watcher->isFinished())
@@ -332,12 +340,12 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
 {
     V2TableModelFileMonitor *tableModel = (V2TableModelFileMonitor *) ui->tableViewFileMonitor->model();
 
-    if(tableModel == nullptr)
-    {
-        tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
-        ui->tableViewFileMonitor->setModel(tableModel);
-        tableModel->setQuery("SELECT * FROM TableItem;", db);
-    }
+    if(tableModel != nullptr)
+        delete tableModel;
+
+    tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
+    ui->tableViewFileMonitor->setModel(tableModel);
+    tableModel->setQuery("SELECT * FROM TableItem;", db);
 
     ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -348,7 +356,6 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::ParentDir,
                                                                        QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
-
 
 //    if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
 //    {

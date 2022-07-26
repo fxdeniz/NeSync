@@ -112,7 +112,7 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,              // 1
                                           V2TableModelFileMonitor::COLUMN_NAME_STATUS,      // 2
                                           V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,   // 3
-                                          pathToFile);                                      // 4
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);       // 4
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);
