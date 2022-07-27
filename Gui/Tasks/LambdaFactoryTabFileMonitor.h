@@ -14,6 +14,7 @@ public:
     static std::function<QSqlQuery (QString, QString)> lambdaFetchFileRowFromModelDb();
     static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsertFileRowIntoModelDb();
     static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatusOfFileRowInModelDb();
+    static std::function<void (QString, QString)> lambdaDeleteFileRowFromModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfFileRowInModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateNameOfFileRowInModelDb();
 };

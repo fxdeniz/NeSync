@@ -124,6 +124,27 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
     };
 }
 
+std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDeleteFileRowFromModelDb()
+{
+    return [](QString connectionName, QString pathToFile){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "DELETE FROM %1 WHERE %2 = :2;" ;
+
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+
+        QSqlQuery deleteQuery(db);
+        deleteQuery.prepare(queryTemplate);
+
+        deleteQuery.bindValue(":2", pathToFile);
+        deleteQuery.exec();
+    };
+}
+
 std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, QString oldName){
