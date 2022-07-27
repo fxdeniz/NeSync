@@ -392,9 +392,6 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     });
 
     watcher->setFuture(future);
-
-//    auto item = TableModelFileMonitor::tableItemMovedAndUpdatedFileFrom(pathToFile, oldFileName);
-//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotRefreshTableViewFileMonitor()
