@@ -334,28 +334,62 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 
 void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
 {
-    QString pathToOldFile = QFileInfo(pathToFile).absolutePath();
-    pathToOldFile = QDir::toNativeSeparators(pathToOldFile) + QDir::separator();
+    QString pathToOldFile = QDir::toNativeSeparators(QFileInfo(pathToFile).absolutePath()) + QDir::separator();
     pathToOldFile += oldFileName;
 
-    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([=]{
-                      auto fsm = FileStorageManager::instance();
-                      bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToOldFile);
-                      return isFileExistInDb;
+    QFuture<void> future = QtConcurrent::run([=]{
 
-                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
-                          TableModelFileMonitor::TableItem item;
+        std::function<bool (QString)> lambdaIsOldFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
+        bool isOldFileExistInDb = lambdaIsOldFileExistInDb(pathToOldFile);
 
-                          if(previous.result() == true)
-                              item = TableModelFileMonitor::tableItemMovedAndModifiedFileFrom(pathToFile, oldFileName);
+        std::function<bool (QString, QString)> lambdaIsOldFileExistInModelDb;
+        lambdaIsOldFileExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsFileRowExistInModelDb();
+        bool isOldFileExistInModelDb = lambdaIsOldFileExistInModelDb(dbConnectionName(), pathToOldFile);
 
-                          return item;
-                      });
+        if(isOldFileExistInDb)
+        {
+            if(isOldFileExistInModelDb)
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+            }
+            else
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb();
+                lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+            }
+
+            std::function<void (QString, QString, QString)> lambdaUpdateOldName;
+            lambdaUpdateOldName = LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb();
+            lambdaUpdateOldName(dbConnectionName(), pathToOldFile, oldFileName);
+        }
+        else
+        {
+            std::function<bool (QString, QString)> lambdaIsRenamed = LambdaFactoryTabFileMonitor::lambdaIsFileRowReanmedInModelDb();
+            bool isFileInDbRenamed = lambdaIsRenamed(dbConnectionName(), pathToOldFile);
+
+            if(!isFileInDbRenamed)
+            {
+                if(isOldFileExistInModelDb)
+                {
+                    std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                    lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
+                    lambdaUpdate(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+                }
+            }
+        }
+
+        std::function<void (QString, QString, QString)> lambdaUpdateName;
+        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfFileRowInModelDb();
+        lambdaUpdateName(dbConnectionName(), pathToOldFile, QFileInfo(pathToFile).fileName());
+    });
 
     watcher->setFuture(future);
 

@@ -75,14 +75,15 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
-        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = '%3';" ;
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,       // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH, // 2
-                                          pathToFile);                               // 3
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
+        selectQuery.bindValue(":3", pathToFile);
         selectQuery.exec();
+        selectQuery.next();
 
         auto value = selectQuery.record().value(V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME).toString();
 
