@@ -68,7 +68,7 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
 
 std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFileRowReanmedInModelDb()
 {
-    return [](QString connectionName, QString pathToFile){
+    return [](QString connectionName, QString pathToFile) -> bool{
 
         bool result = true;
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
@@ -89,6 +89,35 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
 
         if(value.isEmpty() || value.isNull())
             result = false;
+
+        return result;
+    };
+}
+
+std::function<bool (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaIsStatusOfFileRowInModelDbEqualTo()
+{
+    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status) -> bool{
+
+        bool result = false;
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+        selectQuery.bindValue(":3", pathToFile);
+        selectQuery.exec();
+        selectQuery.next();
+
+        auto record = selectQuery.record();
+        auto value = record.value(V2TableModelFileMonitor::COLUMN_NAME_STATUS).value<V2TableModelFileMonitor::TableItemStatus>();
+
+        if(value == status)
+            result = true;
 
         return result;
     };
