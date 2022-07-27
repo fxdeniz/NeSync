@@ -282,9 +282,9 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb();
         lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
 
-        std::function<bool (QString)> lambdaIsOldFileExistInDb;
-        lambdaIsOldFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
-        bool isNewFileExistInDb = lambdaIsOldFileExistInDb(pathToFile);
+        std::function<bool (QString)> lambdaIsNewFileExistInDb;
+        lambdaIsNewFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
+        bool isNewFileExistInDb = lambdaIsNewFileExistInDb(pathToFile);
 
         if(isNewFileExistInDb)
         {
