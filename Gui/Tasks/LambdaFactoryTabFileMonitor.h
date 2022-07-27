@@ -12,6 +12,7 @@ public:
     static std::function<bool (QString)> lambdaIsFileExistInDb();
     static std::function<bool (QString, QString)> lambdaIsFileRowExistInModelDb();
     static std::function<QSqlQuery (QString, QString)> lambdaFetchFileRowFromModelDb();
+    static std::function<bool (QString, QString)> lambdaIsFileRowReanmedInModelDb();
     static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsertFileRowIntoModelDb();
     static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatusOfFileRowInModelDb();
     static std::function<void (QString, QString)> lambdaDeleteFileRowFromModelDb();

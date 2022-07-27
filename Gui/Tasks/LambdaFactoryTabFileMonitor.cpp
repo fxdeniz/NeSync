@@ -66,6 +66,33 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
     };
 }
 
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFileRowReanmedInModelDb()
+{
+    return [](QString connectionName, QString pathToFile){
+
+        bool result = true;
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = '%3';" ;
+        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,       // 1
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH, // 2
+                                          pathToFile);                               // 3
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+        selectQuery.exec();
+
+        auto value = selectQuery.record().value(V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME).toString();
+
+        if(value.isEmpty() || value.isNull())
+            result = false;
+
+        return result;
+    };
+}
+
 std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb()
 {
     return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
