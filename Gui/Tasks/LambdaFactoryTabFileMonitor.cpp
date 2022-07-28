@@ -153,7 +153,7 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         QFileInfo info(pathOfItem);
 
         if(pathOfItem.endsWith(QDir::separator()))
-            insertQuery.bindValue(":2", info.dir().dirName());
+            insertQuery.bindValue(":2", info.dir().dirName() + QDir::separator());
         else
             insertQuery.bindValue(":2", info.fileName());
 
@@ -182,7 +182,7 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
 
 std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
 {
-    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathToItem, V2TableModelFileMonitor::TableItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -200,7 +200,7 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
 
         updateQuery.bindValue(":2", status);
         updateQuery.bindValue(":3", QDateTime::currentDateTime());
-        updateQuery.bindValue(":4", pathToFile);
+        updateQuery.bindValue(":4", pathToItem);
         updateQuery.exec();
     };
 }

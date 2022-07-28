@@ -111,29 +111,47 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 
 void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 {
-    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([=]{
-                      auto fsm = FileStorageManager::instance();
-                      bool isFolderExistInDb = fsm->isFolderExistByUserFolderPath(pathToFolder);
-                      return isFolderExistInDb;
+    QFuture<void> future = QtConcurrent::run([=]{
 
-                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
-                          TableModelFileMonitor::TableItem item;
+        std::function<bool (QString)> lambdaIsExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFolderExistInDb();
+        bool isExistInDb = lambdaIsExistInDb(pathToFolder);
 
-                          if(previous.result() == true)
-                              item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
+        std::function<bool (QString, QString)> lambdaIsExistInModelDb;
+        lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
+        bool isExistInModelDb = lambdaIsExistInModelDb(dbConnectionName(), pathToFolder);
 
-                          return item;
-                      });
+        if(isExistInDb)
+        {
+            if(isExistInModelDb)
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+            }
+            else
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+                lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
+                lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+            }
+        }
+        else
+        {
+            if(isExistInModelDb)
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+            }
+        }
+    });
 
     watcher->setFuture(future);
-
-//    auto item = TableModelFileMonitor::tableItemDeletedFolderFrom(pathToFolder);
-//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
