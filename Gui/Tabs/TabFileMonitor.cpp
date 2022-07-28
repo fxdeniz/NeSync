@@ -309,7 +309,7 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
         lambdaIsNewFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
         bool isNewFileExistInDb = lambdaIsNewFileExistInDb(pathToFile);
 
-        if(isNewFileExistInDb) // File renamed as same again
+        if(isNewFileExistInDb)
         {
             std::function<void (QString, QString, QString)> lambdaUpdateOldName;
             lambdaUpdateOldName = LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb();
@@ -319,10 +319,19 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
             lambdaFetchStatus = LambdaFactoryTabFileMonitor::lambdaFetchStatusOfFileRowFromModelDb();
             auto currentStatus = lambdaFetchStatus(dbConnectionName(), pathToFile);
 
-            if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Moved)
+            if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Moved) // File renamed as same again
             {
                 std::function<void (QString, QString)> lambdaDelete = LambdaFactoryTabFileMonitor::lambdaDeleteFileRowFromModelDb();
                 lambdaDelete(dbConnectionName(), pathToFile);
+            }
+            else if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Deleted)
+            {
+                std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+                lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
+                lambdaUpdate(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+
+                std::function<void (QString, QString)> lambdaDelete = LambdaFactoryTabFileMonitor::lambdaDeleteFileRowFromModelDb();
+                lambdaDelete(dbConnectionName(), pathToOldFile);
             }
         }
     });
