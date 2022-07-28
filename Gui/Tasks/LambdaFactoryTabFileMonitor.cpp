@@ -94,11 +94,10 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
     };
 }
 
-std::function<bool (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaIsStatusOfFileRowInModelDbEqualTo()
+std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfFileRowFromModelDb()
 {
-    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status) -> bool{
+    return [](QString connectionName, QString pathToFile) -> V2TableModelFileMonitor::TableItemStatus{
 
-        bool result = false;
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
@@ -114,10 +113,7 @@ std::function<bool (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         selectQuery.next();
 
         auto record = selectQuery.record();
-        auto value = record.value(V2TableModelFileMonitor::COLUMN_NAME_STATUS).value<V2TableModelFileMonitor::TableItemStatus>();
-
-        if(value == status)
-            result = true;
+        auto result = record.value(V2TableModelFileMonitor::COLUMN_NAME_STATUS).value<V2TableModelFileMonitor::TableItemStatus>();
 
         return result;
     };

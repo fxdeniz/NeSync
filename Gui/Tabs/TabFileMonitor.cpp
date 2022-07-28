@@ -271,17 +271,29 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
         if(isOldFileExistInDb)
         {
+            std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
+            lambdaFetchStatus = LambdaFactoryTabFileMonitor::lambdaFetchStatusOfFileRowFromModelDb();
+            auto currentStatus = lambdaFetchStatus(dbConnectionName(), pathToOldFile);
+
             if(isOldFileExistInModelDb)
             {
                 std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
                 lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb();
-                lambdaUpdate(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
+
+                if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Modified)
+                    lambdaUpdate(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                else
+                    lambdaUpdate(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
             }
             else
             {
                 std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
                 lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb();
-                lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
+
+                if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Modified)
+                    lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                else
+                    lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
             }
 
             std::function<void (QString, QString, QString)> lambdaUpdateOldName;
@@ -303,11 +315,11 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
             lambdaUpdateOldName = LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb();
             lambdaUpdateOldName(dbConnectionName(), pathToFile, "");
 
-            std::function<bool (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaIsMoved;
-            lambdaIsMoved = LambdaFactoryTabFileMonitor::lambdaIsStatusOfFileRowInModelDbEqualTo();
-            bool isMoved = lambdaIsMoved(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Moved);
+            std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
+            lambdaFetchStatus = LambdaFactoryTabFileMonitor::lambdaFetchStatusOfFileRowFromModelDb();
+            auto currentStatus = lambdaFetchStatus(dbConnectionName(), pathToFile);
 
-            if(isMoved)
+            if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Moved)
             {
                 std::function<void (QString, QString)> lambdaDelete = LambdaFactoryTabFileMonitor::lambdaDeleteFileRowFromModelDb();
                 lambdaDelete(dbConnectionName(), pathToFile);
