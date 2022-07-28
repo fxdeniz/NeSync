@@ -10,14 +10,15 @@ class LambdaFactoryTabFileMonitor
 {
 public:
     static std::function<bool (QString)> lambdaIsFileExistInDb();
-    static std::function<bool (QString, QString)> lambdaIsFileRowExistInModelDb();
+    static std::function<bool (QString)> lambdaIsFolderExistInDb();
+    static std::function<bool (QString, QString)> lambdaIsRowExistInModelDb();
     static std::function<QSqlQuery (QString, QString)> lambdaFetchFileRowFromModelDb();
     static std::function<bool (QString, QString)> lambdaIsFileRowReanmedInModelDb();
-    static std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatusOfFileRowFromModelDb();
-    static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsertFileRowIntoModelDb();
-    static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatusOfFileRowInModelDb();
-    static std::function<void (QString, QString)> lambdaDeleteFileRowFromModelDb();
-    static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfFileRowInModelDb();
+    static std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatusOfRowFromModelDb();
+    static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsertRowIntoModelDb();
+    static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatusOfRowInModelDb();
+    static std::function<void (QString, QString)> lambdaDeleteRowFromModelDb();
+    static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfRowInModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateNameOfFileRowInModelDb();
 };
 

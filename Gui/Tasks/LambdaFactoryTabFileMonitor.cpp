@@ -10,28 +10,38 @@ std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb
     return [](QString pathToFile) -> bool{
 
         auto fsm = FileStorageManager::instance();
-        bool isFileExistInDb = fsm->isFileExistByUserFilePath(pathToFile);
-        return isFileExistInDb;
+        bool result = fsm->isFileExistByUserFilePath(pathToFile);
+        return result;
     };
 }
 
-std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFileRowExistInModelDb()
+std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFolderExistInDb()
 {
-    return [] (QString connectionName, QString pathToFile) -> bool {
+    return [](QString pathToFolder) -> bool{
+
+        auto fsm = FileStorageManager::instance();
+        bool result = fsm->isFolderExistByUserFolderPath(pathToFolder);
+        return result;
+    };
+}
+
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb()
+{
+    return [] (QString connectionName, QString pathOfRowItem) -> bool {
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
         QString resultColumn = "result_column";
-        QString queryTemplate = "SELECT COUNT(*) AS %1 FROM %2 WHERE %3 = '%4';" ;
-        queryTemplate = queryTemplate.arg(resultColumn,                              // 1
-                                          V2TableModelFileMonitor::TABLE_NAME,       // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH, // 3
-                                          pathToFile);                               // 4
+        QString queryTemplate = "SELECT COUNT(*) AS %1 FROM %2 WHERE %3 = :3;" ;
+        queryTemplate = queryTemplate.arg(resultColumn,                               // 1
+                                          V2TableModelFileMonitor::TABLE_NAME,        // 2
+                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 3
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
+        selectQuery.bindValue(":3", pathOfRowItem);
         selectQuery.exec();
         selectQuery.next();
 
@@ -94,7 +104,7 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
     };
 }
 
-std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfFileRowFromModelDb()
+std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
 {
     return [](QString connectionName, QString pathToFile) -> V2TableModelFileMonitor::TableItemStatus{
 
@@ -119,9 +129,9 @@ std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> Lambd
     };
 }
 
-std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertFileRowIntoModelDb()
+std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
 {
-    return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathOfItem, V2TableModelFileMonitor::TableItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -140,19 +150,37 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         QSqlQuery insertQuery(db);
         insertQuery.prepare(queryTemplate);
 
-        QFileInfo info(pathToFile);
-        auto parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+        QFileInfo info(pathOfItem);
 
-        insertQuery.bindValue(":2", info.fileName());
+        if(pathOfItem.endsWith(QDir::separator()))
+            insertQuery.bindValue(":2", info.dir().dirName());
+        else
+            insertQuery.bindValue(":2", info.fileName());
+
+        QString parentDir;
+        if(pathOfItem.endsWith(QDir::separator()))
+        {
+            QDir dir = info.dir();
+            dir.cdUp();
+            parentDir = QDir::toNativeSeparators(dir.absolutePath()) + QDir::separator();
+        }
+        else
+            parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+
         insertQuery.bindValue(":3", parentDir);
-        insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::File);
+
+        if(pathOfItem.endsWith(QDir::separator()))
+            insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::Folder);
+        else
+            insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::File);
+
         insertQuery.bindValue(":5", status);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
         insertQuery.exec();
     };
 }
 
-std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfFileRowInModelDb()
+std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, V2TableModelFileMonitor::TableItemStatus status){
 
@@ -177,7 +205,7 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
     };
 }
 
-std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDeleteFileRowFromModelDb()
+std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()
 {
     return [](QString connectionName, QString pathToFile){
 
@@ -198,7 +226,7 @@ std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDelete
     };
 }
 
-std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfFileRowInModelDb()
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, QString oldName){
 
