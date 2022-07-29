@@ -19,7 +19,7 @@ public:
     static std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatusOfRowInModelDb();
     static std::function<void (QString, QString)> lambdaDeleteRowFromModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfRowInModelDb();
-    static std::function<void (QString, QString, QString)> lambdaUpdateNameOfFileRowInModelDb();
+    static std::function<void (QString, QString, QString)> lambdaUpdateNameOfRowInModelDb();
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H

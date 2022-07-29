@@ -249,7 +249,7 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
     };
 }
 
-std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateNameOfFileRowInModelDb()
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateNameOfRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, QString oldName){
 

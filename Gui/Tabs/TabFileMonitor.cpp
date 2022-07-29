@@ -156,35 +156,61 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 
 void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName)
 {
-    QDir parentDir = QFileInfo(pathToFolder).absoluteDir();
+    QDir parentDir(pathToFolder);
     parentDir.cdUp();
-
-    auto pathToOldFolder = QDir::toNativeSeparators(parentDir.absolutePath()) + QDir::separator();
+    QString pathToOldFolder = QDir::toNativeSeparators(parentDir.absolutePath()) + QDir::separator();
     pathToOldFolder += oldFolderName + QDir::separator();
 
-    auto *watcher = new QFutureWatcher<TableModelFileMonitor::TableItem>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<TableModelFileMonitor::TableItem>::finished,
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    auto future = QtConcurrent::run([=]{
-                      auto fsm = FileStorageManager::instance();
-                      bool isFolderExistInDb = fsm->isFolderExistByUserFolderPath(pathToOldFolder);
-                      return isFolderExistInDb;
+    QFuture<void> future = QtConcurrent::run([=]{
 
-                  }).then(QtFuture::Launch::Inherit, [=](QFuture<bool> previous){
-                          TableModelFileMonitor::TableItem item;
+        std::function<bool (QString)> lambdaIsExistInDb;
+        lambdaIsExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFolderExistInDb();
 
-                          if(previous.result() == true)
-                              item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
+        std::function<bool (QString, QString)> lambdaIsExistInModelDb;
+        lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-                          return item;
-                      });
+        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdate;
+        lambdaUpdate = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
+
+        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
+
+        std::function<void (QString, QString, QString)> lambdaUpdateOldName;
+        lambdaUpdateOldName = LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfRowInModelDb();
+
+        std::function<void (QString, QString, QString)> lambdaUpdateName;
+        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfRowInModelDb();
+
+        bool isOldFolderExistInDb = lambdaIsExistInDb(pathToOldFolder);
+        bool isOldFolderExistInModelDb = lambdaIsExistInModelDb(dbConnectionName(), pathToOldFolder);
+
+        if(isOldFolderExistInDb)
+        {
+            if(isOldFolderExistInModelDb)
+                lambdaUpdate(dbConnectionName(), pathToOldFolder, V2TableModelFileMonitor::TableItemStatus::Moved);
+            else
+                lambdaInsert(dbConnectionName(), pathToOldFolder, V2TableModelFileMonitor::TableItemStatus::Moved);
+
+            lambdaUpdateOldName(dbConnectionName(), pathToOldFolder, oldFolderName + QDir::separator());
+        }
+
+        lambdaUpdateName(dbConnectionName(), pathToOldFolder, QFileInfo(pathToFolder).dir().dirName() + QDir::separator());
+
+        bool isNewFolderExistInDb = lambdaIsExistInDb(pathToFolder);
+
+        if(isNewFolderExistInDb) // Is Folder renamed to original name
+        {
+            std::function<void (QString, QString)> lambdaDelete = LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb();
+            lambdaDelete(dbConnectionName(), pathToFolder);
+        }
+    });
 
     watcher->setFuture(future);
-
-//    auto item = TableModelFileMonitor::tableItemMovedFolderFrom(pathToFolder, oldFolderName);
-//    addRowToTableViewFileMonitor(item);
 }
 
 void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
@@ -342,7 +368,7 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
         }
 
         std::function<void (QString, QString, QString)> lambdaUpdateName;
-        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfFileRowInModelDb();
+        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfRowInModelDb();
         lambdaUpdateName(dbConnectionName(), pathToOldFile, QFileInfo(pathToFile).fileName());
 
         std::function<bool (QString)> lambdaIsNewFileExistInDb;
@@ -476,7 +502,7 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
         }
 
         std::function<void (QString, QString, QString)> lambdaUpdateName;
-        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfFileRowInModelDb();
+        lambdaUpdateName = LambdaFactoryTabFileMonitor::lambdaUpdateNameOfRowInModelDb();
         lambdaUpdateName(dbConnectionName(), pathToOldFile, QFileInfo(pathToFile).fileName());
 
         std::function<bool (QString)> lambdaIsNewFileExistInDb;
