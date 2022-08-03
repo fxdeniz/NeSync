@@ -35,21 +35,20 @@ QString TabFileMonitor::dbFileName()
     return "file:TabFileMonitorSqlFile?mode=memory&cache=shared";
 }
 
-void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFile)
+void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
 {
-    // TODO this will probably require another item
-    QFileInfo fileInfo(pathToFile);
-    auto fileDir = QDir::toNativeSeparators(fileInfo.absolutePath()) + QDir::separator();
-    TableModelFileMonitor::TableItem item {
-        fileInfo.fileName(),
-        fileDir,
-        "",
-        TableModelFileMonitor::TableItemType::File,
-        TableModelFileMonitor::TableItemStatus::Missing,
-        QDateTime::currentDateTime()
-    };
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
 
-    addRowToTableViewFileMonitor(item);
+    QFuture<void> future = QtConcurrent::run([=]{
+        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
+        lambdaInsert(dbConnectionName(), pathToFileOrFolder, V2TableModelFileMonitor::TableItemStatus::Missing);
+    });
+
+    watcher->setFuture(future);
 }
 
 void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder)

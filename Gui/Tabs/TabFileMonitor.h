@@ -25,7 +25,7 @@ public:
     static QString dbFileName();
 
 public slots:
-    void slotOnPredictionTargetNotFound(const QString &pathToFile);
+    void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
     void slotOnNewFolderAdded(const QString &pathToFolder);
     void slotOnFolderDeleted(const QString &pathToFolder);
