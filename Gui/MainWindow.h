@@ -10,6 +10,9 @@
 #include "Tabs/TabFileExplorer.h"
 #include "Tabs/TabFileMonitor.h"
 
+#define DEBUG_FSM_TO_GUI
+#define DEBUG_FSM_TO_GUI_WITHOUT_THREAD_INFO
+
 namespace Ui
 {
     class MainWindow;
@@ -40,12 +43,31 @@ private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
+    void createFileMonitorThread();
+    QString fileMonitorThreadName() const;
 
 private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
     DialogAddNewFile *dialogAddNewFile;
+    QThread *fileMonitorThread;
+
+#ifdef DEBUG_FSM_TO_GUI
+private slots:
+    void slotOnPredictionTargetNotFound(const QString &pathToTaget);
+    void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
+    void slotOnUnPredictedFileDetected(const QString &pathToFile);
+    void slotOnFileSystemEventAnalysisStarted();
+    void slotOnNewFolderAdded(const QString &pathToFolder);
+    void slotOnFolderDeleted(const QString &pathToFolder);
+    void slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName);
+    void slotOnNewFileAdded(const QString &pathToFile);
+    void slotOnFileDeleted(const QString &pathToFile);
+    void slotOnFileModified(const QString &pathToFile);
+    void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
+    void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
+#endif
 
 };
 

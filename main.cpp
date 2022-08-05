@@ -10,7 +10,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-//    FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
+    //FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
 
 //    auto testFolderPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
 //    testFolderPath += "/test/";

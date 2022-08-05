@@ -1,45 +1,61 @@
 #ifndef TABLEMODELFILEMONITOR_H
 #define TABLEMODELFILEMONITOR_H
 
-#include <QDateTime>
-#include <QAbstractTableModel>
+#include <QSqlQueryModel>
 
-class TableModelFileMonitor : public QAbstractTableModel
+class TableModelFileMonitor : public QSqlQueryModel
 {
     Q_OBJECT
-
 public:
-    struct MonitorTableItem
-    {
-        QString fileName;
-        QString folderPath;
-        QString eventType;
-        QDateTime timestamp;
+    static const QString TABLE_NAME;
+    static const QString COLUMN_NAME_NAME;
+    static const QString COLUMN_NAME_PARENT_DIR;
+    static const QString COLUMN_NAME_PATH;
+    static const QString COLUMN_NAME_OLD_NAME;
+    static const QString COLUMN_NAME_TYPE;
+    static const QString COLUMN_NAME_STATUS;
+    static const QString COLUMN_NAME_TIMESTAMP;
+    static const QString COLUMN_NAME_ACTION;
+    static const QString COLUMN_NAME_NOTE_NUMBER;
 
-        bool operator==(const MonitorTableItem &other) const
-        {
-            return fileName == other.fileName && folderPath == other.folderPath;
-        }
+    enum ColumnIndex
+    {
+        Name,
+        ParentDir,
+        Path,
+        OldName,
+        Type,
+        Status,
+        Timestamp,
+        Action,
+        NoteNumber
+    };
+
+    enum TableItemStatus
+    {
+        InvalidStatus,
+        Missing,
+        NewAdded,
+        Modified,
+        Moved,
+        MovedAndModified,
+        Deleted
+    };
+
+    enum TableItemType
+    {
+        UndefinedType,
+        Folder,
+        File
     };
 
 public:
     TableModelFileMonitor(QObject *parent = nullptr);
-    TableModelFileMonitor(const QList<MonitorTableItem> &_itemList, QObject *parent = nullptr);
 
-    // QAbstractTableModel interface
-public:
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
-    bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
-private:
-    QList<MonitorTableItem> itemList;
-    QSet<QPersistentModelIndex> checkedItems;
+signals:
 
 };
 

@@ -48,6 +48,7 @@ QSharedPointer<FileStorageManager> FileStorageManager::instance()
     appDataDir += QDir::separator();
 
     auto backupDir = appDataDir + "backup" + QDir::separator();
+
     QDir dir;
     dir.mkdir(backupDir);
 
@@ -402,9 +403,34 @@ bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) 
     return queryResult;
 }
 
+bool FileStorageManager::isFolderExistByUserFolderPath(const QString &userFolderPath) const
+{
+    bool result = false;
+    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromAllFiles();
+
+    // TODO: Replace for loop with db query.
+    for(const QString &currentPath : queryResult)
+    {
+        if(userFolderPath == currentPath)
+        {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
 QStringList FileStorageManager::getMonitoredFilePathList() const
 {
     auto queryResult = QueryFileRecord(this->db).selectUserFilePathListFromActiveFiles();
+
+    return queryResult;
+}
+
+QStringList FileStorageManager::getMonitoredFolderPathList() const
+{
+    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromActiveFiles();
 
     return queryResult;
 }
@@ -544,7 +570,7 @@ bool FileStorageManager::addNewFolder(const QString &directory)
     if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
         dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
 
-    if(!this->isFolderExist(dir))
+    if(!this->isFolderSymbolExist(dir))
     {
         dir.truncate(dir.lastIndexOf(CONST_SYMBOL_DIRECTORY_SEPARATOR));
 
@@ -593,7 +619,7 @@ bool FileStorageManager::markFolderAsFavorite(const QString &directory, bool sta
     return result;
 }
 
-bool FileStorageManager::isFolderExist(const QString &directory) const
+bool FileStorageManager::isFolderSymbolExist(const QString &directory) const
 {
     QString dir = directory;
 

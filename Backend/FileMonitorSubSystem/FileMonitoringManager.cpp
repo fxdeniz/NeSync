@@ -22,9 +22,33 @@ FileMonitoringManager::FileMonitoringManager(int snapshotDelay, QObject *parent)
     QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalMoveEventDetected,
                      this, &FileMonitoringManager::slotOnMoveEventDetected);
 
-    QObject::connect(&this->timer, &QTimer::timeout,
+    QObject::connect(timer, &QTimer::timeout,
                      this, &FileMonitoringManager::slotReleaseScheduledEvents);
 
+    timer = new QTimer(this);
+    this->setSnapshotDelay(snapshotDelay);
+    this->fileWatcher.watch();
+}
+
+FileMonitoringManager::FileMonitoringManager(QTimer *_timer, int snapshotDelay, QObject *parent)
+    : QObject{parent}
+{
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalAddEventDetected,
+                     this, &FileMonitoringManager::slotOnAddEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalDeleteEventDetected,
+                     this, &FileMonitoringManager::slotOnDeleteEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalModificationEventDetected,
+                     this, &FileMonitoringManager::slotOnModificationEventDetected);
+
+    QObject::connect(&this->fileSystemEventListener, &FileSystemEventListener::signalMoveEventDetected,
+                     this, &FileMonitoringManager::slotOnMoveEventDetected);
+
+    QObject::connect(_timer, &QTimer::timeout,
+                     this, &FileMonitoringManager::slotReleaseScheduledEvents);
+
+    this->timer = _timer;
     this->setSnapshotDelay(snapshotDelay);
     this->fileWatcher.watch();
 }
@@ -51,6 +75,21 @@ void FileMonitoringManager::setSnapshotDelay(int newSnapshotDelay)
         this->snapshotDelay = newSnapshotDelay * 1000;
 }
 
+const QStringList &FileMonitoringManager::getPredictionList() const
+{
+    return predictionList;
+}
+
+void FileMonitoringManager::setPredictionList(const QStringList &newPredictionList)
+{
+    predictionList = newPredictionList;
+}
+
+void FileMonitoringManager::start()
+{
+    startMonitoringOn(getPredictionList());
+}
+
 void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predictedItemList)
 {
     QSet<QString> predictedFiles, predictedFolders;
@@ -58,37 +97,35 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
 
     for(const QString &currentPath : predictedItemList)
     {
+        auto standarizedPath = QDir::fromNativeSeparators(currentPath);
+
         QFileInfo info(currentPath);
 
-        if(info.isFile())
+        if(info.exists())
         {
-            if(info.exists())
+            if(info.isFile())
             {
-                predictedFiles.insert(currentPath);
-                this->addTargetFromFilePath(currentPath);
+                predictedFiles.insert(standarizedPath);
+                this->addTargetFromFilePath(standarizedPath);
 
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
             }
-            else
-                emit signalPredictedFileNotFound(currentPath);
-        }
-        else if(info.isDir())
-        {
-            if(info.exists())
+            else if(info.isDir())
             {
-                predictedFolders.insert(currentPath);
-                this->addTargetFromDirPath(currentPath);
+                if(currentPath.endsWith(QDir::separator())) // Insert predicted folder without seprator
+                    predictedFolders.insert(standarizedPath.chopped(1));
+                else
+                    predictedFolders.insert(standarizedPath);
 
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
+                this->addTargetFromDirPath(standarizedPath);
 
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
             }
-            else
-                emit signalPredictedFolderNotFound(currentPath);
         }
         else
-            emit signalPredictionTargetNotRecognized(currentPath);
+            emit signalPredictionTargetNotFound(currentPath);
     }
 
     unPredictedFiles -= predictedFiles;
@@ -125,7 +162,8 @@ QSet<QString> FileMonitoringManager::unPredictedFilesWithRespectTo(QString pathT
     while(iterator.hasNext())
         result.insert(iterator.next());
 
-    result.remove(pathToDirOrFile);
+    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
+    result.remove(standardizedPath);
 
     return result;
 }
@@ -142,7 +180,8 @@ QSet<QString> FileMonitoringManager::unPredictedFoldersWithRespectTo(QString pat
     while(iterator.hasNext())
         result.insert(iterator.next());
 
-    result.remove(pathToDirOrFile);
+    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
+    result.remove(standardizedPath);
 
     return result;
 }
@@ -373,7 +412,13 @@ bool FileMonitoringManager::isFileReadyToRelease(const QString currentFilePath, 
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnAddEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
+    this->timer->stop();
     QString _dir = this->mddb.standardizeDir(dir);
 
     QFileInfo info(_dir + fileName);
@@ -395,12 +440,18 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         this->mddb.scheduleDirAs(dirPath, MonitoredDirDb::MonitoredItemState::NewAdded);
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnDeleteEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
+    this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
     auto _dir = this->mddb.standardizeDir(dir);
@@ -419,12 +470,18 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
         this->mddb.scheduleDirAs(dirPath, MonitoredDirDb::MonitoredItemState::Deleted);
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
 {
-    this->timer.stop();
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnModificationEventDetected() \t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
+    this->timer->stop();
 
     bool isFile = this->mddb.isFileExistInDir(fileName, dir);
 
@@ -448,12 +505,19 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
         this->mddb.updateEventTimestampOfFileInDir(fileName, dir, QDateTime::currentDateTime());
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
 {
-    this->timer.stop();
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "\t FileMonitoringManager::slotOnMoveEventDetected() \t\t in = " << QThread::currentThread();
+    qDebug() << "\t\t fileName = " << fileName;
+    qDebug() << "\t\t oldFileName = " << oldFileName;
+    qDebug() << "\t\t dir = " << dir;
+#endif
+
+    this->timer->stop();
 
     auto _dir = this->mddb.standardizeDir(dir);
     QFileInfo info(_dir + fileName);
@@ -483,6 +547,11 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
                     this->mddb.scheduleFileInDirAs(fileName, dir, MonitoredDirDb::MonitoredItemState::Moved);
                 }
             }
+//            else
+//            {
+//                // If newly added file overwrites existing file then, consider that file modified
+//                this->mddb.scheduleFileInDirAs(fileName, dir, MonitoredDirDb::MonitoredItemState::Modified);
+//            }
 
             this->mddb.updateEventTimestampOfFileInDir(fileName, dir, QDateTime::currentDateTime());
         }
@@ -512,12 +581,16 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         }
     }
 
-    this->timer.start(this->getSnapshotDelay());
+    this->timer->start(this->getSnapshotDelay());
 }
 
 void FileMonitoringManager::slotReleaseScheduledEvents()
 {
-    this->timer.stop();
+#ifdef DEBUG_FSM_SLOTS
+    qDebug() << "-----> FileMonitoringManager::slotReleaseScheduledEvents() \t in = " << QThread::currentThread();
+#endif
+
+    this->timer->stop();
     emit signalFileSystemEventAnalysisStarted();
 
     this->releaseNewAddedFolders();

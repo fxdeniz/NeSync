@@ -10,20 +10,27 @@
 #define CONST_MIN_SNAPSHOT_DELAY 10
 #define CONST_DEFAULT_SLEEP_DURATION_FOR_RELEASABLE_FILE_CHECK 1
 
+#define DEBUG_FSM_SLOTS
+
 class FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
     explicit FileMonitoringManager(int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
+    explicit FileMonitoringManager(QTimer *_timer, int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
 
     void startMonitoringOn(const QStringList &predictedTargetList);
     int getSnapshotDelay() const;
     void setSnapshotDelay(int newSnapshotDelay);
 
+    const QStringList &getPredictionList() const;
+    void setPredictionList(const QStringList &newPredictionList);
+
+public slots:
+    void start();
+
 signals:
-    void signalPredictedFileNotFound(const QString &pathToFile);
-    void signalPredictedFolderNotFound(const QString &pathToFolder);
-    void signalPredictionTargetNotRecognized(const QString &pathToTaget);
+    void signalPredictionTargetNotFound(const QString &pathToTaget);
     void signalUnPredictedFolderDetected(const QString &pathToFolder);
     void signalUnPredictedFileDetected(const QString &pathToFile);
     void signalFileSystemEventAnalysisStarted();
@@ -66,8 +73,9 @@ private:
     efsw::FileWatcher fileWatcher;
     FileSystemEventListener fileSystemEventListener;
     MonitoredDirDb mddb;
-    QTimer timer;
+    QTimer *timer;
     int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY * 1000;
+    QStringList predictionList;
 };
 
 #endif // FILEMONITORINGMANAGER_H

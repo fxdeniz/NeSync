@@ -1,73 +1,23 @@
 #include "TableModelFileMonitor.h"
 
-#include <QFileIconProvider>
-#include <QPixmap>
 #include <QColor>
+#include <QDateTime>
+#include <QFileIconProvider>
+
+const QString TableModelFileMonitor::TABLE_NAME = "TableItem";
+const QString TableModelFileMonitor::COLUMN_NAME_NAME = "name";
+const QString TableModelFileMonitor::COLUMN_NAME_PARENT_DIR = "parent_dir";
+const QString TableModelFileMonitor::COLUMN_NAME_PATH = "path";
+const QString TableModelFileMonitor::COLUMN_NAME_OLD_NAME = "old_name";
+const QString TableModelFileMonitor::COLUMN_NAME_TYPE = "type";
+const QString TableModelFileMonitor::COLUMN_NAME_STATUS = "status";
+const QString TableModelFileMonitor::COLUMN_NAME_TIMESTAMP = "timestamp";
+const QString TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
+const QString TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
 
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
-    : QAbstractTableModel(parent)
+    : QSqlQueryModel(parent)
 {
-}
-
-TableModelFileMonitor::TableModelFileMonitor(const QList<MonitorTableItem> &_itemList, QObject *parent)
-    : QAbstractTableModel(parent), itemList(_itemList)
-{
-}
-
-int TableModelFileMonitor::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : this->itemList.size();
-}
-
-int TableModelFileMonitor::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : 6;
-}
-
-QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid())
-        return QVariant();
-
-    if (index.row() >= this->itemList.size() || index.row() < 0)
-        return QVariant();
-
-    if (role == Qt::ItemDataRole::DisplayRole) {
-        const auto &item = this->itemList.at(index.row());
-
-        switch (index.column()) {
-        case 0:
-            return item.folderPath;
-        case 1:
-            return item.fileName;
-        case 2:
-            return item.eventType;
-        case 3:
-            return item.timestamp;
-        default:
-            break;
-        }
-    }
-    else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == 0)
-    {
-        if(this->checkedItems.contains(index))
-            return Qt::CheckState::Checked;
-        else
-            return Qt::CheckState::Unchecked;
-    }
-    else if(role == Qt::ItemDataRole::DecorationRole && (index.column() == 0 || index.column() == 1))
-    {
-        QFileIconProvider provider;
-        auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(20, 20);
-
-        return result;
-    }
-    else if(role == Qt::ItemDataRole::TextAlignmentRole && (index.column() == 2 || index.column() == 3))
-    {
-        return Qt::AlignmentFlag::AlignCenter;
-    }
-
-    return QVariant();
 }
 
 QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
@@ -75,19 +25,27 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+        case ColumnIndex::Name:
+            return tr("Name");
+        case ColumnIndex::ParentDir:
             return tr("Location");
-        case 1:
-            return tr("File Name");
-        case 2:
-            return tr("Event");
-        case 3:
+        case ColumnIndex::Path:
+            return tr("Path");
+        case ColumnIndex::OldName:
+            return tr("Old Name");
+        case ColumnIndex::Type:
+            return tr("Type");
+        case ColumnIndex::Status:
+            return tr("Status");
+        case ColumnIndex::Timestamp:
             return tr("Timestamp");
-        case 4:
+        case ColumnIndex::Action:
             return tr("Action");
-        case 5:
+        case ColumnIndex::NoteNumber:
             return tr("Note");
         default:
             break;
@@ -96,76 +54,105 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
     return QVariant();
 }
 
-Qt::ItemFlags TableModelFileMonitor::flags(const QModelIndex &index) const
+QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
-        return Qt::ItemIsEnabled;
-
-    return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
-}
-
-bool TableModelFileMonitor::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (index.isValid())
+    if(role == Qt::ItemDataRole::TextAlignmentRole)
     {
-        if(role == Qt::ItemDataRole::EditRole)
+        if(index.column() == ColumnIndex::Type ||
+           index.column() == ColumnIndex::Status ||
+           index.column() == ColumnIndex::Timestamp)
         {
-            const int row = index.row();
-            auto item = this->itemList.value(row);
-
-            switch (index.column())
-            {
-            case 0:
-                item.fileName = value.toString();
-                break;
-            case 1:
-                item.folderPath = value.toString();
-                break;
-            default:
-                return false;
-            }
-            this->itemList.replace(row, item);
-            emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
-
-            return true;
-        }
-        else if(role == Qt::ItemDataRole::CheckStateRole)
-        {
-            if(value == Qt::CheckState::Checked)
-                this->checkedItems.insert(index);
-            else
-                this->checkedItems.remove(index);
-
-            emit dataChanged(index, index);
-            return true;
+            return Qt::AlignmentFlag::AlignCenter;
         }
     }
 
-    return false;
+    if(role == Qt::ItemDataRole::DecorationRole)
+    {
+        QFileIconProvider provider;
+
+        if(index.column() == ColumnIndex::Name)
+        {
+            QModelIndex typeIndex = index.siblingAtColumn(ColumnIndex::Type);
+            QVariant typeValue = QSqlQueryModel::data(typeIndex);
+            TableItemType type = typeValue.value<TableItemType>();
+
+            if(type == TableItemType::File)
+            {
+                QModelIndex parentDirIndex = index.siblingAtColumn(ColumnIndex::ParentDir);
+                auto parentDirValue = QSqlQueryModel::data(parentDirIndex).toString();
+                auto nameValue = QSqlQueryModel::data(index).toString();
+
+                QFileInfo info(parentDirValue + nameValue);
+                auto result = provider.icon(info);
+                return result;
+            }
+            else if(type == TableItemType::Folder)
+            {
+                auto result = provider.icon(QFileIconProvider::IconType::Folder);
+                return result;
+            }
+        }
+        else if(index.column() == ColumnIndex::ParentDir)
+        {
+            auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(32, 32);
+            return result;
+        }
+    }
+
+    QVariant value = QSqlQueryModel::data(index, role);
+
+    if (value.isValid() && role == Qt::DisplayRole)
+    {
+        if (index.column() == ColumnIndex::Name)
+            return value.toString();
+
+        else if (index.column() == ColumnIndex::ParentDir)
+            return value.toString();
+
+        else if(index.column() == ColumnIndex::Path)
+            return value.toString();
+
+        else if(index.column() == ColumnIndex::OldName)
+            return value.toString();
+
+        else if(index.column() == ColumnIndex::Type)
+        {
+            if(value.value<TableItemType>() == TableItemType::File)
+                return tr("File");
+            else if(value.value<TableItemType>() == TableItemType::Folder)
+                return tr("Folder");
+            else
+                return "NaN";
+        }
+        else if(index.column() == ColumnIndex::Status)
+        {
+            if(value.value<TableItemStatus>() == TableItemStatus::Modified)
+                return tr("Updated");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::NewAdded)
+                return tr("New Added");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::Deleted)
+                return tr("Deleted");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::Moved)
+                return tr("Moved");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::MovedAndModified)
+                return tr("Moved & Updated");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::Missing)
+                return tr("Missing");
+
+            else if(value.value<TableItemStatus>() == TableItemStatus::InvalidStatus)
+                return tr("Invalid");
+
+            else
+                return tr("NaN");
+        }
+        else if(index.column() == ColumnIndex::Timestamp)
+            return value.toDateTime();
+    }
+
+    return value;
 }
-
-bool TableModelFileMonitor::insertRows(int position, int rows, const QModelIndex &index)
-{
-    Q_UNUSED(index);
-    beginInsertRows(QModelIndex(), position, position + rows - 1);
-
-    for (int row = 0; row < rows; ++row)
-        this->itemList.insert(position, { QString(), QString() });
-
-    endInsertRows();
-
-    return true;
-}
-
-bool TableModelFileMonitor::removeRows(int position, int rows, const QModelIndex &index)
-{
-    Q_UNUSED(index);
-    beginRemoveRows(QModelIndex(), position, position + rows - 1);
-
-    for (int row = 0; row < rows; ++row)
-        this->itemList.removeAt(position);
-
-    endRemoveRows();
-    return true;
-}
-
