@@ -214,8 +214,19 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
 
 void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
 {
-    auto item = TableModelFileMonitor::tableItemNewAddedFileFrom(pathToFile);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    QFuture<void> future = QtConcurrent::run([=]{
+
+        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
+        lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+    });
+
+    watcher->setFuture(future);
 }
 
 void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
