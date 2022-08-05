@@ -53,8 +53,19 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrF
 
 void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder)
 {
-    auto item = TableModelFileMonitor::tableItemNewAddedFolderFrom(pathToFolder);
-    addRowToTableViewFileMonitor(item);
+    auto *watcher = new QFutureWatcher<void>(this);
+    newResultSet.insert(watcher);
+    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+
+    QFuture<void> future = QtConcurrent::run([=]{
+
+        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
+        lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+    });
+
+    watcher->setFuture(future);
 }
 
 void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
