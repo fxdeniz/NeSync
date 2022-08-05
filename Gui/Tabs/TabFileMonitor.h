@@ -7,7 +7,6 @@
 
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h"
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h"
-#include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 
 namespace Ui {
 class TabFileMonitor;

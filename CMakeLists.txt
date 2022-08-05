@@ -62,9 +62,6 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabFileExplorer.cpp
         Gui/Tabs/TabFileExplorer.ui
         #
-        Gui/DataModels/TabFileMonitor/V2TableModelFileMonitor.h
-        Gui/DataModels/TabFileMonitor/V2TableModelFileMonitor.cpp
-        #
         Gui/DataModels/TabFileExplorer/TableModelFileExplorer.h
         Gui/DataModels/TabFileExplorer/TableModelFileExplorer.cpp
         #

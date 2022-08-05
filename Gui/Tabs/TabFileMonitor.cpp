@@ -2,7 +2,7 @@
 #include "ui_TabFileMonitor.h"
 #include "Tasks/LambdaFactoryTabFileMonitor.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
-#include "DataModels/TabFileMonitor/V2TableModelFileMonitor.h"
+#include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 
 #include <QtConcurrent>
 #include <QSqlQuery>
@@ -43,9 +43,9 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrF
                      this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
-        lambdaInsert(dbConnectionName(), pathToFileOrFolder, V2TableModelFileMonitor::TableItemStatus::Missing);
+        lambdaInsert(dbConnectionName(), pathToFileOrFolder, TableModelFileMonitor::TableItemStatus::Missing);
     });
 
     watcher->setFuture(future);
@@ -60,9 +60,9 @@ void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder
 
     QFuture<void> future = QtConcurrent::run([=]{
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
-        lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+        lambdaInsert(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::NewAdded);
     });
 
     watcher->setFuture(future);
@@ -83,10 +83,10 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
         bool isExistInDb = lambdaIsExistInDb(pathToFolder);
@@ -95,16 +95,16 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
         if(isExistInDb)
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaUpdateStatus(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::Modified);
             else
-                lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaInsert(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::Modified);
         }
         else
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+                lambdaUpdateStatus(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::NewAdded);
             else
-                lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+                lambdaInsert(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::NewAdded);
         }
     });
 
@@ -126,10 +126,10 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
 
@@ -139,14 +139,14 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
         if(isExistInDb)
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaUpdateStatus(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::Deleted);
             else
-                lambdaInsert(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaInsert(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::Deleted);
         }
         else
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFolder, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaUpdateStatus(dbConnectionName(), pathToFolder, TableModelFileMonitor::TableItemStatus::Deleted);
         }
     });
 
@@ -173,10 +173,10 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
         std::function<void (QString, QString, QString)> lambdaUpdateOldName;
@@ -191,9 +191,9 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
         if(isOldFolderExistInDb)
         {
             if(isOldFolderExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToOldFolder, V2TableModelFileMonitor::TableItemStatus::Moved);
+                lambdaUpdateStatus(dbConnectionName(), pathToOldFolder, TableModelFileMonitor::TableItemStatus::Moved);
             else
-                lambdaInsert(dbConnectionName(), pathToOldFolder, V2TableModelFileMonitor::TableItemStatus::Moved);
+                lambdaInsert(dbConnectionName(), pathToOldFolder, TableModelFileMonitor::TableItemStatus::Moved);
 
             lambdaUpdateOldName(dbConnectionName(), pathToOldFolder, oldFolderName + QDir::separator());
         }
@@ -221,9 +221,9 @@ void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
 
     QFuture<void> future = QtConcurrent::run([=]{
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
-        lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+        lambdaInsert(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::NewAdded);
     });
 
     watcher->setFuture(future);
@@ -244,10 +244,10 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
         bool isExistInDb = lambdaIsExistInDb(pathToFile);
@@ -256,16 +256,16 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
         if(isExistInDb)
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
             else
-                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaInsert(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
         }
         else
         {
             if(isExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+                lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::NewAdded);
             else
-                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::NewAdded);
+                lambdaInsert(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::NewAdded);
         }
     });
 
@@ -287,10 +287,10 @@ void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStaus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStaus;
         lambdaUpdateStaus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
         bool isExistInDb = lambdaIsExistInDb(pathToFile);
@@ -299,14 +299,14 @@ void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
         if(isExistInDb)
         {
             if(isExistInModelDb)
-                lambdaUpdateStaus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaUpdateStaus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Deleted);
             else
-                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaInsert(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Deleted);
         }
         else
         {
             if(isExistInModelDb)
-                lambdaUpdateStaus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Deleted);
+                lambdaUpdateStaus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Deleted);
         }
     });
 
@@ -331,13 +331,13 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
         std::function<bool (QString, QString)> lambdaIsOldFileExistInModelDb;
         lambdaIsOldFileExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
+        std::function<TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
         lambdaFetchStatus = LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
         std::function<void (QString, QString, QString)> lambdaUpdateOldName;
@@ -359,17 +359,17 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
             if(isOldFileExistInModelDb)
             {
-                if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Modified)
-                    lambdaUpdateStatus(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                if(currentStatus == TableModelFileMonitor::TableItemStatus::Modified)
+                    lambdaUpdateStatus(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
                 else
-                    lambdaUpdateStatus(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
+                    lambdaUpdateStatus(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::Moved);
             }
             else
             {
-                if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Modified)
-                    lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                if(currentStatus == TableModelFileMonitor::TableItemStatus::Modified)
+                    lambdaInsert(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
                 else
-                    lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::Moved);
+                    lambdaInsert(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::Moved);
             }
 
             lambdaUpdateOldName(dbConnectionName(), pathToOldFile, oldFileName);
@@ -385,13 +385,13 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
             auto currentStatus = lambdaFetchStatus(dbConnectionName(), pathToFile);
 
-            if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Moved) // File renamed as same again
+            if(currentStatus == TableModelFileMonitor::TableItemStatus::Moved) // File renamed as same again
             {
                 lambdaDeleteRow(dbConnectionName(), pathToFile);
             }
-            else if(currentStatus == V2TableModelFileMonitor::TableItemStatus::Deleted)
+            else if(currentStatus == TableModelFileMonitor::TableItemStatus::Deleted)
             {
-                lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
 
                 lambdaDeleteRow(dbConnectionName(), pathToOldFile);
             }
@@ -416,13 +416,13 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
         std::function<bool (QString, QString)> lambdaIsExistInModelDb;
         lambdaIsExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
+        std::function<TableModelFileMonitor::TableItemStatus (QString, QString)> lambdaFetchStatus;
         lambdaFetchStatus = LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
 
@@ -436,21 +436,21 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
             if(isExistInModelDb)
             {
 
-                if(currentStatus == V2TableModelFileMonitor::Moved ||
-                   currentStatus == V2TableModelFileMonitor::TableItemStatus::MovedAndModified)
-                    lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                if(currentStatus == TableModelFileMonitor::Moved ||
+                   currentStatus == TableModelFileMonitor::TableItemStatus::MovedAndModified)
+                    lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
                 else
-                    lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+                    lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
             }
             else
-                lambdaInsert(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+                lambdaInsert(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
         }
         else
         {
             if(isExistInModelDb)
             {
-                if(currentStatus == V2TableModelFileMonitor::Moved)
-                    lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                if(currentStatus == TableModelFileMonitor::Moved)
+                    lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
             }
         }
     });
@@ -476,10 +476,10 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
         std::function<bool (QString, QString)> lambdaIsOldFileExistInModelDb;
         lambdaIsOldFileExistInModelDb = LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaInsert;
         lambdaInsert = LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb();
 
-        std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
+        std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> lambdaUpdateStatus;
         lambdaUpdateStatus = LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb();
 
         std::function<void (QString, QString, QString)> lambdaUpdateOldName;
@@ -495,10 +495,10 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
         if(isOldFileExistInDb)
         {
             if(isOldFileExistInModelDb)
-                lambdaUpdateStatus(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                lambdaUpdateStatus(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
 
             else
-                lambdaInsert(dbConnectionName(), pathToOldFile, V2TableModelFileMonitor::TableItemStatus::MovedAndModified);
+                lambdaInsert(dbConnectionName(), pathToOldFile, TableModelFileMonitor::TableItemStatus::MovedAndModified);
 
             lambdaUpdateOldName(dbConnectionName(), pathToOldFile, oldFileName);
         }
@@ -509,7 +509,7 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
 
         if(isNewFileExistInDb) // File renamed as same again
         {
-            lambdaUpdateStatus(dbConnectionName(), pathToFile, V2TableModelFileMonitor::TableItemStatus::Modified);
+            lambdaUpdateStatus(dbConnectionName(), pathToFile, TableModelFileMonitor::TableItemStatus::Modified);
 
             lambdaUpdateOldName(dbConnectionName(), pathToFile, "");
         }
@@ -533,11 +533,11 @@ void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
 
 void TabFileMonitor::refreshTableViewFileMonitor()
 {
-    V2TableModelFileMonitor *tableModel = (V2TableModelFileMonitor *) ui->tableViewFileMonitor->model();
+    TableModelFileMonitor *tableModel = (TableModelFileMonitor *) ui->tableViewFileMonitor->model();
 
     if(tableModel == nullptr)
     {
-        tableModel = new V2TableModelFileMonitor(ui->tableViewFileMonitor);
+        tableModel = new TableModelFileMonitor(ui->tableViewFileMonitor);
         ui->tableViewFileMonitor->setModel(tableModel);
     }
 
@@ -546,10 +546,10 @@ void TabFileMonitor::refreshTableViewFileMonitor()
     ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 
-    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::Name,
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Name,
                                                                        QHeaderView::ResizeMode::Interactive);
 
-    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::ParentDir,
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::ParentDir,
                                                                        QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
 }

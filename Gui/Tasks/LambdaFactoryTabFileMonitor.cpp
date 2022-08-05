@@ -36,8 +36,8 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsRowE
         QString resultColumn = "result_column";
         QString queryTemplate = "SELECT COUNT(*) AS %1 FROM %2 WHERE %3 = :3;" ;
         queryTemplate = queryTemplate.arg(resultColumn,                               // 1
-                                          V2TableModelFileMonitor::TABLE_NAME,        // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 3
+                                          TableModelFileMonitor::TABLE_NAME,        // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 3
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
@@ -64,8 +64,8 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
         db.open();
 
         QString queryTemplate = "SELECT * FROM %1 WHERE %2 = '%3';" ;
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,       // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH, // 2
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,       // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH, // 2
                                           pathToFile);                               // 3
 
         QSqlQuery selectQuery(db);
@@ -86,8 +86,8 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
         db.open();
 
         QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 2
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
@@ -95,7 +95,7 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
         selectQuery.exec();
         selectQuery.next();
 
-        auto value = selectQuery.record().value(V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME).toString();
+        auto value = selectQuery.record().value(TableModelFileMonitor::COLUMN_NAME_OLD_NAME).toString();
 
         if(value.isEmpty() || value.isNull())
             result = false;
@@ -104,17 +104,17 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
     };
 }
 
-std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
+std::function<TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
 {
-    return [](QString connectionName, QString pathToFile) -> V2TableModelFileMonitor::TableItemStatus{
+    return [](QString connectionName, QString pathToFile) -> TableModelFileMonitor::TableItemStatus{
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
         QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 2
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
@@ -123,15 +123,15 @@ std::function<V2TableModelFileMonitor::TableItemStatus (QString, QString)> Lambd
         selectQuery.next();
 
         auto record = selectQuery.record();
-        auto result = record.value(V2TableModelFileMonitor::COLUMN_NAME_STATUS).value<V2TableModelFileMonitor::TableItemStatus>();
+        auto result = record.value(TableModelFileMonitor::COLUMN_NAME_STATUS).value<TableModelFileMonitor::TableItemStatus>();
 
         return result;
     };
 }
 
-std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
 {
-    return [](QString connectionName, QString pathOfItem, V2TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::TableItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -140,12 +140,12 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6) "
                                 "VALUES(:2, :3, :4, :5, :6);" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,              // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_NAME,        // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_PARENT_DIR,  // 3
-                                          V2TableModelFileMonitor::COLUMN_NAME_TYPE,        // 4
-                                          V2TableModelFileMonitor::COLUMN_NAME_STATUS,      // 5
-                                          V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP);  // 6
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,              // 1
+                                          TableModelFileMonitor::COLUMN_NAME_NAME,        // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PARENT_DIR,  // 3
+                                          TableModelFileMonitor::COLUMN_NAME_TYPE,        // 4
+                                          TableModelFileMonitor::COLUMN_NAME_STATUS,      // 5
+                                          TableModelFileMonitor::COLUMN_NAME_TIMESTAMP);  // 6
 
         QSqlQuery insertQuery(db);
         insertQuery.prepare(queryTemplate);
@@ -170,9 +170,9 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
         insertQuery.bindValue(":3", parentDir);
 
         if(pathOfItem.endsWith(QDir::separator()))
-            insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::Folder);
+            insertQuery.bindValue(":4", TableModelFileMonitor::TableItemType::Folder);
         else
-            insertQuery.bindValue(":4", V2TableModelFileMonitor::TableItemType::File);
+            insertQuery.bindValue(":4", TableModelFileMonitor::TableItemType::File);
 
         insertQuery.bindValue(":5", status);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
@@ -180,9 +180,9 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
     };
 }
 
-std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
 {
-    return [](QString connectionName, QString pathToItem, V2TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathToItem, TableModelFileMonitor::TableItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -190,10 +190,10 @@ std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)>
 
         QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3 WHERE %4 = :4;" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,            // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_STATUS,    // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_TIMESTAMP, // 3
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);     // 4
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,            // 1
+                                          TableModelFileMonitor::COLUMN_NAME_STATUS,    // 2
+                                          TableModelFileMonitor::COLUMN_NAME_TIMESTAMP, // 3
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);     // 4
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);
@@ -215,8 +215,8 @@ std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDelete
 
         QString queryTemplate = "DELETE FROM %1 WHERE %2 = :2;" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 2
 
         QSqlQuery deleteQuery(db);
         deleteQuery.prepare(queryTemplate);
@@ -236,9 +236,9 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
 
         QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,           // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_OLD_NAME, // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH);    // 3
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,           // 1
+                                          TableModelFileMonitor::COLUMN_NAME_OLD_NAME, // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);    // 3
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);
@@ -259,9 +259,9 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
 
         QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
 
-        queryTemplate = queryTemplate.arg(V2TableModelFileMonitor::TABLE_NAME,        // 1
-                                          V2TableModelFileMonitor::COLUMN_NAME_NAME,  // 2
-                                          V2TableModelFileMonitor::COLUMN_NAME_PATH); // 3
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_NAME,  // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 3
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);

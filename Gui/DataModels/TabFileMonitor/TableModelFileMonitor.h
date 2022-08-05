@@ -1,14 +1,36 @@
 #ifndef TABLEMODELFILEMONITOR_H
 #define TABLEMODELFILEMONITOR_H
 
-#include <QDateTime>
-#include <QAbstractTableModel>
+#include <QSqlQueryModel>
 
-class TableModelFileMonitor : public QAbstractTableModel
+class TableModelFileMonitor : public QSqlQueryModel
 {
     Q_OBJECT
-
 public:
+    static const QString TABLE_NAME;
+    static const QString COLUMN_NAME_NAME;
+    static const QString COLUMN_NAME_PARENT_DIR;
+    static const QString COLUMN_NAME_PATH;
+    static const QString COLUMN_NAME_OLD_NAME;
+    static const QString COLUMN_NAME_TYPE;
+    static const QString COLUMN_NAME_STATUS;
+    static const QString COLUMN_NAME_TIMESTAMP;
+    static const QString COLUMN_NAME_ACTION;
+    static const QString COLUMN_NAME_NOTE_NUMBER;
+
+    enum ColumnIndex
+    {
+        Name,
+        ParentDir,
+        Path,
+        OldName,
+        Type,
+        Status,
+        Timestamp,
+        Action,
+        NoteNumber
+    };
+
     enum TableItemStatus
     {
         InvalidStatus,
@@ -27,56 +49,13 @@ public:
         File
     };
 
-    struct TableItem
-    {
-        QString name;
-        QString parentDirPath;
-        QString oldName;
-        TableItemType itemType;
-        TableItemStatus status = TableItemStatus::InvalidStatus;
-        QDateTime timestamp;
-
-
-        bool operator==(const TableItem &other) const
-        {
-            return name == other.name && parentDirPath == other.parentDirPath;
-        }
-    };
-
 public:
     TableModelFileMonitor(QObject *parent = nullptr);
-    TableModelFileMonitor(const QList<TableItem> &_itemList, QObject *parent = nullptr);
 
-    QList<TableItem> getItemList();
-
-    static TableItem tableItemNewAddedFolderFrom(const QString &pathToFolder);
-    static TableItem tableItemModifiedFolderFrom(const QString &pathToFolder);
-    static TableItem tableItemDeletedFolderFrom(const QString &pathToFolder);
-    static TableItem tableItemMovedFolderFrom(const QString &pathToFolder, const QString &oldLocation);
-    static TableItem tableItemNewAddedFileFrom(const QString &pathToFile);
-    static TableItem tableItemDeletedFileFrom(const QString &pathToFile);
-    static TableItem tableItemMovedFileFrom(const QString &pathToFile, const QString &oldLocation);
-    static TableItem tableItemModifiedFileFrom(const QString &pathToFile);
-    static TableItem tableItemMovedAndModifiedFileFrom(const QString &pathToFile, const QString &oldLocation);
-
-    // QAbstractTableModel interface
-public:
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
-    bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
-private:
-    static TableItem tableItemFolderFrom(const QString &pathToFolder, TableItemStatus status, const QString &oldLocation = "");
-    static TableItem tableItemFileFrom(const QString &pathToFile, TableItemStatus status, const QString &oldLocation = "");
-
-private:
-    QList<TableItem> itemList;
-    QSet<QPersistentModelIndex> checkedItems;
+signals:
 
 };
 
