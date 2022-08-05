@@ -56,6 +56,16 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
 
 QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 {
+    if(role == Qt::ItemDataRole::TextAlignmentRole)
+    {
+        if(index.column() == ColumnIndex::Type ||
+           index.column() == ColumnIndex::Status ||
+           index.column() == ColumnIndex::Timestamp)
+        {
+            return Qt::AlignmentFlag::AlignCenter;
+        }
+    }
+
     if(role == Qt::ItemDataRole::DecorationRole)
     {
         QFileIconProvider provider;

@@ -1,7 +1,6 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
 #include "Tasks/LambdaFactoryTabFileMonitor.h"
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 
 #include <QtConcurrent>
@@ -550,6 +549,9 @@ void TabFileMonitor::refreshTableViewFileMonitor()
                                                                        QHeaderView::ResizeMode::Interactive);
 
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::ParentDir,
+                                                                       QHeaderView::ResizeMode::Interactive);
+
+    ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Path,
                                                                        QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
 }
