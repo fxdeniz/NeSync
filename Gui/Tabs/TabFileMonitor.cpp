@@ -554,6 +554,12 @@ void TabFileMonitor::refreshTableViewFileMonitor()
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Path,
                                                                        QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
+
+    for(int rowIndex = 0; rowIndex < tableModel->rowCount(); rowIndex++)
+    {
+        ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Action, this->comboBoxItemDelegateFileAction);
+        ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::Action));
+    }
 }
 
 void TabFileMonitor::createDb()
