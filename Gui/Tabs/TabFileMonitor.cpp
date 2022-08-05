@@ -38,9 +38,9 @@ QString TabFileMonitor::dbFileName()
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
         std::function<void (QString, QString, V2TableModelFileMonitor::TableItemStatus)> lambdaInsert;
@@ -54,9 +54,9 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrF
 void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -71,9 +71,9 @@ void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder
 void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -114,9 +114,9 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
 void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -161,9 +161,9 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
     pathToOldFolder += oldFolderName + QDir::separator();
 
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -215,9 +215,9 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
 void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -232,9 +232,9 @@ void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
 void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -275,9 +275,9 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
 void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -319,9 +319,9 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
     pathToOldFile += oldFileName;
 
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -404,9 +404,9 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -464,9 +464,9 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     pathToOldFile += oldFileName;
 
     auto *watcher = new QFutureWatcher<void>(this);
-    newResultSet.insert(watcher);
+    resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotRefreshTableViewFileMonitor);
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -518,30 +518,20 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     watcher->setFuture(future);
 }
 
-void TabFileMonitor::slotRefreshTableViewFileMonitor()
+void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
 {
-//    for(QFutureWatcher<TableModelFileMonitor::TableItem> *watcher : qAsConst(resultSet))
-//    {
-//        if(watcher->isFinished())
-//        {
-//            addRowToTableViewFileMonitor(watcher->result());
-//            watcher->deleteLater();
-//            resultSet.remove(watcher);
-//        }
-//    }
-    for(QFutureWatcher<void> *watcher : qAsConst(newResultSet))
+    for(QFutureWatcher<void> *watcher : qAsConst(resultSet))
     {
         if(watcher->isFinished())
         {
-            TableModelFileMonitor::TableItem dummy;
-            addRowToTableViewFileMonitor(dummy);
+            refreshTableViewFileMonitor();
             watcher->deleteLater();
-            newResultSet.remove(watcher);
+            resultSet.remove(watcher);
         }
     }
 }
 
-void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item)
+void TabFileMonitor::refreshTableViewFileMonitor()
 {
     V2TableModelFileMonitor *tableModel = (V2TableModelFileMonitor *) ui->tableViewFileMonitor->model();
 
@@ -562,40 +552,6 @@ void TabFileMonitor::addRowToTableViewFileMonitor(const TableModelFileMonitor::T
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(V2TableModelFileMonitor::ColumnIndex::ParentDir,
                                                                        QHeaderView::ResizeMode::Interactive);
     ui->tableViewFileMonitor->resizeColumnsToContents();
-
-//    if(item.status != TableModelFileMonitor::TableItemStatus::InvalidStatus)
-//    {
-//        TableModelFileMonitor *tableModel = (TableModelFileMonitor *) ui->tableViewFileMonitor->model();
-
-//        if(tableModel == nullptr)
-//        {
-//            tableModel = new TableModelFileMonitor({item}, ui->tableViewFileMonitor);
-//            ui->tableViewFileMonitor->setModel(tableModel);
-//        }
-//        else
-//        {
-//            QList<TableModelFileMonitor::TableItem> itemList = tableModel->getItemList();
-//            bool isExist = itemList.contains(item);
-
-//            if(isExist)
-//            {
-//                auto index = itemList.indexOf(item);
-//                itemList.replace(index, item);
-//            }
-//            else
-//                itemList.append(item);
-
-//            delete tableModel;
-//            tableModel = new TableModelFileMonitor(itemList, ui->tableViewFileMonitor);
-//            ui->tableViewFileMonitor->setModel(tableModel);
-//        }
-
-//        ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
-//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
-//        ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
-//        ui->tableViewFileMonitor->resizeColumnsToContents();
-//    }
 }
 
 void TabFileMonitor::createDb()

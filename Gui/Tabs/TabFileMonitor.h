@@ -37,14 +37,11 @@ public slots:
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
-signals:
-    void signalTableItemReady(TableModelFileMonitor::TableItem item);
-
 private slots:
-    void slotRefreshTableViewFileMonitor();
-    void addRowToTableViewFileMonitor(const TableModelFileMonitor::TableItem &item);
+    void slotOnAsyncCategorizationTaskCompleted();
 
 private:
+    void refreshTableViewFileMonitor();
     void createDb();
 
 private:
@@ -52,8 +49,7 @@ private:
     QSqlDatabase db;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
-    QSet<QFutureWatcher<TableModelFileMonitor::TableItem> *> resultSet;
-    QSet<QFutureWatcher<void> *> newResultSet;
+    QSet<QFutureWatcher<void> *> resultSet;
 
 };
 
