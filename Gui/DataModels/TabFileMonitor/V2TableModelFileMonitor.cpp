@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QDateTime>
+#include <QFileIconProvider>
 
 const QString V2TableModelFileMonitor::TABLE_NAME = "TableItem";
 const QString V2TableModelFileMonitor::COLUMN_NAME_NAME = "name";
@@ -55,6 +56,39 @@ QVariant V2TableModelFileMonitor::headerData(int section, Qt::Orientation orient
 
 QVariant V2TableModelFileMonitor::data(const QModelIndex &index, int role) const
 {
+    if(role == Qt::ItemDataRole::DecorationRole)
+    {
+        QFileIconProvider provider;
+
+        if(index.column() == ColumnIndex::Name)
+        {
+            QModelIndex typeIndex = index.siblingAtColumn(ColumnIndex::Type);
+            QVariant typeValue = QSqlQueryModel::data(typeIndex);
+            TableItemType type = typeValue.value<TableItemType>();
+
+            if(type == TableItemType::File)
+            {
+                QModelIndex parentDirIndex = index.siblingAtColumn(ColumnIndex::ParentDir);
+                auto parentDirValue = QSqlQueryModel::data(parentDirIndex).toString();
+                auto nameValue = QSqlQueryModel::data(index).toString();
+
+                QFileInfo info(parentDirValue + nameValue);
+                auto result = provider.icon(info);
+                return result;
+            }
+            else if(type == TableItemType::Folder)
+            {
+                auto result = provider.icon(QFileIconProvider::IconType::Folder);
+                return result;
+            }
+        }
+        else if(index.column() == ColumnIndex::ParentDir)
+        {
+            auto result = provider.icon(QFileIconProvider::IconType::Folder).pixmap(32, 32);
+            return result;
+        }
+    }
+
     QVariant value = QSqlQueryModel::data(index, role);
 
     if (value.isValid() && role == Qt::DisplayRole)
