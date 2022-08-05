@@ -113,7 +113,11 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
             }
             else if(info.isDir())
             {
-                predictedFolders.insert(standarizedPath);
+                if(currentPath.endsWith(QDir::separator())) // Insert predicted folder without seprator
+                    predictedFolders.insert(standarizedPath.chopped(1));
+                else
+                    predictedFolders.insert(standarizedPath);
+
                 this->addTargetFromDirPath(standarizedPath);
 
                 unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
