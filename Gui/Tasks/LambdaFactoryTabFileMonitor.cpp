@@ -104,9 +104,9 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
     };
 }
 
-std::function<TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
+std::function<TableModelFileMonitor::ItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
 {
-    return [](QString connectionName, QString pathToFile) -> TableModelFileMonitor::TableItemStatus{
+    return [](QString connectionName, QString pathToFile) -> TableModelFileMonitor::ItemStatus{
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -123,15 +123,15 @@ std::function<TableModelFileMonitor::TableItemStatus (QString, QString)> LambdaF
         selectQuery.next();
 
         auto record = selectQuery.record();
-        auto result = record.value(TableModelFileMonitor::COLUMN_NAME_STATUS).value<TableModelFileMonitor::TableItemStatus>();
+        auto result = record.value(TableModelFileMonitor::COLUMN_NAME_STATUS).value<TableModelFileMonitor::ItemStatus>();
 
         return result;
     };
 }
 
-std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
 {
-    return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
@@ -170,9 +170,9 @@ std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> L
         insertQuery.bindValue(":3", parentDir);
 
         if(pathOfItem.endsWith(QDir::separator()))
-            insertQuery.bindValue(":4", TableModelFileMonitor::TableItemType::Folder);
+            insertQuery.bindValue(":4", TableModelFileMonitor::ItemType::Folder);
         else
-            insertQuery.bindValue(":4", TableModelFileMonitor::TableItemType::File);
+            insertQuery.bindValue(":4", TableModelFileMonitor::ItemType::File);
 
         insertQuery.bindValue(":5", status);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
@@ -180,9 +180,9 @@ std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> L
     };
 }
 
-std::function<void (QString, QString, TableModelFileMonitor::TableItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
 {
-    return [](QString connectionName, QString pathToItem, TableModelFileMonitor::TableItemStatus status){
+    return [](QString connectionName, QString pathToItem, TableModelFileMonitor::ItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);

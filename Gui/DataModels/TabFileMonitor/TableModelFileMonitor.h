@@ -20,18 +20,26 @@ public:
 
     enum ColumnIndex
     {
-        Name,
-        ParentDir,
-        Path,
-        OldName,
-        Type,
-        Status,
-        Timestamp,
-        Action,
-        NoteNumber
+        Name = 0,
+        ParentDir = 1,
+        Path = 2,
+        OldName = 3,
+        Type = 4,
+        Status = 5,
+        Timestamp = 6,
+        Action = 7,
+        NoteNumber = 8
     };
 
-    enum TableItemStatus
+    enum Action
+    {
+        Update,
+        Replace,
+        Delete,
+        Freeze
+    };
+
+    enum ItemStatus
     {
         InvalidStatus,
         Missing,
@@ -42,7 +50,7 @@ public:
         Deleted
     };
 
-    enum TableItemType
+    enum ItemType
     {
         UndefinedType,
         Folder,
@@ -51,6 +59,8 @@ public:
 
 public:
     TableModelFileMonitor(QObject *parent = nullptr);
+
+    static ItemStatus statusCodeFromString(const QString &status);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role) const override;

@@ -20,6 +20,30 @@ TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
 {
 }
 
+TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(const QString &status)
+{
+    if(status == "Updated")
+        return ItemStatus::Modified;
+
+    else if(status == "New Added")
+        return ItemStatus::NewAdded;
+
+    else if(status == "Deleted")
+        return ItemStatus::Deleted;
+
+    else if(status == "Moved")
+        return ItemStatus::Moved;
+
+    else if(status == "Moved & Updated" )
+        return ItemStatus::MovedAndModified;
+
+    else if(status == "Missing")
+        return ItemStatus::Missing;
+
+    else
+        return ItemStatus::InvalidStatus;
+}
+
 QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
@@ -74,9 +98,9 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         {
             QModelIndex typeIndex = index.siblingAtColumn(ColumnIndex::Type);
             QVariant typeValue = QSqlQueryModel::data(typeIndex);
-            TableItemType type = typeValue.value<TableItemType>();
+            ItemType type = typeValue.value<ItemType>();
 
-            if(type == TableItemType::File)
+            if(type == ItemType::File)
             {
                 QModelIndex parentDirIndex = index.siblingAtColumn(ColumnIndex::ParentDir);
                 auto parentDirValue = QSqlQueryModel::data(parentDirIndex).toString();
@@ -86,7 +110,7 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 auto result = provider.icon(info);
                 return result;
             }
-            else if(type == TableItemType::Folder)
+            else if(type == ItemType::Folder)
             {
                 auto result = provider.icon(QFileIconProvider::IconType::Folder);
                 return result;
@@ -117,34 +141,34 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 
         else if(index.column() == ColumnIndex::Type)
         {
-            if(value.value<TableItemType>() == TableItemType::File)
+            if(value.value<ItemType>() == ItemType::File)
                 return tr("File");
-            else if(value.value<TableItemType>() == TableItemType::Folder)
+            else if(value.value<ItemType>() == ItemType::Folder)
                 return tr("Folder");
             else
                 return "NaN";
         }
         else if(index.column() == ColumnIndex::Status)
         {
-            if(value.value<TableItemStatus>() == TableItemStatus::Modified)
+            if(value.value<ItemStatus>() == ItemStatus::Modified)
                 return tr("Updated");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::NewAdded)
+            else if(value.value<ItemStatus>() == ItemStatus::NewAdded)
                 return tr("New Added");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::Deleted)
+            else if(value.value<ItemStatus>() == ItemStatus::Deleted)
                 return tr("Deleted");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::Moved)
+            else if(value.value<ItemStatus>() == ItemStatus::Moved)
                 return tr("Moved");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::MovedAndModified)
+            else if(value.value<ItemStatus>() == ItemStatus::MovedAndModified)
                 return tr("Moved & Updated");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::Missing)
+            else if(value.value<ItemStatus>() == ItemStatus::Missing)
                 return tr("Missing");
 
-            else if(value.value<TableItemStatus>() == TableItemStatus::InvalidStatus)
+            else if(value.value<ItemStatus>() == ItemStatus::InvalidStatus)
                 return tr("Invalid");
 
             else
