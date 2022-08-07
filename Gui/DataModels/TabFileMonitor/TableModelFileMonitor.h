@@ -18,6 +18,14 @@ public:
     static const QString COLUMN_NAME_ACTION;
     static const QString COLUMN_NAME_NOTE_NUMBER;
 
+    static const QString STATUS_TEXT_MODIFIED;
+    static const QString STATUS_TEXT_NEW_ADDED;
+    static const QString STATUS_TEXT_DELETED;
+    static const QString STATUS_TEXT_MOVED;
+    static const QString STATUS_TEXT_MOVED_AND_MODIFIED;
+    static const QString STATUS_TEXT_MISSING;
+    static const QString STATUS_TEXT_INVALID;
+
     enum ColumnIndex
     {
         Name = 0,

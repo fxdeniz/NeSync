@@ -15,6 +15,16 @@ const QString TableModelFileMonitor::COLUMN_NAME_TIMESTAMP = "timestamp";
 const QString TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
 const QString TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
 
+
+const QString TableModelFileMonitor::STATUS_TEXT_MODIFIED = tr("Updated");
+const QString TableModelFileMonitor::STATUS_TEXT_NEW_ADDED = tr("New Added");
+const QString TableModelFileMonitor::STATUS_TEXT_DELETED = tr("Deleted");
+const QString TableModelFileMonitor::STATUS_TEXT_MOVED = tr("Moved");
+const QString TableModelFileMonitor::STATUS_TEXT_MOVED_AND_MODIFIED = tr("Moved & Updated");
+const QString TableModelFileMonitor::STATUS_TEXT_MISSING = tr("Missing");
+const QString TableModelFileMonitor::STATUS_TEXT_INVALID = tr("Invalid");
+
+
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
     : QSqlQueryModel(parent)
 {
@@ -22,22 +32,22 @@ TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
 
 TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(const QString &status)
 {
-    if(status == "Updated")
+    if(status == STATUS_TEXT_MODIFIED)
         return ItemStatus::Modified;
 
-    else if(status == "New Added")
+    else if(status == STATUS_TEXT_NEW_ADDED)
         return ItemStatus::NewAdded;
 
-    else if(status == "Deleted")
+    else if(status == STATUS_TEXT_DELETED)
         return ItemStatus::Deleted;
 
-    else if(status == "Moved")
+    else if(status == STATUS_TEXT_MOVED)
         return ItemStatus::Moved;
 
-    else if(status == "Moved & Updated" )
+    else if(status == STATUS_TEXT_MOVED_AND_MODIFIED)
         return ItemStatus::MovedAndModified;
 
-    else if(status == "Missing")
+    else if(status == STATUS_TEXT_MISSING)
         return ItemStatus::Missing;
 
     else
@@ -151,25 +161,25 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         else if(index.column() == ColumnIndex::Status)
         {
             if(value.value<ItemStatus>() == ItemStatus::Modified)
-                return tr("Updated");
+                return STATUS_TEXT_MODIFIED;
 
             else if(value.value<ItemStatus>() == ItemStatus::NewAdded)
-                return tr("New Added");
+                return STATUS_TEXT_NEW_ADDED;
 
             else if(value.value<ItemStatus>() == ItemStatus::Deleted)
-                return tr("Deleted");
+                return STATUS_TEXT_DELETED;
 
             else if(value.value<ItemStatus>() == ItemStatus::Moved)
-                return tr("Moved");
+                return STATUS_TEXT_MOVED;
 
             else if(value.value<ItemStatus>() == ItemStatus::MovedAndModified)
-                return tr("Moved & Updated");
+                return STATUS_TEXT_MOVED_AND_MODIFIED;
 
             else if(value.value<ItemStatus>() == ItemStatus::Missing)
-                return tr("Missing");
+                return STATUS_TEXT_MISSING;
 
             else if(value.value<ItemStatus>() == ItemStatus::InvalidStatus)
-                return tr("Invalid");
+                return STATUS_TEXT_INVALID;
 
             else
                 return tr("NaN");
