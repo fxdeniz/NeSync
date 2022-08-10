@@ -1,4 +1,5 @@
 #include "ComboBoxItemDelegateFileAction.h"
+#include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 
 #include <QComboBox>
 
@@ -17,10 +18,35 @@ QWidget *ComboBoxItemDelegateFileAction::createEditor(QWidget *parent, const QSt
 {
     // Create the combobox and populate it
     QComboBox *cb = new QComboBox(parent);
-    const int row = index.row();
-    cb->addItem(QString("one in row %1").arg(row));
-    cb->addItem(QString("two in row %1").arg(row));
-    cb->addItem(QString("three in row %1").arg(row));
+
+    QModelIndex statusIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Status);
+    auto statusText = statusIndex.data().toString();
+    auto statusCode = TableModelFileMonitor::statusCodeFromString(statusText);
+
+    if(statusCode == TableModelFileMonitor::ItemStatus::Missing)
+    {
+        cb->addItem("Restore");
+        cb->addItem("Freeze");
+        cb->addItem("Delete from Db");
+    }
+    else if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
+    {
+        cb->addItem("Save");
+    }
+    else if(statusCode == TableModelFileMonitor::ItemStatus::Modified ||
+            statusCode == TableModelFileMonitor::ItemStatus::Moved ||
+            statusCode == TableModelFileMonitor::ItemStatus::MovedAndModified)
+    {
+        cb->addItem("Save");
+        cb->addItem("Restore");
+    }
+    else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
+    {
+        cb->addItem("Delete from Db");
+        cb->addItem("Restore");
+        cb->addItem("Freeze");
+    }
+
     return cb;
 }
 
