@@ -1,6 +1,7 @@
 #ifndef TABFILEMONITOR_H
 #define TABFILEMONITOR_H
 
+#include <QStringListModel>
 #include <QSqlDatabase>
 #include <QFuture>
 #include <QWidget>
@@ -22,6 +23,8 @@ public:
 
     static QString dbConnectionName();
     static QString dbFileName();
+
+    QStringListModel *getListModelNoteNumber() const;
 
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
@@ -49,7 +52,7 @@ private:
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;
-
+    QStringListModel *listModelNoteNumber;
 };
 
 #endif // TABFILEMONITOR_H

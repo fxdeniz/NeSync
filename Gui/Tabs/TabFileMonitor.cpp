@@ -15,8 +15,9 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui->setupUi(this);
     createDb();
 
-    this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this->ui->tableViewFileMonitor);
-    this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this->ui->tableViewFileMonitor);
+    listModelNoteNumber = new QStringListModel(this);
+    this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this);
+    this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this);
 }
 
 TabFileMonitor::~TabFileMonitor()
@@ -32,6 +33,11 @@ QString TabFileMonitor::dbConnectionName()
 QString TabFileMonitor::dbFileName()
 {
     return "file:TabFileMonitorSqlFile?mode=memory&cache=shared";
+}
+
+QStringListModel *TabFileMonitor::getListModelNoteNumber() const
+{
+    return listModelNoteNumber;
 }
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
@@ -553,13 +559,24 @@ void TabFileMonitor::refreshTableViewFileMonitor()
 
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Path,
                                                                        QHeaderView::ResizeMode::Interactive);
-    ui->tableViewFileMonitor->resizeColumnsToContents();
+
+    QStringList list;
+
+    for(int number = 0; number < tableModel->rowCount(); number++)
+        list.append(QString::number(number + 1));
+
+    listModelNoteNumber->setStringList(list);
+
+    ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Action, this->comboBoxItemDelegateFileAction);
+    ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::NoteNumber, this->comboBoxItemDelegateNote);
 
     for(int rowIndex = 0; rowIndex < tableModel->rowCount(); rowIndex++)
     {
-        ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Action, this->comboBoxItemDelegateFileAction);
         ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::Action));
+        ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::NoteNumber));
     }
+
+    ui->tableViewFileMonitor->resizeColumnsToContents();
 }
 
 void TabFileMonitor::createDb()
@@ -593,3 +610,4 @@ void TabFileMonitor::createDb()
     query.prepare(queryString);
     query.exec();
 }
+
