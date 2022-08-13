@@ -23,6 +23,7 @@ public:
 
     static QString dbConnectionName();
     static QString dbFileName();
+    static QString defaultNoNoteText();
 
     QStringListModel *getListModelNoteNumber() const;
 
@@ -41,6 +42,9 @@ public slots:
 
 private slots:
     void slotOnAsyncCategorizationTaskCompleted();
+
+    void on_buttonAddNote_clicked();
+    void on_buttonDeleteNote_clicked();
 
 private:
     void refreshTableViewFileMonitor();

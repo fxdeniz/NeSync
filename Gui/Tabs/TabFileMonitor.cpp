@@ -16,6 +16,11 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     createDb();
 
     listModelNoteNumber = new QStringListModel(this);
+    ui->comboBoxNoteNumber->setModel(getListModelNoteNumber());
+
+    ui->comboBoxNoteNumber->setPlaceholderText(defaultNoNoteText());
+    ui->buttonDeleteNote->setDisabled(true);
+
     this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this);
     this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this);
 }
@@ -33,6 +38,11 @@ QString TabFileMonitor::dbConnectionName()
 QString TabFileMonitor::dbFileName()
 {
     return "file:TabFileMonitorSqlFile?mode=memory&cache=shared";
+}
+
+QString TabFileMonitor::defaultNoNoteText()
+{
+    return "No note";
 }
 
 QStringListModel *TabFileMonitor::getListModelNoteNumber() const
@@ -560,13 +570,6 @@ void TabFileMonitor::refreshTableViewFileMonitor()
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Path,
                                                                        QHeaderView::ResizeMode::Interactive);
 
-    QStringList list;
-
-    for(int number = 0; number < tableModel->rowCount(); number++)
-        list.append(QString::number(number + 1));
-
-    listModelNoteNumber->setStringList(list);
-
     ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Action, this->comboBoxItemDelegateFileAction);
     ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::NoteNumber, this->comboBoxItemDelegateNote);
 
@@ -609,5 +612,51 @@ void TabFileMonitor::createDb()
     QSqlQuery query(db);
     query.prepare(queryString);
     query.exec();
+}
+
+
+void TabFileMonitor::on_buttonAddNote_clicked()
+{
+    auto stringList = getListModelNoteNumber()->stringList();
+    auto size = stringList.size();
+
+    QString item;
+
+    if(size == 0)
+        item = "1";
+    else
+        item = QString::number(stringList.last().toInt() + 1);
+
+    stringList.append(item);
+    getListModelNoteNumber()->setStringList(stringList);
+
+    ui->comboBoxNoteNumber->setEnabled(true);
+    ui->buttonDeleteNote->setEnabled(true);
+
+    size = stringList.size();
+    ui->comboBoxNoteNumber->setCurrentIndex(size - 1);
+}
+
+
+void TabFileMonitor::on_buttonDeleteNote_clicked()
+{
+    auto currentIndex = ui->comboBoxNoteNumber->currentIndex();
+    auto stringList = getListModelNoteNumber()->stringList();
+    auto previousSize = stringList.size();
+    stringList.removeAt(currentIndex);
+    getListModelNoteNumber()->setStringList(stringList);
+
+    auto size = stringList.size();
+
+    if(size == 0)
+    {
+        ui->buttonDeleteNote->setDisabled(true);
+        ui->comboBoxNoteNumber->setDisabled(true);
+    }
+
+    if(currentIndex == previousSize - 1) // If deleting the last item
+        ui->comboBoxNoteNumber->setCurrentIndex(currentIndex - 1);
+    else
+        ui->comboBoxNoteNumber->setCurrentIndex(currentIndex); // Stay at same index.
 }
 
