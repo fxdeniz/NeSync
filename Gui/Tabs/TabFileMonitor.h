@@ -8,12 +8,13 @@
 
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h"
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h"
+#include "IComboBoxNoteNotifier.h"
 
 namespace Ui {
 class TabFileMonitor;
 }
 
-class TabFileMonitor : public QWidget
+class TabFileMonitor : public IComboBoxNoteNotifier
 {
     Q_OBJECT
 
@@ -23,7 +24,6 @@ public:
 
     static QString dbConnectionName();
     static QString dbFileName();
-    static QString defaultNoNoteText();
 
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
@@ -37,10 +37,6 @@ public slots:
     void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
-
-signals:
-    void signalNoteNumberAdded(const QStringList &itemList);
-    void signalNoteNumberDeleted(const QStringList &itemList, const QString &removedItem);
 
 private slots:
     void slotOnAsyncCategorizationTaskCompleted();

@@ -3,12 +3,11 @@
 
 #include <QMainWindow>
 
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
+#include "Tabs/TabFileMonitor.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogAddNewFile.h"
 #include "Tabs/TabFileExplorer.h"
-#include "Tabs/TabFileMonitor.h"
 
 #define DEBUG_FSM_TO_GUI
 #define DEBUG_FSM_TO_GUI_WITHOUT_THREAD_INFO

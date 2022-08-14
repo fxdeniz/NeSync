@@ -77,6 +77,10 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabFileMonitor.cpp
         Gui/Tabs/TabFileMonitor.ui
         #
+        #
+        Gui/Tabs/IComboBoxNoteNotifier.h
+        Gui/Tabs/IComboBoxNoteNotifier.cpp
+        #
         Gui/DataModels/TabFileMonitor/TableModelFileMonitor.h
         Gui/DataModels/TabFileMonitor/TableModelFileMonitor.cpp
         #

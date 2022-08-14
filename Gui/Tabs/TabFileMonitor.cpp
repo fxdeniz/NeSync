@@ -9,7 +9,7 @@
 #include <QDir>
 
 TabFileMonitor::TabFileMonitor(QWidget *parent) :
-    QWidget(parent),
+    IComboBoxNoteNotifier(parent),
     ui(new Ui::TabFileMonitor)
 {
     ui->setupUi(this);
@@ -34,11 +34,6 @@ QString TabFileMonitor::dbConnectionName()
 QString TabFileMonitor::dbFileName()
 {
     return "file:TabFileMonitorSqlFile?mode=memory&cache=shared";
-}
-
-QString TabFileMonitor::defaultNoNoteText()
-{
-    return "No note";
 }
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
