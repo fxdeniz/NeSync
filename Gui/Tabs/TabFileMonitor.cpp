@@ -16,7 +16,6 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     createDb();
 
     ui->comboBoxNoteNumber->setPlaceholderText(defaultNoNoteText());
-    ui->buttonDeleteNote->setDisabled(true);
 
     this->comboBoxItemDelegateNote = new ComboBoxItemDelegateNote(this);
     this->comboBoxItemDelegateFileAction = new ComboBoxItemDelegateFileAction(this);
@@ -632,6 +631,7 @@ void TabFileMonitor::on_buttonAddNote_clicked()
 
     ui->comboBoxNoteNumber->setEnabled(true);
     ui->buttonDeleteNote->setEnabled(true);
+    ui->textEditDescription->setEnabled(true);
 
     size = stringList.size();
     ui->comboBoxNoteNumber->setCurrentIndex(size - 1);
@@ -656,6 +656,7 @@ void TabFileMonitor::on_buttonDeleteNote_clicked()
     {
         ui->buttonDeleteNote->setDisabled(true);
         ui->comboBoxNoteNumber->setDisabled(true);
+        ui->textEditDescription->setDisabled(true);
     }
 
     if(currentIndex == previousSize - 1) // If deleting the last item
