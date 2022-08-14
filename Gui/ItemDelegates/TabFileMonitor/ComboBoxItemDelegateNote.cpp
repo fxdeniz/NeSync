@@ -1,5 +1,6 @@
 #include "ComboBoxItemDelegateNote.h"
 #include "Tabs/TabFileMonitor.h"
+#include "ComboBoxNote.h"
 
 #include <QComboBox>
 
@@ -18,9 +19,12 @@ ComboBoxItemDelegateNote::~ComboBoxItemDelegateNote()
 QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     // Create the combobox and populate it
-    QComboBox *cb = new QComboBox(parent);
+    ComboBoxNote *cb = new ComboBoxNote(parent);
     cb->setPlaceholderText(TabFileMonitor::defaultNoNoteText());
-    cb->setModel(parentTab->getListModelNoteNumber());
+
+    QObject::connect(parentTab, &TabFileMonitor::signalNoteNumberAdded, cb, &ComboBoxNote::slotOnItemAdded);
+    QObject::connect(parentTab, &TabFileMonitor::signalNoteNumberDeleted, cb, &ComboBoxNote::slotOnItemRemoved);
+
     return cb;
 }
 

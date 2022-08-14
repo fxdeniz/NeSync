@@ -25,8 +25,6 @@ public:
     static QString dbFileName();
     static QString defaultNoNoteText();
 
-    QStringListModel *getListModelNoteNumber() const;
-
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
@@ -39,6 +37,10 @@ public slots:
     void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
     void slotOnFileModified(const QString &pathToFile);
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
+
+signals:
+    void signalNoteNumberAdded(const QStringList &itemList);
+    void signalNoteNumberDeleted(const QStringList &itemList, const QString &removedItem);
 
 private slots:
     void slotOnAsyncCategorizationTaskCompleted();
@@ -56,7 +58,6 @@ private:
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;
-    QStringListModel *listModelNoteNumber;
 };
 
 #endif // TABFILEMONITOR_H

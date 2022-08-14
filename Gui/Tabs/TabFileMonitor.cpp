@@ -15,9 +15,6 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui->setupUi(this);
     createDb();
 
-    listModelNoteNumber = new QStringListModel(this);
-    ui->comboBoxNoteNumber->setModel(getListModelNoteNumber());
-
     ui->comboBoxNoteNumber->setPlaceholderText(defaultNoNoteText());
     ui->buttonDeleteNote->setDisabled(true);
 
@@ -43,11 +40,6 @@ QString TabFileMonitor::dbFileName()
 QString TabFileMonitor::defaultNoNoteText()
 {
     return "No note";
-}
-
-QStringListModel *TabFileMonitor::getListModelNoteNumber() const
-{
-    return listModelNoteNumber;
 }
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
@@ -617,7 +609,15 @@ void TabFileMonitor::createDb()
 
 void TabFileMonitor::on_buttonAddNote_clicked()
 {
-    auto stringList = getListModelNoteNumber()->stringList();
+    QStringListModel *model = qobject_cast<QStringListModel *>(ui->comboBoxNoteNumber->model());
+
+    if(model == nullptr)
+    {
+        model = new QStringListModel(ui->comboBoxNoteNumber);
+        ui->comboBoxNoteNumber->setModel(model);
+    }
+
+    auto stringList = model->stringList();
     auto size = stringList.size();
 
     QString item;
@@ -628,23 +628,27 @@ void TabFileMonitor::on_buttonAddNote_clicked()
         item = QString::number(stringList.last().toInt() + 1);
 
     stringList.append(item);
-    getListModelNoteNumber()->setStringList(stringList);
+    model->setStringList(stringList);
 
     ui->comboBoxNoteNumber->setEnabled(true);
     ui->buttonDeleteNote->setEnabled(true);
 
     size = stringList.size();
     ui->comboBoxNoteNumber->setCurrentIndex(size - 1);
+
+    emit signalNoteNumberAdded(stringList);
 }
 
 
 void TabFileMonitor::on_buttonDeleteNote_clicked()
 {
     auto currentIndex = ui->comboBoxNoteNumber->currentIndex();
-    auto stringList = getListModelNoteNumber()->stringList();
+    QStringListModel *model = qobject_cast<QStringListModel *>(ui->comboBoxNoteNumber->model());
+    auto stringList = model->stringList();
     auto previousSize = stringList.size();
+    auto removedItem = stringList.value(currentIndex);
     stringList.removeAt(currentIndex);
-    getListModelNoteNumber()->setStringList(stringList);
+    model->setStringList(stringList);
 
     auto size = stringList.size();
 
@@ -658,5 +662,7 @@ void TabFileMonitor::on_buttonDeleteNote_clicked()
         ui->comboBoxNoteNumber->setCurrentIndex(currentIndex - 1);
     else
         ui->comboBoxNoteNumber->setCurrentIndex(currentIndex); // Stay at same index.
+
+    emit signalNoteNumberDeleted(stringList, removedItem);
 }
 

@@ -85,6 +85,9 @@ set(PROJECT_SOURCES
         #
         Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h
         Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.cpp
+        #
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxNote.h
+        Gui/ItemDelegates/TabFileMonitor/ComboBoxNote.cpp
     #
 
     # TabReleatedFiles
