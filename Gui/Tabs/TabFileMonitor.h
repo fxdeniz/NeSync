@@ -7,8 +7,7 @@
 #include <QWidget>
 
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h"
-#include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h"
-#include "IComboBoxNoteNotifier.h"
+#include "ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.h"
 
 namespace Ui {
 class TabFileMonitor;

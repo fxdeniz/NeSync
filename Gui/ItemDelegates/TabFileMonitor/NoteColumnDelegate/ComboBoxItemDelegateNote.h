@@ -3,7 +3,7 @@
 
 #include <QStyledItemDelegate>
 
-#include "Tabs/IComboBoxNoteNotifier.h"
+#include "IComboBoxNoteNotifier.h"
 
 // class IComboBoxNoteNotifier;
 

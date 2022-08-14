@@ -77,21 +77,20 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabFileMonitor.cpp
         Gui/Tabs/TabFileMonitor.ui
         #
-        #
-        Gui/Tabs/IComboBoxNoteNotifier.h
-        Gui/Tabs/IComboBoxNoteNotifier.cpp
-        #
         Gui/DataModels/TabFileMonitor/TableModelFileMonitor.h
         Gui/DataModels/TabFileMonitor/TableModelFileMonitor.cpp
         #
         Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h
         Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.cpp
         #
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.cpp
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/IComboBoxNoteNotifier.h
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/IComboBoxNoteNotifier.cpp
         #
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxNote.h
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxNote.cpp
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.h
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.cpp
+        #
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxNote.h
+        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxNote.cpp
     #
 
     # TabReleatedFiles
