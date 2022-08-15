@@ -3,7 +3,9 @@
 
 #include <QStyledItemDelegate>
 
-class TabFileMonitor;
+#include "IComboBoxNoteNotifier.h"
+
+// class IComboBoxNoteNotifier;
 
 // code here is adapted from
 //      https://wiki.qt.io/Combo_Boxes_in_Item_Views
@@ -12,16 +14,15 @@ class ComboBoxItemDelegateNote : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    ComboBoxItemDelegateNote(TabFileMonitor *parentTab);
+    ComboBoxItemDelegateNote(IComboBoxNoteNotifier *parentTab);
     ~ComboBoxItemDelegateNote();
-
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     void setEditorData(QWidget *editor, const QModelIndex &index) const override;
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
 
 private:
-    TabFileMonitor *parentTab;
+    IComboBoxNoteNotifier *parentTab;
 };
 
 

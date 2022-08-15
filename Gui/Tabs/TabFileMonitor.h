@@ -7,13 +7,13 @@
 #include <QWidget>
 
 #include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h"
-#include "ItemDelegates/TabFileMonitor/ComboBoxItemDelegateNote.h"
+#include "ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.h"
 
 namespace Ui {
 class TabFileMonitor;
 }
 
-class TabFileMonitor : public QWidget
+class TabFileMonitor : public IComboBoxNoteNotifier
 {
     Q_OBJECT
 
@@ -23,8 +23,6 @@ public:
 
     static QString dbConnectionName();
     static QString dbFileName();
-
-    QStringListModel *getListModelNoteNumber() const;
 
 public slots:
     void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
@@ -42,6 +40,9 @@ public slots:
 private slots:
     void slotOnAsyncCategorizationTaskCompleted();
 
+    void on_buttonAddNote_clicked();
+    void on_buttonDeleteNote_clicked();
+
 private:
     void refreshTableViewFileMonitor();
     void createDb();
@@ -52,7 +53,6 @@ private:
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;
-    QStringListModel *listModelNoteNumber;
 };
 
 #endif // TABFILEMONITOR_H

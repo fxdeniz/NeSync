@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Tabs/TabRelatedFiles.h"
 
 #include <QStandardPaths>

@@ -3,8 +3,8 @@
 
 #include <QComboBox>
 
-ComboBoxItemDelegateAutoSync::ComboBoxItemDelegateAutoSync(DialogAddNewFile *dialog, QObject *parent)
-    : QStyledItemDelegate(parent)
+ComboBoxItemDelegateAutoSync::ComboBoxItemDelegateAutoSync(DialogAddNewFile *dialog)
+    : QStyledItemDelegate(dialog)
 {
     this->dialog = dialog;
 }

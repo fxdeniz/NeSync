@@ -1,9 +1,9 @@
 #include "ComboBoxItemDelegateNote.h"
-#include "Tabs/TabFileMonitor.h"
+#include "ComboBoxNote.h"
 
 #include <QComboBox>
 
-ComboBoxItemDelegateNote::ComboBoxItemDelegateNote(TabFileMonitor *parentTab)
+ComboBoxItemDelegateNote::ComboBoxItemDelegateNote(IComboBoxNoteNotifier *parentTab)
     : QStyledItemDelegate(parentTab)
 {
     this->parentTab = parentTab;
@@ -18,14 +18,11 @@ ComboBoxItemDelegateNote::~ComboBoxItemDelegateNote()
 QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     // Create the combobox and populate it
-    QComboBox *cb = new QComboBox(parent);
+    ComboBoxNote *cb = new ComboBoxNote(parent);
+    cb->setPlaceholderText(IComboBoxNoteNotifier::defaultNoNoteText());
 
-    cb->setModel(parentTab->getListModelNoteNumber());
-
-//    const int row = index.row();
-//    cb->addItem(QString("one in row %1").arg(row));
-//    cb->addItem(QString("two in row %1").arg(row));
-//    cb->addItem(QString("three in row %1").arg(row));
+    QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberAdded, cb, &ComboBoxNote::slotOnItemAdded);
+    QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberDeleted, cb, &ComboBoxNote::slotOnItemRemoved);
 
     return cb;
 }

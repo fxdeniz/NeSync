@@ -83,12 +83,19 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox"/>
+             <widget class="QComboBox" name="comboBoxNoteNumber">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="currentText">
+               <string/>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="buttonAddNote">
             <property name="maximumSize">
              <size>
               <width>50</width>
@@ -101,7 +108,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="buttonDeleteNote">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>50</width>
@@ -146,7 +156,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="textEditDescription_2">
+           <widget class="QTextEdit" name="textEditDescription">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="minimumSize">
              <size>
               <width>0</width>

@@ -9,7 +9,7 @@ class ComboBoxItemDelegateAutoSync : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    ComboBoxItemDelegateAutoSync(DialogAddNewFile *dialog, QObject *parent = nullptr);
+    ComboBoxItemDelegateAutoSync(DialogAddNewFile *dialog);
     ~ComboBoxItemDelegateAutoSync();
 
 
