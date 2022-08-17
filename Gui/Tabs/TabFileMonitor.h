@@ -42,6 +42,9 @@ private slots:
 
     void on_buttonAddNote_clicked();
     void on_buttonDeleteNote_clicked();
+    void on_textEditDescription_textChanged();
+
+    void on_comboBoxNoteNumber_currentTextChanged(const QString &arg1);
 
 private:
     void refreshTableViewFileMonitor();
@@ -50,6 +53,7 @@ private:
 private:
     Ui::TabFileMonitor *ui;
     QSqlDatabase db;
+    QHash<int, QString> noteMap;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;

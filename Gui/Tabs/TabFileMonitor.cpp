@@ -631,12 +631,17 @@ void TabFileMonitor::on_buttonAddNote_clicked()
     size = stringList.size();
     ui->comboBoxNoteNumber->setCurrentIndex(size - 1);
 
+    noteMap.insert(ui->comboBoxNoteNumber->currentText().toInt(), "");
+    ui->textEditDescription->setText("");
+
     emit signalNoteNumberAdded(stringList);
 }
 
 
 void TabFileMonitor::on_buttonDeleteNote_clicked()
 {
+    noteMap.remove(ui->comboBoxNoteNumber->currentText().toInt());
+
     auto currentIndex = ui->comboBoxNoteNumber->currentIndex();
     QStringListModel *model = qobject_cast<QStringListModel *>(ui->comboBoxNoteNumber->model());
     auto stringList = model->stringList();
@@ -660,5 +665,19 @@ void TabFileMonitor::on_buttonDeleteNote_clicked()
         ui->comboBoxNoteNumber->setCurrentIndex(currentIndex); // Stay at same index.
 
     emit signalNoteNumberDeleted(stringList, removedItem);
+}
+
+
+void TabFileMonitor::on_textEditDescription_textChanged()
+{
+    noteMap.insert(ui->comboBoxNoteNumber->currentText().toInt(),
+                   ui->textEditDescription->toPlainText());
+}
+
+
+void TabFileMonitor::on_comboBoxNoteNumber_currentTextChanged(const QString &arg1)
+{
+    auto key = ui->comboBoxNoteNumber->currentText().toInt();
+    ui->textEditDescription->setText(noteMap.value(key));
 }
 
