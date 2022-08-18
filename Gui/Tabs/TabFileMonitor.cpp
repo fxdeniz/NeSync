@@ -582,17 +582,20 @@ void TabFileMonitor::createDb()
 
     db.open();
 
-    QString queryString = "CREATE TABLE \"TableItem\" (";
-    queryString += " \"name\" TEXT NOT NULL,";
-    queryString += " \"parent_dir\" TEXT NOT NULL,";
-    queryString += " \"path\" TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (\"parent_dir\" || \"name\") VIRTUAL,";
-    queryString += " \"old_name\" TEXT,";
-    queryString += " \"type\" INTEGER NOT NULL CHECK(\"type\" >= 0 AND \"type\" <= 2),";
-    queryString += " \"status\"	INTEGER NOT NULL CHECK(\"status\" >= 0 AND \"status\" <= 6),";
-    queryString += " \"timestamp\" TEXT NOT NULL,";
-    queryString += " \"action\"	INTEGER,";
-    queryString += " \"note_number\" INTEGER,";
-    queryString += " PRIMARY KEY(\"parent_dir\", \"name\")";
+    QString queryString = "CREATE TABLE TableItem (";
+    queryString += " name TEXT NOT NULL,";
+    queryString += " parent_dir TEXT NOT NULL,";
+    queryString += " path TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (parent_dir || name) VIRTUAL,";
+    queryString += " old_name TEXT,";
+    queryString += " type INTEGER NOT NULL CHECK(type >= 0 AND type <= 2),";
+    queryString += " status	INTEGER NOT NULL CHECK(status >= 0 AND status <= 6),";
+    queryString += " timestamp TEXT NOT NULL,";
+    queryString += " auto_sync_status INTEGER NOT NULL DEFAULT 0 CHECK(auto_sync_status == 0 OR auto_sync_status == 1),";
+    queryString += " action	INTEGER,";
+    queryString += " note_number INTEGER,";
+    queryString += " progress INTEGER,";
+    queryString += " current_version INTEGER,";
+    queryString += " PRIMARY KEY(parent_dir, name)";
     queryString += ");";
 
     QSqlQuery query(db);

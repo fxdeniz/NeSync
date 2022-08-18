@@ -12,9 +12,11 @@ const QString TableModelFileMonitor::COLUMN_NAME_OLD_NAME = "old_name";
 const QString TableModelFileMonitor::COLUMN_NAME_TYPE = "type";
 const QString TableModelFileMonitor::COLUMN_NAME_STATUS = "status";
 const QString TableModelFileMonitor::COLUMN_NAME_TIMESTAMP = "timestamp";
+const QString TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS = "auto_sync_status";
+const QString TableModelFileMonitor::COLUMN_NAME_PROGRESS = "progress";
+const QString TableModelFileMonitor::COLUMN_NAME_CURRENT_VERSION = "current_version";
 const QString TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
 const QString TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
-
 
 const QString TableModelFileMonitor::STATUS_TEXT_MODIFIED = tr("Updated");
 const QString TableModelFileMonitor::STATUS_TEXT_NEW_ADDED = tr("New Added");
@@ -23,6 +25,9 @@ const QString TableModelFileMonitor::STATUS_TEXT_MOVED = tr("Moved");
 const QString TableModelFileMonitor::STATUS_TEXT_MOVED_AND_MODIFIED = tr("Moved & Updated");
 const QString TableModelFileMonitor::STATUS_TEXT_MISSING = tr("Missing");
 const QString TableModelFileMonitor::STATUS_TEXT_INVALID = tr("Invalid");
+
+const QString TableModelFileMonitor::AUTO_SYNC_STATUS_ENABLED_TEXT = tr("Enabled");
+const QString TableModelFileMonitor::AUTO_SYNC_STATUS_DISABLED_TEXT = tr("Disabled");
 
 
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
@@ -77,6 +82,12 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
             return tr("Status");
         case ColumnIndex::Timestamp:
             return tr("Timestamp");
+        case ColumnIndex::AutoSyncStatus:
+            return tr("Auto-Sync");
+        case ColumnIndex::Progress:
+            return tr("Progress");
+        case ColumnIndex::CurrentVersion:
+            return tr("Current Version");
         case ColumnIndex::Action:
             return tr("Action");
         case ColumnIndex::NoteNumber:
@@ -94,7 +105,8 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
     {
         if(index.column() == ColumnIndex::Type ||
            index.column() == ColumnIndex::Status ||
-           index.column() == ColumnIndex::Timestamp)
+           index.column() == ColumnIndex::Timestamp ||
+            index.column() == ColumnIndex::AutoSyncStatus)
         {
             return Qt::AlignmentFlag::AlignCenter;
         }
@@ -186,6 +198,13 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         }
         else if(index.column() == ColumnIndex::Timestamp)
             return value.toDateTime();
+        else if(index.column() == ColumnIndex::AutoSyncStatus)
+        {
+            if(value.toBool())
+                return AUTO_SYNC_STATUS_ENABLED_TEXT;
+            else
+                return AUTO_SYNC_STATUS_DISABLED_TEXT;
+        }
     }
 
     return value;

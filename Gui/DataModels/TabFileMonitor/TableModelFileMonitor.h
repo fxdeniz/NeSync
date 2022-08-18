@@ -15,6 +15,9 @@ public:
     static const QString COLUMN_NAME_TYPE;
     static const QString COLUMN_NAME_STATUS;
     static const QString COLUMN_NAME_TIMESTAMP;
+    static const QString COLUMN_NAME_AUTOSYNC_STATUS;
+    static const QString COLUMN_NAME_PROGRESS;
+    static const QString COLUMN_NAME_CURRENT_VERSION;
     static const QString COLUMN_NAME_ACTION;
     static const QString COLUMN_NAME_NOTE_NUMBER;
 
@@ -26,6 +29,9 @@ public:
     static const QString STATUS_TEXT_MISSING;
     static const QString STATUS_TEXT_INVALID;
 
+    static const QString AUTO_SYNC_STATUS_ENABLED_TEXT;
+    static const QString AUTO_SYNC_STATUS_DISABLED_TEXT;
+
     enum ColumnIndex
     {
         Name = 0,
@@ -35,8 +41,11 @@ public:
         Type = 4,
         Status = 5,
         Timestamp = 6,
-        Action = 7,
-        NoteNumber = 8
+        AutoSyncStatus = 7,
+        Progress = 8,
+        CurrentVersion = 9,
+        Action = 10,
+        NoteNumber = 11,
     };
 
     enum Action
