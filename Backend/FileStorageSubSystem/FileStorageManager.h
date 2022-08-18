@@ -63,7 +63,7 @@ public:
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;
     FolderRequestResult getFolderMetaData(const QString &directory) const;
     QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
-    FileRequestResult getFileMetaData(const QString &pathToSymbolFile) const;
+    FileRequestResult getFileMetaData(const QString &symbolOrUserPathToFile) const;
     QList<FileRequestResult> getFavoriteFileMetaDataList() const;
     FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
