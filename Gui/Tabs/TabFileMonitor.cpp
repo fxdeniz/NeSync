@@ -660,6 +660,7 @@ void TabFileMonitor::on_buttonDeleteNote_clicked()
         ui->buttonDeleteNote->setDisabled(true);
         ui->comboBoxNoteNumber->setDisabled(true);
         ui->textEditDescription->setDisabled(true);
+        ui->textEditDescription->clear();
     }
 
     if(currentIndex == previousSize - 1) // If deleting the last item

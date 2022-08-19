@@ -1,9 +1,9 @@
-#ifndef FILEVERSIONMETADATA_H
-#define FILEVERSIONMETADATA_H
+#ifndef FILEVERSIONREQUESTRESULT_H
+#define FILEVERSIONREQUESTRESULT_H
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFileVersion.h"
 
-class FileVersionMetaData
+class FileVersionRequestResult
 {
 public:
     friend class FileStorageManager;
@@ -18,8 +18,8 @@ public:
     const QString &symbolFilePathToParent() const;
 
 private:
-    FileVersionMetaData();
-    FileVersionMetaData(PtrTo_RowFileVersion row);
+    FileVersionRequestResult();
+    FileVersionRequestResult(PtrTo_RowFileVersion row);
 
     bool exist;
 
@@ -31,4 +31,4 @@ private:
 
 };
 
-#endif // FILEVERSIONMETADATA_H
+#endif // FILEVERSIONREQUESTRESULT_H

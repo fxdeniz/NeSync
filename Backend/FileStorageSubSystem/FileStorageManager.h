@@ -2,7 +2,7 @@
 #define FILESTORAGEMANAGER_H
 
 #include "RequestResults/SaveGroupItemMetaData.h"
-#include "RequestResults/FileVersionMetaData.h"
+#include "RequestResults/FileVersionRequestResult.h"
 #include "RequestResults/FolderRequestResult.h"
 #include "RequestResults/FileRequestResult.h"
 #include "SqlPrimitives/RowFolderRecord.h"
@@ -65,7 +65,7 @@ public:
     QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
     FileRequestResult getFileMetaData(const QString &symbolOrUserPathToFile) const;
     QList<FileRequestResult> getFavoriteFileMetaDataList() const;
-    FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
+    FileVersionRequestResult getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 
     static const QString &rootFolderPath();

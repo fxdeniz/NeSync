@@ -1,8 +1,8 @@
-#include "FileVersionMetaData.h"
+#include "FileVersionRequestResult.h"
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h"
 
-FileVersionMetaData::FileVersionMetaData()
+FileVersionRequestResult::FileVersionRequestResult()
 {
     this->exist = false;
     this->_symbolFilePathToParent = INVALID_FIELD_VALUE_QSTRING;
@@ -12,7 +12,7 @@ FileVersionMetaData::FileVersionMetaData()
     this->_description = INVALID_FIELD_VALUE_QSTRING;
 }
 
-FileVersionMetaData::FileVersionMetaData(PtrTo_RowFileVersion row)
+FileVersionRequestResult::FileVersionRequestResult(PtrTo_RowFileVersion row)
 {
     this->exist = true;
     this->_symbolFilePathToParent = row->getParentRowFileRecord()->getSymbolFilePath();
@@ -22,32 +22,32 @@ FileVersionMetaData::FileVersionMetaData(PtrTo_RowFileVersion row)
     this->_description = row->getDescription();
 }
 
-const QString &FileVersionMetaData::symbolFilePathToParent() const
+const QString &FileVersionRequestResult::symbolFilePathToParent() const
 {
     return _symbolFilePathToParent;
 }
 
-bool FileVersionMetaData::isExist() const
+bool FileVersionRequestResult::isExist() const
 {
     return exist;
 }
 
-qlonglong FileVersionMetaData::versionNumber() const
+qlonglong FileVersionRequestResult::versionNumber() const
 {
     return _versionNumber;
 }
 
-qlonglong FileVersionMetaData::fileSize() const
+qlonglong FileVersionRequestResult::fileSize() const
 {
     return _size;
 }
 
-const QDateTime &FileVersionMetaData::timestamp() const
+const QDateTime &FileVersionRequestResult::timestamp() const
 {
     return _timestamp;
 }
 
-const QString &FileVersionMetaData::description() const
+const QString &FileVersionRequestResult::description() const
 {
     return _description;
 }

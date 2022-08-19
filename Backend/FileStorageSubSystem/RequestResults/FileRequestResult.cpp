@@ -14,6 +14,7 @@ FileRequestResult::FileRequestResult()
     this->_favorite = INVALID_FIELD_VALUE_BOOL;
     this->_frozen = INVALID_FIELD_VALUE_BOOL;
     this->_autoSyncEnabled = INVALID_FIELD_VALUE_BOOL;
+    this->_latestVersionNumber = INVALID_FIELD_VALUE_QLONGLONG;
 }
 
 FileRequestResult::FileRequestResult(PtrTo_RowFileRecord row)
@@ -34,6 +35,7 @@ FileRequestResult::FileRequestResult(PtrTo_RowFileRecord row)
     this->_icon = provider.icon(info);
 
     this->_versionNumbers = row->getVersionNumbers();
+    this->_latestVersionNumber = row->getLatestVersionNumber();
 }
 
 bool FileRequestResult::isExist() const
@@ -94,4 +96,9 @@ const QIcon &FileRequestResult::fileIcon() const
 QList<qlonglong> FileRequestResult::versionNumbers()
 {
     return this->_versionNumbers;
+}
+
+qlonglong FileRequestResult::latestVersionNumber() const
+{
+    return _latestVersionNumber;
 }

@@ -526,9 +526,9 @@ QList<FileRequestResult> FileStorageManager::getFavoriteFileMetaDataList() const
     return result;
 }
 
-FileVersionMetaData FileStorageManager::getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
+FileVersionRequestResult FileStorageManager::getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
 {
-    FileVersionMetaData result;
+    FileVersionRequestResult result;
 
     auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
 
@@ -540,7 +540,7 @@ FileVersionMetaData FileStorageManager::getFileVersionMetaData(const QString &pa
     if(!rowVersion->isExistInDB())
         return result;
 
-    result = FileVersionMetaData(rowVersion);
+    result = FileVersionRequestResult(rowVersion);
 
     return result;
 }

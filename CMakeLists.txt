@@ -132,7 +132,7 @@ set(PROJECT_SOURCES
 
     Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.h Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.cpp
     Backend/FileStorageSubSystem/RequestResults/FileRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/FileVersionMetaData.h Backend/FileStorageSubSystem/RequestResults/FileVersionMetaData.cpp
+    Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.cpp
     Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.cpp
     Backend/FileStorageSubSystem/FileStorageManager.h Backend/FileStorageSubSystem/FileStorageManager.cpp
 
