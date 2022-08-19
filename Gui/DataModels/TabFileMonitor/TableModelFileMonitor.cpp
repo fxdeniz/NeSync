@@ -29,6 +29,12 @@ const QString TableModelFileMonitor::STATUS_TEXT_INVALID = tr("Invalid");
 const QString TableModelFileMonitor::AUTO_SYNC_STATUS_ENABLED_TEXT = tr("Enabled");
 const QString TableModelFileMonitor::AUTO_SYNC_STATUS_DISABLED_TEXT = tr("Disabled");
 
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION = tr("Waiting for user");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION = tr("Applying user selected action");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION = tr("Applying auto action");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_ERROR_OCCURED = tr("Error occured");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_COMPLETED = tr("Action completed");
+
 
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
     : QSqlQueryModel(parent)
@@ -106,7 +112,8 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         if(index.column() == ColumnIndex::Type ||
            index.column() == ColumnIndex::Status ||
            index.column() == ColumnIndex::Timestamp ||
-            index.column() == ColumnIndex::AutoSyncStatus)
+           index.column() == ColumnIndex::AutoSyncStatus ||
+           index.column() == ColumnIndex::Progress)
         {
             return Qt::AlignmentFlag::AlignCenter;
         }
@@ -163,34 +170,40 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 
         else if(index.column() == ColumnIndex::Type)
         {
-            if(value.value<ItemType>() == ItemType::File)
+            auto variantValue = value.value<ItemType>();
+
+            if(variantValue == ItemType::File)
                 return tr("File");
-            else if(value.value<ItemType>() == ItemType::Folder)
+
+            else if(variantValue == ItemType::Folder)
                 return tr("Folder");
+
             else
                 return "NaN";
         }
         else if(index.column() == ColumnIndex::Status)
         {
-            if(value.value<ItemStatus>() == ItemStatus::Modified)
+            auto variantValue = value.value<ItemStatus>();
+
+            if(variantValue == ItemStatus::Modified)
                 return STATUS_TEXT_MODIFIED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::NewAdded)
+            else if(variantValue == ItemStatus::NewAdded)
                 return STATUS_TEXT_NEW_ADDED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Deleted)
+            else if(variantValue == ItemStatus::Deleted)
                 return STATUS_TEXT_DELETED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Moved)
+            else if(variantValue == ItemStatus::Moved)
                 return STATUS_TEXT_MOVED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::MovedAndModified)
+            else if(variantValue == ItemStatus::MovedAndModified)
                 return STATUS_TEXT_MOVED_AND_MODIFIED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Missing)
+            else if(variantValue == ItemStatus::Missing)
                 return STATUS_TEXT_MISSING;
 
-            else if(value.value<ItemStatus>() == ItemStatus::InvalidStatus)
+            else if(variantValue == ItemStatus::InvalidStatus)
                 return STATUS_TEXT_INVALID;
 
             else
@@ -204,6 +217,27 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 return AUTO_SYNC_STATUS_ENABLED_TEXT;
             else
                 return AUTO_SYNC_STATUS_DISABLED_TEXT;
+        }
+        else if(index.column() == ColumnIndex::Progress)
+        {
+            auto variantValue = value.value<ProgressStatus>();
+
+            if(variantValue == ProgressStatus::ApplyingAutoAction)
+                return PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION;
+
+            else if(variantValue == ProgressStatus::ApplyingUserAction)
+                return PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION;
+
+            else if(variantValue == ProgressStatus::WaitingForUserInteraction)
+                return PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION;
+
+            else if(variantValue == ProgressStatus::ErrorOccured)
+                return PROGRESS_STATUS_TEXT_ERROR_OCCURED;
+
+            else if(variantValue == ProgressStatus::Completed)
+                return PROGRESS_STATUS_TEXT_COMPLETED;
+            else
+                return "NaN";
         }
     }
 

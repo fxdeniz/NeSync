@@ -32,6 +32,13 @@ public:
     static const QString AUTO_SYNC_STATUS_ENABLED_TEXT;
     static const QString AUTO_SYNC_STATUS_DISABLED_TEXT;
 
+    static const QString PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION;
+    static const QString PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION;
+    static const QString PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION;
+    static const QString PROGRESS_STATUS_TEXT_ERROR_OCCURED;
+    static const QString PROGRESS_STATUS_TEXT_COMPLETED;
+
+
     enum ColumnIndex
     {
         Name = 0,
@@ -72,6 +79,15 @@ public:
         UndefinedType,
         Folder,
         File
+    };
+
+    enum ProgressStatus
+    {
+        WaitingForUserInteraction = 0,
+        ApplyingUserAction = 1,
+        ApplyingAutoAction = 2,
+        ErrorOccured = 3,
+        Completed = 4
     };
 
 public:

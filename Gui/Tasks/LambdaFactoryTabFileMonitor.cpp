@@ -137,8 +137,8 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
-        QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6, %7) "
-                                "VALUES(:2, :3, :4, :5, :6, :7);" ;
+        QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6, %7, %8) "
+                                "VALUES(:2, :3, :4, :5, :6, :7, :8);" ;
 
         queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,                    // 1
                                           TableModelFileMonitor::COLUMN_NAME_NAME,              // 2
@@ -146,7 +146,8 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
                                           TableModelFileMonitor::COLUMN_NAME_TYPE,              // 4
                                           TableModelFileMonitor::COLUMN_NAME_STATUS,            // 5
                                           TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,         // 6
-                                          TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS);  // 7
+                                          TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS,   // 7
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS);         // 8
 
         QSqlQuery insertQuery(db);
         insertQuery.prepare(queryTemplate);
@@ -171,24 +172,31 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         insertQuery.bindValue(":3", parentDir);
 
         if(pathOfItem.endsWith(QDir::separator()))
-        {
             insertQuery.bindValue(":4", TableModelFileMonitor::ItemType::Folder);
-            insertQuery.bindValue(":7", true);
-        }
-        else
-        {
+        else // If we're inserting a file
             insertQuery.bindValue(":4", TableModelFileMonitor::ItemType::File);
-
-            auto fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
-
-            if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
-                insertQuery.bindValue(":7", true);
-            else
-                insertQuery.bindValue(":7", false);
-        }
 
         insertQuery.bindValue(":5", status);
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
+
+        bool autoSyncStatus = false;
+
+        if(pathOfItem.endsWith(QDir::separator()))
+            autoSyncStatus = true;
+        else
+        {
+            auto fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
+
+            if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
+                autoSyncStatus = true;
+        }
+
+        insertQuery.bindValue(":7", autoSyncStatus);
+
+        if(status == TableModelFileMonitor::ItemStatus::Deleted || autoSyncStatus == false)
+            insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::WaitingForUserInteraction);
+        else
+            insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
 
         insertQuery.exec();
     };
