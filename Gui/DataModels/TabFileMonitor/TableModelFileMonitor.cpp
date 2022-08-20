@@ -2,6 +2,8 @@
 
 #include <QColor>
 #include <QDateTime>
+#include <QSqlQuery>
+#include <QSqlRecord>
 #include <QFileIconProvider>
 
 const QString TableModelFileMonitor::TABLE_NAME = "TableItem";
@@ -39,6 +41,28 @@ const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_COMPLETED = tr("Action
 TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
     : QSqlQueryModel(parent)
 {
+}
+
+bool TableModelFileMonitor::isRowWithOldNameExist(const QSqlDatabase &db) const
+{
+    bool result = false;
+    QSqlQuery query(db);
+
+    QString columnName = "result_column";
+    QString queryTemplate = "SELECT COUNT(old_name) AS %1 FROM TableItem WHERE old_name IS NOT NULL;" ;
+    queryTemplate = queryTemplate.arg(columnName);
+
+    query.prepare(queryTemplate);
+    query.exec();
+
+    query.next();
+
+    auto value = query.record().value(columnName).toLongLong();
+
+    if(value > 0)
+        result = true;
+
+    return result;
 }
 
 TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(const QString &status)

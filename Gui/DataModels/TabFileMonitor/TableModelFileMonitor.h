@@ -93,6 +93,7 @@ public:
 public:
     TableModelFileMonitor(QObject *parent = nullptr);
 
+    bool isRowWithOldNameExist(const QSqlDatabase &db) const;
     static ItemStatus statusCodeFromString(const QString &status);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
