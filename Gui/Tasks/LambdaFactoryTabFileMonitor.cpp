@@ -154,7 +154,6 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         insertQuery.prepare(queryTemplate);
 
         QFileInfo info(pathOfItem);
-
         if(pathOfItem.endsWith(QDir::separator()))
             insertQuery.bindValue(":2", info.dir().dirName() + QDir::separator());
         else
@@ -165,10 +164,9 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         {
             QDir dir = info.dir();
             dir.cdUp();
-            parentDir = QDir::toNativeSeparators(dir.absolutePath()) + QDir::separator();
         }
-        else
-            parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+
+        parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
 
         insertQuery.bindValue(":3", parentDir);
 
