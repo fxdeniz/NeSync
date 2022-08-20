@@ -137,8 +137,8 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
-        QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6, %7, %8) "
-                                "VALUES(:2, :3, :4, :5, :6, :7, :8);" ;
+        QString queryTemplate = "INSERT INTO %1 (%2, %3, %4, %5, %6, %7, %8, %9) "
+                                "VALUES(:2, :3, :4, :5, :6, :7, :8, :9);" ;
 
         queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,                    // 1
                                           TableModelFileMonitor::COLUMN_NAME_NAME,              // 2
@@ -147,7 +147,8 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
                                           TableModelFileMonitor::COLUMN_NAME_STATUS,            // 5
                                           TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,         // 6
                                           TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS,   // 7
-                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS);         // 8
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS,          // 8
+                                          TableModelFileMonitor::COLUMN_NAME_CURRENT_VERSION);  // 9
 
         QSqlQuery insertQuery(db);
         insertQuery.prepare(queryTemplate);
@@ -180,13 +181,12 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
 
         bool autoSyncStatus = false;
+        FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
 
         if(pathOfItem.endsWith(QDir::separator()))
             autoSyncStatus = true;
         else
         {
-            auto fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
-
             if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
                 autoSyncStatus = true;
         }
@@ -197,6 +197,14 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
             insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::WaitingForUserInteraction);
         else
             insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+
+        if(!pathOfItem.endsWith(QDir::separator()))
+        {
+            if(fileRecordFromDb.isExist())
+                insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber() + 1);
+            else
+                insertQuery.bindValue(":9", 1);
+        }
 
         insertQuery.exec();
     };

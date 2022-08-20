@@ -178,7 +178,7 @@ QSet<QString> FileMonitoringManager::unPredictedFoldersWithRespectTo(QString pat
     QDirIterator iterator(dir, QDirIterator::IteratorFlag::Subdirectories);
 
     while(iterator.hasNext())
-        result.insert(iterator.next());
+        result.insert(QDir::fromNativeSeparators(iterator.next() + QDir::separator()));
 
     auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
     result.remove(standardizedPath);

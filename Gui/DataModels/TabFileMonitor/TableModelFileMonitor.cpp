@@ -113,7 +113,8 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
            index.column() == ColumnIndex::Status ||
            index.column() == ColumnIndex::Timestamp ||
            index.column() == ColumnIndex::AutoSyncStatus ||
-           index.column() == ColumnIndex::Progress)
+           index.column() == ColumnIndex::Progress ||
+            index.column() == ColumnIndex::CurrentVersion)
         {
             return Qt::AlignmentFlag::AlignCenter;
         }
@@ -238,6 +239,15 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
                 return PROGRESS_STATUS_TEXT_COMPLETED;
             else
                 return "NaN";
+        }
+        else if(index.column() == ColumnIndex::Progress)
+        {
+            qlonglong versionNumber = value.toLongLong();
+
+            if(versionNumber < 0)
+                return "";
+            else
+                return QString::number(versionNumber);
         }
     }
 

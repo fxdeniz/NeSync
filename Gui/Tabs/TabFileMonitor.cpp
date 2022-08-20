@@ -544,7 +544,7 @@ void TabFileMonitor::refreshTableViewFileMonitor()
 
     tableModel->setQuery("SELECT * FROM TableItem;", db);
 
-    ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(110);
+    ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(140);
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(TableModelFileMonitor::ColumnIndex::Name,
@@ -592,7 +592,7 @@ void TabFileMonitor::createDb()
     queryString += " timestamp TEXT NOT NULL,";
     queryString += " auto_sync_status INTEGER NOT NULL DEFAULT 0 CHECK(auto_sync_status == 0 OR auto_sync_status == 1),";
     queryString += " progress INTEGER,";
-    queryString += " current_version INTEGER,";
+    queryString += " current_version INTEGER DEFAULT 0,";
     queryString += " action	INTEGER,";
     queryString += " note_number INTEGER,";
     queryString += " PRIMARY KEY(parent_dir, name)";
