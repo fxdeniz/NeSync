@@ -35,9 +35,9 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsRowE
 
         QString resultColumn = "result_column";
         QString queryTemplate = "SELECT COUNT(*) AS %1 FROM %2 WHERE %3 = :3;" ;
-        queryTemplate = queryTemplate.arg(resultColumn,                               // 1
-                                          TableModelFileMonitor::TABLE_NAME,        // 2
-                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 3
+        queryTemplate = queryTemplate.arg(resultColumn,                              // 1
+                                          TableModelFileMonitor::TABLE_NAME,         // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);  // 3
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
@@ -64,9 +64,9 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
         db.open();
 
         QString queryTemplate = "SELECT * FROM %1 WHERE %2 = '%3';" ;
-        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,       // 1
-                                          TableModelFileMonitor::COLUMN_NAME_PATH, // 2
-                                          pathToFile);                               // 3
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH,  // 2
+                                          pathToFile);                              // 3
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
@@ -198,10 +198,23 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 
         if(!pathOfItem.endsWith(QDir::separator()))
         {
-            if(fileRecordFromDb.isExist())
-                insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber() + 1);
-            else
-                insertQuery.bindValue(":9", 1);
+                if(status == TableModelFileMonitor::ItemStatus::NewAdded)
+                    insertQuery.bindValue(":9", 1);
+
+                else if(status == TableModelFileMonitor::ItemStatus::Missing)
+                    insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber());
+
+                else if(status == TableModelFileMonitor::ItemStatus::Modified ||
+                        status == TableModelFileMonitor::ItemStatus::Moved ||
+                        status == TableModelFileMonitor::ItemStatus::MovedAndModified)
+                {
+                    if(fileRecordFromDb.isExist())
+                        insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber() + 1);
+                }
+                else
+                {
+                    insertQuery.bindValue(":9", 0);
+                }
         }
 
         insertQuery.exec();
