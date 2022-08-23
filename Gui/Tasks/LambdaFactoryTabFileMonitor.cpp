@@ -191,8 +191,12 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 
         insertQuery.bindValue(":7", autoSyncStatus);
 
-        if(status == TableModelFileMonitor::ItemStatus::Deleted || autoSyncStatus == false)
+        if(status == TableModelFileMonitor::ItemStatus::Deleted ||
+           status == TableModelFileMonitor::ItemStatus::Missing ||
+           autoSyncStatus == false)
+        {
             insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::WaitingForUserInteraction);
+        }
         else
             insertQuery.bindValue(":8", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
 
