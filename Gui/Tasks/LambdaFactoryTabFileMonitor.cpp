@@ -286,6 +286,10 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
                 if(fileRecordFromDb.isExist())
                     updateQuery.bindValue(":6", fileRecordFromDb.latestVersionNumber() + 1);
             }
+            else
+            {
+                updateQuery.bindValue(":6", 0);
+            }
         }
 
         updateQuery.bindValue(":7", pathOfItem);
