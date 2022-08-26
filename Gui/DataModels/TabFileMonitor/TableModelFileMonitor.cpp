@@ -264,11 +264,11 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
             else
                 return "NaN";
         }
-        else if(index.column() == ColumnIndex::Progress)
+        else if(index.column() == ColumnIndex::CurrentVersion)
         {
             qlonglong versionNumber = value.toLongLong();
 
-            if(versionNumber < 0)
+            if(versionNumber <= 0)
                 return "";
             else
                 return QString::number(versionNumber);
