@@ -227,25 +227,68 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 
 std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
 {
-    return [](QString connectionName, QString pathToItem, TableModelFileMonitor::ItemStatus status){
+    return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
-        QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3 WHERE %4 = :4;" ;
+        QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3, %4 = :4, %5 = :5, %6 = :6 WHERE %7 = :7;" ;
 
-        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,            // 1
-                                          TableModelFileMonitor::COLUMN_NAME_STATUS,    // 2
-                                          TableModelFileMonitor::COLUMN_NAME_TIMESTAMP, // 3
-                                          TableModelFileMonitor::COLUMN_NAME_PATH);     // 4
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,                    // 1
+                                          TableModelFileMonitor::COLUMN_NAME_STATUS,            // 2
+                                          TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,         // 3
+                                          TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS,   // 4
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS,          // 5
+                                          TableModelFileMonitor::COLUMN_NAME_CURRENT_VERSION,   // 6
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);             // 7
 
         QSqlQuery updateQuery(db);
         updateQuery.prepare(queryTemplate);
 
         updateQuery.bindValue(":2", status);
         updateQuery.bindValue(":3", QDateTime::currentDateTime());
-        updateQuery.bindValue(":4", pathToItem);
+
+        bool autoSyncStatus = false;
+        FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
+
+        if(pathOfItem.endsWith(QDir::separator()))
+            autoSyncStatus = true;
+        else
+        {
+            if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
+                autoSyncStatus = true;
+        }
+
+        updateQuery.bindValue(":4", autoSyncStatus);
+
+        if(status == TableModelFileMonitor::ItemStatus::Deleted ||
+            status == TableModelFileMonitor::ItemStatus::Missing ||
+            autoSyncStatus == false)
+        {
+            updateQuery.bindValue(":5", TableModelFileMonitor::ProgressStatus::WaitingForUserInteraction);
+        }
+        else
+            updateQuery.bindValue(":5", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+
+        if(!pathOfItem.endsWith(QDir::separator()))
+        {
+            if(status == TableModelFileMonitor::ItemStatus::NewAdded)
+                updateQuery.bindValue(":6", 1);
+
+            else if(status == TableModelFileMonitor::ItemStatus::Missing)
+                updateQuery.bindValue(":6", fileRecordFromDb.latestVersionNumber());
+
+            else if(status == TableModelFileMonitor::ItemStatus::Modified ||
+                     status == TableModelFileMonitor::ItemStatus::Moved ||
+                     status == TableModelFileMonitor::ItemStatus::MovedAndModified)
+            {
+                if(fileRecordFromDb.isExist())
+                    updateQuery.bindValue(":6", fileRecordFromDb.latestVersionNumber() + 1);
+            }
+        }
+
+        updateQuery.bindValue(":7", pathOfItem);
         updateQuery.exec();
     };
 }
