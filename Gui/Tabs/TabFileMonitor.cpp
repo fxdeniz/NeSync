@@ -548,6 +548,7 @@ void TabFileMonitor::refreshTableViewFileMonitor()
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 
     ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::Path);
+    ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::AutoSyncStatus);
 
     if(!tableModel->isRowWithOldNameExist(db)) // If all columns have NULL value for old_name column.
         ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::OldName);
