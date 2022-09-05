@@ -58,6 +58,7 @@ public:
 
     QStringList getMonitoredFilePathList() const;
     QStringList getMonitoredFolderPathList() const;
+    QString getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const;
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;

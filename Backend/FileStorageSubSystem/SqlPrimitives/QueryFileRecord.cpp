@@ -178,6 +178,30 @@ QList<PtrTo_RowFileRecord> QueryFileRecord::selectRowsBySymbolDirectory(const QS
     return result;
 }
 
+QList<PtrTo_RowFileRecord> QueryFileRecord::selectRowsByUserDirectory(const QString &userDirectory) const
+{
+    QList<PtrTo_RowFileRecord> result;
+
+    QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2;" ;
+    queryTemplate = queryTemplate.arg(this->getTableName(), TABLE_FILE_RECORD_COLNAME_USER_DIRECTORY);
+
+    QSqlQuery query(this->getDb());
+
+    query.prepare(queryTemplate);
+
+    query.bindValue(":2", userDirectory);
+    query.exec();
+
+    while(query.next())
+    {
+        auto ptr = new RowFileRecord(this->getDb(), query.record());
+        PtrTo_RowFileRecord item(ptr);
+        result.append(item);
+    }
+
+    return result;
+}
+
 QList<PtrTo_RowFileRecord> QueryFileRecord::selectRowsByMatchingFileName(const QString &searchTerm) const
 {
     QList<PtrTo_RowFileRecord> result;

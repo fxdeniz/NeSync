@@ -20,6 +20,8 @@ public:
     static std::function<void (QString, QString)> lambdaDeleteRowFromModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfRowInModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateNameOfRowInModelDb();
+    static std::function<QStringList (QString)> lambdaFetchAutoActionFilesRowsFromModelDb();
+    static std::function<void (QString, QString)> lambdaApplyAutoActionForFile();
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H

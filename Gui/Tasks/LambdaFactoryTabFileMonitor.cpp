@@ -363,3 +363,72 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
         updateQuery.exec();
     };
 }
+
+std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFilesRowsFromModelDb()
+{
+    return [](QString connectionName) -> QStringList{
+
+        QStringList result;
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2 AND %3 = :3;" ;
+
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,             // 1
+                                          TableModelFileMonitor::COLUMN_NAME_TYPE,       // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS);  // 3
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+
+        selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
+        selectQuery.bindValue(":3", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+
+        while(selectQuery.next())
+        {
+            auto value = selectQuery.record().value(TableModelFileMonitor::ColumnIndex::Path).toString();
+            result.append(value);
+        }
+
+        return result;
+    };
+}
+
+std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()
+{
+    return [](QString connectionName, QString userFilePath){
+
+        auto fsm = FileStorageManager::instance();
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2 AND %3 = :3;" ;
+
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,             // 1
+                                          TableModelFileMonitor::COLUMN_NAME_TYPE,       // 2
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS);  // 3
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+
+        selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
+        selectQuery.bindValue(":3", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        selectQuery.exec();
+
+        while(selectQuery.next())
+        {
+            auto record = selectQuery.record();
+            auto statusCode = record.value(TableModelFileMonitor::ColumnIndex::Status).value<TableModelFileMonitor::ItemStatus>();
+
+            if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
+            {
+            }
+
+            qDebug() << selectQuery.record().value(TableModelFileMonitor::ColumnIndex::Path);
+        }
+    };
+}

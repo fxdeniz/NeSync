@@ -43,7 +43,6 @@ private slots:
     void on_buttonAddNote_clicked();
     void on_buttonDeleteNote_clicked();
     void on_textEditDescription_textChanged();
-
     void on_comboBoxNoteNumber_currentTextChanged(const QString &arg1);
 
 private:
