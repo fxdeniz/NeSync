@@ -83,11 +83,12 @@ public:
 
     enum ProgressStatus
     {
-        WaitingForUserInteraction = 0,
-        ApplyingUserAction = 1,
-        ApplyingAutoAction = 2,
-        ErrorOccured = 3,
-        Completed = 4
+        InvalidProgressStatus = 0,
+        WaitingForUserInteraction = 1,
+        ApplyingUserAction = 2,
+        ApplyingAutoAction = 3,
+        ErrorOccured = 4,
+        Completed = 5
     };
 
 public:
@@ -95,6 +96,7 @@ public:
 
     bool isRowWithOldNameExist(const QSqlDatabase &db) const;
     static ItemStatus statusCodeFromString(const QString &status);
+    static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role) const override;

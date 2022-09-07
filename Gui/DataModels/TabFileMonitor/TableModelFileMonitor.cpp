@@ -89,6 +89,27 @@ TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(co
         return ItemStatus::InvalidStatus;
 }
 
+TableModelFileMonitor::ProgressStatus TableModelFileMonitor::progressStatusCodeFromString(const QString &textProgressStatus)
+{
+    if(textProgressStatus == PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION)
+        return ProgressStatus::ApplyingAutoAction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION)
+        return ProgressStatus::ApplyingUserAction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION)
+        return ProgressStatus::WaitingForUserInteraction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_ERROR_OCCURED)
+        return ProgressStatus::ErrorOccured;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_COMPLETED)
+        return ProgressStatus::Completed;
+
+    else
+        return ProgressStatus::InvalidProgressStatus;
+}
+
 QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)

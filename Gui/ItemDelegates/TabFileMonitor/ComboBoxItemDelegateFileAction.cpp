@@ -39,6 +39,16 @@ QWidget *ComboBoxItemDelegateFileAction::createEditor(QWidget *parent, const QSt
     {
         cb->addItem("Save");
         cb->addItem("Restore");
+
+        QModelIndex progressIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
+        auto progressCodeText = progressIndex.data().toString();
+        auto progressCode = TableModelFileMonitor::progressStatusCodeFromString(progressCodeText);
+
+        if(progressCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction)
+        {
+            cb->setCurrentIndex(0);
+            cb->setDisabled(true);
+        }
     }
     else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
     {

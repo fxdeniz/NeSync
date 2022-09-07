@@ -539,7 +539,12 @@ void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
             bool isAdded = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
 
             if(isAdded)
+            {
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::Completed);
                 LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()(dbConnectionName(), item);
+            }
             else
                 LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
                                                                                   item,
