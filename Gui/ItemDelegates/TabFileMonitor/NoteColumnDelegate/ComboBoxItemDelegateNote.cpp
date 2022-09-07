@@ -1,4 +1,5 @@
 #include "ComboBoxItemDelegateNote.h"
+#include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 #include "ComboBoxNote.h"
 
 #include <QComboBox>
@@ -23,6 +24,13 @@ QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOpt
 
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberAdded, cb, &ComboBoxNote::slotOnItemAdded);
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberDeleted, cb, &ComboBoxNote::slotOnItemRemoved);
+
+    QModelIndex progressIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
+    auto progressStatusText = progressIndex.data().toString();
+    auto progressStatusCode = TableModelFileMonitor::progressStatusCodeFromString(progressStatusText);
+
+    if(progressStatusCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction)
+        cb->setDisabled(true);
 
     return cb;
 }
