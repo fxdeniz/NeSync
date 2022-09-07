@@ -17,11 +17,12 @@ public:
     static std::function<TableModelFileMonitor::ItemStatus (QString, QString)> lambdaFetchStatusOfRowFromModelDb();
     static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> lambdaInsertRowIntoModelDb();
     static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> lambdaUpdateStatusOfRowInModelDb();
+    static std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> lambdaUpdateProgressOfRowInModelDb();
     static std::function<void (QString, QString)> lambdaDeleteRowFromModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfRowInModelDb();
     static std::function<void (QString, QString, QString)> lambdaUpdateNameOfRowInModelDb();
-    static std::function<QStringList (QString)> lambdaFetchAutoActionFilesRowsFromModelDb();
-    static std::function<void (QString, QString)> lambdaApplyAutoActionForFile();
+    static std::function<QStringList (QString)> lambdaFetchAutoActionFileRowsFromModelDb();
+    static std::function<bool (QString, QString)> lambdaApplyAutoActionForFile();
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H

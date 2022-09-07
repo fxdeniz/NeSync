@@ -532,11 +532,18 @@ void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
     }
 
     QFuture<void> future = QtConcurrent::run([=]{
-        QStringList filePathList = LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFilesRowsFromModelDb()(dbConnectionName());
+        QStringList filePathList = LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()(dbConnectionName());
 
         for(const QString &item : filePathList)
         {
+            bool isAdded = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
 
+            if(isAdded)
+                LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()(dbConnectionName(), item);
+            else
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::ErrorOccured);
         }
     });
 }
@@ -602,7 +609,6 @@ void TabFileMonitor::createDb()
     QString queryString = "CREATE TABLE TableItem (";
     queryString += " name TEXT NOT NULL,";
     queryString += " parent_dir TEXT NOT NULL,";
-    queryString += " symbol_dir TEXT,";
     queryString += " path TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (parent_dir || name) VIRTUAL,";
     queryString += " old_name TEXT,";
     queryString += " type INTEGER NOT NULL CHECK(type >= 0 AND type <= 2),";

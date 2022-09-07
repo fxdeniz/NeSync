@@ -297,6 +297,31 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
     };
 }
 
+std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()
+{
+    return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ProgressStatus progress){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "UPDATE %1 SET %2 = :2, %3 = :3 WHERE %4 = :4;" ;
+
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,                // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS,      // 2
+                                          TableModelFileMonitor::COLUMN_NAME_TIMESTAMP,     // 3
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);         // 4
+
+        QSqlQuery updateQuery(db);
+        updateQuery.prepare(queryTemplate);
+
+        updateQuery.bindValue(":2", progress);
+        updateQuery.bindValue(":3", QDateTime::currentDateTime());
+        updateQuery.bindValue(":4", pathOfItem);
+        updateQuery.exec();
+    };
+}
+
 std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()
 {
     return [](QString connectionName, QString pathToFile){
@@ -364,7 +389,7 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
     };
 }
 
-std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFilesRowsFromModelDb()
+std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()
 {
     return [](QString connectionName) -> QStringList{
 
@@ -385,6 +410,7 @@ std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAut
 
         selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
         selectQuery.bindValue(":3", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        selectQuery.exec();
 
         while(selectQuery.next())
         {
@@ -396,39 +422,40 @@ std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAut
     };
 }
 
-std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()
 {
-    return [](QString connectionName, QString userFilePath){
-
+    return [](QString connectionName, QString userFilePath) -> bool{
+        bool result = false;
         auto fsm = FileStorageManager::instance();
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
 
-        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2 AND %3 = :3;" ;
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2;" ;
 
-        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,             // 1
-                                          TableModelFileMonitor::COLUMN_NAME_TYPE,       // 2
-                                          TableModelFileMonitor::COLUMN_NAME_PROGRESS);  // 3
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,            // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);     // 2
 
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
 
-        selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
-        selectQuery.bindValue(":3", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        selectQuery.bindValue(":2", userFilePath);
         selectQuery.exec();
+        selectQuery.next();
 
-        while(selectQuery.next())
+        auto record = selectQuery.record();
+        auto statusCode = record.value(TableModelFileMonitor::ColumnIndex::Status).value<TableModelFileMonitor::ItemStatus>();
+
+        if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
         {
-            auto record = selectQuery.record();
-            auto statusCode = record.value(TableModelFileMonitor::ColumnIndex::Status).value<TableModelFileMonitor::ItemStatus>();
+            // TODO design FileStorageManager::appendNewVersion() such that
+            //      remove call to fsm->getFileMetaData(userFilePath);
 
-            if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
-            {
-            }
-
-            qDebug() << selectQuery.record().value(TableModelFileMonitor::ColumnIndex::Path);
+            FileRequestResult requestResult = fsm->getFileMetaData(userFilePath);
+            result = fsm->appendNewVersion(userFilePath, requestResult.symbolFilePath());
         }
+
+        return result;
     };
 }
