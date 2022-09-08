@@ -38,7 +38,7 @@ public slots:
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
 private slots:
-    void slotOnAsyncCategorizationTaskCompleted();
+    void slotOnAsyncTaskCompleted();
 
     void on_buttonAddNote_clicked();
     void on_buttonDeleteNote_clicked();

@@ -41,7 +41,7 @@ void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrF
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
         std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> lambdaInsert;
@@ -57,7 +57,7 @@ void TabFileMonitor::slotOnUnPredictedFolderDetected(const QString &pathToFolder
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -74,7 +74,7 @@ void TabFileMonitor::slotOnNewFolderAdded(const QString &pathToFolder)
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -117,7 +117,7 @@ void TabFileMonitor::slotOnFolderDeleted(const QString &pathToFolder)
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -164,7 +164,7 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -218,7 +218,7 @@ void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -235,7 +235,7 @@ void TabFileMonitor::slotOnNewFileAdded(const QString &pathToFile)
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -278,7 +278,7 @@ void TabFileMonitor::slotOnFileDeleted(const QString &pathToFile)
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -322,7 +322,7 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -407,7 +407,7 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     auto *categorizationWatcher = new QFutureWatcher<void>(this);
     resultSet.insert(categorizationWatcher);
     QObject::connect(categorizationWatcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> categorizationFuture = QtConcurrent::run([=]{
 
@@ -459,7 +459,7 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     auto *savingWatcher = new QFutureWatcher<void>(this);
     resultSet.insert(savingWatcher);
     QObject::connect(savingWatcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
 
@@ -496,7 +496,7 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     auto *watcher = new QFutureWatcher<void>(this);
     resultSet.insert(watcher);
     QObject::connect(watcher, &QFutureWatcher<void>::finished,
-                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
     QFuture<void> future = QtConcurrent::run([=]{
 
@@ -548,7 +548,7 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     watcher->setFuture(future);
 }
 
-void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
+void TabFileMonitor::slotOnAsyncTaskCompleted()
 {
     for(QFutureWatcher<void> *watcher : qAsConst(resultSet))
     {
