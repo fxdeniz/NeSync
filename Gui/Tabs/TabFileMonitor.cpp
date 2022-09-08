@@ -404,12 +404,12 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
 void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
 {
-    auto *watcher = new QFutureWatcher<void>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+    auto *categorizationWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(categorizationWatcher);
+    QObject::connect(categorizationWatcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
 
-    QFuture<void> future = QtConcurrent::run([=]{
+    QFuture<void> categorizationFuture = QtConcurrent::run([=]{
 
         std::function<bool (QString)> lambdaIsExistInDb;
         lambdaIsExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
@@ -456,7 +456,36 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
         }
     });
 
-    watcher->setFuture(future);
+    auto *savingWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(savingWatcher);
+    QObject::connect(savingWatcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotOnAsyncCategorizationTaskCompleted);
+
+    QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
+
+        QThread::currentThread()->usleep(10000000); // Give some rome for categorizationFuture's result to be displayed.
+        QStringList filePathList = LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()(dbConnectionName());
+
+        for(const QString &item : filePathList)
+        {
+            bool isAdded = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
+
+            if(isAdded)
+            {
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::Completed);
+                LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()(dbConnectionName(), item);
+            }
+            else
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::ErrorOccured);
+        }
+    });
+
+    categorizationWatcher->setFuture(categorizationFuture);
+    savingWatcher->setFuture(savingFuture);
 }
 
 void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName)
@@ -530,27 +559,6 @@ void TabFileMonitor::slotOnAsyncCategorizationTaskCompleted()
             resultSet.remove(watcher);
         }
     }
-
-    QFuture<void> future = QtConcurrent::run([=]{
-        QStringList filePathList = LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()(dbConnectionName());
-
-        for(const QString &item : filePathList)
-        {
-            bool isAdded = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
-
-            if(isAdded)
-            {
-                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
-                                                                                  item,
-                                                                                  TableModelFileMonitor::ProgressStatus::Completed);
-                LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()(dbConnectionName(), item);
-            }
-            else
-                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
-                                                                                  item,
-                                                                                  TableModelFileMonitor::ProgressStatus::ErrorOccured);
-        }
-    });
 }
 
 void TabFileMonitor::refreshTableViewFileMonitor()
