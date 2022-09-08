@@ -209,12 +209,17 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
                     insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber());
 
                 else if(status == TableModelFileMonitor::ItemStatus::Modified ||
-                        status == TableModelFileMonitor::ItemStatus::Moved ||
                         status == TableModelFileMonitor::ItemStatus::MovedAndModified)
                 {
                     if(fileRecordFromDb.isExist())
                         insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber() + 1);
                 }
+                else if(status == TableModelFileMonitor::ItemStatus::Moved)
+                {
+                    if(fileRecordFromDb.isExist())
+                        insertQuery.bindValue(":9", fileRecordFromDb.latestVersionNumber());
+                }
+
                 else
                 {
                     insertQuery.bindValue(":9", 0);
@@ -454,6 +459,26 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaApplyA
 
             FileRequestResult requestResult = fsm->getFileMetaData(userFilePath);
             result = fsm->appendNewVersion(userFilePath, requestResult.symbolFilePath());
+        }
+        else if(statusCode == TableModelFileMonitor::ItemStatus::Moved)
+        {
+            QFileInfo info(userFilePath);
+            QString oldUserlFilePath = info.absolutePath() + QDir::separator();
+            oldUserlFilePath += record.value(TableModelFileMonitor::ColumnIndex::OldName).toString();
+            oldUserlFilePath = QDir::toNativeSeparators(oldUserlFilePath);
+
+            FileRequestResult requestResult = fsm->getFileMetaData(oldUserlFilePath);
+            result = fsm->updateNameOfFile(requestResult.symbolFilePath(), info.baseName());
+
+            if(result == true)
+            {
+                QString userFilePathWithOldExtension = info.absolutePath() + QDir::separator() + info.baseName();
+                userFilePathWithOldExtension += requestResult.fileExtension();
+                userFilePathWithOldExtension = QDir::toNativeSeparators(userFilePathWithOldExtension);
+
+                requestResult = fsm->getFileMetaData(userFilePathWithOldExtension);
+                result = fsm->updateExtensionOfFile(requestResult.symbolFilePath(), "." + info.completeSuffix());
+            }
         }
 
         return result;
