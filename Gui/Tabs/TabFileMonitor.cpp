@@ -411,9 +411,9 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
 
         for(const QString &item : filePathList)
         {
-            bool isAdded = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
+            bool isSaved = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
 
-            if(isAdded)
+            if(isSaved)
             {
                 LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
                                                                                   item,
@@ -523,12 +523,12 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     QString pathToOldFile = QDir::toNativeSeparators(QFileInfo(pathToFile).absolutePath()) + QDir::separator();
     pathToOldFile += oldFileName;
 
-    auto *watcher = new QFutureWatcher<void>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+    auto *categorizationWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(categorizationWatcher);
+    QObject::connect(categorizationWatcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
-    QFuture<void> future = QtConcurrent::run([=]{
+    QFuture<void> categorizationFuture = QtConcurrent::run([=]{
 
         std::function<bool (QString)> lambdaIsFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
         lambdaIsFileExistInDb = LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb();
@@ -575,7 +575,36 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
         }
     });
 
-    watcher->setFuture(future);
+    auto *savingWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(savingWatcher);
+    QObject::connect(savingWatcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
+
+    QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
+
+        QThread::currentThread()->usleep(10000000); // Give some rome for categorizationFuture's result to be displayed.
+        QStringList filePathList = LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()(dbConnectionName());
+
+        for(const QString &item : filePathList)
+        {
+            bool isSaved = LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()(dbConnectionName(), item);
+
+            if(isSaved)
+            {
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::Completed);
+                LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()(dbConnectionName(), item);
+            }
+            else
+                LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                                  item,
+                                                                                  TableModelFileMonitor::ProgressStatus::ErrorOccured);
+        }
+    });
+
+    categorizationWatcher->setFuture(categorizationFuture);
+    savingWatcher->setFuture(savingFuture);
 }
 
 void TabFileMonitor::slotOnAsyncTaskCompleted()
