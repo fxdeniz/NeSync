@@ -45,12 +45,33 @@ void TabFileMonitor::slotOnActionSaveAllTriggered()
 
     QFuture<void> savingFuture = QtConcurrent::run([=]{
 
-        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()(dbConnectionName(),
-                                                                                                     TableModelFileMonitor::WaitingForUserInteraction);
+        QStringList folderPathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                TableModelFileMonitor::ItemType::Folder,
+                                                                                                TableModelFileMonitor::ProgressStatus::WaitingForUserInteraction);
+         for(const QString &item : folderPathList)
+         {
+             bool isApplied = LambdaFactoryTabFileMonitor::applyActionForFolder()(dbConnectionName(), item);
 
+             if(isApplied)
+             {
+                 LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                             item,
+                                                                             TableModelFileMonitor::ProgressStatus::Completed);
+                 LambdaFactoryTabFileMonitor::deleteRowFromModelDb()(dbConnectionName(), item);
+             }
+             else
+                 LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                             item,
+                                                                             TableModelFileMonitor::ProgressStatus::ErrorOccured);
+        }
+    }).then(QtFuture::Launch::Inherit, [=]{
+
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                 TableModelFileMonitor::ItemType::File,
+                                                                                                 TableModelFileMonitor::WaitingForUserInteraction);
         for(const QString &item : filePathList)
         {
-            bool isApplied = LambdaFactoryTabFileMonitor::applyAutoActionForFile()(dbConnectionName(), item);
+            bool isApplied = LambdaFactoryTabFileMonitor::applyActionForFile()(dbConnectionName(), item);
 
             if(isApplied)
             {
@@ -440,12 +461,13 @@ void TabFileMonitor::slotOnFileMoved(const QString &pathToFile, const QString &o
     QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
 
         QThread::currentThread()->usleep(1000000); // Give some rome for categorizationFuture's result to be displayed.
-        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()(dbConnectionName(),
-                                                                                                           TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                 TableModelFileMonitor::ItemType::File,
+                                                                                                 TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
 
         for(const QString &item : filePathList)
         {
-            bool isSaved = LambdaFactoryTabFileMonitor::applyAutoActionForFile()(dbConnectionName(), item);
+            bool isSaved = LambdaFactoryTabFileMonitor::applyActionForFile()(dbConnectionName(), item);
 
             if(isSaved)
             {
@@ -528,12 +550,13 @@ void TabFileMonitor::slotOnFileModified(const QString &pathToFile)
     QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
 
         QThread::currentThread()->usleep(10000000); // Give some rome for categorizationFuture's result to be displayed.
-        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()(dbConnectionName(),
-                                                                                                           TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                 TableModelFileMonitor::ItemType::File,
+                                                                                                 TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
 
         for(const QString &item : filePathList)
         {
-            bool isAdded = LambdaFactoryTabFileMonitor::applyAutoActionForFile()(dbConnectionName(), item);
+            bool isAdded = LambdaFactoryTabFileMonitor::applyActionForFile()(dbConnectionName(), item);
 
             if(isAdded)
             {
@@ -618,12 +641,13 @@ void TabFileMonitor::slotOnFileMovedAndModified(const QString &pathToFile, const
     QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
 
         QThread::currentThread()->usleep(10000000); // Give some rome for categorizationFuture's result to be displayed.
-        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()(dbConnectionName(),
-                                                                                                           TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                 TableModelFileMonitor::ItemType::File,
+                                                                                                 TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
 
         for(const QString &item : filePathList)
         {
-            bool isSaved = LambdaFactoryTabFileMonitor::applyAutoActionForFile()(dbConnectionName(), item);
+            bool isSaved = LambdaFactoryTabFileMonitor::applyActionForFile()(dbConnectionName(), item);
 
             if(isSaved)
             {

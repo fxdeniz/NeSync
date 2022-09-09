@@ -21,8 +21,11 @@ public:
     static std::function<void (QString, QString)> deleteRowFromModelDb();
     static std::function<void (QString, QString, QString)> updateOldNameOfRowInModelDb();
     static std::function<void (QString, QString, QString)> updateNameOfRowInModelDb();
-    static std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> fetchFileRowsByProgressFromModelDb();
-    static std::function<bool (QString, QString)> applyAutoActionForFile();
+    static std::function<QStringList (QString,
+                                      TableModelFileMonitor::ItemType,
+                                      TableModelFileMonitor::ProgressStatus)> fetchRowsByProgressFromModelDb();
+    static std::function<bool (QString, QString)> applyActionForFolder();
+    static std::function<bool (QString, QString)> applyActionForFile();
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H

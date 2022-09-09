@@ -1,4 +1,4 @@
-#include "LambdaFactoryTabFileMonitor.h"
+﻿#include "LambdaFactoryTabFileMonitor.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QFileInfo>
@@ -164,9 +164,10 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         {
             QDir dir = info.dir();
             dir.cdUp();
+            parentDir = QDir::toNativeSeparators(dir.path() + QDir::separator());
         }
-
-        parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+        else
+            parentDir = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
 
         insertQuery.bindValue(":3", parentDir);
 
@@ -182,7 +183,7 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
 
         if(pathOfItem.endsWith(QDir::separator()))
-            autoSyncStatus = true;
+            autoSyncStatus = false;
         else
         {
             if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
@@ -394,9 +395,13 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::upd
     };
 }
 
-std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()
+std::function<QStringList (QString,
+                           TableModelFileMonitor::ItemType,
+                           TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()
 {
-    return [](QString connectionName, TableModelFileMonitor::ProgressStatus progressStatus) -> QStringList{
+    return [](QString connectionName,
+              TableModelFileMonitor::ItemType itemType,
+              TableModelFileMonitor::ProgressStatus progressStatus) -> QStringList {
 
         QStringList result;
 
@@ -413,7 +418,7 @@ std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> Lamb
         QSqlQuery selectQuery(db);
         selectQuery.prepare(queryTemplate);
 
-        selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
+        selectQuery.bindValue(":2", itemType);
         selectQuery.bindValue(":3", progressStatus);
         selectQuery.exec();
 
@@ -427,7 +432,62 @@ std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> Lamb
     };
 }
 
-std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyAutoActionForFile()
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionForFolder()
+{
+    return [](QString connectionName, QString userFolderPath) -> bool{
+        bool result = false;
+        auto fsm = FileStorageManager::instance();
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :2;" ;
+
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,            // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH);     // 2
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+
+        selectQuery.bindValue(":2", userFolderPath);
+        selectQuery.exec();
+        selectQuery.next();
+
+        auto record = selectQuery.record();
+        auto statusCode = record.value(TableModelFileMonitor::ColumnIndex::Status).value<TableModelFileMonitor::ItemStatus>();
+
+        if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
+        {
+            QFileInfo info(userFolderPath);
+            QDir currentUserDir = info.dir();
+            QString rootSymbolFolderPath, rootUserDirPath = "";
+            QStringList childrenSymbolTokens;
+
+            while(rootSymbolFolderPath.isEmpty())
+            {
+                rootUserDirPath = QDir::toNativeSeparators(currentUserDir.absolutePath() + QDir::separator());
+                rootSymbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(rootUserDirPath);
+                bool isGoneUp = currentUserDir.cdUp();
+
+                // Still couldn't find matching symbol folder path and user directory reached to absolute top.
+                if(rootSymbolFolderPath.isEmpty() && isGoneUp == false)
+                {
+                    rootSymbolFolderPath = FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
+                    break;
+                }
+            }
+
+            QString userFolderPathSuffix = userFolderPath.split(rootUserDirPath).last();
+            userFolderPathSuffix.replace("\\", FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+            result = fsm->addNewFolder(rootSymbolFolderPath + userFolderPathSuffix);
+        }
+
+        return result;
+    };
+}
+
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionForFile()
 {
     return [](QString connectionName, QString userFilePath) -> bool{
         bool result = false;
@@ -457,23 +517,12 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyAutoAct
             QFileInfo info(userFilePath);
             QDir currentUserDir = info.dir();
             QString userDirectory = QDir::toNativeSeparators(info.absolutePath() + QDir::separator());
-            QString symbolFolderPath = "";
+            QString symbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(userDirectory);
 
-            while(symbolFolderPath.isEmpty())
-            {
-                auto currentUserDirPath = QDir::toNativeSeparators(currentUserDir.absolutePath() + QDir::separator());
-                symbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(currentUserDirPath);
-                bool isGoneUp = currentUserDir.cdUp();
-
-                // Still couldn't find matching symbol folder path and user directory reached to absolute top.
-                if(symbolFolderPath.isEmpty() && isGoneUp == false)
-                {
-                    symbolFolderPath = FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
-                    break;
-                }
-            }
-
-            result = fsm->addNewFile(userFilePath, symbolFolderPath, false, true, userDirectory);
+            if(symbolFolderPath.isEmpty())
+                result = false;
+            else
+                result = fsm->addNewFile(userFilePath, symbolFolderPath, false, true, userDirectory);
         }
         else if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
         {
