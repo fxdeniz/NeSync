@@ -437,10 +437,15 @@ QStringList FileStorageManager::getMonitoredFolderPathList() const
 
 QString FileStorageManager::getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const
 {
-    // TODO remove this method with better conceptual design in FolderRecord entity.
+    QString result = "";
 
+    // TODO remove this method with better conceptual design in FolderRecord entity.
     QList<PtrTo_RowFileRecord> fileList = QueryFileRecord(this->db).selectRowsByUserDirectory(userDirectory);
-    return fileList.first()->getSymbolDirectory();
+
+    if(!fileList.isEmpty())
+        result =  fileList.first()->getSymbolDirectory();
+
+    return result;
 }
 
 qlonglong FileStorageManager::getCurrentSaveGroupNumber() const

@@ -452,8 +452,30 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyAutoAct
         auto record = selectQuery.record();
         auto statusCode = record.value(TableModelFileMonitor::ColumnIndex::Status).value<TableModelFileMonitor::ItemStatus>();
 
-        // Save new version
-        if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
+        if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
+        {
+            QFileInfo info(userFilePath);
+            QDir currentUserDir = info.dir();
+            QString userDirectory = QDir::toNativeSeparators(info.absolutePath() + QDir::separator());
+            QString symbolFolderPath = "";
+
+            while(symbolFolderPath.isEmpty())
+            {
+                auto currentUserDirPath = QDir::toNativeSeparators(currentUserDir.absolutePath() + QDir::separator());
+                symbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(currentUserDirPath);
+                bool isGoneUp = currentUserDir.cdUp();
+
+                // Still couldn't find matching symbol folder path and user directory reached to absolute top.
+                if(symbolFolderPath.isEmpty() && isGoneUp == false)
+                {
+                    symbolFolderPath = FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
+                    break;
+                }
+            }
+
+            result = fsm->addNewFile(userFilePath, symbolFolderPath, false, true, userDirectory);
+        }
+        else if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
         {
             // TODO design FileStorageManager::appendNewVersion() such that
             //      remove call to fsm->getFileMetaData(userFilePath);

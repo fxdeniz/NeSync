@@ -38,7 +38,35 @@ QString TabFileMonitor::dbFileName()
 
 void TabFileMonitor::slotOnActionSaveAllTriggered()
 {
+    auto *savingWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(savingWatcher);
+    QObject::connect(savingWatcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
+    QFuture<void> savingFuture = QtConcurrent::run([=]{
+
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                     TableModelFileMonitor::WaitingForUserInteraction);
+
+        for(const QString &item : filePathList)
+        {
+            bool isApplied = LambdaFactoryTabFileMonitor::applyAutoActionForFile()(dbConnectionName(), item);
+
+            if(isApplied)
+            {
+                LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                            item,
+                                                                            TableModelFileMonitor::ProgressStatus::Completed);
+                LambdaFactoryTabFileMonitor::deleteRowFromModelDb()(dbConnectionName(), item);
+            }
+            else
+                LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                            item,
+                                                                            TableModelFileMonitor::ProgressStatus::ErrorOccured);
+        }
+    });
+
+    savingWatcher->setFuture(savingFuture);
 }
 
 void TabFileMonitor::slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder)
