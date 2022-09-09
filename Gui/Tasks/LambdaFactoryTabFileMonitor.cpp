@@ -5,7 +5,7 @@
 #include <QUuid>
 #include <QDir>
 
-std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb()
+std::function<bool (QString)> LambdaFactoryTabFileMonitor::isFileExistInDb()
 {
     return [](QString pathToFile) -> bool{
 
@@ -15,7 +15,7 @@ std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFileExistInDb
     };
 }
 
-std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFolderExistInDb()
+std::function<bool (QString)> LambdaFactoryTabFileMonitor::isFolderExistInDb()
 {
     return [](QString pathToFolder) -> bool{
 
@@ -25,7 +25,7 @@ std::function<bool (QString)> LambdaFactoryTabFileMonitor::lambdaIsFolderExistIn
     };
 }
 
-std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsRowExistInModelDb()
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::isRowExistInModelDb()
 {
     return [] (QString connectionName, QString pathOfRowItem) -> bool {
 
@@ -55,7 +55,7 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsRowE
     };
 }
 
-std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchFileRowFromModelDb()
+std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::fetchFileRowFromModelDb()
 {
     return [] (QString connectionName, QString pathToFile) -> QSqlQuery {
 
@@ -76,7 +76,7 @@ std::function<QSqlQuery (QString, QString)> LambdaFactoryTabFileMonitor::lambdaF
     };
 }
 
-std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFileRowReanmedInModelDb()
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::isFileRowReanmedInModelDb()
 {
     return [](QString connectionName, QString pathToFile) -> bool{
 
@@ -104,7 +104,7 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaIsFile
     };
 }
 
-std::function<TableModelFileMonitor::ItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::lambdaFetchStatusOfRowFromModelDb()
+std::function<TableModelFileMonitor::ItemStatus (QString, QString)> LambdaFactoryTabFileMonitor::fetchStatusOfRowFromModelDb()
 {
     return [](QString connectionName, QString pathToFile) -> TableModelFileMonitor::ItemStatus{
 
@@ -129,7 +129,7 @@ std::function<TableModelFileMonitor::ItemStatus (QString, QString)> LambdaFactor
     };
 }
 
-std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::lambdaInsertRowIntoModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::insertRowIntoModelDb()
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
@@ -230,7 +230,7 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
     };
 }
 
-std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateStatusOfRowInModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::updateStatusOfRowInModelDb()
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
@@ -302,7 +302,7 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
     };
 }
 
-std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::lambdaUpdateProgressOfRowInModelDb()
+std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ProgressStatus progress){
 
@@ -327,7 +327,7 @@ std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> La
     };
 }
 
-std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDeleteRowFromModelDb()
+std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::deleteRowFromModelDb()
 {
     return [](QString connectionName, QString pathToFile){
 
@@ -348,7 +348,7 @@ std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::lambdaDelete
     };
 }
 
-std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateOldNameOfRowInModelDb()
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::updateOldNameOfRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, QString oldName){
 
@@ -371,7 +371,7 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
     };
 }
 
-std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lambdaUpdateNameOfRowInModelDb()
+std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::updateNameOfRowInModelDb()
 {
     return [](QString connectionName, QString pathToFile, QString oldName){
 
@@ -394,9 +394,9 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::lam
     };
 }
 
-std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAutoActionFileRowsFromModelDb()
+std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> LambdaFactoryTabFileMonitor::fetchFileRowsByProgressFromModelDb()
 {
-    return [](QString connectionName) -> QStringList{
+    return [](QString connectionName, TableModelFileMonitor::ProgressStatus progressStatus) -> QStringList{
 
         QStringList result;
 
@@ -414,7 +414,7 @@ std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAut
         selectQuery.prepare(queryTemplate);
 
         selectQuery.bindValue(":2", TableModelFileMonitor::ItemType::File);
-        selectQuery.bindValue(":3", TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+        selectQuery.bindValue(":3", progressStatus);
         selectQuery.exec();
 
         while(selectQuery.next())
@@ -427,7 +427,7 @@ std::function<QStringList (QString)> LambdaFactoryTabFileMonitor::lambdaFetchAut
     };
 }
 
-std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::lambdaApplyAutoActionForFile()
+std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyAutoActionForFile()
 {
     return [](QString connectionName, QString userFilePath) -> bool{
         bool result = false;

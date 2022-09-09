@@ -9,20 +9,20 @@
 class LambdaFactoryTabFileMonitor
 {
 public:
-    static std::function<bool (QString)> lambdaIsFileExistInDb();
-    static std::function<bool (QString)> lambdaIsFolderExistInDb();
-    static std::function<bool (QString, QString)> lambdaIsRowExistInModelDb();
-    static std::function<QSqlQuery (QString, QString)> lambdaFetchFileRowFromModelDb();
-    static std::function<bool (QString, QString)> lambdaIsFileRowReanmedInModelDb();
-    static std::function<TableModelFileMonitor::ItemStatus (QString, QString)> lambdaFetchStatusOfRowFromModelDb();
-    static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> lambdaInsertRowIntoModelDb();
-    static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> lambdaUpdateStatusOfRowInModelDb();
-    static std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> lambdaUpdateProgressOfRowInModelDb();
-    static std::function<void (QString, QString)> lambdaDeleteRowFromModelDb();
-    static std::function<void (QString, QString, QString)> lambdaUpdateOldNameOfRowInModelDb();
-    static std::function<void (QString, QString, QString)> lambdaUpdateNameOfRowInModelDb();
-    static std::function<QStringList (QString)> lambdaFetchAutoActionFileRowsFromModelDb();
-    static std::function<bool (QString, QString)> lambdaApplyAutoActionForFile();
+    static std::function<bool (QString)> isFileExistInDb();
+    static std::function<bool (QString)> isFolderExistInDb();
+    static std::function<bool (QString, QString)> isRowExistInModelDb();
+    static std::function<QSqlQuery (QString, QString)> fetchFileRowFromModelDb();
+    static std::function<bool (QString, QString)> isFileRowReanmedInModelDb();
+    static std::function<TableModelFileMonitor::ItemStatus (QString, QString)> fetchStatusOfRowFromModelDb();
+    static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> insertRowIntoModelDb();
+    static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> updateStatusOfRowInModelDb();
+    static std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> updateProgressOfRowInModelDb();
+    static std::function<void (QString, QString)> deleteRowFromModelDb();
+    static std::function<void (QString, QString, QString)> updateOldNameOfRowInModelDb();
+    static std::function<void (QString, QString, QString)> updateNameOfRowInModelDb();
+    static std::function<QStringList (QString, TableModelFileMonitor::ProgressStatus)> fetchFileRowsByProgressFromModelDb();
+    static std::function<bool (QString, QString)> applyAutoActionForFile();
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H
