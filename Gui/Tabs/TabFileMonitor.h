@@ -53,7 +53,6 @@ private:
 private:
     Ui::TabFileMonitor *ui;
     QSqlDatabase db;
-    QHash<int, QString> noteMap;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;

@@ -55,6 +55,13 @@ void ComboBoxItemDelegateNote::setModelData(QWidget *editor, QAbstractItemModel 
     Q_ASSERT(cb);
 
     TableModelFileMonitor *tableModel = (TableModelFileMonitor *) model;
+    QModelIndex indexFilePath = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Path);
+
+    if(cb->currentText() != cb->placeholderText()) // If text is different than "No note"
+    {
+        auto noteText = parentTab->getNoteMap().value(cb->currentText().toInt());
+        tableModel->saveNoteContentOfRow(indexFilePath.data().toString(), noteText);
+    }
 
     // TODO make new designs use line below.
     // model->setData(index, cb->currentText(), Qt::EditRole);

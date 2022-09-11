@@ -96,7 +96,7 @@ public:
 
     void runSelectQuery();
     bool isRowWithOldNameExist() const;
-    void saveNoteContentOfRow(const QString &filePath, int noteNumber, const QSqlDatabase &db);
+    void saveNoteContentOfRow(const QString &filePath, const QString &noteText);
     static ItemStatus statusCodeFromString(const QString &status);
     static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
 

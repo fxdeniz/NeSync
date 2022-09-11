@@ -71,15 +71,16 @@ bool TableModelFileMonitor::isRowWithOldNameExist() const
     return result;
 }
 
-void TableModelFileMonitor::saveNoteContentOfRow(const QString &filePath, int noteNumber, const QSqlDatabase &db)
+void TableModelFileMonitor::saveNoteContentOfRow(const QString &filePath, const QString &noteText)
 {
-    QString queryTemplate = "UPDATE %1 SET %2 WHERE %3 = :3;" ;
+    QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
     queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,
                                       TableModelFileMonitor::COLUMN_NAME_NOTE,
                                       TableModelFileMonitor::COLUMN_NAME_PATH);
 
     QSqlQuery query(db);
     query.prepare(queryTemplate);
+    query.bindValue(":2", noteText);
     query.bindValue(":3", filePath);
     query.exec();
 }
