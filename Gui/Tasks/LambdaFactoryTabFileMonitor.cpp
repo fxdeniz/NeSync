@@ -517,12 +517,32 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
             QFileInfo info(userFilePath);
             QDir currentUserDir = info.dir();
             QString userDirectory = QDir::toNativeSeparators(info.absolutePath() + QDir::separator());
-            QString symbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(userDirectory);
+            QString rootUserDirPath, rootSymbolFolderPath = "";
 
-            if(symbolFolderPath.isEmpty())
-                result = false;
-            else
-                result = fsm->addNewFile(userFilePath, symbolFolderPath, false, true, userDirectory);
+            while(rootSymbolFolderPath.isEmpty())
+            {
+                rootUserDirPath = QDir::toNativeSeparators(currentUserDir.path() + QDir::separator());
+                rootSymbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(rootUserDirPath);
+                bool isGoneUp = currentUserDir.cdUp();
+
+                if(isGoneUp == false && rootSymbolFolderPath.isEmpty())
+                    return false;
+            }
+
+            QString targetSymbolFolderPath = rootSymbolFolderPath;
+            QStringList childSuffixes = userDirectory.split(rootUserDirPath);
+            childSuffixes.removeFirst();
+
+            if(!childSuffixes.first().isEmpty())
+            {
+                for(QString &token : childSuffixes)
+                {
+                    token.replace("\\", FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+                    targetSymbolFolderPath.append(token);
+                }
+            }
+
+            result = fsm->addNewFile(userFilePath, targetSymbolFolderPath, false, true, userDirectory);
         }
         else if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
         {
