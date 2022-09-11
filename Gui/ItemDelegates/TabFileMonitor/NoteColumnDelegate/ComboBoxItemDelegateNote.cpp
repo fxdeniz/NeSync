@@ -53,6 +53,10 @@ void ComboBoxItemDelegateNote::setModelData(QWidget *editor, QAbstractItemModel 
 {
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
-    model->setData(index, cb->currentText(), Qt::EditRole);
+
+    TableModelFileMonitor *tableModel = (TableModelFileMonitor *) model;
+
+    // TODO make new designs use line below.
+    // model->setData(index, cb->currentText(), Qt::EditRole);
 }
 

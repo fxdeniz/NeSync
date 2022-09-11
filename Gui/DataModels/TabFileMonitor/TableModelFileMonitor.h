@@ -19,7 +19,7 @@ public:
     static const QString COLUMN_NAME_PROGRESS;
     static const QString COLUMN_NAME_CURRENT_VERSION;
     static const QString COLUMN_NAME_ACTION;
-    static const QString COLUMN_NAME_NOTE_NUMBER;
+    static const QString COLUMN_NAME_NOTE;
 
     static const QString STATUS_TEXT_MODIFIED;
     static const QString STATUS_TEXT_NEW_ADDED;
@@ -52,7 +52,7 @@ public:
         Progress = 8,
         CurrentVersion = 9,
         Action = 10,
-        NoteNumber = 11,
+        Note = 11,
     };
 
     enum Action
@@ -95,6 +95,7 @@ public:
     TableModelFileMonitor(QObject *parent = nullptr);
 
     bool isRowWithOldNameExist(const QSqlDatabase &db) const;
+    void saveNoteContentOfRow(const QString &filePath, int noteNumber, const QSqlDatabase &db);
     static ItemStatus statusCodeFromString(const QString &status);
     static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
 

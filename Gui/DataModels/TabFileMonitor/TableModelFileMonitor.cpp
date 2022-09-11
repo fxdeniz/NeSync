@@ -18,7 +18,7 @@ const QString TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS = "auto_sync_st
 const QString TableModelFileMonitor::COLUMN_NAME_PROGRESS = "progress";
 const QString TableModelFileMonitor::COLUMN_NAME_CURRENT_VERSION = "current_version";
 const QString TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
-const QString TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
+const QString TableModelFileMonitor::COLUMN_NAME_NOTE = "note";
 
 const QString TableModelFileMonitor::STATUS_TEXT_MODIFIED = tr("Updated");
 const QString TableModelFileMonitor::STATUS_TEXT_NEW_ADDED = tr("New Added");
@@ -63,6 +63,19 @@ bool TableModelFileMonitor::isRowWithOldNameExist(const QSqlDatabase &db) const
         result = true;
 
     return result;
+}
+
+void TableModelFileMonitor::saveNoteContentOfRow(const QString &filePath, int noteNumber, const QSqlDatabase &db)
+{
+    QString queryTemplate = "UPDATE %1 SET %2 WHERE %3 = :3;" ;
+    queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,
+                                      TableModelFileMonitor::COLUMN_NAME_NOTE,
+                                      TableModelFileMonitor::COLUMN_NAME_PATH);
+
+    QSqlQuery query(db);
+    query.prepare(queryTemplate);
+    query.bindValue(":3", filePath);
+    query.exec();
 }
 
 TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(const QString &status)
@@ -141,7 +154,7 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
             return tr("Current Version");
         case ColumnIndex::Action:
             return tr("Action");
-        case ColumnIndex::NoteNumber:
+        case ColumnIndex::Note:
             return tr("Note");
         default:
             break;

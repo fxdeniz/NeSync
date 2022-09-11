@@ -713,12 +713,12 @@ void TabFileMonitor::refreshTableViewFileMonitor()
                                                                        QHeaderView::ResizeMode::Interactive);
 
     ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Action, this->comboBoxItemDelegateFileAction);
-    ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::NoteNumber, this->comboBoxItemDelegateNote);
+    ui->tableViewFileMonitor->setItemDelegateForColumn(TableModelFileMonitor::ColumnIndex::Note, this->comboBoxItemDelegateNote);
 
     for(int rowIndex = 0; rowIndex < tableModel->rowCount(); rowIndex++)
     {
         ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::Action));
-        ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::NoteNumber));
+        ui->tableViewFileMonitor->openPersistentEditor(tableModel->index(rowIndex, TableModelFileMonitor::ColumnIndex::Note));
     }
 
     ui->tableViewFileMonitor->resizeColumnsToContents();
@@ -750,7 +750,7 @@ void TabFileMonitor::createDb()
     queryString += " progress INTEGER,";
     queryString += " current_version INTEGER DEFAULT 0,";
     queryString += " action	INTEGER,";
-    queryString += " note_number INTEGER,";
+    queryString += " note TEXT,";
     queryString += " PRIMARY KEY(parent_dir, name)";
     queryString += ");";
 
