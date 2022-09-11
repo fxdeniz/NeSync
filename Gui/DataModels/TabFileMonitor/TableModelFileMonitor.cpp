@@ -38,12 +38,18 @@ const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_ERROR_OCCURED = tr("Er
 const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_COMPLETED = tr("Action completed");
 
 
-TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
+TableModelFileMonitor::TableModelFileMonitor(const QSqlDatabase &db, QObject *parent)
     : QSqlQueryModel(parent)
 {
+    this->db = db;
 }
 
-bool TableModelFileMonitor::isRowWithOldNameExist(const QSqlDatabase &db) const
+void TableModelFileMonitor::runSelectQuery()
+{
+    setQuery("SELECT * FROM TableItem;", db);
+}
+
+bool TableModelFileMonitor::isRowWithOldNameExist() const
 {
     bool result = false;
     QSqlQuery query(db);

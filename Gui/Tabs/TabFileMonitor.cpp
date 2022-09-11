@@ -686,11 +686,11 @@ void TabFileMonitor::refreshTableViewFileMonitor()
 
     if(tableModel == nullptr)
     {
-        tableModel = new TableModelFileMonitor(ui->tableViewFileMonitor);
+        tableModel = new TableModelFileMonitor(db, ui->tableViewFileMonitor);
         ui->tableViewFileMonitor->setModel(tableModel);
     }
 
-    tableModel->setQuery("SELECT * FROM TableItem;", db);
+    tableModel->runSelectQuery();
 
     ui->tableViewFileMonitor->horizontalHeader()->setMinimumSectionSize(140);
     ui->tableViewFileMonitor->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -698,7 +698,7 @@ void TabFileMonitor::refreshTableViewFileMonitor()
     ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::Path);
     ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::AutoSyncStatus);
 
-    if(!tableModel->isRowWithOldNameExist(db)) // If all columns have NULL value for old_name column.
+    if(!tableModel->isRowWithOldNameExist()) // If all columns have NULL value for old_name column.
         ui->tableViewFileMonitor->hideColumn(TableModelFileMonitor::ColumnIndex::OldName);
     else
         ui->tableViewFileMonitor->showColumn(TableModelFileMonitor::ColumnIndex::OldName);

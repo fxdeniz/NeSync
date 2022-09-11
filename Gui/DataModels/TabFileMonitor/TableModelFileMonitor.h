@@ -92,9 +92,10 @@ public:
     };
 
 public:
-    TableModelFileMonitor(QObject *parent = nullptr);
+    TableModelFileMonitor(const QSqlDatabase &db, QObject *parent = nullptr);
 
-    bool isRowWithOldNameExist(const QSqlDatabase &db) const;
+    void runSelectQuery();
+    bool isRowWithOldNameExist() const;
     void saveNoteContentOfRow(const QString &filePath, int noteNumber, const QSqlDatabase &db);
     static ItemStatus statusCodeFromString(const QString &status);
     static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
@@ -102,8 +103,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
-signals:
-
+private:
+    QSqlDatabase db;
 };
 
 #endif // TABLEMODELFILEMONITOR_H
