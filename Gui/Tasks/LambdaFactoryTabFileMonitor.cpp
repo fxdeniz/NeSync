@@ -643,6 +643,16 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
                 result = fsm->appendNewVersion(userFilePath, requestResult.symbolFilePath());
             }
         }
+        else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
+        {
+            auto action = record.value(TableModelFileMonitor::ColumnIndex::Action);
+
+            if(action == TableModelFileMonitor::Action::Delete)
+            {
+                FileRequestResult requestResult = fsm->getFileMetaData(userFilePath);
+                result = fsm->deleteFiles({ requestResult.symbolFilePath() });
+            }
+        }
 
         return result;
     };
