@@ -61,7 +61,7 @@ void ComboBoxItemDelegateNote::setModelData(QWidget *editor, QAbstractItemModel 
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
 
-    TableModelFileMonitor *tableModel = (TableModelFileMonitor *) model;
+    TableModelFileMonitor *tableModel = qobject_cast<TableModelFileMonitor *>(model);
     QModelIndex indexFilePath = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Path);
 
     if(cb->currentText() != cb->placeholderText()) // If text is different than "No note"

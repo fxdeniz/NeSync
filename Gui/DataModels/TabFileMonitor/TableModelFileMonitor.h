@@ -60,10 +60,11 @@ public:
 
     enum Action
     {
-        Update,
-        Replace,
-        Delete,
-        Freeze
+        UndefinedAction = 0,
+        Save = 1,
+        Restore = 2,
+        Delete = 3,
+        Freeze = 4
     };
 
     enum ItemStatus
@@ -100,6 +101,7 @@ public:
     void runSelectQuery();
     bool isRowWithOldNameExist() const;
     void saveNoteContentOfRow(const QString &filePath, const QString &noteText);
+    void saveActionContentOfRow(const QString &fileOrFolderPath, enum Action action);
     static ItemStatus statusCodeFromString(const QString &status);
     static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
     static ItemType itemTypeCodeFromString(const QString &itemText);

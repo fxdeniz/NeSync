@@ -1,6 +1,7 @@
 #include "TableModelFileMonitor.h"
 
 #include <QColor>
+#include <QSqlError>
 #include <QDateTime>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -86,6 +87,23 @@ void TableModelFileMonitor::saveNoteContentOfRow(const QString &filePath, const 
     query.prepare(queryTemplate);
     query.bindValue(":2", noteText);
     query.bindValue(":3", filePath);
+    query.exec();
+}
+
+void TableModelFileMonitor::saveActionContentOfRow(const QString &fileOrFolderPath, enum Action action)
+{
+    if(action == Action::UndefinedAction)
+        return;
+
+    QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+    queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,          // 1
+                                      TableModelFileMonitor::COLUMN_NAME_ACTION,  // 2
+                                      TableModelFileMonitor::COLUMN_NAME_PATH);   // 3
+
+    QSqlQuery query(db);
+    query.prepare(queryTemplate);
+    query.bindValue(":2", action);
+    query.bindValue(":3", fileOrFolderPath);
     query.exec();
 }
 
