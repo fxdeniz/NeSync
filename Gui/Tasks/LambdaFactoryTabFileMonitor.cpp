@@ -183,7 +183,7 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
 
         if(pathOfItem.endsWith(QDir::separator()))
-            autoSyncStatus = false;
+            autoSyncStatus = true;
         else
         {
             if(fileRecordFromDb.isExist() && fileRecordFromDb.isAutoSyncEnabled())
@@ -192,7 +192,8 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 
         insertQuery.bindValue(":7", autoSyncStatus);
 
-        if(status == TableModelFileMonitor::ItemStatus::Deleted ||
+        if(status == TableModelFileMonitor::ItemStatus::NewAdded ||
+           status == TableModelFileMonitor::ItemStatus::Deleted ||
            status == TableModelFileMonitor::ItemStatus::Missing ||
            autoSyncStatus == false)
         {
