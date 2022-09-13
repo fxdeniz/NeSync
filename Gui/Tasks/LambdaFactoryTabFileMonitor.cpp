@@ -183,6 +183,10 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
+        FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
+        if(fileRecordFromDb.isFrozen())
+            return;
+
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
@@ -230,7 +234,6 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         insertQuery.bindValue(":6", QDateTime::currentDateTime());
 
         bool autoSyncStatus = false;
-        FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
 
         if(pathOfItem.endsWith(QDir::separator()))
             autoSyncStatus = true;
