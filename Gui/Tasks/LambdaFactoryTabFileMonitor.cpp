@@ -542,7 +542,8 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
                 }
             }
 
-            result = fsm->addNewFile(userFilePath, targetSymbolFolderPath, false, true, userDirectory);
+            QString note = record.value(TableModelFileMonitor::ColumnIndex::Note).toString();
+            result = fsm->addNewFile(userFilePath, targetSymbolFolderPath, false, true, userDirectory, note);
         }
         else if(statusCode == TableModelFileMonitor::ItemStatus::Modified)
         {
