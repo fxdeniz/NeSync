@@ -652,6 +652,11 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
                 FileRequestResult requestResult = fsm->getFileMetaData(userFilePath);
                 result = fsm->deleteFiles({ requestResult.symbolFilePath() });
             }
+            else if(action == TableModelFileMonitor::Action::Freeze)
+            {
+                FileRequestResult requestResult = fsm->getFileMetaData(userFilePath);
+                result = fsm->updateFrozenStatusOfFile(requestResult.symbolFilePath(), true);
+            }
         }
 
         return result;
