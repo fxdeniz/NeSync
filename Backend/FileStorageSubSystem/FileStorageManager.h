@@ -58,7 +58,12 @@ public:
 
     QStringList getMonitoredFilePathList() const;
     QStringList getMonitoredFolderPathList() const;
+
+    // TODO <--- Will be removed when FolderRecord entity equipped with UserDir column --->
     QString getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const;
+    bool updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir);
+    // <--- --->
+
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;

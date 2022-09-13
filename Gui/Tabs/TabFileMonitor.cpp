@@ -215,12 +215,12 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
     QString pathToOldFolder = QDir::toNativeSeparators(parentDir.absolutePath()) + QDir::separator();
     pathToOldFolder += oldFolderName + QDir::separator();
 
-    auto *watcher = new QFutureWatcher<void>(this);
-    resultSet.insert(watcher);
-    QObject::connect(watcher, &QFutureWatcher<void>::finished,
+    auto *categorizationWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(categorizationWatcher);
+    QObject::connect(categorizationWatcher, &QFutureWatcher<void>::finished,
                      this, &TabFileMonitor::slotOnAsyncTaskCompleted);
 
-    QFuture<void> future = QtConcurrent::run([=]{
+    QFuture<void> categorizationFuture = QtConcurrent::run([=]{
 
         std::function<bool (QString)> lambdaIsExistInDb;
         lambdaIsExistInDb = LambdaFactoryTabFileMonitor::isFolderExistInDb();
@@ -264,7 +264,40 @@ void TabFileMonitor::slotOnFolderMoved(const QString &pathToFolder, const QStrin
         }
     });
 
-    watcher->setFuture(future);
+    auto *savingWatcher = new QFutureWatcher<void>(this);
+    resultSet.insert(savingWatcher);
+    QObject::connect(savingWatcher, &QFutureWatcher<void>::finished,
+                     this, &TabFileMonitor::slotOnAsyncTaskCompleted);
+
+    QFuture<void> savingFuture = categorizationFuture.then(QtFuture::Launch::Inherit, [=]{
+
+        QThread::currentThread()->usleep(1000000); // Give some rome for categorizationFuture's result to be displayed.
+        QStringList filePathList = LambdaFactoryTabFileMonitor::fetchRowsByProgressFromModelDb()(dbConnectionName(),
+                                                                                                 TableModelFileMonitor::ItemType::Folder,
+                                                                                                 TableModelFileMonitor::ProgressStatus::ApplyingAutoAction);
+
+        for(const QString &item : filePathList)
+        {
+            bool isSaved = LambdaFactoryTabFileMonitor::applyActionForFolder()(dbConnectionName(), item);
+
+            if(isSaved)
+            {
+                LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                            item,
+                                                                            TableModelFileMonitor::ProgressStatus::Completed);
+                LambdaFactoryTabFileMonitor::deleteRowFromModelDb()(dbConnectionName(), item);
+            }
+            else
+                LambdaFactoryTabFileMonitor::updateProgressOfRowInModelDb()(dbConnectionName(),
+                                                                            item,
+                                                                            TableModelFileMonitor::ProgressStatus::ErrorOccured);
+        }
+    });
+
+
+    categorizationWatcher->setFuture(categorizationFuture);
+    savingWatcher->setFuture(savingFuture);
+
 }
 
 void TabFileMonitor::slotOnUnPredictedFileDetected(const QString &pathToFile)

@@ -129,6 +129,56 @@ std::function<TableModelFileMonitor::ItemStatus (QString, QString)> LambdaFactor
     };
 }
 
+std::function<QString (QString, QString)> LambdaFactoryTabFileMonitor::fetchNameOfRowFromModelDb()
+{
+    return [](QString connectionName, QString pathToFileOrFolder) -> QString{
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+        selectQuery.bindValue(":3", pathToFileOrFolder);
+        selectQuery.exec();
+        selectQuery.next();
+
+        auto record = selectQuery.record();
+        auto result = record.value(TableModelFileMonitor::COLUMN_NAME_NAME).toString();
+
+        return result;
+    };
+}
+
+std::function<QString (QString, QString)> LambdaFactoryTabFileMonitor::fetchOldNameOfRowFromModelDb()
+{
+    return [](QString connectionName, QString pathToFileOrFolder) -> QString{
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "SELECT * FROM %1 WHERE %2 = :3;" ;
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,        // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PATH); // 2
+
+        QSqlQuery selectQuery(db);
+        selectQuery.prepare(queryTemplate);
+        selectQuery.bindValue(":3", pathToFileOrFolder);
+        selectQuery.exec();
+        selectQuery.next();
+
+        auto record = selectQuery.record();
+        auto result = record.value(TableModelFileMonitor::COLUMN_NAME_OLD_NAME).toString();
+
+        return result;
+    };
+}
+
 std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> LambdaFactoryTabFileMonitor::insertRowIntoModelDb()
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
@@ -460,28 +510,21 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
 
         if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
         {
-            QFileInfo info(userFolderPath);
-            QDir currentUserDir = info.dir();
-            QString rootSymbolFolderPath, rootUserDirPath = "";
-            QStringList childrenSymbolTokens;
+            QString targetSymbolFolderPath = LambdaFactoryTabFileMonitor::generateSymbolFolderPathFromUserDir(userFolderPath);
+            result = fsm->addNewFolder(targetSymbolFolderPath);
+        }
+        else if(statusCode == TableModelFileMonitor::ItemStatus::Moved)
+        {
+            auto oldName = LambdaFactoryTabFileMonitor::fetchOldNameOfRowFromModelDb()(connectionName, userFolderPath);
+            auto dir = QFileInfo(userFolderPath).dir();
+            dir.cdUp();
+            QString oldUserFolderPath = QDir::toNativeSeparators(dir.path() + QDir::separator() + oldName);
+            QString oldSymbolFolderPath = LambdaFactoryTabFileMonitor::generateSymbolFolderPathFromUserDir(oldUserFolderPath);
+            QString newFolderName = LambdaFactoryTabFileMonitor::fetchNameOfRowFromModelDb()(connectionName, userFolderPath);
+            newFolderName.chop(1);
 
-            while(rootSymbolFolderPath.isEmpty())
-            {
-                rootUserDirPath = QDir::toNativeSeparators(currentUserDir.absolutePath() + QDir::separator());
-                rootSymbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(rootUserDirPath);
-                bool isGoneUp = currentUserDir.cdUp();
-
-                // Still couldn't find matching symbol folder path and user directory reached to absolute top.
-                if(rootSymbolFolderPath.isEmpty() && isGoneUp == false)
-                {
-                    rootSymbolFolderPath = FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
-                    break;
-                }
-            }
-
-            QString userFolderPathSuffix = userFolderPath.split(rootUserDirPath).last();
-            userFolderPathSuffix.replace("\\", FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
-            result = fsm->addNewFolder(rootSymbolFolderPath + userFolderPathSuffix);
+            result = fsm->renameFolder(oldSymbolFolderPath, newFolderName); // Update FolderRecord
+            result = fsm->updateAllUserDirs(oldUserFolderPath, userFolderPath); // Update all matching FileRecords.
         }
 
         return result;
@@ -603,4 +646,28 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
 
         return result;
     };
+}
+
+QString LambdaFactoryTabFileMonitor::generateSymbolFolderPathFromUserDir(const QString userFolderPath)
+{
+    QFileInfo info(userFolderPath);
+    QDir currentUserDir = info.dir();
+    QString rootSymbolFolderPath, rootUserDirPath = "";
+    auto fsm = FileStorageManager::instance();
+
+    while(rootSymbolFolderPath.isEmpty())
+    {
+        rootUserDirPath = QDir::toNativeSeparators(currentUserDir.absolutePath() + QDir::separator());
+        rootSymbolFolderPath = fsm->getMatchingSymbolFolderPathForUserDirectory(rootUserDirPath);
+        bool isGoneUp = currentUserDir.cdUp();
+
+        // Still couldn't find matching symbol folder path and user directory reached to absolute top.
+        if(rootSymbolFolderPath.isEmpty() && isGoneUp == false)
+            return "";
+    }
+
+    QString userFolderPathSuffix = userFolderPath.split(rootUserDirPath).last();
+    userFolderPathSuffix.replace("\\", FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    QString targetSymbolFolderPath = rootSymbolFolderPath + userFolderPathSuffix;
+    return targetSymbolFolderPath;
 }

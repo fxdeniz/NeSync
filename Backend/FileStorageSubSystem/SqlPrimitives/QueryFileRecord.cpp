@@ -304,6 +304,29 @@ QList<PtrTo_RowFileRecord> QueryFileRecord::selectRowsByMatchingFilExtensionFrom
     return result;
 }
 
+bool QueryFileRecord::updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir)
+{
+    bool result = false;
+
+    QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+    queryTemplate = queryTemplate.arg(this->getTableName(),                       // 1
+                                      TABLE_FILE_RECORD_COLNAME_USER_DIRECTORY,   // 2
+                                      TABLE_FILE_RECORD_COLNAME_USER_DIRECTORY);  // 3
+
+    QSqlQuery query(this->getDb());
+
+    query.prepare(queryTemplate);
+
+    query.bindValue(":2", newUserDir);
+    query.bindValue(":3", oldUserDir);
+    query.exec();
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+        result = true;
+
+    return result;
+}
+
 template<typename T>
 PtrTo_RowFileRecord QueryFileRecord::queryTemplateSelectRowByKey(const QString &keyColumnName, T keyValue) const
 {

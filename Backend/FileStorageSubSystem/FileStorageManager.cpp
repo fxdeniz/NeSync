@@ -448,6 +448,11 @@ QString FileStorageManager::getMatchingSymbolFolderPathForUserDirectory(const QS
     return result;
 }
 
+bool FileStorageManager::updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir)
+{
+    return QueryFileRecord(this->db).updateAllUserDirs(oldUserDir, newUserDir);
+}
+
 qlonglong FileStorageManager::getCurrentSaveGroupNumber() const
 {
     return this->currentSaveGroupNumber;

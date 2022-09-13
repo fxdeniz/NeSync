@@ -15,6 +15,8 @@ public:
     static std::function<QSqlQuery (QString, QString)> fetchFileRowFromModelDb();
     static std::function<bool (QString, QString)> isFileRowReanmedInModelDb();
     static std::function<TableModelFileMonitor::ItemStatus (QString, QString)> fetchStatusOfRowFromModelDb();
+    static std::function<QString (QString, QString)> fetchNameOfRowFromModelDb();
+    static std::function<QString (QString, QString)> fetchOldNameOfRowFromModelDb();
     static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> insertRowIntoModelDb();
     static std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> updateStatusOfRowInModelDb();
     static std::function<void (QString, QString, TableModelFileMonitor::ProgressStatus)> updateProgressOfRowInModelDb();
@@ -26,6 +28,9 @@ public:
                                       TableModelFileMonitor::ProgressStatus)> fetchRowsByProgressFromModelDb();
     static std::function<bool (QString, QString)> applyActionForFolder();
     static std::function<bool (QString, QString)> applyActionForFile();
+
+private:
+    static QString generateSymbolFolderPathFromUserDir(const QString userFolderPath);
 };
 
 #endif // LAMBDAFACTORYTABFILEMONITOR_H
