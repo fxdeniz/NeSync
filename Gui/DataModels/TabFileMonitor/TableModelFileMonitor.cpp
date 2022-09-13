@@ -37,6 +37,10 @@ const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION 
 const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_ERROR_OCCURED = tr("Error occured");
 const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_COMPLETED = tr("Action completed");
 
+const QString TableModelFileMonitor::ITEM_TEXT_FILE = tr("File");
+const QString TableModelFileMonitor::ITEM_TEXT_FOLDER = tr("Folder");
+const QString TableModelFileMonitor::ITEM_TEXT_UNDEFINED = tr("Undefined");
+
 
 TableModelFileMonitor::TableModelFileMonitor(const QSqlDatabase &db, QObject *parent)
     : QSqlQueryModel(parent)
@@ -128,6 +132,18 @@ TableModelFileMonitor::ProgressStatus TableModelFileMonitor::progressStatusCodeF
 
     else
         return ProgressStatus::InvalidProgressStatus;
+}
+
+TableModelFileMonitor::ItemType TableModelFileMonitor::itemTypeCodeFromString(const QString &itemText)
+{
+    if(itemText == ITEM_TEXT_FILE)
+        return ItemType::File;
+
+    else if(itemText == ITEM_TEXT_FOLDER)
+        return ItemType::Folder;
+
+    else
+        return ItemType::UndefinedType;
 }
 
 QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
@@ -239,13 +255,13 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
             auto variantValue = value.value<ItemType>();
 
             if(variantValue == ItemType::File)
-                return tr("File");
+                return ITEM_TEXT_FILE;
 
             else if(variantValue == ItemType::Folder)
-                return tr("Folder");
+                return ITEM_TEXT_FOLDER;
 
             else
-                return "NaN";
+                return ITEM_TEXT_UNDEFINED;
         }
         else if(index.column() == ColumnIndex::Status)
         {

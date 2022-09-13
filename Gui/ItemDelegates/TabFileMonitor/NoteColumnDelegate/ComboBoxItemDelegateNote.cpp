@@ -25,12 +25,19 @@ QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOpt
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberAdded, cb, &ComboBoxNote::slotOnItemAdded);
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberDeleted, cb, &ComboBoxNote::slotOnItemRemoved);
 
-    QModelIndex progressIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
-    auto progressStatusText = progressIndex.data().toString();
+    QModelIndex indexProgress = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
+    auto progressStatusText = indexProgress.data().toString();
     auto progressStatusCode = TableModelFileMonitor::progressStatusCodeFromString(progressStatusText);
 
-    if(progressStatusCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction)
+    QModelIndex indexType = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Type);
+    auto itemTypeText = indexType.data().toString();
+    auto itemTypeCode = TableModelFileMonitor::itemTypeCodeFromString(itemTypeText);
+
+    if(progressStatusCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction ||
+       itemTypeCode == TableModelFileMonitor::ItemType::Folder)
+    {
         cb->setDisabled(true);
+    }
 
     return cb;
 }

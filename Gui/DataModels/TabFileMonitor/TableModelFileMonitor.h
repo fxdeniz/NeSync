@@ -38,6 +38,9 @@ public:
     static const QString PROGRESS_STATUS_TEXT_ERROR_OCCURED;
     static const QString PROGRESS_STATUS_TEXT_COMPLETED;
 
+    static const QString ITEM_TEXT_FILE;
+    static const QString ITEM_TEXT_FOLDER;
+    static const QString ITEM_TEXT_UNDEFINED;
 
     enum ColumnIndex
     {
@@ -99,6 +102,7 @@ public:
     void saveNoteContentOfRow(const QString &filePath, const QString &noteText);
     static ItemStatus statusCodeFromString(const QString &status);
     static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
+    static ItemType itemTypeCodeFromString(const QString &itemText);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role) const override;
