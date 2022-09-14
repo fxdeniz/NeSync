@@ -183,8 +183,16 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
 {
     return [](QString connectionName, QString pathOfItem, TableModelFileMonitor::ItemStatus status){
 
+        // Ignore frozen files.
         FileRequestResult fileRecordFromDb = FileStorageManager::instance()->getFileMetaData(pathOfItem);
         if(fileRecordFromDb.isFrozen())
+            return;
+
+        // Ignore files when parent user dir is deleted.
+        QString parentUserDir = QDir::toNativeSeparators(QFileInfo(pathOfItem).dir().path() + QDir::separator());
+        TableModelFileMonitor::ItemStatus parentUserDirStatus = LambdaFactoryTabFileMonitor::fetchStatusOfRowFromModelDb()(connectionName,
+                                                                                                                           parentUserDir);
+        if(parentUserDirStatus == TableModelFileMonitor::ItemStatus::Deleted)
             return;
 
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
