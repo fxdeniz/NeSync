@@ -315,6 +315,10 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         if(parentUserDirStatus == TableModelFileMonitor::ItemStatus::Deleted)
             LambdaFactoryTabFileMonitor::deleteRowFromModelDb()(connectionName, pathOfItem);
 
+        // Delete existing child files for folder item if, folder is deleted.
+        if(pathOfItem.endsWith(QDir::separator()) && status == TableModelFileMonitor::ItemStatus::Deleted)
+            LambdaFactoryTabFileMonitor::deleteChildFileRowsFromModelDb()(connectionName, pathOfItem);
+
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
