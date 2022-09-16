@@ -579,6 +579,11 @@ std::function<bool (QString, QString)> LambdaFactoryTabFileMonitor::applyActionF
             result = fsm->renameFolder(oldSymbolFolderPath, newFolderName); // Update FolderRecord
             result = fsm->updateAllUserDirs(oldUserFolderPath, userFolderPath); // Update all matching FileRecords.
         }
+        else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
+        {
+            auto matchingSymbolFolder = fsm->getMatchingSymbolFolderPathForUserDirectory(userFolderPath);
+            result = fsm->deleteFolder(matchingSymbolFolder);
+        }
 
         return result;
     };
