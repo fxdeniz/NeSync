@@ -195,6 +195,11 @@ std::function<void (QString, QString, TableModelFileMonitor::ItemStatus)> Lambda
         if(parentUserDirStatus == TableModelFileMonitor::ItemStatus::Deleted)
             return;
 
+        // Delete existing child files for folder item if, folder is deleted.
+        if(pathOfItem.endsWith(QDir::separator()) && status == TableModelFileMonitor::ItemStatus::Deleted)
+            LambdaFactoryTabFileMonitor::deleteChildFileRowsFromModelDb()(connectionName, pathOfItem);
+
+
         QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
         QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
         db.open();
@@ -466,6 +471,27 @@ std::function<void (QString, QString, QString)> LambdaFactoryTabFileMonitor::upd
         updateQuery.bindValue(":2", oldName);
         updateQuery.bindValue(":3", pathToFile);
         updateQuery.exec();
+    };
+}
+
+std::function<void (QString, QString)> LambdaFactoryTabFileMonitor::deleteChildFileRowsFromModelDb()
+{
+    return [](QString connectionName, QString pathOfParentFolder){
+
+        QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+        QSqlDatabase db = QSqlDatabase::cloneDatabase(connectionName, newConnectionName);
+        db.open();
+
+        QString queryTemplate = "DELETE FROM %1 WHERE %2 = :2;" ;
+
+        queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,                // 1
+                                          TableModelFileMonitor::COLUMN_NAME_PARENT_DIR);   // 2
+
+        QSqlQuery deleteQuery(db);
+        deleteQuery.prepare(queryTemplate);
+
+        deleteQuery.bindValue(":2", pathOfParentFolder);
+        deleteQuery.exec();
     };
 }
 

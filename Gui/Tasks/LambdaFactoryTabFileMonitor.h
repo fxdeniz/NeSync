@@ -23,6 +23,7 @@ public:
     static std::function<void (QString, QString)> deleteRowFromModelDb();
     static std::function<void (QString, QString, QString)> updateOldNameOfRowInModelDb();
     static std::function<void (QString, QString, QString)> updateNameOfRowInModelDb();
+    static std::function<void (QString, QString)> deleteChildFileRowsFromModelDb();
     static std::function<QStringList (QString,
                                       TableModelFileMonitor::ItemType,
                                       TableModelFileMonitor::ProgressStatus)> fetchRowsByProgressFromModelDb();
