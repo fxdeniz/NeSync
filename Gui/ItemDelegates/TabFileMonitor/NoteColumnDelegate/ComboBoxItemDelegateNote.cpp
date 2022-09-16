@@ -1,4 +1,5 @@
 #include "ComboBoxItemDelegateNote.h"
+#include "DataModels/TabFileMonitor/TableModelFileMonitor.h"
 #include "ComboBoxNote.h"
 
 #include <QComboBox>
@@ -24,6 +25,20 @@ QWidget *ComboBoxItemDelegateNote::createEditor(QWidget *parent, const QStyleOpt
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberAdded, cb, &ComboBoxNote::slotOnItemAdded);
     QObject::connect(parentTab, &IComboBoxNoteNotifier::signalNoteNumberDeleted, cb, &ComboBoxNote::slotOnItemRemoved);
 
+    QModelIndex indexProgress = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
+    auto progressStatusText = indexProgress.data().toString();
+    auto progressStatusCode = TableModelFileMonitor::progressStatusCodeFromString(progressStatusText);
+
+    QModelIndex indexType = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Type);
+    auto itemTypeText = indexType.data().toString();
+    auto itemTypeCode = TableModelFileMonitor::itemTypeCodeFromString(itemTypeText);
+
+    if(progressStatusCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction ||
+       itemTypeCode == TableModelFileMonitor::ItemType::Folder)
+    {
+        cb->setDisabled(true);
+    }
+
     return cb;
 }
 
@@ -45,6 +60,17 @@ void ComboBoxItemDelegateNote::setModelData(QWidget *editor, QAbstractItemModel 
 {
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
-    model->setData(index, cb->currentText(), Qt::EditRole);
+
+    TableModelFileMonitor *tableModel = qobject_cast<TableModelFileMonitor *>(model);
+    QModelIndex indexFilePath = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Path);
+
+    if(cb->currentText() != cb->placeholderText()) // If text is different than "No note"
+    {
+        auto noteText = parentTab->getNoteMap().value(cb->currentText().toInt());
+        tableModel->saveNoteContentOfRow(indexFilePath.data().toString(), noteText);
+    }
+
+    // TODO make new designs use line below.
+    // model->setData(index, cb->currentText(), Qt::EditRole);
 }
 

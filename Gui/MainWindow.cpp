@@ -187,6 +187,9 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(monitor, &FileMonitoringManager::signalFileMovedAndModified,
                      tabFileMonitor, &TabFileMonitor::slotOnFileMovedAndModified);
 
+    QObject::connect(ui->tab2Action_SaveAll, &QAction::triggered,
+                     tabFileMonitor, &TabFileMonitor::slotOnActionSaveAllTriggered);
+
 
 
 
@@ -400,3 +403,4 @@ void MainWindow::slotOnFileMovedAndModified(const QString &pathToFile, const QSt
     qDebug() << "MainWindow::slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
 }
 #endif
+

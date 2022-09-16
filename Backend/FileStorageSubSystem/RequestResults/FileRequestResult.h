@@ -2,7 +2,7 @@
 #define FILEREQUESTRESULT_H
 
 #include "Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h"
-#include "FileVersionMetaData.h"
+#include "FileVersionRequestResult.h"
 
 #include <QIcon>
 
@@ -25,6 +25,7 @@ public:
     bool isAutoSyncEnabled() const;
     const QIcon &fileIcon() const;
     QList<qlonglong> versionNumbers();
+    qlonglong latestVersionNumber() const;
 
 private:
     FileRequestResult();
@@ -44,6 +45,7 @@ private:
     QIcon _icon;
 
     QList<qlonglong> _versionNumbers;
+    qlonglong _latestVersionNumber;
 };
 
 #endif // FILEREQUESTRESULT_H

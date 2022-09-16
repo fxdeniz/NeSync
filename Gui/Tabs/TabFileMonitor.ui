@@ -13,7 +13,117 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,5,2">
+   <item>
+    <layout class="QHBoxLayout" name="layoutFilter">
+     <property name="spacing">
+      <number>20</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetFixedSize</enum>
+     </property>
+     <item>
+      <widget class="QCheckBox" name="checkBoxShowAutoSaved">
+       <property name="font">
+        <font>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QCheckBox
+{	
+	padding-top: 5px;
+   	padding-left: 5px;
+    padding-right: 10px;
+	padding-bottom: 5px;
+}
+
+QCheckBox:checked 
+{
+	background-color: #C4E538;
+}</string>
+       </property>
+       <property name="text">
+        <string>Show auto saved</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxShowFiles">
+       <property name="font">
+        <font>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QCheckBox
+{	
+	padding-top: 5px;
+   	padding-left: 5px;
+    padding-right: 10px;
+	padding-bottom: 5px;
+}
+
+QCheckBox:checked 
+{
+	background-color: #C4E538;
+}</string>
+       </property>
+       <property name="text">
+        <string>Show Files</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxShowFolders">
+       <property name="styleSheet">
+        <string notr="true">QCheckBox
+{	
+	padding-top: 5px;
+   	padding-left: 5px;
+    padding-right: 10px;
+	padding-bottom: 5px;
+}
+
+ QCheckBox:checked 
+{
+	background-color: #C4E538;
+}
+
+</string>
+       </property>
+       <property name="text">
+        <string>Show Folders</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="autoRepeat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
    <item>
     <widget class="QTableView" name="tableViewFileMonitor">
      <property name="editTriggers">

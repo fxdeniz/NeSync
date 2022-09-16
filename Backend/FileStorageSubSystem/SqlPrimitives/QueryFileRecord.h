@@ -23,10 +23,13 @@ public:
     QStringList selectUserFolderPathListFromAllFiles() const;
     QList<PtrTo_RowFileRecord> selectFavoriteFileList() const;
     QList<PtrTo_RowFileRecord> selectRowsBySymbolDirectory(const QString &symbolDirectory) const;
+    QList<PtrTo_RowFileRecord> selectRowsByUserDirectory(const QString &userDirectory) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFileName(const QString &searchTerm) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFileExtension(const QString &searchTerm) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFileNameFromDirectory(const QString &searchTerm, const QString &directory) const;
     QList<PtrTo_RowFileRecord> selectRowsByMatchingFilExtensionFromDirectory(const QString &searchTerm, const QString &directory) const;
+
+    bool updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir);
 private:
     template <typename T>
     PtrTo_RowFileRecord queryTemplateSelectRowByKey(const QString &keyColumnName, T keyValue) const;

@@ -15,8 +15,11 @@ public:
     static const QString COLUMN_NAME_TYPE;
     static const QString COLUMN_NAME_STATUS;
     static const QString COLUMN_NAME_TIMESTAMP;
+    static const QString COLUMN_NAME_AUTOSYNC_STATUS;
+    static const QString COLUMN_NAME_PROGRESS;
+    static const QString COLUMN_NAME_CURRENT_VERSION;
     static const QString COLUMN_NAME_ACTION;
-    static const QString COLUMN_NAME_NOTE_NUMBER;
+    static const QString COLUMN_NAME_NOTE;
 
     static const QString STATUS_TEXT_MODIFIED;
     static const QString STATUS_TEXT_NEW_ADDED;
@@ -25,6 +28,19 @@ public:
     static const QString STATUS_TEXT_MOVED_AND_MODIFIED;
     static const QString STATUS_TEXT_MISSING;
     static const QString STATUS_TEXT_INVALID;
+
+    static const QString AUTO_SYNC_STATUS_ENABLED_TEXT;
+    static const QString AUTO_SYNC_STATUS_DISABLED_TEXT;
+
+    static const QString PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION;
+    static const QString PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION;
+    static const QString PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION;
+    static const QString PROGRESS_STATUS_TEXT_ERROR_OCCURED;
+    static const QString PROGRESS_STATUS_TEXT_COMPLETED;
+
+    static const QString ITEM_TEXT_FILE;
+    static const QString ITEM_TEXT_FOLDER;
+    static const QString ITEM_TEXT_UNDEFINED;
 
     enum ColumnIndex
     {
@@ -35,16 +51,20 @@ public:
         Type = 4,
         Status = 5,
         Timestamp = 6,
-        Action = 7,
-        NoteNumber = 8
+        AutoSyncStatus = 7,
+        Progress = 8,
+        CurrentVersion = 9,
+        Action = 10,
+        Note = 11,
     };
 
     enum Action
     {
-        Update,
-        Replace,
-        Delete,
-        Freeze
+        UndefinedAction = 0,
+        Save = 1,
+        Restore = 2,
+        Delete = 3,
+        Freeze = 4
     };
 
     enum ItemStatus
@@ -65,16 +85,32 @@ public:
         File
     };
 
-public:
-    TableModelFileMonitor(QObject *parent = nullptr);
+    enum ProgressStatus
+    {
+        InvalidProgressStatus = 0,
+        WaitingForUserInteraction = 1,
+        ApplyingUserAction = 2,
+        ApplyingAutoAction = 3,
+        ErrorOccured = 4,
+        Completed = 5
+    };
 
+public:
+    TableModelFileMonitor(const QSqlDatabase &db, QObject *parent = nullptr);
+
+    void runSelectQuery();
+    bool isRowWithOldNameExist() const;
+    void saveNoteContentOfRow(const QString &filePath, const QString &noteText);
+    void saveActionContentOfRow(const QString &fileOrFolderPath, enum Action action);
     static ItemStatus statusCodeFromString(const QString &status);
+    static ProgressStatus progressStatusCodeFromString(const QString &textProgressStatus);
+    static ItemType itemTypeCodeFromString(const QString &itemText);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
-signals:
-
+private:
+    QSqlDatabase db;
 };
 
 #endif // TABLEMODELFILEMONITOR_H

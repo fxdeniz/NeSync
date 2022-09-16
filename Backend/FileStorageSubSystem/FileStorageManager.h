@@ -2,7 +2,7 @@
 #define FILESTORAGEMANAGER_H
 
 #include "RequestResults/SaveGroupItemMetaData.h"
-#include "RequestResults/FileVersionMetaData.h"
+#include "RequestResults/FileVersionRequestResult.h"
 #include "RequestResults/FolderRequestResult.h"
 #include "RequestResults/FileRequestResult.h"
 #include "SqlPrimitives/RowFolderRecord.h"
@@ -58,14 +58,20 @@ public:
 
     QStringList getMonitoredFilePathList() const;
     QStringList getMonitoredFolderPathList() const;
+
+    // TODO <--- Will be removed when FolderRecord entity equipped with UserDir column --->
+    QString getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const;
+    bool updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir);
+    // <--- --->
+
     qlonglong getCurrentSaveGroupNumber() const;
     QList<qlonglong> getAvailableSaveGroupNumbers() const;
     QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;
     FolderRequestResult getFolderMetaData(const QString &directory) const;
     QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
-    FileRequestResult getFileMetaData(const QString &pathToSymbolFile) const;
+    FileRequestResult getFileMetaData(const QString &symbolOrUserPathToFile) const;
     QList<FileRequestResult> getFavoriteFileMetaDataList() const;
-    FileVersionMetaData getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
+    FileVersionRequestResult getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 
     static const QString &rootFolderPath();

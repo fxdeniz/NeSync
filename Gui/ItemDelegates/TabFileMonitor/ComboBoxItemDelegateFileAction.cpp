@@ -3,6 +3,11 @@
 
 #include <QComboBox>
 
+const QString ComboBoxItemDelegateFileAction::ITEM_TEXT_SAVE = tr("Save");
+const QString ComboBoxItemDelegateFileAction::ITEM_TEXT_RESTORE = tr("Restore");
+const QString ComboBoxItemDelegateFileAction::ITEM_TEXT_FREEZE = tr("Freeze");
+const QString ComboBoxItemDelegateFileAction::ITEM_TEXT_DELETE = tr("Delete from Db");
+
 ComboBoxItemDelegateFileAction::ComboBoxItemDelegateFileAction(QObject *parent)
     : QStyledItemDelegate(parent)
 {
@@ -25,26 +30,36 @@ QWidget *ComboBoxItemDelegateFileAction::createEditor(QWidget *parent, const QSt
 
     if(statusCode == TableModelFileMonitor::ItemStatus::Missing)
     {
-        cb->addItem("Restore");
-        cb->addItem("Freeze");
-        cb->addItem("Delete from Db");
+        cb->addItem(ITEM_TEXT_RESTORE);
+        cb->addItem(ITEM_TEXT_FREEZE);
+        cb->addItem(ITEM_TEXT_DELETE);
     }
     else if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
     {
-        cb->addItem("Save");
+        cb->addItem(ITEM_TEXT_SAVE);
     }
     else if(statusCode == TableModelFileMonitor::ItemStatus::Modified ||
             statusCode == TableModelFileMonitor::ItemStatus::Moved ||
             statusCode == TableModelFileMonitor::ItemStatus::MovedAndModified)
     {
-        cb->addItem("Save");
-        cb->addItem("Restore");
+        cb->addItem(ITEM_TEXT_SAVE);
+        cb->addItem(ITEM_TEXT_RESTORE);
+
+        QModelIndex progressIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
+        auto progressCodeText = progressIndex.data().toString();
+        auto progressCode = TableModelFileMonitor::progressStatusCodeFromString(progressCodeText);
+
+        if(progressCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction)
+        {
+            cb->setCurrentIndex(0);
+            cb->setDisabled(true);
+        }
     }
     else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
     {
-        cb->addItem("Delete from Db");
-        cb->addItem("Restore");
-        cb->addItem("Freeze");
+        cb->addItem(ITEM_TEXT_DELETE);
+        cb->addItem(ITEM_TEXT_RESTORE);
+        cb->addItem(ITEM_TEXT_FREEZE);
     }
 
     return cb;
@@ -68,5 +83,25 @@ void ComboBoxItemDelegateFileAction::setModelData(QWidget *editor, QAbstractItem
 {
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
-    model->setData(index, cb->currentText(), Qt::EditRole);
+
+    auto tableModel = qobject_cast<TableModelFileMonitor *>(model);
+    QModelIndex indexPath = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Path);
+
+    enum TableModelFileMonitor::Action action;
+
+    if(cb->currentText() == ITEM_TEXT_SAVE)
+        action = TableModelFileMonitor::Action::Save;
+    else if(cb->currentText() == ITEM_TEXT_RESTORE)
+        action = TableModelFileMonitor::Action::Restore;
+    else if(cb->currentText() == ITEM_TEXT_FREEZE)
+        action = TableModelFileMonitor::Action::Freeze;
+    else if(cb->currentText() == ITEM_TEXT_DELETE)
+        action = TableModelFileMonitor::Action::Delete;
+    else
+        action = TableModelFileMonitor::Action::UndefinedAction;
+
+    tableModel->saveActionContentOfRow(indexPath.data().toString(), action);
+
+    // TODO make new designs use line below.
+    // model->setData(index, cb->currentText(), Qt::EditRole);
 }

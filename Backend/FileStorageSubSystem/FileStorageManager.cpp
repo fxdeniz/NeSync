@@ -435,6 +435,24 @@ QStringList FileStorageManager::getMonitoredFolderPathList() const
     return queryResult;
 }
 
+QString FileStorageManager::getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const
+{
+    QString result = "";
+
+    // TODO remove this method with better conceptual design in FolderRecord entity.
+    QList<PtrTo_RowFileRecord> fileList = QueryFileRecord(this->db).selectRowsByUserDirectory(userDirectory);
+
+    if(!fileList.isEmpty())
+        result =  fileList.first()->getSymbolDirectory();
+
+    return result;
+}
+
+bool FileStorageManager::updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir)
+{
+    return QueryFileRecord(this->db).updateAllUserDirs(oldUserDir, newUserDir);
+}
+
 qlonglong FileStorageManager::getCurrentSaveGroupNumber() const
 {
     return this->currentSaveGroupNumber;
@@ -492,14 +510,21 @@ QList<FolderRequestResult> FileStorageManager::getFavoriteFolderMetaDataList() c
     return result;
 }
 
-FileRequestResult FileStorageManager::getFileMetaData(const QString &pathToSymbolFile) const
+FileRequestResult FileStorageManager::getFileMetaData(const QString &symbolOrUserPathToFile) const
 {
     FileRequestResult result;
 
-    auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
+    auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(symbolOrUserPathToFile);
 
     if(rowRecord->isExistInDB())
         result = FileRequestResult(rowRecord);
+    else
+    {
+        rowRecord = QueryFileRecord(this->db).selectRowByUserFilePath(symbolOrUserPathToFile);
+
+        if(rowRecord->isExistInDB())
+            result = FileRequestResult(rowRecord);
+    }
 
     return result;
 }
@@ -519,9 +544,9 @@ QList<FileRequestResult> FileStorageManager::getFavoriteFileMetaDataList() const
     return result;
 }
 
-FileVersionMetaData FileStorageManager::getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
+FileVersionRequestResult FileStorageManager::getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
 {
-    FileVersionMetaData result;
+    FileVersionRequestResult result;
 
     auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
 
@@ -533,7 +558,7 @@ FileVersionMetaData FileStorageManager::getFileVersionMetaData(const QString &pa
     if(!rowVersion->isExistInDB())
         return result;
 
-    result = FileVersionMetaData(rowVersion);
+    result = FileVersionRequestResult(rowVersion);
 
     return result;
 }

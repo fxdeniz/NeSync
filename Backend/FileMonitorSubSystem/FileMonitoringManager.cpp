@@ -97,31 +97,25 @@ void FileMonitoringManager::addTargetsFromPredictionList(const QStringList predi
 
     for(const QString &currentPath : predictedItemList)
     {
-        auto standarizedPath = QDir::fromNativeSeparators(currentPath);
-
         QFileInfo info(currentPath);
 
         if(info.exists())
         {
             if(info.isFile())
             {
-                predictedFiles.insert(standarizedPath);
-                this->addTargetFromFilePath(standarizedPath);
+                predictedFiles.insert(currentPath);
+                this->addTargetFromFilePath(currentPath);
 
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
             }
             else if(info.isDir())
             {
-                if(currentPath.endsWith(QDir::separator())) // Insert predicted folder without seprator
-                    predictedFolders.insert(standarizedPath.chopped(1));
-                else
-                    predictedFolders.insert(standarizedPath);
+                predictedFolders.insert(currentPath);
+                this->addTargetFromDirPath(currentPath);
 
-                this->addTargetFromDirPath(standarizedPath);
-
-                unPredictedFolders += this->unPredictedFoldersWithRespectTo(standarizedPath);
-                unPredictedFiles += this->unPredictedFilesWithRespectTo(standarizedPath);
+                unPredictedFolders += this->unPredictedFoldersWithRespectTo(currentPath);
+                unPredictedFiles += this->unPredictedFilesWithRespectTo(currentPath);
             }
         }
         else
@@ -160,10 +154,9 @@ QSet<QString> FileMonitoringManager::unPredictedFilesWithRespectTo(QString pathT
     QDirIterator iterator(dir, QDirIterator::IteratorFlag::Subdirectories);
 
     while(iterator.hasNext())
-        result.insert(iterator.next());
+        result.insert(QDir::toNativeSeparators(iterator.next()));
 
-    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
-    result.remove(standardizedPath);
+    result.remove(pathToDirOrFile);
 
     return result;
 }
@@ -178,10 +171,9 @@ QSet<QString> FileMonitoringManager::unPredictedFoldersWithRespectTo(QString pat
     QDirIterator iterator(dir, QDirIterator::IteratorFlag::Subdirectories);
 
     while(iterator.hasNext())
-        result.insert(iterator.next());
+        result.insert(QDir::toNativeSeparators(iterator.next() + QDir::separator()));
 
-    auto standardizedPath = QDir::fromNativeSeparators(pathToDirOrFile);
-    result.remove(standardizedPath);
+    result.remove(pathToDirOrFile);
 
     return result;
 }

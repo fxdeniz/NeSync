@@ -1,7 +1,10 @@
 #include "TableModelFileMonitor.h"
 
 #include <QColor>
+#include <QSqlError>
 #include <QDateTime>
+#include <QSqlQuery>
+#include <QSqlRecord>
 #include <QFileIconProvider>
 
 const QString TableModelFileMonitor::TABLE_NAME = "TableItem";
@@ -12,9 +15,11 @@ const QString TableModelFileMonitor::COLUMN_NAME_OLD_NAME = "old_name";
 const QString TableModelFileMonitor::COLUMN_NAME_TYPE = "type";
 const QString TableModelFileMonitor::COLUMN_NAME_STATUS = "status";
 const QString TableModelFileMonitor::COLUMN_NAME_TIMESTAMP = "timestamp";
+const QString TableModelFileMonitor::COLUMN_NAME_AUTOSYNC_STATUS = "auto_sync_status";
+const QString TableModelFileMonitor::COLUMN_NAME_PROGRESS = "progress";
+const QString TableModelFileMonitor::COLUMN_NAME_CURRENT_VERSION = "current_version";
 const QString TableModelFileMonitor::COLUMN_NAME_ACTION = "action";
-const QString TableModelFileMonitor::COLUMN_NAME_NOTE_NUMBER = "note_number";
-
+const QString TableModelFileMonitor::COLUMN_NAME_NOTE = "note";
 
 const QString TableModelFileMonitor::STATUS_TEXT_MODIFIED = tr("Updated");
 const QString TableModelFileMonitor::STATUS_TEXT_NEW_ADDED = tr("New Added");
@@ -24,10 +29,82 @@ const QString TableModelFileMonitor::STATUS_TEXT_MOVED_AND_MODIFIED = tr("Moved 
 const QString TableModelFileMonitor::STATUS_TEXT_MISSING = tr("Missing");
 const QString TableModelFileMonitor::STATUS_TEXT_INVALID = tr("Invalid");
 
+const QString TableModelFileMonitor::AUTO_SYNC_STATUS_ENABLED_TEXT = tr("Enabled");
+const QString TableModelFileMonitor::AUTO_SYNC_STATUS_DISABLED_TEXT = tr("Disabled");
 
-TableModelFileMonitor::TableModelFileMonitor(QObject *parent)
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION = tr("Waiting for user");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION = tr("Applying user selected action");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION = tr("Applying auto action");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_ERROR_OCCURED = tr("Error occured");
+const QString TableModelFileMonitor::PROGRESS_STATUS_TEXT_COMPLETED = tr("Action completed");
+
+const QString TableModelFileMonitor::ITEM_TEXT_FILE = tr("File");
+const QString TableModelFileMonitor::ITEM_TEXT_FOLDER = tr("Folder");
+const QString TableModelFileMonitor::ITEM_TEXT_UNDEFINED = tr("Undefined");
+
+
+TableModelFileMonitor::TableModelFileMonitor(const QSqlDatabase &db, QObject *parent)
     : QSqlQueryModel(parent)
 {
+    this->db = db;
+}
+
+void TableModelFileMonitor::runSelectQuery()
+{
+    setQuery("SELECT * FROM TableItem;", db);
+}
+
+bool TableModelFileMonitor::isRowWithOldNameExist() const
+{
+    bool result = false;
+    QSqlQuery query(db);
+
+    QString columnName = "result_column";
+    QString queryTemplate = "SELECT COUNT(old_name) AS %1 FROM TableItem WHERE old_name IS NOT NULL;" ;
+    queryTemplate = queryTemplate.arg(columnName);
+
+    query.prepare(queryTemplate);
+    query.exec();
+
+    query.next();
+
+    auto value = query.record().value(columnName).toLongLong();
+
+    if(value > 0)
+        result = true;
+
+    return result;
+}
+
+void TableModelFileMonitor::saveNoteContentOfRow(const QString &filePath, const QString &noteText)
+{
+    QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+    queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,
+                                      TableModelFileMonitor::COLUMN_NAME_NOTE,
+                                      TableModelFileMonitor::COLUMN_NAME_PATH);
+
+    QSqlQuery query(db);
+    query.prepare(queryTemplate);
+    query.bindValue(":2", noteText);
+    query.bindValue(":3", filePath);
+    query.exec();
+}
+
+void TableModelFileMonitor::saveActionContentOfRow(const QString &fileOrFolderPath, enum Action action)
+{
+    if(action == Action::UndefinedAction)
+        return;
+
+    QString queryTemplate = "UPDATE %1 SET %2 = :2 WHERE %3 = :3;" ;
+    queryTemplate = queryTemplate.arg(TableModelFileMonitor::TABLE_NAME,          // 1
+                                      TableModelFileMonitor::COLUMN_NAME_ACTION,  // 2
+                                      TableModelFileMonitor::COLUMN_NAME_PATH);   // 3
+
+    QSqlQuery query(db);
+    query.prepare(queryTemplate);
+    query.bindValue(":2", action);
+    query.bindValue(":3", fileOrFolderPath);
+    query.exec();
 }
 
 TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(const QString &status)
@@ -54,6 +131,39 @@ TableModelFileMonitor::ItemStatus TableModelFileMonitor::statusCodeFromString(co
         return ItemStatus::InvalidStatus;
 }
 
+TableModelFileMonitor::ProgressStatus TableModelFileMonitor::progressStatusCodeFromString(const QString &textProgressStatus)
+{
+    if(textProgressStatus == PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION)
+        return ProgressStatus::ApplyingAutoAction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION)
+        return ProgressStatus::ApplyingUserAction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION)
+        return ProgressStatus::WaitingForUserInteraction;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_ERROR_OCCURED)
+        return ProgressStatus::ErrorOccured;
+
+    else if(textProgressStatus == PROGRESS_STATUS_TEXT_COMPLETED)
+        return ProgressStatus::Completed;
+
+    else
+        return ProgressStatus::InvalidProgressStatus;
+}
+
+TableModelFileMonitor::ItemType TableModelFileMonitor::itemTypeCodeFromString(const QString &itemText)
+{
+    if(itemText == ITEM_TEXT_FILE)
+        return ItemType::File;
+
+    else if(itemText == ITEM_TEXT_FOLDER)
+        return ItemType::Folder;
+
+    else
+        return ItemType::UndefinedType;
+}
+
 QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
@@ -77,9 +187,15 @@ QVariant TableModelFileMonitor::headerData(int section, Qt::Orientation orientat
             return tr("Status");
         case ColumnIndex::Timestamp:
             return tr("Timestamp");
+        case ColumnIndex::AutoSyncStatus:
+            return tr("Auto-Sync");
+        case ColumnIndex::Progress:
+            return tr("Progress");
+        case ColumnIndex::CurrentVersion:
+            return tr("Current Version");
         case ColumnIndex::Action:
             return tr("Action");
-        case ColumnIndex::NoteNumber:
+        case ColumnIndex::Note:
             return tr("Note");
         default:
             break;
@@ -94,7 +210,10 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
     {
         if(index.column() == ColumnIndex::Type ||
            index.column() == ColumnIndex::Status ||
-           index.column() == ColumnIndex::Timestamp)
+           index.column() == ColumnIndex::Timestamp ||
+           index.column() == ColumnIndex::AutoSyncStatus ||
+           index.column() == ColumnIndex::Progress ||
+            index.column() == ColumnIndex::CurrentVersion)
         {
             return Qt::AlignmentFlag::AlignCenter;
         }
@@ -151,34 +270,40 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
 
         else if(index.column() == ColumnIndex::Type)
         {
-            if(value.value<ItemType>() == ItemType::File)
-                return tr("File");
-            else if(value.value<ItemType>() == ItemType::Folder)
-                return tr("Folder");
+            auto variantValue = value.value<ItemType>();
+
+            if(variantValue == ItemType::File)
+                return ITEM_TEXT_FILE;
+
+            else if(variantValue == ItemType::Folder)
+                return ITEM_TEXT_FOLDER;
+
             else
-                return "NaN";
+                return ITEM_TEXT_UNDEFINED;
         }
         else if(index.column() == ColumnIndex::Status)
         {
-            if(value.value<ItemStatus>() == ItemStatus::Modified)
+            auto variantValue = value.value<ItemStatus>();
+
+            if(variantValue == ItemStatus::Modified)
                 return STATUS_TEXT_MODIFIED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::NewAdded)
+            else if(variantValue == ItemStatus::NewAdded)
                 return STATUS_TEXT_NEW_ADDED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Deleted)
+            else if(variantValue == ItemStatus::Deleted)
                 return STATUS_TEXT_DELETED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Moved)
+            else if(variantValue == ItemStatus::Moved)
                 return STATUS_TEXT_MOVED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::MovedAndModified)
+            else if(variantValue == ItemStatus::MovedAndModified)
                 return STATUS_TEXT_MOVED_AND_MODIFIED;
 
-            else if(value.value<ItemStatus>() == ItemStatus::Missing)
+            else if(variantValue == ItemStatus::Missing)
                 return STATUS_TEXT_MISSING;
 
-            else if(value.value<ItemStatus>() == ItemStatus::InvalidStatus)
+            else if(variantValue == ItemStatus::InvalidStatus)
                 return STATUS_TEXT_INVALID;
 
             else
@@ -186,6 +311,43 @@ QVariant TableModelFileMonitor::data(const QModelIndex &index, int role) const
         }
         else if(index.column() == ColumnIndex::Timestamp)
             return value.toDateTime();
+        else if(index.column() == ColumnIndex::AutoSyncStatus)
+        {
+            if(value.toBool())
+                return AUTO_SYNC_STATUS_ENABLED_TEXT;
+            else
+                return AUTO_SYNC_STATUS_DISABLED_TEXT;
+        }
+        else if(index.column() == ColumnIndex::Progress)
+        {
+            auto variantValue = value.value<ProgressStatus>();
+
+            if(variantValue == ProgressStatus::ApplyingAutoAction)
+                return PROGRESS_STATUS_TEXT_APPLYTING_AUTO_ACTION;
+
+            else if(variantValue == ProgressStatus::ApplyingUserAction)
+                return PROGRESS_STATUS_TEXT_APPLYING_USER_ACTION;
+
+            else if(variantValue == ProgressStatus::WaitingForUserInteraction)
+                return PROGRESS_STATUS_TEXT_WAITING_USER_INTERACTION;
+
+            else if(variantValue == ProgressStatus::ErrorOccured)
+                return PROGRESS_STATUS_TEXT_ERROR_OCCURED;
+
+            else if(variantValue == ProgressStatus::Completed)
+                return PROGRESS_STATUS_TEXT_COMPLETED;
+            else
+                return "NaN";
+        }
+        else if(index.column() == ColumnIndex::CurrentVersion)
+        {
+            qlonglong versionNumber = value.toLongLong();
+
+            if(versionNumber <= 0)
+                return "";
+            else
+                return QString::number(versionNumber);
+        }
     }
 
     return value;

@@ -25,6 +25,7 @@ public:
     static QString dbFileName();
 
 public slots:
+    void slotOnActionSaveAllTriggered();
     void slotOnPredictionTargetNotFound(const QString &pathToFileOrFolder);
     void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
     void slotOnNewFolderAdded(const QString &pathToFolder);
@@ -38,12 +39,11 @@ public slots:
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 
 private slots:
-    void slotOnAsyncCategorizationTaskCompleted();
+    void slotOnAsyncTaskCompleted();
 
     void on_buttonAddNote_clicked();
     void on_buttonDeleteNote_clicked();
     void on_textEditDescription_textChanged();
-
     void on_comboBoxNoteNumber_currentTextChanged(const QString &arg1);
 
 private:
@@ -53,7 +53,6 @@ private:
 private:
     Ui::TabFileMonitor *ui;
     QSqlDatabase db;
-    QHash<int, QString> noteMap;
     ComboBoxItemDelegateNote *comboBoxItemDelegateNote;
     ComboBoxItemDelegateFileAction *comboBoxItemDelegateFileAction;
     QSet<QFutureWatcher<void> *> resultSet;
