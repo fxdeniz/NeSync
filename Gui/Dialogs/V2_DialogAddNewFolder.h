@@ -2,6 +2,7 @@
 #define V2_DIALOGADDNEWFOLDER_H
 
 #include <QDialog>
+#include <QFileSystemModel>
 
 #include "BaseDialog.h"
 
@@ -17,8 +18,12 @@ public:
     explicit V2_DialogAddNewFolder(QWidget *parent = nullptr);
     ~V2_DialogAddNewFolder();
 
+private slots:
+    void on_buttonSelectFolder_clicked();
+
 private:
     Ui::V2_DialogAddNewFolder *ui;
+    QFileSystemModel *model;
 };
 
 #endif // V2_DIALOGADDNEWFOLDER_H
