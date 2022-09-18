@@ -140,6 +140,11 @@
     <string>Save Selected</string>
    </property>
   </action>
+  <action name="tab1Action_v2_NewFolder">
+   <property name="text">
+    <string>v2 Add New Folder</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

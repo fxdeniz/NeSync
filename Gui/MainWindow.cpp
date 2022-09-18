@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFile = new DialogAddNewFile(this);
+    v2_dialogAddNewFolder = new V2_DialogAddNewFolder(this);
 
     allocateSeparators();
     buildTabWidget();
@@ -72,6 +73,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
     if(index == 0)
     {
+        toolBar->addAction(ui->tab1Action_v2_NewFolder);
         toolBar->addAction(ui->tab1Action_NewFolder);
         toolBar->addAction(ui->tab1Action_AddFile);
         toolBar->addAction(separator1);
@@ -272,6 +274,15 @@ void MainWindow::on_tab1Action_NewFolder_triggered()
 {
     dialogAddNewFolder->setModal(true);
     dialogAddNewFolder->show(tabFileExplorer->currentDir());
+}
+
+void MainWindow::on_tab1Action_v2_NewFolder_triggered()
+{
+    Qt::WindowFlags flags = v2_dialogAddNewFolder->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    v2_dialogAddNewFolder->setWindowFlags(flags);
+    v2_dialogAddNewFolder->setModal(true);
+    v2_dialogAddNewFolder->show();
 }
 
 #ifdef DEBUG_FSM_TO_GUI_WITH_THREAD_INFO

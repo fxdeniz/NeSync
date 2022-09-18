@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "Tabs/TabFileMonitor.h"
+#include "Dialogs/V2_DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogAddNewFile.h"
@@ -50,6 +51,7 @@ private:
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
     DialogAddNewFile *dialogAddNewFile;
+    V2_DialogAddNewFolder *v2_dialogAddNewFolder;
     QThread *fileMonitorThread;
 
 #ifdef DEBUG_FSM_TO_GUI
@@ -68,6 +70,7 @@ private slots:
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 #endif
 
+    void on_tab1Action_v2_NewFolder_triggered();
 };
 
 #endif // MAINWINDOW_H

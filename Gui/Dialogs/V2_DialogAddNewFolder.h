@@ -3,11 +3,13 @@
 
 #include <QDialog>
 
+#include "BaseDialog.h"
+
 namespace Ui {
 class V2_DialogAddNewFolder;
 }
 
-class V2_DialogAddNewFolder : public QDialog
+class V2_DialogAddNewFolder : public QDialog, public BaseDialog
 {
     Q_OBJECT
 
