@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(XdBackup VERSION 0.1 LANGUAGES CXX)
+project(BoldBackup VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -49,6 +49,10 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogAddNewFolder.h
         Gui/Dialogs/DialogAddNewFolder.cpp
         Gui/Dialogs/DialogAddNewFolder.ui
+
+        Gui/Dialogs/V2_DialogAddNewFolder.h
+        Gui/Dialogs/V2_DialogAddNewFolder.cpp
+        Gui/Dialogs/V2_DialogAddNewFolder.ui
     #
 
     # DialogFileOrDirEditor
@@ -232,31 +236,31 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(XdBackup
+    qt_add_executable(BoldBackup
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET XdBackup APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET BoldBackup APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(XdBackup SHARED
+        add_library(BoldBackup SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(XdBackup
+        add_executable(BoldBackup
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_link_libraries(XdBackup PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(BoldBackup PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
 
-set_target_properties(XdBackup PROPERTIES
+set_target_properties(BoldBackup PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -265,5 +269,5 @@ set_target_properties(XdBackup PROPERTIES
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(XdBackup)
+    qt_finalize_executable(BoldBackup)
 endif()
