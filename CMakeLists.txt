@@ -49,7 +49,10 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogAddNewFolder.h
         Gui/Dialogs/DialogAddNewFolder.cpp
         Gui/Dialogs/DialogAddNewFolder.ui
-
+        #
+        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.h
+        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.cpp
+        #
         Gui/Dialogs/V2_DialogAddNewFolder.h
         Gui/Dialogs/V2_DialogAddNewFolder.cpp
         Gui/Dialogs/V2_DialogAddNewFolder.ui

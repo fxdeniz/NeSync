@@ -5,6 +5,7 @@
 #include <QFileSystemModel>
 
 #include "BaseDialog.h"
+#include "DataModels/DialogAddNewFolder/CustomFileSystemModel.h"
 
 namespace Ui {
 class V2_DialogAddNewFolder;
@@ -21,9 +22,11 @@ public:
 private slots:
     void on_buttonSelectFolder_clicked();
 
+    void on_treeView_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::V2_DialogAddNewFolder *ui;
-    QFileSystemModel *model;
+    CustomFileSystemModel *model;
 };
 
 #endif // V2_DIALOGADDNEWFOLDER_H
