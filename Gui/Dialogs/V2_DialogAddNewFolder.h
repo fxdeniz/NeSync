@@ -19,14 +19,24 @@ public:
     explicit V2_DialogAddNewFolder(QWidget *parent = nullptr);
     ~V2_DialogAddNewFolder();
 
+public slots:
+    void show(const QString &_parentFolderPath);
+
 private slots:
     void on_buttonSelectFolder_clicked();
-
     void on_treeView_doubleClicked(const QModelIndex &index);
+
+private:
+    QString expectingStatusText();
+    QString emptyFolderStatusText();
+    QString existStatusText(QString folderName);
+    QString successStatusText(QString folderName);
+    QString errorStatusText(QString folderName);
 
 private:
     Ui::V2_DialogAddNewFolder *ui;
     CustomFileSystemModel *model;
+    QString parentFolderPath;
 };
 
 #endif // V2_DIALOGADDNEWFOLDER_H

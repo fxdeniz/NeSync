@@ -282,7 +282,7 @@ void MainWindow::on_tab1Action_v2_NewFolder_triggered()
     flags |= Qt::WindowMaximizeButtonHint;
     v2_dialogAddNewFolder->setWindowFlags(flags);
     v2_dialogAddNewFolder->setModal(true);
-    v2_dialogAddNewFolder->show();
+    v2_dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
 
 #ifdef DEBUG_FSM_TO_GUI_WITH_THREAD_INFO
