@@ -28,39 +28,53 @@ void CustomFileSystemModel::updateAutoSyncStatusOfItem(const QModelIndex &index)
 
 int CustomFileSystemModel::columnCount(const QModelIndex &parent) const
 {
-    return QFileSystemModel::columnCount() + 1;
+    return QFileSystemModel::columnCount() + 2;
 }
 
 QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
 {
-    if(index.column() == ColumnIndex::AutoSync)
+    if(!index.isValid())
+        return {};
+
+    int column = index.column();
+
+    if(role == Qt::DisplayRole)
     {
-        switch(role)
+        if(column == ColumnIndex::AutoSync)
         {
-           case(Qt::DisplayRole):
+            QFileInfo info = fileInfo(index);
+            bool isFile = info.isFile();
+
+            if(!isFile)
+                return tr("Not Applicable");
+            else
             {
-                QFileInfo info = fileInfo(index);
-                bool isFile = info.isFile();
+                auto key = info.absoluteFilePath();
+                bool isContains = autoSyncDisabledFiles.contains(key);
 
-                if(!isFile)
-                    return tr("Not Applicable");
+                if(isContains)
+                    return "✘";
                 else
-                {
-                    auto key = info.absoluteFilePath();
-                    bool isContains = autoSyncDisabledFiles.contains(key);
+                    return "✔";
 
-                    if(isContains)
-                        return "✘";
-                    else
-                        return "✔";
-
-                }
             }
-           case(Qt::TextAlignmentRole):
-               return Qt::AlignHCenter;
-
-           default:{}
         }
+        else if(column == ColumnIndex::Status)
+        {
+            auto key = index.siblingAtColumn(ColumnIndex::Name).data().toString();
+            bool isContains = statusOfFiles.contains(key);
+
+            if(isContains)
+                return itemStatusToString(statusOfFiles.value(key));
+            else
+                return itemStatusToString(ItemStatus::Waiting);
+        }
+    }
+    else if(role == Qt::TextAlignmentRole)
+    {
+        if(column == ColumnIndex::AutoSync || column == ColumnIndex::Status)
+            return Qt::AlignHCenter;
+
     }
 
     return QFileSystemModel::data(index,role);
@@ -71,5 +85,27 @@ QVariant CustomFileSystemModel::headerData(int section, Qt::Orientation orientat
     if(section == ColumnIndex::AutoSync)
         return tr("Auto-Sync");
 
-    return QFileSystemModel::headerData(section, orientation, role);
+    else if(section == ColumnIndex::Status)
+        return tr("Status");
+
+    else
+        return QFileSystemModel::headerData(section, orientation, role);
+}
+
+QString CustomFileSystemModel::itemStatusToString(ItemStatus status)
+{
+    if(status == ItemStatus::Waiting)
+        return tr("Waiting");
+
+    else if(status == ItemStatus::Pending)
+        return tr("Pending");
+
+    else if(status == ItemStatus::Successful)
+        return tr("Successful");
+
+    else if(status == ItemStatus::Failed)
+        return tr("Failed");
+
+    else
+        return "NaN";
 }

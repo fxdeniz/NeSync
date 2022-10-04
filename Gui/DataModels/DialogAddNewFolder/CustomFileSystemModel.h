@@ -14,7 +14,16 @@ public:
         Size = 1,
         Type = 2,
         DateModified = 3,
-        AutoSync = 4
+        AutoSync = 4,
+        Status = 5
+    };
+
+    enum ItemStatus
+    {
+        Waiting,
+        Pending,
+        Successful,
+        Failed,
     };
 
     explicit CustomFileSystemModel(QObject *parent = nullptr);
@@ -28,7 +37,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
+    static QString itemStatusToString(ItemStatus status);
     QSet<QString> autoSyncDisabledFiles;
+    QHash<QString, ItemStatus> statusOfFiles;
 };
 
 #endif // CUSTOMFILESYSTEMMODEL_H
