@@ -77,7 +77,7 @@ bool FileStorageManager::addNewFile(const QString &pathToFile,
     if(!rowUnRegisteredFileEvent->isExistInDB())
         return false;
 
-    bool isFolderCreated = this->addNewFolder(symbolDirectory);
+    bool isFolderCreated = this->addNewFolder(symbolDirectory, userDirectory);
 
     if(!isFolderCreated)
         return false;
