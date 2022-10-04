@@ -29,7 +29,11 @@ public:
     bool setSuffixDirectory(const QString &newSuffixDirectory);
     bool setUserDirectory(const QString &newUserDirectory);
     bool setIsFavorite(bool newIsFavorite);
+
+    // TODO Remove when V2_DialogAddNewFolder compeleted
     bool addChildFolder(const QString &suffixDirectory);
+
+    bool addChildFolder(const QString &suffixDirectory, const QString &userDirectory);
 
 private:
     RowFolderRecord(const QSqlDatabase &db, const QSqlRecord &record);

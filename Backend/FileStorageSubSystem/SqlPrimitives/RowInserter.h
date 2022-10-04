@@ -13,7 +13,14 @@ class I_InsertFolderRecord : virtual public BaseSqlPrimitive
 {
 public:
     virtual PtrTo_RowFolderRecord insertRootFolder(const QString &rootDir) = 0;
-    virtual PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir, const QString &suffixDir) = 0;
+
+    // TODO Remove when V2_DialogAddNewFolder compeleted
+    virtual PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir,
+                                                    const QString &suffixDir) = 0;
+
+    virtual PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir,
+                                                    const QString &suffixDir,
+                                                    const QString &userDir) = 0;
 };
 
 
@@ -74,7 +81,14 @@ public:
 
     //I_InsertFolderRecord
     PtrTo_RowFolderRecord insertRootFolder(const QString &rootDir) override;
-    PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir, const QString &suffixDir) override;
+
+    // TODO Remove when V2_DialogAddNewFolder compeleted
+    PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir,
+                                            const QString &suffixDir) override;
+
+    PtrTo_RowFolderRecord insertChildFolder(const QString &parentDir,
+                                            const QString &suffixDir,
+                                            const QString &userDir) override;
 
     //I_InsertFileRecord
     PtrTo_RowFileRecord insertActiveFile(const QString &fileName,

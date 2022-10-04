@@ -182,16 +182,33 @@ QString RowFolderRecord::toString() const
     result += " | " + TABLE_FOLDER_RECORD_COLNAME_DIRECTORY + " = " + this->getDirectory();
     result += " | " + TABLE_FOLDER_RECORD_COLNAME_PARENT_DIRECTORY + " = " + this->getParentDirectory();
     result += " | " + TABLE_FOLDER_RECORD_COLNAME_SUFFIX_DIRECTORY + " = " + this->getSuffixDirectory();
+    result += " | " + TABLE_FOLDER_RECORD_COLNAME_USER_DIRECTORY + " = " + this->getUserDirectory();
 
     return result;
 }
 
+// TODO Remove when V2_DialogAddNewFolder compeleted
 bool RowFolderRecord::addChildFolder(const QString &suffixDirectory)
 {
     auto *rowInserter = new RowInserter(this->getDb());
     ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
 
     auto childRow = folderInserter->insertChildFolder(this->getDirectory(), suffixDirectory);
+
+    this->setLastError(folderInserter->getLastError());
+
+    if(childRow->isExistInDB())
+        return true;
+    else
+        return false;
+}
+
+bool RowFolderRecord::addChildFolder(const QString &suffixDirectory, const QString &userDirectory)
+{
+    auto *rowInserter = new RowInserter(this->getDb());
+    ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
+
+    auto childRow = folderInserter->insertChildFolder(this->getDirectory(), suffixDirectory, userDirectory);
 
     this->setLastError(folderInserter->getLastError());
 

@@ -589,10 +589,11 @@ const QString &FileStorageManager::rootFolderPath()
     return CONST_SYMBOL_DIRECTORY_SEPARATOR;
 }
 
-bool FileStorageManager::addNewFolder(const QString &directory)
+// TODO Remove when V2_DialogAddNewFolder compeleted
+bool FileStorageManager::addNewFolder(const QString &symbolDirectory)
 {
-    QString dir = directory;
-    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
+    QString dir = symbolDirectory;
+    if(!symbolDirectory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
         dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
 
     if(!this->isFolderSymbolExist(dir))
@@ -618,6 +619,49 @@ bool FileStorageManager::addNewFolder(const QString &directory)
             {
                 QString suffix = token + CONST_SYMBOL_DIRECTORY_SEPARATOR;
                 bool isChildAdded = currentFolder->addChildFolder(suffix);
+
+                if(!isChildAdded)
+                    return false;
+                else
+                    currentFolder = currentFolder->getChildFolderBySuffix(suffix);
+            }
+        }
+
+        return true;
+    }
+
+    return true;
+}
+
+bool FileStorageManager::addNewFolder(const QString &symbolDirectory, const QString &userDirectory)
+{
+    QString dir = symbolDirectory;
+    if(!symbolDirectory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
+        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
+
+    if(!this->isFolderSymbolExist(dir))
+    {
+        dir.truncate(dir.lastIndexOf(CONST_SYMBOL_DIRECTORY_SEPARATOR));
+
+        QStringList tokenList = dir.split(CONST_SYMBOL_DIRECTORY_SEPARATOR);
+        PtrTo_RowFolderRecord currentFolder;
+
+        auto *rowInserter = new RowInserter(this->db);
+        ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
+
+        for(auto const &token : tokenList)
+        {
+            if(token.isEmpty())
+            {
+                currentFolder = folderInserter->insertRootFolder(CONST_SYMBOL_DIRECTORY_SEPARATOR);
+
+                if(!currentFolder->isExistInDB())
+                    return false;
+            }
+            else
+            {
+                QString suffix = token + CONST_SYMBOL_DIRECTORY_SEPARATOR;
+                bool isChildAdded = currentFolder->addChildFolder(suffix, userDirectory);
 
                 if(!isChildAdded)
                     return false;

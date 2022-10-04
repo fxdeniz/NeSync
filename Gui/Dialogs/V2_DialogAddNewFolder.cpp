@@ -1,5 +1,6 @@
 #include "V2_DialogAddNewFolder.h"
 #include "ui_V2_DialogAddNewFolder.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QFileIconProvider>
 #include <QStandardPaths>
@@ -99,4 +100,28 @@ QString V2_DialogAddNewFolder::errorStatusText(QString folderName)
     return text;
 }
 
+
+
+void V2_DialogAddNewFolder::on_buttonTest_V2_RowFolderRecord_clicked()
+{
+    ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::MultiSelection);
+    ui->treeView->selectAll();
+
+    QModelIndexList list = ui->treeView->selectionModel()->selectedIndexes();
+
+    for(const QModelIndex &index : list)
+    {
+        auto fsm = FileStorageManager::instance();
+
+        QDirIterator iter(model->rootDirectory(), QDirIterator::IteratorFlag::Subdirectories);
+
+        while(iter.hasNext())
+        {
+            QString currentDir = iter.next();
+            qDebug() << "creating = " << currentDir;
+            qDebug() << "\t isCreated = " << fsm->addNewFolder(ui->labelParentFolderPath->text() + ui->labelFolderName->text(), currentDir);
+            qDebug() << "";
+        }
+    }
+}
 

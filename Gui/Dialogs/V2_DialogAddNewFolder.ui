@@ -140,6 +140,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="buttonTest_V2_RowFolderRecord">
+     <property name="text">
+      <string>Test V2 RowFolderRecord</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="labelStatus">
      <property name="styleSheet">
       <string notr="true">QLabel

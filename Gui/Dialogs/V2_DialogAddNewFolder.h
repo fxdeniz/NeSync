@@ -26,6 +26,8 @@ private slots:
     void on_buttonSelectFolder_clicked();
     void on_treeView_doubleClicked(const QModelIndex &index);
 
+    void on_buttonTest_V2_RowFolderRecord_clicked();
+
 private:
     QString expectingStatusText();
     QString emptyFolderStatusText();
