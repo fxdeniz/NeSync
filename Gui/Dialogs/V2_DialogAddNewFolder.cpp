@@ -4,6 +4,7 @@
 
 #include <QFileIconProvider>
 #include <QStandardPaths>
+#include <QHashIterator>
 #include <QFileDialog>
 
 V2_DialogAddNewFolder::V2_DialogAddNewFolder(QWidget *parent) :
@@ -104,24 +105,39 @@ QString V2_DialogAddNewFolder::errorStatusText(QString folderName)
 
 void V2_DialogAddNewFolder::on_buttonTest_V2_RowFolderRecord_clicked()
 {
-    ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::MultiSelection);
-    ui->treeView->selectAll();
 
-    QModelIndexList list = ui->treeView->selectionModel()->selectedIndexes();
+    QString rootPath = QDir::toNativeSeparators(model->rootPath());
+    QDir rootDir = model->rootDirectory();
+    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
 
-    for(const QModelIndex &index : list)
+    QDirIterator dirIterator(rootDir, QDirIterator::IteratorFlag::Subdirectories);
+    QHash<QString, QString> userDirSuffixes;
+
+    while(dirIterator.hasNext())
     {
-        auto fsm = FileStorageManager::instance();
+        auto current = dirIterator.next();
+        current = QDir::toNativeSeparators(current);
 
-        QDirIterator iter(model->rootDirectory(), QDirIterator::IteratorFlag::Subdirectories);
+        auto suffix = current.split(rootPath).last();
+        suffix = QDir::toNativeSeparators(suffix);
+        userDirSuffixes.insert(current, suffix);
+    }
 
-        while(iter.hasNext())
-        {
-            QString currentDir = iter.next();
-            qDebug() << "creating = " << currentDir;
-            qDebug() << "\t isCreated = " << fsm->addNewFolder(ui->labelParentFolderPath->text() + ui->labelFolderName->text(), currentDir);
-            qDebug() << "";
-        }
+    auto fsm = FileStorageManager::instance();
+    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
+    fsm->addNewFolder(parentSymbolDir, rootPath);
+
+    QHashIterator<QString, QString> hashIterator(userDirSuffixes);
+
+    while(hashIterator.hasNext())
+    {
+        // QHashIterator starts from index -1
+        //      see https://doc.qt.io/qt-6/qhashiterator.html#details
+        hashIterator.next();
+
+        auto currentSymbolDir = parentSymbolDir + hashIterator.value();
+        currentSymbolDir.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+        fsm->addNewFolder(currentSymbolDir, hashIterator.key());
     }
 }
 
