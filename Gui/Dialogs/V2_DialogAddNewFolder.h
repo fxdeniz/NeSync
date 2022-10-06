@@ -25,15 +25,17 @@ public slots:
 private slots:
     void on_buttonSelectFolder_clicked();
     void on_treeView_doubleClicked(const QModelIndex &index);
-
+    void on_buttonAddFilesToDb_clicked();
     void on_buttonTest_V2_RowFolderRecord_clicked();
+    void slotEnableButtonAddFilesToDb(const QString &dummy);
 
 private:
-    QString expectingStatusText();
-    QString emptyFolderStatusText();
-    QString existStatusText(QString folderName);
-    QString successStatusText(QString folderName);
-    QString errorStatusText(QString folderName);
+    static QString statusTextWaitingForFolder();
+    static QString statusTextContentReadyToAdd(uint folderCount, uint fileCount);
+    static QString statusTextEmptyFolder();
+    static QString statusTextExist(QString folderName);
+    static QString statusTextSuccess(QString folderName);
+    static QString statusTextError(QString folderName);
 
 private:
     Ui::V2_DialogAddNewFolder *ui;

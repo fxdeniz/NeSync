@@ -140,9 +140,23 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="buttonTest_V2_RowFolderRecord">
+    <widget class="QPushButton" name="buttonAddFilesToDb">
      <property name="text">
-      <string>Test V2 RowFolderRecord</string>
+      <string>Add files to Db</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="buttonClearResults">
+     <property name="text">
+      <string>Clear and Add new files</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>24</number>
      </property>
     </widget>
    </item>
