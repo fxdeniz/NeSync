@@ -37,9 +37,8 @@ private slots:
     void slotEnableButtonAddFilesToDb(const QString &dummy);
 
 private:
-    QHash<QString, QString> createSymbolDirMapping();
-    QHash<QString, bool> createFileAutoSyncMapping();
-    QHash<QString, FolderItem> createBufferWithFolderOnly();
+    QMap<QString, FolderItem> createBufferWithFolderOnly();
+    void addFilesToBuffer(QMap<QString, FolderItem> &buffer);
     QString generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir);
 
     static QString statusTextWaitingForFolder();

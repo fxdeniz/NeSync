@@ -4,48 +4,41 @@
 
 #include <QDir>
 
-TaskAddNewFolders::TaskAddNewFolders(const QHash<QString, QString> &userDirToSymbolDirMapping,
-                                     QObject *parent)
+TaskAddNewFolders::TaskAddNewFolders(const QList<V2_DialogAddNewFolder::FolderItem> &_list, QObject *parent)
     : QThread{parent}
 {
-    hashIterator = new QHashIterator<QString, QString>(userDirToSymbolDirMapping);
+    list = _list;
 }
 
 TaskAddNewFolders::~TaskAddNewFolders()
 {
-    delete hashIterator;
-}
-
-void TaskAddNewFolders::addFile(const QString &userFilePath, bool isAutoSyncEnabled)
-{
-    bool isContains = files.contains(userFilePath);
-
-    if(!isContains)
-        files.insert(userFilePath, isAutoSyncEnabled);
 }
 
 int TaskAddNewFolders::fileCount() const
 {
-    return files.size();
+    int result = 0;
+
+    for(const V2_DialogAddNewFolder::FolderItem &item : list)
+        result += item.files.size();
+
+    return result;
 }
 
 void TaskAddNewFolders::run()
 {
-
-}
-
-void TaskAddNewFolders::createSymbolDirs()
-{
     auto fsm = FileStorageManager::instance();
 
-    while(hashIterator->hasNext())
+    // first create folders
+    for(const V2_DialogAddNewFolder::FolderItem &item : list)
     {
-        // QHashIterator starts from index -1
-        //      see https://doc.qt.io/qt-6/qhashiterator.html#details
-        hashIterator->next();
+        fsm->addNewFolder(item.symbolDir, item.userDir);
 
-        auto currentSymbolDir = hashIterator->value();
-        currentSymbolDir.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        fsm->addNewFolder(currentSymbolDir, hashIterator->key());
+        // Then add files
+        QHashIterator<QString, bool> cursor(item.files);
+        while(cursor.hasNext())
+        {
+            cursor.next();
+            fsm->addNewFile(cursor.key(), item.symbolDir, false, cursor.value(), item.userDir);
+        }
     }
 }

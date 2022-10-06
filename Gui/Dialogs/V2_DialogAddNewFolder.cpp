@@ -80,51 +80,9 @@ void V2_DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
         model->updateAutoSyncStatusOfItem(index);
 }
 
-QHash<QString, QString> V2_DialogAddNewFolder::createSymbolDirMapping()
+QMap<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createBufferWithFolderOnly()
 {
-    QString rootPath = QDir::toNativeSeparators(model->rootPath());
-    QDir rootDir = model->rootDirectory();
-    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
-
-    QDirIterator dirIterator(rootDir, QDirIterator::IteratorFlag::Subdirectories);
-    QHash<QString, QString> result;
-    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
-    result.insert(rootPath, parentSymbolDir);
-
-    while(dirIterator.hasNext())
-    {
-        auto currentUserDir = dirIterator.next();
-        currentUserDir = QDir::toNativeSeparators(currentUserDir);
-
-        auto suffix = currentUserDir.split(rootPath).last();
-        suffix = QDir::toNativeSeparators(suffix);
-        suffix.prepend(parentSymbolDir);
-        suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        result.insert(currentUserDir, suffix);
-    }
-
-    return result;
-}
-
-QHash<QString, bool> V2_DialogAddNewFolder::createFileAutoSyncMapping()
-{
-    QHash<QString, bool> result;
-
-    QDirIterator iter(model->rootPath(), QDir::Filter::Files, QDirIterator::IteratorFlag::Subdirectories);
-
-    while(iter.hasNext())
-    {
-        auto path = iter.next();
-        bool isEnabled = model->isAutoSyncEnabledFor(path);
-        result.insert(path, isEnabled);
-    }
-
-    return result;
-}
-
-QHash<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createBufferWithFolderOnly()
-{
-    QHash<QString, FolderItem> result;
+    QMap<QString, FolderItem> result;
 
     QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
     QDir rootDir = model->rootDirectory();
@@ -146,6 +104,20 @@ QHash<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createB
         result.insert(currentUserDir, item);
     }
     return result;
+}
+
+void V2_DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
+{
+    QDirIterator cursor(model->rootPath(), QDir::Filter::Files, QDirIterator::IteratorFlag::Subdirectories);
+
+    while(cursor.hasNext())
+    {
+        QFileInfo info = cursor.nextFileInfo();
+        FolderItem item = buffer.value(info.absolutePath());
+        bool isEnabled = model->isAutoSyncEnabledFor(info.filePath());
+        item.files.insert(info.filePath(), isEnabled);
+        buffer.insert(info.absolutePath(), item);
+    }
 }
 
 QString V2_DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir)
@@ -210,26 +182,15 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     this->showStatusInfo(statusTextAdding(), ui->labelStatus);
     ui->progressBar->show();
 
-    TaskAddNewFolders *task = new TaskAddNewFolders(createSymbolDirMapping(), this);
+    auto buffer = createBufferWithFolderOnly();
+    addFilesToBuffer(buffer);
+    QList<FolderItem> result = buffer.values();
 
-    QHashIterator<QString, bool> hashIterator(createFileAutoSyncMapping());
-
-    while(hashIterator.hasNext())
-    {
-        hashIterator.next();
-
-        task->addFile(hashIterator.key(), hashIterator.value());
-    }
-
-    for(const FolderItem &item : createBufferWithFolderOnly())
-    {
-        qDebug() << item.userDir << " -> " << item.symbolDir;
-    }
-
-    qDebug() << "";
+    TaskAddNewFolders *task = new TaskAddNewFolders(result, this);
 
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);
+
 
     task->start();
 }

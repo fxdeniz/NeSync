@@ -1,6 +1,8 @@
 #ifndef TASKADDNEWFOLDERS_H
 #define TASKADDNEWFOLDERS_H
 
+#include "Dialogs/V2_DialogAddNewFolder.h"
+
 #include <QThread>
 #include <QObject>
 #include <QHash>
@@ -9,11 +11,9 @@ class TaskAddNewFolders : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskAddNewFolders(const QHash<QString, QString> &userDirToSymbolDirMapping,
+    explicit TaskAddNewFolders(const QList<V2_DialogAddNewFolder::FolderItem> &_list,
                                QObject *parent = nullptr);
     ~TaskAddNewFolders();
-
-    void addFile(const QString &userFilePath, bool isAutoSyncEnabled);
     int fileCount() const;
 
     // QThread interface
@@ -29,18 +29,7 @@ signals:
     void finished(bool isAllRequestsSuccessful); // Overloaded QThread::finished()
 
 private:
-    void createSymbolDirs();
-
-    QHashIterator<QString, QString> *hashIterator;
-    QHash<QString, bool> files;
-
-//    typedef struct
-//    {
-//        bool isAutoSyncEnabled;
-//        QString symbolFolderPath;
-//    } FileItem;
-
-//    QHash<QString, FileItem> files;
+    QList<V2_DialogAddNewFolder::FolderItem> list;
 };
 
 #endif // TASKADDNEWFOLDERS_H
