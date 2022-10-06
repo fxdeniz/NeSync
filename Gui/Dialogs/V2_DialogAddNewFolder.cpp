@@ -122,6 +122,45 @@ QHash<QString, bool> V2_DialogAddNewFolder::createFileAutoSyncMapping()
     return result;
 }
 
+QHash<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createBufferWithFolderOnly()
+{
+    QHash<QString, FolderItem> result;
+
+    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
+    QDir rootDir = model->rootDirectory();
+    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+    QDirIterator cursor(rootDir, QDirIterator::IteratorFlag::Subdirectories);
+
+    FolderItem firstItem;
+    firstItem.userDir = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
+    firstItem.symbolDir = parentSymbolDir + FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
+    result.insert(model->rootPath(), firstItem);
+
+    while(cursor.hasNext())
+    {
+        FolderItem item;
+        QString currentUserDir = cursor.next();
+
+        item.userDir = QDir::toNativeSeparators(currentUserDir + QDir::separator());
+        item.symbolDir = generateSymbolDirFrom(currentUserDir, model->rootPath(), parentSymbolDir);
+        result.insert(currentUserDir, item);
+    }
+    return result;
+}
+
+QString V2_DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir)
+{
+    QString parentDir = QDir::toNativeSeparators(parentUserDir);
+    QString currentUserDir = QDir::toNativeSeparators(userDir + QDir::separator());
+
+    auto suffix = currentUserDir.split(parentDir).last();
+    suffix = QDir::toNativeSeparators(suffix);
+    suffix.prepend(parentSymbolDir);
+    suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+
+    return suffix;
+}
+
 QString V2_DialogAddNewFolder::statusTextWaitingForFolder()
 {
     return tr("Please select a folder");
@@ -182,6 +221,12 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
         task->addFile(hashIterator.key(), hashIterator.value());
     }
 
+    for(const FolderItem &item : createBufferWithFolderOnly())
+    {
+        qDebug() << item.userDir << " -> " << item.symbolDir;
+    }
+
+    qDebug() << "";
 
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);

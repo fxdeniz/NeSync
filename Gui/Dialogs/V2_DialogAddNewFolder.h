@@ -16,6 +16,14 @@ class V2_DialogAddNewFolder : public QDialog, public BaseDialog
     Q_OBJECT
 
 public:
+    typedef struct
+    {
+        QString userDir;
+        QString symbolDir;
+        QHash<QString, bool> files;
+
+    } FolderItem;
+
     explicit V2_DialogAddNewFolder(QWidget *parent = nullptr);
     ~V2_DialogAddNewFolder();
 
@@ -31,6 +39,8 @@ private slots:
 private:
     QHash<QString, QString> createSymbolDirMapping();
     QHash<QString, bool> createFileAutoSyncMapping();
+    QHash<QString, FolderItem> createBufferWithFolderOnly();
+    QString generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir);
 
     static QString statusTextWaitingForFolder();
     static QString statusTextContentReadyToAdd();
