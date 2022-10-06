@@ -78,6 +78,39 @@ void V2_DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
         model->updateAutoSyncStatusOfItem(index);
 }
 
+void V2_DialogAddNewFolder::createSymbolDirs()
+{
+    QString rootPath = QDir::toNativeSeparators(model->rootPath());
+    QDir rootDir = model->rootDirectory();
+    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+
+    QDirIterator dirIterator(rootDir, QDirIterator::IteratorFlag::Subdirectories);
+    QHash<QString, QString> userDirToSymbolDirMapping;
+    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
+    userDirToSymbolDirMapping.insert(rootPath, parentSymbolDir);
+
+    while(dirIterator.hasNext())
+    {
+        auto currentUserDir = dirIterator.next();
+        currentUserDir = QDir::toNativeSeparators(currentUserDir);
+
+        auto suffix = currentUserDir.split(rootPath).last();
+        suffix = QDir::toNativeSeparators(suffix);
+        suffix.prepend(parentSymbolDir);
+        suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+        userDirToSymbolDirMapping.insert(currentUserDir, suffix);
+    }
+
+    QHashIterator<QString, QString> hashIterator(userDirToSymbolDirMapping);
+
+    while(hashIterator.hasNext())
+    {
+        // QHashIterator starts from index -1
+        //      see https://doc.qt.io/qt-6/qhashiterator.html#details
+        hashIterator.next();
+    }
+}
+
 QString V2_DialogAddNewFolder::statusTextWaitingForFolder()
 {
     return tr("Please select a folder");
@@ -92,6 +125,11 @@ QString V2_DialogAddNewFolder::statusTextContentReadyToAdd()
 QString V2_DialogAddNewFolder::statusTextEmptyFolder()
 {
     return tr("Folder name cannot be <b>empty</b>");
+}
+
+QString V2_DialogAddNewFolder::statusTextAdding()
+{
+    return tr("Folders & files are being added in background...");
 }
 
 QString V2_DialogAddNewFolder::statusTextExist(QString folderName)
@@ -119,45 +157,9 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 {
     ui->buttonSelectFolder->setEnabled(false);
     ui->buttonAddFilesToDb->setEnabled(false);
-    this->showStatusInfo("Files are being added in background...", ui->labelStatus);
+    this->showStatusInfo(statusTextAdding(), ui->labelStatus);
     ui->progressBar->show();
-}
-
-void V2_DialogAddNewFolder::on_buttonTest_V2_RowFolderRecord_clicked()
-{
-    QString rootPath = QDir::toNativeSeparators(model->rootPath());
-    QDir rootDir = model->rootDirectory();
-    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
-
-    QDirIterator dirIterator(rootDir, QDirIterator::IteratorFlag::Subdirectories);
-    QHash<QString, QString> userDirSuffixes;
-
-    while(dirIterator.hasNext())
-    {
-        auto current = dirIterator.next();
-        current = QDir::toNativeSeparators(current);
-
-        auto suffix = current.split(rootPath).last();
-        suffix = QDir::toNativeSeparators(suffix);
-        userDirSuffixes.insert(current, suffix);
-    }
-
-    auto fsm = FileStorageManager::instance();
-    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
-    fsm->addNewFolder(parentSymbolDir, rootPath);
-
-    QHashIterator<QString, QString> hashIterator(userDirSuffixes);
-
-    while(hashIterator.hasNext())
-    {
-        // QHashIterator starts from index -1
-        //      see https://doc.qt.io/qt-6/qhashiterator.html#details
-        hashIterator.next();
-
-        auto currentSymbolDir = parentSymbolDir + hashIterator.value();
-        currentSymbolDir.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        fsm->addNewFolder(currentSymbolDir, hashIterator.key());
-    }
+    createSymbolDirs();
 }
 
 void V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb(const QString &dummy)

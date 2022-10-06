@@ -110,6 +110,9 @@ set(PROJECT_SOURCES
         # TaskAddNewFiles
         Gui/Tasks/TaskAddNewFiles.h
         Gui/Tasks/TaskAddNewFiles.cpp
+        # TaskAddNewFolders
+        Gui/Tasks/TaskAddNewFolders.h
+        Gui/Tasks/TaskAddNewFolders.cpp
         # TaskNavigateFileSystem
         Gui/Tasks/TaskNaviagateFileSystem.h
         Gui/Tasks/TaskNaviagateFileSystem.cpp
