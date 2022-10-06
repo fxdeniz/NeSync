@@ -31,7 +31,7 @@ private slots:
 
 private:
     static QString statusTextWaitingForFolder();
-    static QString statusTextContentReadyToAdd(uint folderCount, uint fileCount);
+    static QString statusTextContentReadyToAdd();
     static QString statusTextEmptyFolder();
     static QString statusTextExist(QString folderName);
     static QString statusTextSuccess(QString folderName);

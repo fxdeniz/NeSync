@@ -53,7 +53,8 @@ void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
 
 void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
 {
-    QObject::connect(model, &QFileSystemModel::rootPathChanged, this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
+    QObject::connect(model, &QFileSystemModel::rootPathChanged,
+                     this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
 
     QFileDialog dialog(this);
     dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation));
@@ -82,12 +83,9 @@ QString V2_DialogAddNewFolder::statusTextWaitingForFolder()
     return tr("Please select a folder");
 }
 
-QString V2_DialogAddNewFolder::statusTextContentReadyToAdd(uint folderCount, uint fileCount)
+QString V2_DialogAddNewFolder::statusTextContentReadyToAdd()
 {
-    QString text = tr("<b>%1 folders</b> & <b>%2 files</b> ready to add");
-    auto arg1 = QString::number(folderCount);
-    auto arg2 = QString::number(fileCount);
-    text = text.arg(arg1, arg2);
+    QString text = tr("<b>All folder</b> content ready to add");
     return text;
 }
 
@@ -166,24 +164,8 @@ void V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb(const QString &dummy)
 {
     Q_UNUSED(dummy);
     ui->buttonAddFilesToDb->setEnabled(true);
+    showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
 
-    auto dir = model->rootDirectory();
-    //dir.setFilter(QDir::Filter::Dirs | QDir::Filter::Files | QDir::Filter::NoDotAndDotDot);
-
-    uint folderCount = 0;
-    uint fileCount = 0;
-
-    QDirIterator iter(dir, QDirIterator::IteratorFlag::Subdirectories);
-
-    while(iter.hasNext())
-    {
-        auto info = iter.fileInfo();
-
-        if(info.isDir())
-            ++folderCount;
-        else if(info.isFile())
-            ++fileCount;
-    }
-
-    showStatusInfo(statusTextContentReadyToAdd(folderCount, fileCount), ui->labelStatus);
+    QObject::disconnect(model, &QFileSystemModel::rootPathChanged,
+                        this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
 }
