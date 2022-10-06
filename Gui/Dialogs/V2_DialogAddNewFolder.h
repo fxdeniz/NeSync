@@ -29,7 +29,8 @@ private slots:
     void slotEnableButtonAddFilesToDb(const QString &dummy);
 
 private:
-    void createSymbolDirs();
+    QHash<QString, QString> createSymbolDirMapping();
+    QHash<QString, bool> createFileAutoSyncMapping();
 
     static QString statusTextWaitingForFolder();
     static QString statusTextContentReadyToAdd();

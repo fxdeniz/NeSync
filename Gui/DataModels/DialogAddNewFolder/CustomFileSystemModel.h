@@ -35,6 +35,7 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    bool isAutoSyncEnabledFor(const QString &pathToFile);
 
 private:
     static QString itemStatusToString(ItemStatus status);

@@ -1,5 +1,7 @@
 #include "V2_DialogAddNewFolder.h"
 #include "ui_V2_DialogAddNewFolder.h"
+
+#include "Tasks/TaskAddNewFolders.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QFileIconProvider>
@@ -78,16 +80,16 @@ void V2_DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
         model->updateAutoSyncStatusOfItem(index);
 }
 
-void V2_DialogAddNewFolder::createSymbolDirs()
+QHash<QString, QString> V2_DialogAddNewFolder::createSymbolDirMapping()
 {
     QString rootPath = QDir::toNativeSeparators(model->rootPath());
     QDir rootDir = model->rootDirectory();
     rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
 
     QDirIterator dirIterator(rootDir, QDirIterator::IteratorFlag::Subdirectories);
-    QHash<QString, QString> userDirToSymbolDirMapping;
+    QHash<QString, QString> result;
     QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
-    userDirToSymbolDirMapping.insert(rootPath, parentSymbolDir);
+    result.insert(rootPath, parentSymbolDir);
 
     while(dirIterator.hasNext())
     {
@@ -98,17 +100,26 @@ void V2_DialogAddNewFolder::createSymbolDirs()
         suffix = QDir::toNativeSeparators(suffix);
         suffix.prepend(parentSymbolDir);
         suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        userDirToSymbolDirMapping.insert(currentUserDir, suffix);
+        result.insert(currentUserDir, suffix);
     }
 
-    QHashIterator<QString, QString> hashIterator(userDirToSymbolDirMapping);
+    return result;
+}
 
-    while(hashIterator.hasNext())
+QHash<QString, bool> V2_DialogAddNewFolder::createFileAutoSyncMapping()
+{
+    QHash<QString, bool> result;
+
+    QDirIterator iter(model->rootPath(), QDir::Filter::Files, QDirIterator::IteratorFlag::Subdirectories);
+
+    while(iter.hasNext())
     {
-        // QHashIterator starts from index -1
-        //      see https://doc.qt.io/qt-6/qhashiterator.html#details
-        hashIterator.next();
+        auto path = iter.next();
+        bool isEnabled = model->isAutoSyncEnabledFor(path);
+        result.insert(path, isEnabled);
     }
+
+    return result;
 }
 
 QString V2_DialogAddNewFolder::statusTextWaitingForFolder()
@@ -159,7 +170,23 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     ui->buttonAddFilesToDb->setEnabled(false);
     this->showStatusInfo(statusTextAdding(), ui->labelStatus);
     ui->progressBar->show();
-    createSymbolDirs();
+
+    TaskAddNewFolders *task = new TaskAddNewFolders(createSymbolDirMapping(), this);
+
+    QHashIterator<QString, bool> hashIterator(createFileAutoSyncMapping());
+
+    while(hashIterator.hasNext())
+    {
+        hashIterator.next();
+
+        task->addFile(hashIterator.key(), hashIterator.value());
+    }
+
+
+    QObject::connect(task, &QThread::finished,
+                     task, &QThread::deleteLater);
+
+    task->start();
 }
 
 void V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb(const QString &dummy)

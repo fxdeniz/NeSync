@@ -92,6 +92,16 @@ QVariant CustomFileSystemModel::headerData(int section, Qt::Orientation orientat
         return QFileSystemModel::headerData(section, orientation, role);
 }
 
+bool CustomFileSystemModel::isAutoSyncEnabledFor(const QString &pathToFile)
+{
+    bool isContains = autoSyncDisabledFiles.contains(pathToFile);
+
+    if(isContains)
+        return false;
+    else
+        return true;
+}
+
 QString CustomFileSystemModel::itemStatusToString(ItemStatus status)
 {
     if(status == ItemStatus::Waiting)

@@ -16,6 +16,24 @@ TaskAddNewFolders::~TaskAddNewFolders()
     delete hashIterator;
 }
 
+void TaskAddNewFolders::addFile(const QString &userFilePath, bool isAutoSyncEnabled)
+{
+    bool isContains = files.contains(userFilePath);
+
+    if(!isContains)
+        files.insert(userFilePath, isAutoSyncEnabled);
+}
+
+int TaskAddNewFolders::fileCount() const
+{
+    return files.size();
+}
+
+void TaskAddNewFolders::run()
+{
+
+}
+
 void TaskAddNewFolders::createSymbolDirs()
 {
     auto fsm = FileStorageManager::instance();
