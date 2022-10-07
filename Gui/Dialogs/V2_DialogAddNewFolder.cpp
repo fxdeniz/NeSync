@@ -188,9 +188,16 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 
     TaskAddNewFolders *task = new TaskAddNewFolders(result, this);
 
+    this->ui->progressBar->setMaximum(task->fileCount());
+
+    QObject::connect(task, &TaskAddNewFolders::signalFileProcessed,
+                     this->ui->progressBar, &QProgressBar::setValue);
+
+    QObject::connect(task, &TaskAddNewFolders::finished,
+                     this, &V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished);
+
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);
-
 
     task->start();
 }
@@ -203,4 +210,15 @@ void V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb(const QString &dummy)
 
     QObject::disconnect(model, &QFileSystemModel::rootPathChanged,
                         this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
+}
+
+void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)
+{
+    if(isAllRequestSuccessful)
+        this->showStatusSuccess("<b>All folder</b> content added successfully", ui->labelStatus);
+    else
+        this->showStatusError("Not all files added successfully, check the results for details", ui->labelStatus);
+
+    ui->buttonAddFilesToDb->hide();
+    ui->buttonClearResults->show();
 }

@@ -27,6 +27,8 @@ int TaskAddNewFolders::fileCount() const
 void TaskAddNewFolders::run()
 {
     auto fsm = FileStorageManager::instance();
+    int fileNumber = 1;
+    bool isAllRequestSuccessful = true;
 
     // first create folders
     for(const V2_DialogAddNewFolder::FolderItem &item : list)
@@ -38,7 +40,28 @@ void TaskAddNewFolders::run()
         while(cursor.hasNext())
         {
             cursor.next();
-            fsm->addNewFile(cursor.key(), item.symbolDir, false, cursor.value(), item.userDir);
+
+            emit signalFileBeingProcessed(cursor.key());
+            emit signalGenericFileEvent();
+
+            bool requestResult = fsm->addNewFile(cursor.key(), item.symbolDir, false, cursor.value(), item.userDir);
+
+            if(requestResult == true)
+                emit signalFileAddedSuccessfully(cursor.key());
+            else
+            {
+                isAllRequestSuccessful = false;
+                emit signalFileAddingFailed(cursor.key());
+            }
+
+            emit signalFileProcessed(fileNumber);
+            emit signalGenericFileEvent();
+            ++fileNumber;
         }
     }
+
+    if(isAllRequestSuccessful == false)
+        emit finished(false);
+    else
+        emit finished(true);
 }

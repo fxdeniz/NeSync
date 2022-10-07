@@ -35,6 +35,7 @@ private slots:
     void on_treeView_doubleClicked(const QModelIndex &index);
     void on_buttonAddFilesToDb_clicked();
     void slotEnableButtonAddFilesToDb(const QString &dummy);
+    void slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful);
 
 private:
     QMap<QString, FolderItem> createBufferWithFolderOnly();
