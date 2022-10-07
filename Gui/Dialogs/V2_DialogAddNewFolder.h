@@ -38,6 +38,8 @@ private slots:
     void slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful);
     void refreshTreeView();
 
+    void on_buttonClearResults_clicked();
+
 private:
     QMap<QString, FolderItem> createBufferWithFolderOnly();
     void addFilesToBuffer(QMap<QString, FolderItem> &buffer);

@@ -241,3 +241,24 @@ void V2_DialogAddNewFolder::refreshTreeView()
     ui->treeView->viewport()->update();
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
+
+void V2_DialogAddNewFolder::on_buttonClearResults_clicked()
+{
+    ui->labelFolderName->setText("New Folder Name");
+    ui->progressBar->setValue(0);
+    ui->progressBar->hide();
+    ui->lineEditFolderPath->clear();
+    ui->buttonSelectFolder->setEnabled(true);
+    ui->buttonSelectFolder->show();
+    ui->buttonAddFilesToDb->show();
+    ui->buttonClearResults->hide();
+    showStatusInfo(statusTextWaitingForFolder(), ui->labelStatus);
+
+    ui->treeView->hideColumn(CustomFileSystemModel::ColumnIndex::Status);
+
+    CustomFileSystemModel *ptr = new CustomFileSystemModel(this);
+    ui->treeView->setModel(ptr);
+    delete model;
+    model = ptr;
+}
+
