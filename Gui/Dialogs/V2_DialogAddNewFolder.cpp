@@ -189,7 +189,11 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 
     TaskAddNewFolders *task = new TaskAddNewFolders(result, this);
 
-    this->ui->progressBar->setMaximum(task->fileCount());
+    int fileCount = task->fileCount();
+    ui->progressBar->setMaximum(fileCount);
+
+    if(fileCount <= 0) // Prevent infinite progressbar when have only folders
+        ui->progressBar->hide();
 
     QObject::connect(task, &TaskAddNewFolders::signalGenericFileEvent,
                      this, &V2_DialogAddNewFolder::refreshTreeView);
