@@ -99,29 +99,17 @@ bool CustomFileSystemModel::isAutoSyncEnabledFor(const QString &pathToFile)
 
 void CustomFileSystemModel::markItemAsPending(const QString &pathToFile)
 {
-    statusOfFiles.insert(pathToFile, ItemStatus::Pending);
-    QModelIndex index = this->index(pathToFile, ColumnIndex::Status);
-    qDebug() << "pending at index = " << index << " -> " << filePath(index);
-    emit dataChanged(index, index);
-    emit layoutChanged();
+    markItem(pathToFile, ItemStatus::Pending);
 }
 
 void CustomFileSystemModel::markItemAsSuccessful(const QString &pathToFile)
 {
-    statusOfFiles.insert(pathToFile, ItemStatus::Successful);
-    QModelIndex index = this->index(pathToFile, ColumnIndex::Status);
-    qDebug() << "succeded at index = " << index << " -> " << filePath(index);
-    emit dataChanged(index, index);
-    emit layoutChanged();
+    markItem(pathToFile, ItemStatus::Successful);
 }
 
 void CustomFileSystemModel::markItemAsFailed(const QString &pathToFile)
 {
-    statusOfFiles.insert(pathToFile, ItemStatus::Failed);
-    QModelIndex index = this->index(pathToFile, ColumnIndex::Status);
-    qDebug() << "failed at index = " << index << " -> " << filePath(index);
-    emit dataChanged(index, index);
-    emit layoutChanged();
+    markItem(pathToFile, ItemStatus::Failed);
 }
 
 void CustomFileSystemModel::addToStatusColumn(const QModelIndex &index, int first, int last)
@@ -148,4 +136,12 @@ QString CustomFileSystemModel::itemStatusToString(ItemStatus status)
         return tr("Failed");
     else
         return "NaN";
+}
+
+void CustomFileSystemModel::markItem(const QString &pathToFile, ItemStatus status)
+{
+    statusOfFiles.insert(pathToFile, status);
+    QModelIndex index = this->index(pathToFile, ColumnIndex::Status);
+    emit dataChanged(index, index);
+    emit layoutChanged();
 }

@@ -48,6 +48,7 @@ private slots:
 
 private:
     static QString itemStatusToString(ItemStatus status);
+    void markItem(const QString &pathToFile, ItemStatus status);
     QSet<QString> autoSyncDisabledFiles;
     QHash<QString, ItemStatus> statusOfFiles;
 };
