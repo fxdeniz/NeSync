@@ -179,6 +179,7 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 {
     ui->buttonSelectFolder->setEnabled(false);
     ui->buttonAddFilesToDb->setEnabled(false);
+    ui->treeView->showColumn(CustomFileSystemModel::ColumnIndex::Status);
     this->showStatusInfo(statusTextAdding(), ui->labelStatus);
     ui->progressBar->show();
 
@@ -189,6 +190,18 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     TaskAddNewFolders *task = new TaskAddNewFolders(result, this);
 
     this->ui->progressBar->setMaximum(task->fileCount());
+
+    QObject::connect(task, &TaskAddNewFolders::signalGenericFileEvent,
+                     this, &V2_DialogAddNewFolder::refreshTreeView);
+
+    QObject::connect(task, &TaskAddNewFolders::signalFileBeingProcessed,
+                     model, &CustomFileSystemModel::markItemAsPending);
+
+    QObject::connect(task, &TaskAddNewFolders::signalFileAddedSuccessfully,
+                     model, &CustomFileSystemModel::markItemAsSuccessful);
+
+    QObject::connect(task, &TaskAddNewFolders::signalFileAddingFailed,
+                     model, &CustomFileSystemModel::markItemAsFailed);
 
     QObject::connect(task, &TaskAddNewFolders::signalFileProcessed,
                      this->ui->progressBar, &QProgressBar::setValue);
@@ -221,4 +234,10 @@ void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuc
 
     ui->buttonAddFilesToDb->hide();
     ui->buttonClearResults->show();
+}
+
+void V2_DialogAddNewFolder::refreshTreeView()
+{
+    ui->treeView->viewport()->update();
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }

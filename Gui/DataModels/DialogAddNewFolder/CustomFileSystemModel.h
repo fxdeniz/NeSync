@@ -20,10 +20,11 @@ public:
 
     enum ItemStatus
     {
+        NotApplicable,
         Waiting,
         Pending,
         Successful,
-        Failed,
+        Failed
     };
 
     explicit CustomFileSystemModel(QObject *parent = nullptr);
@@ -36,6 +37,14 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     bool isAutoSyncEnabledFor(const QString &pathToFile);
+
+public slots:
+    void markItemAsPending(const QString &pathToFile);
+    void markItemAsSuccessful(const QString &pathToFile);
+    void markItemAsFailed(const QString &pathToFile);
+
+private slots:
+    void addToStatusColumn(const QModelIndex &index, int first, int last);
 
 private:
     static QString itemStatusToString(ItemStatus status);
