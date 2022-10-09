@@ -28,6 +28,9 @@ V2_DialogAddNewFolder::V2_DialogAddNewFolder(QWidget *parent) :
     model = new CustomFileSystemModel(this);
     //model->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
     ui->treeView->setModel(model);
+    ui->treeView->header()->setStretchLastSection(false);
+    ui->treeView->header()->setMinimumSectionSize(200);
+    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
     ui->treeView->hideColumn(CustomFileSystemModel::ColumnIndex::Size);
     ui->treeView->hideColumn(CustomFileSystemModel::ColumnIndex::Type);
     ui->treeView->hideColumn(CustomFileSystemModel::ColumnIndex::DateModified);
@@ -46,7 +49,7 @@ void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
 
     showStatusInfo(statusTextWaitingForFolder(), ui->labelStatus);
     if(ui->lineEditFolderPath->text().isEmpty())
-        ui->labelFolderName->setText("New Folder Name");
+        ui->labelFolderName->setText(tr("New Folder Name"));
 
     ui->lineEditFolderPath->setFocus();
     ui->lineEditFolderPath->selectedText();
@@ -82,11 +85,16 @@ void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
-        QObject::connect(model, &QFileSystemModel::rootPathChanged, model,
-                         [=]{
+        QObject::connect(model, &QFileSystemModel::directoryLoaded, model,
+                         [=](const QString path){
 
-            ui->buttonAddFilesToDb->setEnabled(true);
-            showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
+            if(path == model->rootPath()) // Reject clicks to treeView items
+            {
+                ui->buttonAddFilesToDb->setEnabled(true);
+                showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
+                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
+                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
+            }
         });
 
         ui->lineEditFolderPath->setText(dialog.selectedFiles().at(0));
@@ -214,6 +222,7 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     ui->treeView->showColumn(CustomFileSystemModel::ColumnIndex::Status);
     this->showStatusInfo(statusTextAdding(), ui->labelStatus);
     ui->progressBar->show();
+    ui->treeView->expandAll();
 
     auto buffer = createBufferWithFolderOnly();
     addFilesToBuffer(buffer);
@@ -265,6 +274,8 @@ void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuc
 void V2_DialogAddNewFolder::refreshTreeView()
 {
     ui->treeView->viewport()->update();
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
 
