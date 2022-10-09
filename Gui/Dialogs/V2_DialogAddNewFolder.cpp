@@ -74,8 +74,12 @@ void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
-        QObject::connect(model, &QFileSystemModel::rootPathChanged,
-                         this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
+        QObject::connect(model, &QFileSystemModel::rootPathChanged, model,
+                         [=]{
+
+            ui->buttonAddFilesToDb->setEnabled(true);
+            showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
+        });
 
         ui->lineEditFolderPath->setText(dialog.selectedFiles().at(0));
         QModelIndex rootIndex = model->setRootPath(ui->lineEditFolderPath->text());        
@@ -237,16 +241,6 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
                      task, &QThread::deleteLater);
 
     task->start();
-}
-
-void V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb(const QString &dummy)
-{
-    Q_UNUSED(dummy);
-    ui->buttonAddFilesToDb->setEnabled(true);
-    showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
-
-    QObject::disconnect(model, &QFileSystemModel::rootPathChanged,
-                        this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
 }
 
 void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)

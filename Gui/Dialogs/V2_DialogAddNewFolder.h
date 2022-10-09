@@ -34,7 +34,6 @@ private slots:
     void on_buttonSelectFolder_clicked();
     void on_treeView_doubleClicked(const QModelIndex &index);
     void on_buttonAddFilesToDb_clicked();
-    void slotEnableButtonAddFilesToDb(const QString &dummy);
     void slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful);
     void refreshTreeView();
 
