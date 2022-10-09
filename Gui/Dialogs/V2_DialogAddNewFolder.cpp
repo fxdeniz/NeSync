@@ -7,6 +7,7 @@
 #include <QFileIconProvider>
 #include <QStandardPaths>
 #include <QHashIterator>
+#include <QStorageInfo>
 #include <QFileDialog>
 
 V2_DialogAddNewFolder::V2_DialogAddNewFolder(QWidget *parent) :
@@ -55,15 +56,27 @@ void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
 
 void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
 {
-    QObject::connect(model, &QFileSystemModel::rootPathChanged,
-                     this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
-
     QFileDialog dialog(this);
     dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation));
     dialog.setFileMode(QFileDialog::FileMode::Directory);
 
     if(dialog.exec())
     {
+        auto fsm = FileStorageManager::instance();
+
+        QStorageInfo storageInfo(fsm->getBackupDirectory());
+        qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
+        qint64 availableSize = storageInfo.bytesFree();
+
+        if(folderSize > availableSize)
+        {
+            showStatusWarning(statusTextNoFreeSpace(dialog.selectedFiles().at(0)), ui->labelStatus);
+            return;
+        }
+
+        QObject::connect(model, &QFileSystemModel::rootPathChanged,
+                         this, &V2_DialogAddNewFolder::slotEnableButtonAddFilesToDb);
+
         ui->lineEditFolderPath->setText(dialog.selectedFiles().at(0));
         QModelIndex rootIndex = model->setRootPath(ui->lineEditFolderPath->text());        
         ui->treeView->setRootIndex(rootIndex);
@@ -152,6 +165,13 @@ QString V2_DialogAddNewFolder::statusTextEmptyFolder()
 QString V2_DialogAddNewFolder::statusTextAdding()
 {
     return tr("Folders & files are being added in background...");
+}
+
+QString V2_DialogAddNewFolder::statusTextNoFreeSpace(QString folderName)
+{
+    QString text = tr("Not enough free space available for: <b>%1</b>");
+    text = text.arg(folderName);
+    return text;
 }
 
 QString V2_DialogAddNewFolder::statusTextExist(QString folderName)
@@ -264,5 +284,20 @@ void V2_DialogAddNewFolder::on_buttonClearResults_clicked()
     ui->treeView->setModel(ptr);
     delete model;
     model = ptr;
+}
+
+qint64 V2_DialogAddNewFolder::getFolderSize(const QString &pathToFolder)
+{
+    qint64 result = 0;
+    QDirIterator cursor(pathToFolder,
+                        QDir::Filter::Files | QDir::Filter::NoDotAndDotDot,
+                        QDirIterator::IteratorFlag::Subdirectories);
+
+    while(cursor.hasNext())
+    {
+        result += cursor.nextFileInfo().size();
+    }
+
+    return result;
 }
 

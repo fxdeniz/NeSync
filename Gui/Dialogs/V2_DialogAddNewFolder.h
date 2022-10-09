@@ -41,6 +41,7 @@ private slots:
     void on_buttonClearResults_clicked();
 
 private:
+    static qint64 getFolderSize(const QString &pathToFolder);
     QMap<QString, FolderItem> createBufferWithFolderOnly();
     void addFilesToBuffer(QMap<QString, FolderItem> &buffer);
     QString generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir);
@@ -49,6 +50,7 @@ private:
     static QString statusTextContentReadyToAdd();
     static QString statusTextEmptyFolder();
     static QString statusTextAdding();
+    static QString statusTextNoFreeSpace(QString folderName);
     static QString statusTextExist(QString folderName);
     static QString statusTextSuccess(QString folderName);
     static QString statusTextError(QString folderName);
