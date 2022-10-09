@@ -11,6 +11,7 @@ public:
 
     PtrTo_RowFolderRecord selectRowByID(qlonglong folderID) const;
     PtrTo_RowFolderRecord selectRowByDirectory(const QString &directory) const;
+    PtrTo_RowFolderRecord selectRowByUserDirectory(const QString &userDirectory) const;
 
     QList<PtrTo_RowFolderRecord> selectRowsByParentDirectory(const QString &parentDirectory) const;
     QList<PtrTo_RowFolderRecord> selectRowsByMatchingDirectory(const QString &searchTerm) const;

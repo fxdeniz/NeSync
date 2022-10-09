@@ -74,6 +74,14 @@ void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
+        bool isFolderExistByUserPath = fsm->isFolderExistByUserFolderPath(dialog.selectedFiles().at(0));
+
+        if(isFolderExistByUserPath)
+        {
+            this->showStatusWarning(statusTextFolderExist(dialog.selectedFiles().at(0)), ui->labelStatus);
+            return;
+        }
+
         QObject::connect(model, &QFileSystemModel::rootPathChanged, model,
                          [=]{
 
@@ -178,9 +186,9 @@ QString V2_DialogAddNewFolder::statusTextNoFreeSpace(QString folderName)
     return text;
 }
 
-QString V2_DialogAddNewFolder::statusTextExist(QString folderName)
+QString V2_DialogAddNewFolder::statusTextFolderExist(QString folderName)
 {
-    QString text = tr("Folder <b>%1</b> already exist");
+    QString text = tr("Folder already added: <b>%1</b>");
     text = text.arg(folderName);
     return text;
 }

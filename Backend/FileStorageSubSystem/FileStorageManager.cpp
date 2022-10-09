@@ -406,17 +406,15 @@ bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) 
 bool FileStorageManager::isFolderExistByUserFolderPath(const QString &userFolderPath) const
 {
     bool result = false;
-    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromAllFiles();
 
-    // TODO: Replace for loop with db query.
-    for(const QString &currentPath : queryResult)
-    {
-        if(userFolderPath == currentPath)
-        {
-            result = true;
-            break;
-        }
-    }
+    QString dir = userFolderPath;
+    if(!dir.endsWith(QDir::separator()))
+        dir.append(QDir::separator());
+
+    auto queryResult = QueryFolderRecord(this->db).selectRowByUserDirectory(dir);
+
+    if(queryResult->isExistInDB())
+        result = true;
 
     return result;
 }

@@ -50,7 +50,7 @@ private:
     static QString statusTextEmptyFolder();
     static QString statusTextAdding();
     static QString statusTextNoFreeSpace(QString folderName);
-    static QString statusTextExist(QString folderName);
+    static QString statusTextFolderExist(QString folderName);
     static QString statusTextSuccess(QString folderName);
     static QString statusTextError(QString folderName);
 
