@@ -30,6 +30,10 @@ public:
 public slots:
     void show(const QString &_parentFolderPath);
 
+    // QDialog interface
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
     void on_buttonSelectFolder_clicked();
     void on_treeView_doubleClicked(const QModelIndex &index);
@@ -58,6 +62,7 @@ private:
     Ui::V2_DialogAddNewFolder *ui;
     CustomFileSystemModel *model;
     QString parentFolderPath;
+
 };
 
 #endif // V2_DIALOGADDNEWFOLDER_H

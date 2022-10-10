@@ -33,18 +33,6 @@ set(PROJECT_SOURCES
         Gui/Dialogs/BaseDialog.cpp
     #
 
-    # DialogAddNewFile
-        Gui/Dialogs/DialogAddNewFile.h
-        Gui/Dialogs/DialogAddNewFile.cpp
-        Gui/Dialogs/DialogAddNewFile.ui
-        #
-        Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.h
-        Gui/DataModels/DialogAddNewFile/TableModelNewAddedFiles.cpp
-        #
-        Gui/ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.h
-        Gui/ItemDelegates/DialogAddNewFile/ComboBoxItemDelegateAutoSync.cpp
-    #
-
     # DialogAddNewFolder
         Gui/Dialogs/DialogAddNewFolder.h
         Gui/Dialogs/DialogAddNewFolder.cpp

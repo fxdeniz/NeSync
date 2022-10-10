@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    dialogAddNewFile = new DialogAddNewFile(this);
     v2_dialogAddNewFolder = new V2_DialogAddNewFolder(this);
 
     allocateSeparators();
@@ -42,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
-    QObject::connect(dialogAddNewFile, &QDialog::accepted,
+    QObject::connect(v2_dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
@@ -75,7 +74,6 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         toolBar->addAction(ui->tab1Action_v2_NewFolder);
         toolBar->addAction(ui->tab1Action_NewFolder);
-        toolBar->addAction(ui->tab1Action_AddFile);
         toolBar->addAction(separator1);
 
         toolBar->addAction(ui->tab1Action_SelectAll);
@@ -258,17 +256,6 @@ void MainWindow::on_router_ShowDialogTableItemEditor()
     dialogTableItemEditor->setModal(true);
     dialogTableItemEditor->show();
 }
-
-
-void MainWindow::on_tab1Action_AddFile_triggered()
-{
-    Qt::WindowFlags flags = dialogAddNewFile->windowFlags();
-    flags |= Qt::WindowMaximizeButtonHint;
-    dialogAddNewFile->setWindowFlags(flags);
-    dialogAddNewFile->setModal(true);
-    dialogAddNewFile->show(tabFileExplorer->currentDir());
-}
-
 
 void MainWindow::on_tab1Action_NewFolder_triggered()
 {

@@ -57,6 +57,12 @@ void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
     QWidget::show();
 }
 
+void V2_DialogAddNewFolder::closeEvent(QCloseEvent *event)
+{
+    emit accepted();
+    QDialog::closeEvent(event);
+}
+
 void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
 {
     QFileDialog dialog(this);
