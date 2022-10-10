@@ -1,5 +1,5 @@
-#include "V2_DialogAddNewFolder.h"
-#include "ui_V2_DialogAddNewFolder.h"
+#include "DialogAddNewFolder.h"
+#include "ui_DialogAddNewFolder.h"
 
 #include "Tasks/TaskAddNewFolders.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
@@ -10,9 +10,9 @@
 #include <QStorageInfo>
 #include <QFileDialog>
 
-V2_DialogAddNewFolder::V2_DialogAddNewFolder(QWidget *parent) :
+DialogAddNewFolder::DialogAddNewFolder(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::V2_DialogAddNewFolder)
+    ui(new Ui::DialogAddNewFolder)
 {
     ui->setupUi(this);
 
@@ -37,12 +37,12 @@ V2_DialogAddNewFolder::V2_DialogAddNewFolder(QWidget *parent) :
     ui->treeView->hideColumn(CustomFileSystemModel::ColumnIndex::Status);
 }
 
-V2_DialogAddNewFolder::~V2_DialogAddNewFolder()
+DialogAddNewFolder::~DialogAddNewFolder()
 {
     delete ui;
 }
 
-void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
+void DialogAddNewFolder::show(const QString &_parentFolderPath)
 {
     this->parentFolderPath = _parentFolderPath;
     ui->labelParentFolderPath->setText(_parentFolderPath);
@@ -57,13 +57,13 @@ void V2_DialogAddNewFolder::show(const QString &_parentFolderPath)
     QWidget::show();
 }
 
-void V2_DialogAddNewFolder::closeEvent(QCloseEvent *event)
+void DialogAddNewFolder::closeEvent(QCloseEvent *event)
 {
     emit accepted();
     QDialog::closeEvent(event);
 }
 
-void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
+void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 {
     QFileDialog dialog(this);
     dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation));
@@ -113,13 +113,13 @@ void V2_DialogAddNewFolder::on_buttonSelectFolder_clicked()
 }
 
 
-void V2_DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
+void DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
 {
     if(ui->buttonAddFilesToDb->isEnabled())
         model->updateAutoSyncStatusOfItem(index);
 }
 
-QMap<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createBufferWithFolderOnly()
+QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWithFolderOnly()
 {
     QMap<QString, FolderItem> result;
 
@@ -145,7 +145,7 @@ QMap<QString, V2_DialogAddNewFolder::FolderItem> V2_DialogAddNewFolder::createBu
     return result;
 }
 
-void V2_DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
+void DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
 {
     QDirIterator cursor(model->rootPath(), QDir::Filter::Files, QDirIterator::IteratorFlag::Subdirectories);
 
@@ -159,7 +159,7 @@ void V2_DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
     }
 }
 
-QString V2_DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir)
+QString DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir)
 {
     QString parentDir = QDir::toNativeSeparators(parentUserDir);
     QString currentUserDir = QDir::toNativeSeparators(userDir + QDir::separator());
@@ -172,56 +172,56 @@ QString V2_DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, con
     return suffix;
 }
 
-QString V2_DialogAddNewFolder::statusTextWaitingForFolder()
+QString DialogAddNewFolder::statusTextWaitingForFolder()
 {
     return tr("Please select a folder");
 }
 
-QString V2_DialogAddNewFolder::statusTextContentReadyToAdd()
+QString DialogAddNewFolder::statusTextContentReadyToAdd()
 {
     QString text = tr("<b>All folder</b> content ready to add");
     return text;
 }
 
-QString V2_DialogAddNewFolder::statusTextEmptyFolder()
+QString DialogAddNewFolder::statusTextEmptyFolder()
 {
     return tr("Folder name cannot be <b>empty</b>");
 }
 
-QString V2_DialogAddNewFolder::statusTextAdding()
+QString DialogAddNewFolder::statusTextAdding()
 {
     return tr("Folders & files are being added in background...");
 }
 
-QString V2_DialogAddNewFolder::statusTextNoFreeSpace(QString folderName)
+QString DialogAddNewFolder::statusTextNoFreeSpace(QString folderName)
 {
     QString text = tr("Not enough free space available for: <b>%1</b>");
     text = text.arg(folderName);
     return text;
 }
 
-QString V2_DialogAddNewFolder::statusTextFolderExist(QString folderName)
+QString DialogAddNewFolder::statusTextFolderExist(QString folderName)
 {
     QString text = tr("Folder already added: <b>%1</b>");
     text = text.arg(folderName);
     return text;
 }
 
-QString V2_DialogAddNewFolder::statusTextSuccess(QString folderName)
+QString DialogAddNewFolder::statusTextSuccess(QString folderName)
 {
     QString text = tr("Folder <b>%1</b> created successfully");
     text = text.arg(folderName);
     return text;
 }
 
-QString V2_DialogAddNewFolder::statusTextError(QString folderName)
+QString DialogAddNewFolder::statusTextError(QString folderName)
 {
     QString text = tr("Error ocured while creating folder <b>%1</b>");
     text = text.arg(folderName);
     return text;
 }
 
-void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
+void DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 {
     ui->buttonSelectFolder->setEnabled(false);
     ui->buttonAddFilesToDb->setEnabled(false);
@@ -243,7 +243,7 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
         ui->progressBar->hide();
 
     QObject::connect(task, &TaskAddNewFolders::signalGenericFileEvent,
-                     this, &V2_DialogAddNewFolder::refreshTreeView);
+                     this, &DialogAddNewFolder::refreshTreeView);
 
     QObject::connect(task, &TaskAddNewFolders::signalFileBeingProcessed,
                      model, &CustomFileSystemModel::markItemAsPending);
@@ -258,7 +258,7 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
                      this->ui->progressBar, &QProgressBar::setValue);
 
     QObject::connect(task, &TaskAddNewFolders::finished,
-                     this, &V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished);
+                     this, &DialogAddNewFolder::slotOnTaskAddNewFoldersFinished);
 
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);
@@ -266,7 +266,7 @@ void V2_DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     task->start();
 }
 
-void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)
+void DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)
 {
     if(isAllRequestSuccessful)
         this->showStatusSuccess("<b>All folder</b> content added successfully", ui->labelStatus);
@@ -277,7 +277,7 @@ void V2_DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuc
     ui->buttonClearResults->show();
 }
 
-void V2_DialogAddNewFolder::refreshTreeView()
+void DialogAddNewFolder::refreshTreeView()
 {
     ui->treeView->viewport()->update();
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
@@ -285,7 +285,7 @@ void V2_DialogAddNewFolder::refreshTreeView()
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
 
-void V2_DialogAddNewFolder::on_buttonClearResults_clicked()
+void DialogAddNewFolder::on_buttonClearResults_clicked()
 {
     ui->labelFolderName->setText("New Folder Name");
     ui->progressBar->setValue(0);
@@ -305,7 +305,7 @@ void V2_DialogAddNewFolder::on_buttonClearResults_clicked()
     model = ptr;
 }
 
-qint64 V2_DialogAddNewFolder::getFolderSize(const QString &pathToFolder)
+qint64 DialogAddNewFolder::getFolderSize(const QString &pathToFolder)
 {
     qint64 result = 0;
     QDirIterator cursor(pathToFolder,

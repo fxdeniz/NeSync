@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(symbolDir);
 
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    v2_dialogAddNewFolder = new V2_DialogAddNewFolder(this);
+    dialogAddNewFolder = new DialogAddNewFolder(this);
 
     allocateSeparators();
     buildTabWidget();
@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tabWidget->setCurrentIndex(0);
 
-    QObject::connect(v2_dialogAddNewFolder, &QDialog::accepted,
+    QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
@@ -68,7 +68,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
     if(index == 0)
     {
-        toolBar->addAction(ui->tab1Action_v2_NewFolder);
+        toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
 
         toolBar->addAction(ui->tab1Action_SelectAll);
@@ -252,13 +252,13 @@ void MainWindow::on_router_ShowDialogTableItemEditor()
     dialogTableItemEditor->show();
 }
 
-void MainWindow::on_tab1Action_v2_NewFolder_triggered()
+void MainWindow::on_tab1Action_AddNewFolder_triggered()
 {
-    Qt::WindowFlags flags = v2_dialogAddNewFolder->windowFlags();
+    Qt::WindowFlags flags = dialogAddNewFolder->windowFlags();
     flags |= Qt::WindowMaximizeButtonHint;
-    v2_dialogAddNewFolder->setWindowFlags(flags);
-    v2_dialogAddNewFolder->setModal(true);
-    v2_dialogAddNewFolder->show(tabFileExplorer->currentDir());
+    dialogAddNewFolder->setWindowFlags(flags);
+    dialogAddNewFolder->setModal(true);
+    dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
 
 #ifdef DEBUG_FSM_TO_GUI_WITH_THREAD_INFO
@@ -390,4 +390,3 @@ void MainWindow::slotOnFileMovedAndModified(const QString &pathToFile, const QSt
     qDebug() << "MainWindow::slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
 }
 #endif
-

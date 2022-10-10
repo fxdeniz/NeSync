@@ -1,5 +1,5 @@
-#ifndef V2_DIALOGADDNEWFOLDER_H
-#define V2_DIALOGADDNEWFOLDER_H
+#ifndef DIALOGADDNEWFOLDER_H
+#define DIALOGADDNEWFOLDER_H
 
 #include <QDialog>
 #include <QFileSystemModel>
@@ -8,10 +8,10 @@
 #include "DataModels/DialogAddNewFolder/CustomFileSystemModel.h"
 
 namespace Ui {
-class V2_DialogAddNewFolder;
+class DialogAddNewFolder;
 }
 
-class V2_DialogAddNewFolder : public QDialog, public BaseDialog
+class DialogAddNewFolder : public QDialog, public BaseDialog
 {
     Q_OBJECT
 
@@ -24,8 +24,8 @@ public:
 
     } FolderItem;
 
-    explicit V2_DialogAddNewFolder(QWidget *parent = nullptr);
-    ~V2_DialogAddNewFolder();
+    explicit DialogAddNewFolder(QWidget *parent = nullptr);
+    ~DialogAddNewFolder();
 
 public slots:
     void show(const QString &_parentFolderPath);
@@ -59,10 +59,10 @@ private:
     static QString statusTextError(QString folderName);
 
 private:
-    Ui::V2_DialogAddNewFolder *ui;
+    Ui::DialogAddNewFolder *ui;
     CustomFileSystemModel *model;
     QString parentFolderPath;
 
 };
 
-#endif // V2_DIALOGADDNEWFOLDER_H
+#endif // DIALOGADDNEWFOLDER_H

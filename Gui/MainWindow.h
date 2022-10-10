@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "Tabs/TabFileMonitor.h"
-#include "Dialogs/V2_DialogAddNewFolder.h"
+#include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Tabs/TabFileExplorer.h"
 
@@ -29,7 +29,7 @@ private slots:
     void on_tabWidget_currentChanged(int index);
     void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
-    void on_tab1Action_v2_NewFolder_triggered();
+    void on_tab1Action_AddNewFolder_triggered();
 
 private:
     TabFileExplorer *tabFileExplorer;
@@ -46,7 +46,7 @@ private:
 private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
-    V2_DialogAddNewFolder *v2_dialogAddNewFolder;
+    DialogAddNewFolder *dialogAddNewFolder;
     QThread *fileMonitorThread;
 
 #ifdef DEBUG_FSM_TO_GUI

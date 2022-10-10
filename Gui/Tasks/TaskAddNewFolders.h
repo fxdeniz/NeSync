@@ -1,7 +1,7 @@
 #ifndef TASKADDNEWFOLDERS_H
 #define TASKADDNEWFOLDERS_H
 
-#include "Dialogs/V2_DialogAddNewFolder.h"
+#include "Dialogs/DialogAddNewFolder.h"
 
 #include <QThread>
 #include <QObject>
@@ -11,7 +11,7 @@ class TaskAddNewFolders : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskAddNewFolders(const QList<V2_DialogAddNewFolder::FolderItem> &_list,
+    explicit TaskAddNewFolders(const QList<DialogAddNewFolder::FolderItem> &_list,
                                QObject *parent = nullptr);
     ~TaskAddNewFolders();
     int fileCount() const;
@@ -29,7 +29,7 @@ signals:
     void finished(bool isAllRequestsSuccessful); // Overloaded QThread::finished()
 
 private:
-    QList<V2_DialogAddNewFolder::FolderItem> list;
+    QList<DialogAddNewFolder::FolderItem> list;
 };
 
 #endif // TASKADDNEWFOLDERS_H

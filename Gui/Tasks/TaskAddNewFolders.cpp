@@ -4,7 +4,7 @@
 
 #include <QDir>
 
-TaskAddNewFolders::TaskAddNewFolders(const QList<V2_DialogAddNewFolder::FolderItem> &_list, QObject *parent)
+TaskAddNewFolders::TaskAddNewFolders(const QList<DialogAddNewFolder::FolderItem> &_list, QObject *parent)
     : QThread{parent}
 {
     list = _list;
@@ -18,7 +18,7 @@ int TaskAddNewFolders::fileCount() const
 {
     int result = 0;
 
-    for(const V2_DialogAddNewFolder::FolderItem &item : list)
+    for(const DialogAddNewFolder::FolderItem &item : list)
         result += item.files.size();
 
     return result;
@@ -31,7 +31,7 @@ void TaskAddNewFolders::run()
     bool isAllRequestSuccessful = true;
 
     // first create folders
-    for(const V2_DialogAddNewFolder::FolderItem &item : list)
+    for(const DialogAddNewFolder::FolderItem &item : list)
     {
         fsm->addNewFolder(item.symbolDir, item.userDir);
 
