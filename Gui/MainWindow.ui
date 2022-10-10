@@ -72,11 +72,6 @@
    <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>
   </widget>
-  <action name="tab1Action_NewFolder">
-   <property name="text">
-    <string>New Folder</string>
-   </property>
-  </action>
   <action name="tab1Action_SelectAll">
    <property name="text">
     <string>Select All</string>

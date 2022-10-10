@@ -6,7 +6,6 @@
 #include "Tabs/TabFileMonitor.h"
 #include "Dialogs/V2_DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
-#include "Dialogs/DialogAddNewFolder.h"
 #include "Tabs/TabFileExplorer.h"
 
 #define DEBUG_FSM_TO_GUI
@@ -30,7 +29,7 @@ private slots:
     void on_tabWidget_currentChanged(int index);
     void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
-    void on_tab1Action_NewFolder_triggered();
+    void on_tab1Action_v2_NewFolder_triggered();
 
 private:
     TabFileExplorer *tabFileExplorer;
@@ -47,7 +46,6 @@ private:
 private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
-    DialogAddNewFolder *dialogAddNewFolder;
     V2_DialogAddNewFolder *v2_dialogAddNewFolder;
     QThread *fileMonitorThread;
 
@@ -67,7 +65,6 @@ private slots:
     void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
 #endif
 
-    void on_tab1Action_v2_NewFolder_triggered();
 };
 
 #endif // MAINWINDOW_H

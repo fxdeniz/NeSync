@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(backupDir);
     dir.mkdir(symbolDir);
 
-    dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
     v2_dialogAddNewFolder = new V2_DialogAddNewFolder(this);
 
@@ -37,9 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 
     ui->tabWidget->setCurrentIndex(0);
-
-    QObject::connect(dialogAddNewFolder, &QDialog::accepted,
-                     tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
     QObject::connect(v2_dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
@@ -73,7 +69,6 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     if(index == 0)
     {
         toolBar->addAction(ui->tab1Action_v2_NewFolder);
-        toolBar->addAction(ui->tab1Action_NewFolder);
         toolBar->addAction(separator1);
 
         toolBar->addAction(ui->tab1Action_SelectAll);
@@ -255,12 +250,6 @@ void MainWindow::on_router_ShowDialogTableItemEditor()
 {
     dialogTableItemEditor->setModal(true);
     dialogTableItemEditor->show();
-}
-
-void MainWindow::on_tab1Action_NewFolder_triggered()
-{
-    dialogAddNewFolder->setModal(true);
-    dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
 
 void MainWindow::on_tab1Action_v2_NewFolder_triggered()
