@@ -57,6 +57,31 @@ PtrTo_RowFolderRecord RowInserter::insertChildFolder(const QString &parentDir, c
     return result;
 }
 
+PtrTo_RowFolderRecord RowInserter::insertChildFolder(const QString &parentDir, const QString &suffixDir, const QString &userDir)
+{
+    QSqlQuery query(this->getDb());
+    QString queryTemplate = "INSERT INTO %1 (%2, %3, %4) "
+                            "VALUES(:2, :3, :4);" ;
+
+    queryTemplate = queryTemplate.arg(TABLE_NAME_FOLDER_RECORD,                      // 1
+                                      TABLE_FOLDER_RECORD_COLNAME_PARENT_DIRECTORY,  // 2
+                                      TABLE_FOLDER_RECORD_COLNAME_SUFFIX_DIRECTORY,  // 3
+                                      TABLE_FOLDER_RECORD_COLNAME_USER_DIRECTORY);   // 4
+
+    query.prepare(queryTemplate);
+    query.bindValue(":2", parentDir);
+    query.bindValue(":3", suffixDir);
+    query.bindValue(":4", userDir);
+    query.exec();
+
+    this->setLastError(query.lastError());
+
+    QueryFolderRecord queries(this->getDb());
+    PtrTo_RowFolderRecord result = queries.selectRowByDirectory(parentDir + suffixDir);
+
+    return result;
+}
+
 PtrTo_RowFileRecord RowInserter::insertActiveFile(const QString &fileName,
                                                   const QString &fileExtension,
                                                   const QString &symbolDiectory,

@@ -2,6 +2,7 @@
 
 #include <QSqlRecord>
 #include <QSqlQuery>
+#include <QDir>
 
 QueryFolderRecord::QueryFolderRecord(const QSqlDatabase &db) : BaseSqlPrimitive(db, TABLE_NAME_FOLDER_RECORD)
 {
@@ -19,6 +20,14 @@ PtrTo_RowFolderRecord QueryFolderRecord::selectRowByDirectory(const QString &dir
 {
     auto result = this->queryTemplateSelectRowByKey<QString>(TABLE_FOLDER_RECORD_COLNAME_DIRECTORY, // 1
                                                              directory);                            // 2
+
+    return result;
+}
+
+PtrTo_RowFolderRecord QueryFolderRecord::selectRowByUserDirectory(const QString &userDirectory) const
+{
+    auto result = this->queryTemplateSelectRowByKey<QString>(TABLE_FOLDER_RECORD_COLNAME_USER_DIRECTORY, // 1
+                                                             userDirectory);                             // 2
 
     return result;
 }

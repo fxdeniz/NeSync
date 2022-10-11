@@ -15,6 +15,7 @@ public:
     QString getDirectory() const;
     const QString &getParentDirectory() const;
     const QString &getSuffixDirectory() const;
+    const QString &getUserDirectory() const;
     bool getIsFavorite() const;
     PtrTo_RowFolderRecord getChildFolderBySuffix(const QString &suffixDir) const;
     QList<PtrTo_RowFileRecord> getAllChildRowFileRecords() const;
@@ -26,8 +27,13 @@ public:
 
     bool setParentDirectory(const QString &newParentDirectory);
     bool setSuffixDirectory(const QString &newSuffixDirectory);
+    bool setUserDirectory(const QString &newUserDirectory);
     bool setIsFavorite(bool newIsFavorite);
+
+    // TODO Remove when V2_DialogAddNewFolder compeleted
     bool addChildFolder(const QString &suffixDirectory);
+
+    bool addChildFolder(const QString &suffixDirectory, const QString &userDirectory);
 
 private:
     RowFolderRecord(const QSqlDatabase &db, const QSqlRecord &record);
@@ -39,6 +45,7 @@ private:
 
     QString parentDirectory;
     QString suffixDirectory;
+    QString userDirectory;
     bool isFavorite;
 };
 

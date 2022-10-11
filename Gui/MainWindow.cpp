@@ -27,9 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.mkdir(backupDir);
     dir.mkdir(symbolDir);
 
-    dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
-    dialogAddNewFile = new DialogAddNewFile(this);
+    dialogAddNewFolder = new DialogAddNewFolder(this);
 
     allocateSeparators();
     buildTabWidget();
@@ -39,9 +38,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
 
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
-                     tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
-
-    QObject::connect(dialogAddNewFile, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
@@ -72,8 +68,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
     if(index == 0)
     {
-        toolBar->addAction(ui->tab1Action_NewFolder);
-        toolBar->addAction(ui->tab1Action_AddFile);
+        toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
 
         toolBar->addAction(ui->tab1Action_SelectAll);
@@ -257,19 +252,11 @@ void MainWindow::on_router_ShowDialogTableItemEditor()
     dialogTableItemEditor->show();
 }
 
-
-void MainWindow::on_tab1Action_AddFile_triggered()
+void MainWindow::on_tab1Action_AddNewFolder_triggered()
 {
-    Qt::WindowFlags flags = dialogAddNewFile->windowFlags();
+    Qt::WindowFlags flags = dialogAddNewFolder->windowFlags();
     flags |= Qt::WindowMaximizeButtonHint;
-    dialogAddNewFile->setWindowFlags(flags);
-    dialogAddNewFile->setModal(true);
-    dialogAddNewFile->show(tabFileExplorer->currentDir());
-}
-
-
-void MainWindow::on_tab1Action_NewFolder_triggered()
-{
+    dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
     dialogAddNewFolder->show(tabFileExplorer->currentDir());
 }
@@ -403,4 +390,3 @@ void MainWindow::slotOnFileMovedAndModified(const QString &pathToFile, const QSt
     qDebug() << "MainWindow::slotOnFileMovedAndModified()    pathToFile = " << pathToFile << "    oldFileName = " << oldFileName;
 }
 #endif
-

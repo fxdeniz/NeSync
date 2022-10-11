@@ -75,7 +75,13 @@ public:
     SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
 
     static const QString &rootFolderPath();
-    bool addNewFolder(const QString &directory);
+
+    // TODO Remove when V2_DialogAddNewFolder compeleted
+    // NOTE this method maybe converted to addRootSymbolFolder(void);
+    bool addNewFolder(const QString &symbolDirectory);
+
+    bool addNewFolder(const QString &symbolDirectory, const QString &userDirectory);
+
     bool markFolderAsFavorite(const QString &directory, bool status);
     bool isFolderSymbolExist(const QString &directory) const;
     bool deleteFolder(const QString &directory);
