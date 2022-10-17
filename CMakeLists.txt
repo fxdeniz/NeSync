@@ -134,6 +134,7 @@ set(PROJECT_SOURCES
     #[[ FileMonitoringSubSystem ]]
     Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
     Backend/FileMonitorSubSystem/MonitoredDirDb.h Backend/FileMonitorSubSystem/MonitoredDirDb.cpp
+    Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
     Backend/FileMonitorSubSystem/FileMonitoringManager.h Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
     Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.cpp
 

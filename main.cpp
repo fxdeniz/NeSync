@@ -6,6 +6,7 @@
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
 #include "Backend/FileMonitorSubSystem/MonitoredDirDb.h"
+#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +24,8 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+    FileSystemEventDb database;
 
     return app.exec();
 }
