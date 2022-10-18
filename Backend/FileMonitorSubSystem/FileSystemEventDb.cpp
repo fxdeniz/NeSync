@@ -11,6 +11,25 @@ FileSystemEventDb::FileSystemEventDb()
     createDb();
 }
 
+bool FileSystemEventDb::isFolderExist(const QString &pathToFolder) const
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    QString queryTemplate = "SELECT * FROM Folder WHERE folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    if(query.next())
+        result = true;
+
+    return result;
+}
+
 void FileSystemEventDb::createDb()
 {
     QRandomGenerator *generator = QRandomGenerator::system();
@@ -29,10 +48,8 @@ void FileSystemEventDb::createDb()
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
-    queryCreateTableFolder += " parent_folder_path TEXT,";
     queryCreateTableFolder += " state INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFolder += " PRIMARY KEY(folder_path),";
-    queryCreateTableFolder += " FOREIGN KEY(parent_folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
+    queryCreateTableFolder += " PRIMARY KEY(folder_path)";
     queryCreateTableFolder += ");";
 
     QString queryCreateTableFile;

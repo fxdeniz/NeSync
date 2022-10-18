@@ -8,6 +8,7 @@ class FileSystemEventDb
 public:
     FileSystemEventDb();
 
+    bool isFolderExist(const QString &pathToFolder) const;
     bool addFolder(const QString &pathToFolder);
     bool addFile(const QString &pathToFile);
 
