@@ -17,6 +17,9 @@ bool FileSystemEventDb::isFolderExist(const QString &pathToFolder) const
 
     QString nativePath = QDir::toNativeSeparators(pathToFolder);
 
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
     QString queryTemplate = "SELECT * FROM Folder WHERE folder_path = :1;" ;
 
     QSqlQuery query(database);
@@ -26,6 +29,71 @@ bool FileSystemEventDb::isFolderExist(const QString &pathToFolder) const
 
     if(query.next())
         result = true;
+
+    return result;
+}
+
+bool FileSystemEventDb::addFolder(const QString &pathToFolder)
+{
+    bool result = false;
+
+    QDir dir(pathToFolder);
+    bool isDirExist = dir.exists();
+
+    if(!isDirExist)
+        return false;
+
+    bool isAlreadyInDb = isFolderExist(pathToFolder);
+    if(isAlreadyInDb)
+        return true;
+
+    // Insert from bottom to up (including pathToFolder and root dir)
+    if(database.transaction())
+    {
+        bool isGoneUp = true;
+
+        while(isGoneUp)
+        {
+            QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
+
+            if(!nativePath.endsWith(QDir::separator()))
+                nativePath.append(QDir::separator());
+
+            QDir parentDir = dir;
+            parentDir.cdUp();
+
+            QString nativeParentPath = QDir::toNativeSeparators(parentDir.absolutePath());
+
+            if(!nativeParentPath.endsWith(QDir::separator()))
+                nativeParentPath.append(QDir::separator());
+
+            isGoneUp = dir.cdUp();
+
+            QString queryTemplate;
+
+            if(isGoneUp)
+                queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2); ";
+            else
+                queryTemplate = "INSERT INTO Folder(folder_path) VALUES(:1); ";
+
+            QSqlQuery query(database);
+            query.prepare(queryTemplate);
+
+            query.bindValue(":1", nativePath);
+            if(isGoneUp)
+                query.bindValue(":2", nativeParentPath);
+
+            query.exec();
+
+            if(query.lastError().type() != QSqlError::ErrorType::NoError)
+            {
+                database.rollback();
+                return false; // do not go to line `result = database.commit();`
+            }
+        }
+
+        result = database.commit();
+    }
 
     return result;
 }
@@ -48,8 +116,10 @@ void FileSystemEventDb::createDb()
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
+    queryCreateTableFolder += " parent_folder_path TEXT,";
     queryCreateTableFolder += " state INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFolder += " PRIMARY KEY(folder_path)";
+    queryCreateTableFolder += " PRIMARY KEY(folder_path),";
+    queryCreateTableFolder += "	FOREIGN KEY(parent_folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED";
     queryCreateTableFolder += ");";
 
     QString queryCreateTableFile;
