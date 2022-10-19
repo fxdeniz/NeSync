@@ -33,6 +33,25 @@ bool FileSystemEventDb::isFolderExist(const QString &pathToFolder) const
     return result;
 }
 
+bool FileSystemEventDb::isFileExist(const QString &pathToFile) const
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    QString queryTemplate = "SELECT * FROM File WHERE file_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    if(query.next())
+        result = true;
+
+    return result;
+}
+
 bool FileSystemEventDb::addFolder(const QString &pathToFolder)
 {
     bool result = false;
@@ -84,12 +103,6 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
                 query.bindValue(":2", nativeParentPath);
 
             query.exec();
-
-            if(query.lastError().type() != QSqlError::ErrorType::NoError)
-            {
-                database.rollback();
-                return false; // do not go to line `result = database.commit();`
-            }
         }
 
         result = database.commit();
@@ -98,9 +111,53 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
     return result;
 }
 
+bool FileSystemEventDb::addFile(const QString &pathToFile)
+{
+    bool result = false;
+    QFileInfo info(pathToFile);
+
+    if(!info.exists())
+        return false;
+
+    if(!info.isFile())
+        return false;
+
+    bool isAlreadyInDb = isFileExist(pathToFile);
+
+    if(isAlreadyInDb)
+        return true;
+
+    QString nativeFolderPath = QDir::toNativeSeparators(info.absolutePath());
+
+    if(!nativeFolderPath.endsWith(QDir::separator()))
+        nativeFolderPath.append(QDir::separator());
+
+    bool isFolderAdded = addFolder(nativeFolderPath);
+
+    if(isFolderAdded)
+    {
+        QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+        QString queryTemplate = "INSERT INTO File(file_path, folder_path) VALUES(:1, :2); ";
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", nativePath);
+        query.bindValue(":2", nativeFolderPath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
 void FileSystemEventDb::createDb()
 {
-    QRandomGenerator *generator = QRandomGenerator::system();
+    //QRandomGenerator *generator = QRandomGenerator::system();
+    QRandomGenerator *generator = new QRandomGenerator();
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     dbPath += QDir::separator();
     dbPath += QString::number(generator->generate()) + ".db3";

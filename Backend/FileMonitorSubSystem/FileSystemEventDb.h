@@ -9,6 +9,7 @@ public:
     FileSystemEventDb();
 
     bool isFolderExist(const QString &pathToFolder) const;
+    bool isFileExist(const QString &pathToFile) const;
     bool addFolder(const QString &pathToFolder);
     bool addFile(const QString &pathToFile);
 

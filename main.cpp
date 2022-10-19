@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     FileSystemEventDb database;
     QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     database.addFolder(desktopPath);
+    database.addFile(desktopPath + QDir::separator() + "test.txt");
 
     return app.exec();
 }
