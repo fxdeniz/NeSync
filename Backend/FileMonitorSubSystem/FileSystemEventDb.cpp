@@ -217,8 +217,8 @@ bool FileSystemEventDb::deleteFile(const QString &pathToFile)
 
 void FileSystemEventDb::createDb()
 {
-    //QRandomGenerator *generator = QRandomGenerator::system();
-    QRandomGenerator *generator = new QRandomGenerator();
+    QRandomGenerator *generator = QRandomGenerator::system();
+    //QRandomGenerator *generator = new QRandomGenerator();
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     dbPath += QDir::separator();
     dbPath += QString::number(generator->generate()) + ".db3";

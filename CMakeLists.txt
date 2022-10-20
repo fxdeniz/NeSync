@@ -136,6 +136,7 @@ set(PROJECT_SOURCES
     Backend/FileMonitorSubSystem/MonitoredDirDb.h Backend/FileMonitorSubSystem/MonitoredDirDb.cpp
     Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
     Backend/FileMonitorSubSystem/FileMonitoringManager.h Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
+    Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h Backend/FileMonitorSubSystem/V2_FileMonitoringManager.cpp
     Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.cpp
 
     #[[  ]]
