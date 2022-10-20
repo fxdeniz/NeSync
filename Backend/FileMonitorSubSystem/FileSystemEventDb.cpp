@@ -190,6 +190,31 @@ bool FileSystemEventDb::deleteFolder(const QString &pathToFolder)
     return result;
 }
 
+bool FileSystemEventDb::deleteFile(const QString &pathToFile)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QString queryTemplate = "DELETE FROM File WHERE file_path = :1;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", nativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
 void FileSystemEventDb::createDb()
 {
     //QRandomGenerator *generator = QRandomGenerator::system();

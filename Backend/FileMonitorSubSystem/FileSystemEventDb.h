@@ -13,6 +13,7 @@ public:
     bool addFolder(const QString &pathToFolder);
     bool addFile(const QString &pathToFile);
     bool deleteFolder(const QString &pathToFolder);
+    bool deleteFile(const QString &pathToFile);
 
 private:
     QSqlDatabase database;
