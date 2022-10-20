@@ -93,9 +93,9 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
             QString queryTemplate;
 
             if(isGoneUp)
-                queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2); ";
+                queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2);" ;
             else
-                queryTemplate = "INSERT INTO Folder(folder_path) VALUES(:1); ";
+                queryTemplate = "INSERT INTO Folder(folder_path) VALUES(:1);" ;
 
             QSqlQuery query(database);
             query.prepare(queryTemplate);
@@ -146,12 +146,40 @@ bool FileSystemEventDb::addFile(const QString &pathToFile)
     {
         QString nativePath = QDir::toNativeSeparators(pathToFile);
 
-        QString queryTemplate = "INSERT INTO File(file_path, folder_path) VALUES(:1, :2); ";
+        QString queryTemplate = "INSERT INTO File(file_path, folder_path) VALUES(:1, :2);" ;
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
         query.bindValue(":1", nativePath);
         query.bindValue(":2", nativeFolderPath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
+bool FileSystemEventDb::deleteFolder(const QString &pathToFolder)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QString queryTemplate = "DELETE FROM Folder WHERE folder_path = :1;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", nativePath);
 
         query.exec();
 

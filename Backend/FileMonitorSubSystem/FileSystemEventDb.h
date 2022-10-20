@@ -12,6 +12,7 @@ public:
     bool isFileExist(const QString &pathToFile) const;
     bool addFolder(const QString &pathToFolder);
     bool addFile(const QString &pathToFile);
+    bool deleteFolder(const QString &pathToFolder);
 
 private:
     QSqlDatabase database;

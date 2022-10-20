@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     database.addFolder(desktopPath);
     database.addFile(desktopPath + QDir::separator() + "data" + QDir::separator() + "test.txt");
+    database.deleteFolder(desktopPath);
 
     return app.exec();
 }
