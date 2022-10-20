@@ -62,10 +62,6 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
     if(!isDirExist)
         return false;
 
-    bool isAlreadyInDb = isFolderExist(pathToFolder);
-    if(isAlreadyInDb)
-        return true;
-
     // Insert from bottom to up (including pathToFolder and root dir)
     if(database.transaction())
     {
@@ -77,6 +73,12 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
 
             if(!nativePath.endsWith(QDir::separator()))
                 nativePath.append(QDir::separator());
+
+            // If current folder exist in db (therefore all upper level folder also exist in Db),
+            //      then goto commit line
+            bool isAlreadyInDb = isFolderExist(nativePath);
+            if(isAlreadyInDb)
+                break;
 
             QDir parentDir = dir;
             parentDir.cdUp();
@@ -103,6 +105,12 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
                 query.bindValue(":2", nativeParentPath);
 
             query.exec();
+
+            if(query.lastError().type() != QSqlError::ErrorType::NoError)
+            {
+                database.rollback();
+                return false;
+            }
         }
 
         result = database.commit();
