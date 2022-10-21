@@ -215,6 +215,40 @@ bool FileSystemEventDb::deleteFile(const QString &pathToFile)
     return result;
 }
 
+bool FileSystemEventDb::setEfswIDforFolder(const QString &pathToFolder, long id)
+{
+    bool result = false;
+
+    bool isFolderInDb = isFolderExist(pathToFolder);
+
+    if(!isFolderInDb)
+        return false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = "UPDATE Folder SET efsw_id = :1 WHERE folder_path = :2;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+
+    if(id > 0)
+        query.bindValue(":1", (qlonglong) id);
+    else
+        query.bindValue(":1", QVariant()); // set efsw_id as NULL
+
+    query.bindValue(":2", nativePath);
+
+    query.exec();
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+        result = true;
+
+    return result;
+}
+
 void FileSystemEventDb::createDb()
 {
     QRandomGenerator *generator = QRandomGenerator::system();
@@ -233,10 +267,11 @@ void FileSystemEventDb::createDb()
 
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
+    queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id > 0) UNIQUE,";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
     queryCreateTableFolder += " parent_folder_path TEXT,";
     queryCreateTableFolder += " state INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFolder += " timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
+    queryCreateTableFolder += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
     queryCreateTableFolder += " PRIMARY KEY(folder_path),";
     queryCreateTableFolder += "	FOREIGN KEY(parent_folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED";
     queryCreateTableFolder += ");";
@@ -246,7 +281,7 @@ void FileSystemEventDb::createDb()
     queryCreateTableFile += " file_path TEXT NOT NULL,";
     queryCreateTableFile += " folder_path TEXT,";
     queryCreateTableFile += " state INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFile += " timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
+    queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
     queryCreateTableFile += " PRIMARY KEY(file_path),";
     queryCreateTableFile += " FOREIGN KEY(folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
     queryCreateTableFile += " ); ";

@@ -3,6 +3,7 @@
 
 #include <QSqlDatabase>
 
+
 class FileSystemEventDb
 {
 public:
@@ -14,6 +15,7 @@ public:
     bool addFile(const QString &pathToFile);
     bool deleteFolder(const QString &pathToFolder);
     bool deleteFile(const QString &pathToFile);
+    bool setEfswIDforFolder(const QString &pathToFolder, long id);
 
 private:
     QSqlDatabase database;
