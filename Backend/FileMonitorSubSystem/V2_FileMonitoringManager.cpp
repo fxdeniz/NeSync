@@ -1,6 +1,7 @@
 #include "V2_FileMonitoringManager.h"
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QRandomGenerator>
 
 V2_FileMonitoringManager::V2_FileMonitoringManager(QObject *parent)
@@ -31,14 +32,23 @@ void V2_FileMonitoringManager::startMonitoringOn(const QStringList &predictedTar
 
 void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    qDebug() << "addEvent = " << dir << fileName;
+    QString currentPath = dir + fileName;
+    QFileInfo info(currentPath);
+    qDebug() << "addEvent = " << currentPath;
     qDebug() << "";
 
-    database.addFolder(dir + fileName);
-    long id = QRandomGenerator::system()->generate();
-    long negativeId = (-1 * id);
-    database.setEfswIDforFolder(dir + fileName, id);
-    database.setEfswIDforFolder(dir + fileName, negativeId);
+    if(info.isDir())
+    {
+        database.addFolder(currentPath);
+        long id = QRandomGenerator::system()->generate();
+
+        if(id < 0)
+            id = -1 * id;
+
+        database.setEfswIDofFolder(currentPath, id);
+    }
+    else if(info.isFile())
+        database.addFile(currentPath);
 }
 
 void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)

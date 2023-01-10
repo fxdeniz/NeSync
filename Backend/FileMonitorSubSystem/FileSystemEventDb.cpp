@@ -144,14 +144,12 @@ bool FileSystemEventDb::addFile(const QString &pathToFile)
 
     if(isFolderAdded)
     {
-        QString nativePath = QDir::toNativeSeparators(pathToFile);
-
-        QString queryTemplate = "INSERT INTO File(file_path, folder_path) VALUES(:1, :2);" ;
+        QString queryTemplate = "INSERT INTO File(folder_path, file_name) VALUES(:1, :2);" ;
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
-        query.bindValue(":1", nativePath);
-        query.bindValue(":2", nativeFolderPath);
+        query.bindValue(":1", nativeFolderPath);
+        query.bindValue(":2", info.fileName());
 
         query.exec();
 
@@ -215,7 +213,7 @@ bool FileSystemEventDb::deleteFile(const QString &pathToFile)
     return result;
 }
 
-bool FileSystemEventDb::setEfswIDforFolder(const QString &pathToFolder, long id)
+bool FileSystemEventDb::setEfswIDofFolder(const QString &pathToFolder, long id)
 {
     bool result = false;
 
@@ -278,14 +276,15 @@ void FileSystemEventDb::createDb()
 
     QString queryCreateTableFile;
     queryCreateTableFile += " CREATE TABLE File (";
-    queryCreateTableFile += " file_path TEXT NOT NULL,";
-    queryCreateTableFile += " folder_path TEXT,";
+    queryCreateTableFile += " file_path TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (folder_path || file_name) STORED,";
+    queryCreateTableFile += " folder_path TEXT NOT NULL,";
+    queryCreateTableFile += " file_name TEXT NOT NULL,";
     queryCreateTableFile += " state INTEGER NOT NULL DEFAULT 0,";
     queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFile += " PRIMARY KEY(file_path),";
+    queryCreateTableFile += " PRIMARY KEY(folder_path, file_name),";
     queryCreateTableFile += " FOREIGN KEY(folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
     queryCreateTableFile += " ); ";
 
-    database.exec(queryCreateTableFolder).lastError();
-    database.exec(queryCreateTableFile).lastError();
+    qDebug() << "create folder table query has error = " << database.exec(queryCreateTableFolder).lastError();
+    qDebug() << "create file table query has error = " << database.exec(queryCreateTableFile).lastError();
 }
