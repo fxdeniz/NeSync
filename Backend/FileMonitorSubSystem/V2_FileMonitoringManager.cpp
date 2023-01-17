@@ -46,6 +46,7 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
             id = -1 * id;
 
         database.setEfswIDofFolder(currentPath, id);
+        database.setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
     }
     else if(info.isFile())
         database.addFile(currentPath);

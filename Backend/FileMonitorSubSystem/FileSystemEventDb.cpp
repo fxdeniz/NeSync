@@ -213,7 +213,36 @@ bool FileSystemEventDb::deleteFile(const QString &pathToFile)
     return result;
 }
 
-bool FileSystemEventDb::setStatusOfFile(const QString pathToFile, ItemStatus status)
+bool FileSystemEventDb::setStatusOfFolder(const QString &pathToFolder, ItemStatus status)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QString queryTemplate = "UPDATE Folder SET status = :1 WHERE folder_path = :2;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", status);
+        query.bindValue(":2", nativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
+bool FileSystemEventDb::setStatusOfFile(const QString &pathToFile, ItemStatus status)
 {
     bool result = false;
 

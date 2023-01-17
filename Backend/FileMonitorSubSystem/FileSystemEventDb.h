@@ -25,7 +25,8 @@ public:
     bool addFile(const QString &pathToFile);
     bool deleteFolder(const QString &pathToFolder);
     bool deleteFile(const QString &pathToFile);
-    bool setStatusOfFile(const QString pathToFile, ItemStatus status);
+    bool setStatusOfFolder(const QString &pathToFolder, ItemStatus status);
+    bool setStatusOfFile(const QString &pathToFile, ItemStatus status);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
 
 private:
