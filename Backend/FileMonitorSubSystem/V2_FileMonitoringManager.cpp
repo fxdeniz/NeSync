@@ -26,7 +26,13 @@ void V2_FileMonitoringManager::startMonitoringOn(const QStringList &predictedTar
 {
     for(const QString &item : predictedTargetList)
     {
-        fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, true);
+        efsw::WatchID watchId = fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, true);
+
+        if(watchId > 0) // Successfully started monitoring folder
+        {
+            database.addFolder(item);
+            database.setEfswIDofFolder(item, watchId);
+        }
     }
 }
 
@@ -39,14 +45,18 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
 
     if(info.isDir())
     {
-        database.addFolder(currentPath);
-        long id = QRandomGenerator::system()->generate();
+        bool isFolderAlreadyAdded = database.isFolderExist(currentPath);
+        if(!isFolderAlreadyAdded)
+        {
+            efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, true);
 
-        if(id < 0)
-            id = -1 * id;
-
-        database.setEfswIDofFolder(currentPath, id);
-        database.setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
+            if(watchId > 0) // Successfully started monitoring folder
+            {
+                database.addFolder(currentPath);
+                database.setEfswIDofFolder(currentPath, watchId);
+                database.setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
+            }
+        }
     }
     else if(info.isFile())
         database.addFile(currentPath);
