@@ -1,6 +1,7 @@
 #ifndef FILESYSTEMEVENTDB_H
 #define FILESYSTEMEVENTDB_H
 
+#include "efsw/efsw.hpp"
 #include <QSqlDatabase>
 
 
@@ -28,6 +29,7 @@ public:
     bool setStatusOfFolder(const QString &pathToFolder, ItemStatus status);
     bool setStatusOfFile(const QString &pathToFile, ItemStatus status);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
+    efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
 
 private:
     QSqlDatabase database;

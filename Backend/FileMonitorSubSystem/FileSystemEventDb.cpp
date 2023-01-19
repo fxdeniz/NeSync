@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
 #include <QStandardPaths>
 #include <QRandomGenerator>
 
@@ -300,6 +301,36 @@ bool FileSystemEventDb::setEfswIDofFolder(const QString &pathToFolder, long id)
 
     if(query.lastError().type() == QSqlError::ErrorType::NoError)
         result = true;
+
+    return result;
+}
+
+efsw::WatchID FileSystemEventDb::getEfswIDofFolder(const QString &pathToFolder) const
+{
+    efsw::WatchID result = 0;
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(pathToFolder);
+
+    if(isFolderInDb)
+    {
+        QString columnName = "result_column";
+
+        QString queryTemplate = "SELECT efsw_id AS %1 FROM Folder WHERE folder_path = :1;" ;
+        queryTemplate = queryTemplate.arg(columnName);
+
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", nativePath);
+        query.exec();
+        query.next();
+
+        result = query.record().value(columnName).toLongLong();
+    }
 
     return result;
 }
