@@ -1,5 +1,7 @@
 #include "V2_FileMonitoringManager.h"
 
+#include "FileStorageSubSystem/FileStorageManager.h"
+
 #include <QDebug>
 #include <QFileInfo>
 #include <QRandomGenerator>
@@ -60,8 +62,17 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
     }
     else if(info.isFile())
     {
+        auto status = FileSystemEventDb::ItemStatus::Undefined;
+        auto fsm = FileStorageManager::instance();
+        bool isFilePersists = fsm->isFileExistByUserFilePath(currentPath);
+
+        if(isFilePersists)
+            status = FileSystemEventDb::ItemStatus::Updated;
+        else
+            status = FileSystemEventDb::ItemStatus::NewAdded;
+
         database.addFile(currentPath);
-        database.setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
+        database.setStatusOfFile(currentPath, status);
     }
 }
 
@@ -73,7 +84,11 @@ void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName
     QString currentPath = dir + fileName;
 
     if(database.isFolderExist(currentPath)) // Folder deleted
+    {
         database.setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+        efsw::WatchID watchId = database.getEfswIDofFolder(currentPath);
+        fileWatcher.removeWatch(watchId);
+    }
 
     else if(database.isFileExist(currentPath)) // File deleted
         database.setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Deleted);
