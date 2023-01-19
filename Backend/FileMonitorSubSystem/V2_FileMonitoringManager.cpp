@@ -59,13 +59,24 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
         }
     }
     else if(info.isFile())
+    {
         database.addFile(currentPath);
+        database.setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
+    }
 }
 
 void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
     qDebug() << "deleteEvent = " << dir << fileName;
     qDebug() << "";
+
+    QString currentPath = dir + fileName;
+
+    if(database.isFolderExist(currentPath)) // Folder deleted
+        database.setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+
+    else if(database.isFileExist(currentPath)) // File deleted
+        database.setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Deleted);
 }
 
 void V2_FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)

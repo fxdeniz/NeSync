@@ -226,12 +226,13 @@ bool FileSystemEventDb::setStatusOfFolder(const QString &pathToFolder, ItemStatu
 
     if(isFolderInDb)
     {
-        QString queryTemplate = "UPDATE Folder SET status = :1 WHERE folder_path = :2;" ;
+        QString queryTemplate = "UPDATE Folder SET status = :1, event_timestamp = :2 WHERE folder_path = :3;" ;
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
         query.bindValue(":1", status);
-        query.bindValue(":2", nativePath);
+        query.bindValue(":2", QDateTime::currentDateTime());
+        query.bindValue(":3", nativePath);
 
         query.exec();
 
@@ -252,12 +253,13 @@ bool FileSystemEventDb::setStatusOfFile(const QString &pathToFile, ItemStatus st
 
     if(isFileInDb)
     {
-        QString queryTemplate = "UPDATE File SET status = :1 WHERE file_path = :2;" ;
+        QString queryTemplate = "UPDATE File SET status = :1, event_timestamp = :2 WHERE file_path = :3;" ;
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
         query.bindValue(":1", status);
-        query.bindValue(":2", nativePath);
+        query.bindValue(":2", QDateTime::currentDateTime());
+        query.bindValue(":3", nativePath);
 
         query.exec();
 
