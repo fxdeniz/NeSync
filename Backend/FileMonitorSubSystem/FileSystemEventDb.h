@@ -2,6 +2,7 @@
 #define FILESYSTEMEVENTDB_H
 
 #include "efsw/efsw.hpp"
+#include "qdatetime.h"
 #include <QSqlDatabase>
 
 
@@ -10,6 +11,7 @@ class FileSystemEventDb
 public:
     enum ItemStatus
     {
+        Invalid = -1,
         Undefined = 0,
         NewAdded = 1,
         Updated = 2,
@@ -30,10 +32,12 @@ public:
     bool setStatusOfFile(const QString &pathToFile, ItemStatus status);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
+    ItemStatus getStatusOfFile(const QString &pathToFile) const;
 
 private:
     QSqlDatabase database;
 
+    QSqlRecord getFileRow(const QString &pathToFile) const;
     void createDb();
 };
 

@@ -60,7 +60,7 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
             }
         }
     }
-    else if(info.isFile())
+    else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
         auto status = FileSystemEventDb::ItemStatus::Undefined;
         auto fsm = FileStorageManager::instance();
@@ -98,6 +98,17 @@ void V2_FileMonitoringManager::slotOnModificationEventDetected(const QString &fi
 {
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
+
+    QString currentPath = dir + fileName;
+
+    bool isFileMonitored = database.isFileExist(currentPath);
+    if(isFileMonitored)
+    {
+        FileSystemEventDb::ItemStatus status = database.getStatusOfFile(currentPath);
+
+        if(status != FileSystemEventDb::ItemStatus::NewAdded) // Do not count update events on new added file
+            database.setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
+    }
 }
 
 void V2_FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
