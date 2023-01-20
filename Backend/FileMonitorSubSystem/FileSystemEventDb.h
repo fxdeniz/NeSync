@@ -30,6 +30,8 @@ public:
     bool deleteFile(const QString &pathToFile);
     bool setStatusOfFolder(const QString &pathToFolder, ItemStatus status);
     bool setStatusOfFile(const QString &pathToFile, ItemStatus status);
+    bool setNameOfFile(const QString &pathToFile, const QString &newName);
+    bool setOldNameOfFile(const QString &pathToFile, const QString &oldName);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;

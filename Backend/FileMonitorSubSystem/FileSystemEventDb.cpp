@@ -271,6 +271,58 @@ bool FileSystemEventDb::setStatusOfFile(const QString &pathToFile, ItemStatus st
     return result;
 }
 
+bool FileSystemEventDb::setNameOfFile(const QString &pathToFile, const QString &newName)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QString queryTemplate = "UPDATE File SET file_name = :1 WHERE file_path = :2;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", newName);
+        query.bindValue(":2", nativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
+bool FileSystemEventDb::setOldNameOfFile(const QString &pathToFile, const QString &oldName)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QString queryTemplate = "UPDATE File SET old_file_name = :1 WHERE file_path = :2;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", oldName);
+        query.bindValue(":2", nativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
 bool FileSystemEventDb::setEfswIDofFolder(const QString &pathToFolder, long id)
 {
     bool result = false;

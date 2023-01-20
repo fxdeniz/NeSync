@@ -115,4 +115,35 @@ void V2_FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, 
 {
     qDebug() << "renameEvent (old) -> (new) = " << oldFileName << fileName << dir;
     qDebug() << "";
+
+    QString currentOldPath = dir + oldFileName;
+    QString currentNewPath = dir + fileName;
+
+    QFileInfo info(currentNewPath);
+
+    if(info.isFile() && !info.isHidden()) // Only accept real files.
+    {
+        FileSystemEventDb::ItemStatus currentStatus = database.getStatusOfFile(currentOldPath);
+
+        bool isOldFileMonitored = database.isFileExist(currentOldPath);
+        bool isNewFileMonitored = database.isFileExist(currentNewPath);
+
+        if(isOldFileMonitored && !isNewFileMonitored)
+        {
+            // Do not count renames (moves) if files is new added.
+            if(currentStatus != FileSystemEventDb::ItemStatus::NewAdded)
+            {
+                if(currentStatus == FileSystemEventDb::ItemStatus::Updated ||
+                   currentStatus == FileSystemEventDb::UpdatedAndRenamed)
+                {
+                    database.setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
+                }
+                else
+                    database.setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+            }
+
+            database.setOldNameOfFile(currentOldPath, oldFileName);
+            database.setNameOfFile(currentOldPath, fileName);
+        }
+    }
 }
