@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
+    dialogDebugFileSystemEventDb = new DialogDebugFileMonitor(this);
 
     allocateSeparators();
     buildTabWidget();
@@ -294,6 +295,11 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
     dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
     dialogAddNewFolder->show(tabFileExplorer->currentDir());
+}
+
+void MainWindow::on_menuAction_DebugFileMonitor_triggered()
+{
+    dialogDebugFileSystemEventDb->show();
 }
 
 #ifdef DEBUG_FSM_TO_GUI_WITH_THREAD_INFO

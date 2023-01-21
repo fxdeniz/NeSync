@@ -90,6 +90,12 @@ set(PROJECT_SOURCES
         Gui/Tabs/V2_TabFileMonitor.ui
     #
 
+    #   DialogDebugFileMonitor
+        Gui/Dialogs/DialogDebugFileMonitor.h
+        Gui/Dialogs/DialogDebugFileMonitor.cpp
+        Gui/Dialogs/DialogDebugFileMonitor.ui
+    #
+
     # TabReleatedFiles
         Gui/Tabs/TabRelatedFiles.h
         Gui/Tabs/TabRelatedFiles.cpp

@@ -7,6 +7,7 @@
 #include "Tabs/V2_TabFileMonitor.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
+#include "Dialogs/DialogDebugFileMonitor.h"
 #include "Tabs/TabFileExplorer.h"
 
 #define DEBUG_FSM_TO_GUI
@@ -31,6 +32,7 @@ private slots:
     void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
     void on_tab1Action_AddNewFolder_triggered();
+    void on_menuAction_DebugFileMonitor_triggered();
 
 private:
     TabFileExplorer *tabFileExplorer;
@@ -50,6 +52,7 @@ private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
+    DialogDebugFileMonitor *dialogDebugFileSystemEventDb;
     QThread *fileMonitorThread;
     QThread *V2_fileMonitorThread;
 
