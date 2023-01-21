@@ -21,6 +21,7 @@ public:
     };
 
     FileSystemEventDb();
+    ~FileSystemEventDb();
 
     bool isFolderExist(const QString &pathToFolder) const;
     bool isFileExist(const QString &pathToFile) const;

@@ -13,6 +13,11 @@ FileSystemEventDb::FileSystemEventDb()
     createDb();
 }
 
+FileSystemEventDb::~FileSystemEventDb()
+{
+    database.close();
+}
+
 bool FileSystemEventDb::isFolderExist(const QString &pathToFolder) const
 {
     bool result = false;

@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
 
     createFileMonitorThread();
+    createV2_FileMonitorThread();
 }
 
 MainWindow::~MainWindow()
