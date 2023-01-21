@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
 
 //    FileMonitoringManagerIntegrationTest fmmITest(predictionList);
 
-//    MainWindow w;
-//    w.show();
+    MainWindow w;
+    w.show();
 
 //    FileSystemEventDb database;
 //    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
@@ -33,14 +33,6 @@ int main(int argc, char *argv[])
 //    database.addFile(filePath);
 //    database.deleteFolder(desktopPath);
 //    database.deleteFile(filePath);
-
-    QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-    monitoredPath.append(QDir::separator());
-    monitoredPath.append("data");
-
-    V2_FileMonitoringManager v2fmm;
-
-    v2fmm.startMonitoringOn({monitoredPath});
 
     return app.exec();
 }

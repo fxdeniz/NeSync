@@ -24,9 +24,19 @@ V2_FileMonitoringManager::V2_FileMonitoringManager(QObject *parent)
     fileWatcher.watch();
 }
 
-void V2_FileMonitoringManager::startMonitoringOn(const QStringList &predictedTargetList)
+QStringList V2_FileMonitoringManager::getPredictionList() const
 {
-    for(const QString &item : predictedTargetList)
+    return predictionList;
+}
+
+void V2_FileMonitoringManager::setPredictionList(const QStringList &newPredictionList)
+{
+    predictionList = newPredictionList;
+}
+
+void V2_FileMonitoringManager::start()
+{
+    for(const QString &item : getPredictionList())
     {
         efsw::WatchID watchId = fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, true);
 

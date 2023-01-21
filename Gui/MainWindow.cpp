@@ -9,6 +9,7 @@
 #include <QDir>
 
 #include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
+#include "Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -53,6 +54,10 @@ MainWindow::~MainWindow()
 {
     fileMonitorThread->quit();
     fileMonitorThread->wait();
+
+    V2_fileMonitorThread->quit();
+    V2_fileMonitorThread->wait();
+
     delete ui;
 }
 
@@ -109,9 +114,11 @@ void MainWindow::buildTabWidget()
 {
     tabFileExplorer = new TabFileExplorer(ui->tabWidget);
     tabFileMonitor = new TabFileMonitor(ui->tabWidget);
+    V2_tabFileMonitor = new V2_TabFileMonitor(ui->tabWidget);
 
     ui->tabWidget->addTab(tabFileExplorer, "File Explorer");
     ui->tabWidget->addTab(tabFileMonitor, "File Monitor");
+    ui->tabWidget->addTab(V2_tabFileMonitor, "V2 - File Monitor");
 }
 
 void MainWindow::disableCloseButtonOfPredefinedTabs()
@@ -122,6 +129,9 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 
     tabBar->tabButton(1, QTabBar::ButtonPosition::RightSide)->deleteLater();
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
+
+    tabBar->tabButton(2, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(2, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
 void MainWindow::createFileMonitorThread()
@@ -229,6 +239,31 @@ void MainWindow::createFileMonitorThread()
 #endif
 
     fileMonitorThread->start();
+}
+
+void MainWindow::createV2_FileMonitorThread()
+{
+    V2_fileMonitorThread = new QThread(this);
+    V2_fileMonitorThread->setObjectName("V2_" + fileMonitorThreadName());
+
+    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager();
+
+    QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+    monitoredPath.append(QDir::separator());
+    monitoredPath.append("data");
+
+    monitor->setPredictionList({monitoredPath});
+    //monitor->setPredictionList(queryResult);
+
+    monitor->moveToThread(V2_fileMonitorThread);
+
+    QObject::connect(V2_fileMonitorThread, &QThread::started,
+                     monitor, &V2_FileMonitoringManager::start);
+
+    QObject::connect(V2_fileMonitorThread, &QThread::finished,
+                     monitor, &QObject::deleteLater);
+
+    V2_fileMonitorThread->start();
 }
 
 QString MainWindow::fileMonitorThreadName() const

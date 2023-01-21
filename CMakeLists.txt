@@ -84,6 +84,12 @@ set(PROJECT_SOURCES
         Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxNote.cpp
     #
 
+    # V2_TabFileMonitor
+        Gui/Tabs/V2_TabFileMonitor.h
+        Gui/Tabs/V2_TabFileMonitor.cpp
+        Gui/Tabs/V2_TabFileMonitor.ui
+    #
+
     # TabReleatedFiles
         Gui/Tabs/TabRelatedFiles.h
         Gui/Tabs/TabRelatedFiles.cpp

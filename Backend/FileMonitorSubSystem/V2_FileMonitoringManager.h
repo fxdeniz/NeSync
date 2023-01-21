@@ -12,7 +12,12 @@ class V2_FileMonitoringManager : public QObject
     Q_OBJECT
 public:
     explicit V2_FileMonitoringManager(QObject *parent = nullptr);
-    void startMonitoringOn(const QStringList &predictedTargetList);
+
+    QStringList getPredictionList() const;
+    void setPredictionList(const QStringList &newPredictionList);
+
+public slots:
+    void start();
 
 private slots:
     void slotOnAddEventDetected(const QString &fileName, const QString &dir);
@@ -22,6 +27,7 @@ private slots:
 
 private:
     FileSystemEventDb database;
+    QStringList predictionList;
     FileSystemEventListener fileSystemEventListener;
     efsw::FileWatcher fileWatcher;
 

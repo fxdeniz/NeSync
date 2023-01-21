@@ -1,6 +1,7 @@
 #include "FileSystemEventDb.h"
 
 #include <QDir>
+#include <QUuid>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlRecord>
@@ -511,7 +512,13 @@ void FileSystemEventDb::createDb()
     dbPath = QDir::toNativeSeparators(dbPath);
 
     database = QSqlDatabase::addDatabase("QSQLITE", "file_system_event_db");
-    database.setDatabaseName(dbPath);
+    database.setConnectOptions("QSQLITE_OPEN_URI;QSQLITE_ENABLE_SHARED_CACHE");
+
+    QString connectionString = "file:%1?mode=memory&cache=shared";
+    QString randomDbFileName = QUuid::createUuid().toString(QUuid::StringFormat::Id128) + ".db3";
+    connectionString = connectionString.arg(randomDbFileName);
+
+    database.setDatabaseName(connectionString);
     //database.setDatabaseName(":memory:");
 
     database.open();
