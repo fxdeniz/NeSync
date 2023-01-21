@@ -8,9 +8,10 @@
 #include <QStandardPaths>
 #include <QRandomGenerator>
 
-FileSystemEventDb::FileSystemEventDb()
+FileSystemEventDb::FileSystemEventDb(const QSqlDatabase &eventDb)
 {
-    createDb();
+    database = eventDb;
+    database.open();
 }
 
 FileSystemEventDb::~FileSystemEventDb()
@@ -505,54 +506,4 @@ QSqlRecord FileSystemEventDb::getFileRow(const QString &pathToFile) const
     query.next();
 
     return query.record();
-}
-
-void FileSystemEventDb::createDb()
-{
-    QRandomGenerator *generator = QRandomGenerator::system();
-    //QRandomGenerator *generator = new QRandomGenerator();
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-    dbPath += QDir::separator();
-    dbPath += QString::number(generator->generate()) + ".db3";
-    dbPath = QDir::toNativeSeparators(dbPath);
-
-    database = QSqlDatabase::addDatabase("QSQLITE", "file_system_event_db");
-    database.setConnectOptions("QSQLITE_OPEN_URI;QSQLITE_ENABLE_SHARED_CACHE");
-
-    QString connectionString = "file:%1?mode=memory&cache=shared";
-    QString randomDbFileName = QUuid::createUuid().toString(QUuid::StringFormat::Id128) + ".db3";
-    connectionString = connectionString.arg(randomDbFileName);
-
-    database.setDatabaseName(connectionString);
-    //database.setDatabaseName(":memory:");
-
-    database.open();
-    database.exec("PRAGMA foreign_keys = ON;");
-
-    QString queryCreateTableFolder;
-    queryCreateTableFolder += " CREATE TABLE Folder (";
-    queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id > 0) UNIQUE,";
-    queryCreateTableFolder += " folder_path TEXT NOT NULL,";
-    queryCreateTableFolder += " parent_folder_path TEXT,";
-    queryCreateTableFolder += " old_folder_name TEXT,";
-    queryCreateTableFolder += " status INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFolder += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFolder += " PRIMARY KEY(folder_path),";
-    queryCreateTableFolder += "	FOREIGN KEY(parent_folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED";
-    queryCreateTableFolder += ");";
-
-    QString queryCreateTableFile;
-    queryCreateTableFile += " CREATE TABLE File (";
-    queryCreateTableFile += " file_path TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (folder_path || file_name) STORED,";
-    queryCreateTableFile += " folder_path TEXT NOT NULL,";
-    queryCreateTableFile += " file_name TEXT NOT NULL,";
-    queryCreateTableFile += " old_file_name TEXT,";
-    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0,";
-    queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFile += " PRIMARY KEY(folder_path, file_name),";
-    queryCreateTableFile += " FOREIGN KEY(folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
-    queryCreateTableFile += " ); ";
-
-    qDebug() << "create folder table query has error = " << database.exec(queryCreateTableFolder).lastError();
-    qDebug() << "create file table query has error = " << database.exec(queryCreateTableFile).lastError();
 }

@@ -11,7 +11,8 @@ class V2_FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit V2_FileMonitoringManager(QObject *parent = nullptr);
+    explicit V2_FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent = nullptr);
+    ~V2_FileMonitoringManager();
 
     QStringList getPredictionList() const;
     void setPredictionList(const QStringList &newPredictionList);
@@ -26,7 +27,7 @@ private slots:
     void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
 
 private:
-    FileSystemEventDb database;
+    FileSystemEventDb *database;
     QStringList predictionList;
     FileSystemEventListener fileSystemEventListener;
     efsw::FileWatcher fileWatcher;

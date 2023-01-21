@@ -116,6 +116,9 @@ set(PROJECT_SOURCES
 
     main.cpp
 
+    Utility/DatabaseRegistry.h
+    Utility/DatabaseRegistry.cpp
+
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileRecord.h
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileVersion.h

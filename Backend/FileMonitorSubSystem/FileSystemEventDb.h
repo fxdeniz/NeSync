@@ -20,7 +20,7 @@ public:
         Deleted = 5
     };
 
-    FileSystemEventDb();
+    FileSystemEventDb(const QSqlDatabase &eventDb);
     ~FileSystemEventDb();
 
     bool isFolderExist(const QString &pathToFolder) const;

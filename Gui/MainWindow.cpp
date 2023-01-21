@@ -10,6 +10,7 @@
 
 #include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
 #include "Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h"
+#include "Utility/DatabaseRegistry.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -248,7 +249,7 @@ void MainWindow::createV2_FileMonitorThread()
     V2_fileMonitorThread = new QThread(this);
     V2_fileMonitorThread->setObjectName("V2_" + fileMonitorThreadName());
 
-    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager();
+    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager(DatabaseRegistry::inMemoryFileSystemEventDatabase());
 
     QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     monitoredPath.append(QDir::separator());
