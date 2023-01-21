@@ -271,6 +271,39 @@ bool FileSystemEventDb::setStatusOfFile(const QString &pathToFile, ItemStatus st
     return result;
 }
 
+bool FileSystemEventDb::setPathOfFolder(const QString &pathToFolder, const QString &newPath)
+{
+    bool result = false;
+
+    QString oldNativePath = QDir::toNativeSeparators(pathToFolder);
+    QString newNativePath = QDir::toNativeSeparators(newPath);
+
+    if(!oldNativePath.endsWith(QDir::separator()))
+        oldNativePath.append(QDir::separator());
+
+    if(!newNativePath.endsWith(QDir::separator()))
+        newNativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(oldNativePath);
+
+    if(isFolderInDb)
+    {
+        QString queryTemplate = "UPDATE Folder SET folder_path = :1 WHERE folder_path = :2;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", newNativePath);
+        query.bindValue(":2", oldNativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
 bool FileSystemEventDb::setNameOfFile(const QString &pathToFile, const QString &newName)
 {
     bool result = false;
@@ -286,6 +319,35 @@ bool FileSystemEventDb::setNameOfFile(const QString &pathToFile, const QString &
         query.prepare(queryTemplate);
 
         query.bindValue(":1", newName);
+        query.bindValue(":2", nativePath);
+
+        query.exec();
+
+        if(query.lastError().type() == QSqlError::ErrorType::NoError)
+            result = true;
+    }
+
+    return result;
+}
+
+bool FileSystemEventDb::setOldNameOfFolder(const QString &pathToFolder, const QString &oldName)
+{
+    bool result = false;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QString queryTemplate = "UPDATE Folder SET old_folder_name = :1 WHERE folder_path = :2;" ;
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+
+        query.bindValue(":1", oldName);
         query.bindValue(":2", nativePath);
 
         query.exec();
@@ -376,6 +438,25 @@ efsw::WatchID FileSystemEventDb::getEfswIDofFolder(const QString &pathToFolder) 
     return result;
 }
 
+FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFolder(const QString &pathToFolder) const
+{
+    FileSystemEventDb::ItemStatus result = FileSystemEventDb::ItemStatus::Invalid;
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QSqlRecord row = getFolderRow(nativePath);
+        result = row.value("status").value<FileSystemEventDb::ItemStatus>();
+    }
+
+    return result;
+}
+
 FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &pathToFile) const
 {
     FileSystemEventDb::ItemStatus result = FileSystemEventDb::ItemStatus::Invalid;
@@ -390,6 +471,20 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     }
 
     return result;
+}
+
+QSqlRecord FileSystemEventDb::getFolderRow(const QString &pathToFolder) const
+{
+    QString queryTemplate = "SELECT * FROM Folder WHERE folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+
+    query.bindValue(":1", pathToFolder);
+    query.exec();
+    query.next();
+
+    return query.record();
 }
 
 QSqlRecord FileSystemEventDb::getFileRow(const QString &pathToFile) const
@@ -427,6 +522,7 @@ void FileSystemEventDb::createDb()
     queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id > 0) UNIQUE,";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
     queryCreateTableFolder += " parent_folder_path TEXT,";
+    queryCreateTableFolder += " old_folder_name TEXT,";
     queryCreateTableFolder += " status INTEGER NOT NULL DEFAULT 0,";
     queryCreateTableFolder += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
     queryCreateTableFolder += " PRIMARY KEY(folder_path),";

@@ -146,4 +146,22 @@ void V2_FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, 
             database.setNameOfFile(currentOldPath, fileName);
         }
     }
+    else if(info.isDir())
+    {
+        bool isOldFolderMonitored = database.isFolderExist(currentOldPath);
+        bool isNewFolderMonitored = database.isFolderExist(currentNewPath);
+
+        if(isOldFolderMonitored && !isNewFolderMonitored)
+        {
+            FileSystemEventDb::ItemStatus currentStatus = database.getStatusOfFolder(currentOldPath);
+
+            // Do not count renames (moves) if files is new added.
+            if(currentStatus != FileSystemEventDb::ItemStatus::NewAdded)
+                database.setStatusOfFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+
+            database.setOldNameOfFolder(currentOldPath, oldFileName);
+            database.setPathOfFolder(currentOldPath, currentNewPath);
+        }
+
+    }
 }

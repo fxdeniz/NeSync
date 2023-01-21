@@ -30,15 +30,19 @@ public:
     bool deleteFile(const QString &pathToFile);
     bool setStatusOfFolder(const QString &pathToFolder, ItemStatus status);
     bool setStatusOfFile(const QString &pathToFile, ItemStatus status);
+    bool setPathOfFolder(const QString &pathToFolder, const QString &newPath);
     bool setNameOfFile(const QString &pathToFile, const QString &newName);
+    bool setOldNameOfFolder(const QString &pathToFolder, const QString &oldName);
     bool setOldNameOfFile(const QString &pathToFile, const QString &oldName);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
+    ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
 
 private:
     QSqlDatabase database;
 
+    QSqlRecord getFolderRow(const QString &pathToFolder) const;
     QSqlRecord getFileRow(const QString &pathToFile) const;
     void createDb();
 };
