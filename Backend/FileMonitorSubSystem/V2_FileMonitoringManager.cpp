@@ -64,17 +64,23 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
 
     if(info.isDir())
     {
-        bool isFolderAlreadyAdded = database->isFolderExist(currentPath);
-        if(!isFolderAlreadyAdded)
-        {
-            efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
+        bool isFolderMonitored = database->isFolderExist(currentPath);
+        auto fsm = FileStorageManager::instance();
+        bool isFolderPersists = fsm->isFolderExistByUserFolderPath(currentPath);
 
-            if(watchId > 0) // Successfully started monitoring folder
-            {
+        efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
+
+        if(watchId > 0) // Successfully started monitoring folder
+        {
+            if(!isFolderMonitored)
                 database->addFolder(currentPath);
-                database->setEfswIDofFolder(currentPath, watchId);
+
+            database->setEfswIDofFolder(currentPath, watchId);
+
+            if(isFolderPersists)
+                database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
+            else
                 database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
-            }
         }
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
@@ -99,17 +105,29 @@ void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName
     qDebug() << "";
 
     QString currentPath = dir + fileName;
+    FileSystemEventDb::ItemStatus currentStatus;
 
     if(database->isFolderExist(currentPath)) // Folder deleted
     {
-        database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
         efsw::WatchID watchId = database->getEfswIDofFolder(currentPath);
-        database->deleteFolder(currentPath);
+        currentStatus = database->getStatusOfFolder(currentPath);
+
+        if(currentStatus == FileSystemEventDb::ItemStatus::NewAdded) // Remove new added folders since they're temporary
+            database->deleteFolder(currentPath);
+        else
+            database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+
         fileWatcher.removeWatch(watchId);
     }
-
     else if(database->isFileExist(currentPath)) // File deleted
-        database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+    {
+        currentStatus = database->getStatusOfFile(currentPath);
+
+        if(currentStatus == FileSystemEventDb::ItemStatus::NewAdded) // Remove new added files since they're temporary
+            database->deleteFile(currentPath);
+        else
+            database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+    }
 }
 
 void V2_FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
