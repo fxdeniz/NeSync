@@ -438,8 +438,8 @@ efsw::WatchID FileSystemEventDb::getEfswIDofFolder(const QString &pathToFolder) 
 
     if(isFolderInDb)
     {
-        QSqlRecord record = getFileRow(nativePath);
-        result = record.value("efsw_id").toLongLong();
+        QSqlRecord record = getFolderRow(nativePath);
+        result = record.value("efsw_id").value<efsw::WatchID>();
     }
 
     return result;

@@ -45,7 +45,7 @@ void V2_FileMonitoringManager::start()
 {
     for(const QString &item : getPredictionList())
     {
-        efsw::WatchID watchId = fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, true);
+        efsw::WatchID watchId = fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, false);
 
         if(watchId > 0) // Successfully started monitoring folder
         {
@@ -67,7 +67,7 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
         bool isFolderAlreadyAdded = database->isFolderExist(currentPath);
         if(!isFolderAlreadyAdded)
         {
-            efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, true);
+            efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
 
             if(watchId > 0) // Successfully started monitoring folder
             {
@@ -104,6 +104,7 @@ void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName
     {
         database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
         efsw::WatchID watchId = database->getEfswIDofFolder(currentPath);
+        database->deleteFolder(currentPath);
         fileWatcher.removeWatch(watchId);
     }
 
