@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
-    dialogDebugFileSystemEventDb = new DialogDebugFileMonitor(this);
+    dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
     allocateSeparators();
     buildTabWidget();
@@ -249,7 +249,7 @@ void MainWindow::createV2_FileMonitorThread()
     V2_fileMonitorThread = new QThread(this);
     V2_fileMonitorThread->setObjectName("V2_" + fileMonitorThreadName());
 
-    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager(DatabaseRegistry::inMemoryFileSystemEventDatabase());
+    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
     QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     monitoredPath.append(QDir::separator());
@@ -301,7 +301,7 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
 
 void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 {
-    dialogDebugFileSystemEventDb->show();
+    dialogDebugFileMonitor->show();
 }
 
 #ifdef DEBUG_FSM_TO_GUI_WITH_THREAD_INFO

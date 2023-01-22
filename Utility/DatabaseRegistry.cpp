@@ -14,7 +14,7 @@ DatabaseRegistry::DatabaseRegistry()
 
 }
 
-QSqlDatabase DatabaseRegistry::inMemoryFileSystemEventDatabase()
+QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
 {
     bool isCreated = dbFileMonitor.isValid();
 
@@ -26,16 +26,6 @@ QSqlDatabase DatabaseRegistry::inMemoryFileSystemEventDatabase()
     QSqlDatabase result =  QSqlDatabase::cloneDatabase(dbFileMonitor, newConnectionName);
 
     return result;
-}
-
-QString DatabaseRegistry::fileSystemEventDbFolderTableName()
-{
-    return "Folder";
-}
-
-QString DatabaseRegistry::fileSystemEventDbFileTableName()
-{
-    return "File";
 }
 
 void DatabaseRegistry::createDbFileMonitor()

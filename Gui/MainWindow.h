@@ -52,7 +52,7 @@ private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
-    DialogDebugFileMonitor *dialogDebugFileSystemEventDb;
+    DialogDebugFileMonitor *dialogDebugFileMonitor;
     QThread *fileMonitorThread;
     QThread *V2_fileMonitorThread;
 

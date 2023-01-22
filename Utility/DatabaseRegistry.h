@@ -8,10 +8,7 @@ class DatabaseRegistry
 public:
     DatabaseRegistry();
 
-    static QSqlDatabase inMemoryFileSystemEventDatabase();
-    static QString fileSystemEventDbFolderTableName();
-    static QString fileSystemEventDbFileTableName();
-
+    static QSqlDatabase fileSystemEventDatabase();
 
 private:
     static void createDbFileMonitor();

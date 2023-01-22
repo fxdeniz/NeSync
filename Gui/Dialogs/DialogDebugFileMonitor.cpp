@@ -11,7 +11,7 @@ DialogDebugFileMonitor::DialogDebugFileMonitor(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    database = DatabaseRegistry::inMemoryFileSystemEventDatabase();
+    database = DatabaseRegistry::fileSystemEventDatabase();
     database.open();
 }
 
@@ -21,7 +21,7 @@ DialogDebugFileMonitor::~DialogDebugFileMonitor()
 }
 
 void DialogDebugFileMonitor::on_buttonRefresh_clicked()
-{
+{    
     {
         bool isFolderModelNull = (ui->tableViewFolder->model() == nullptr);
 
@@ -29,10 +29,16 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
             delete ui->tableViewFolder->model();
 
         QSqlQueryModel *folderModel = new QSqlQueryModel(this);
-        folderModel->setQuery("SELECT * FROM " + DatabaseRegistry::fileSystemEventDbFolderTableName(),
-                              database);
+        folderModel->setQuery("SELECT * FROM Folder ORDER BY folder_path ASC", database);
 
         ui->tableViewFolder->setModel(folderModel);
+
+        ui->tableViewFolder->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+        ui->tableViewFolder->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewFolder->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewFolder->horizontalHeader()->setMinimumSectionSize(80);
+        ui->tableViewFolder->setColumnWidth(1, 250);
+        ui->tableViewFolder->setColumnWidth(2, 250);
     }
 
     {
@@ -42,10 +48,16 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
             delete ui->tableViewFile->model();
 
         QSqlQueryModel *fileModel = new QSqlQueryModel(this);
-        fileModel->setQuery("SELECT * FROM " + DatabaseRegistry::fileSystemEventDbFileTableName(),
-                              database);
+        fileModel->setQuery("SELECT * FROM File ORDER BY file_path", database);
 
         ui->tableViewFile->setModel(fileModel);
+
+        ui->tableViewFile->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+        ui->tableViewFile->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewFile->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewFile->horizontalHeader()->setMinimumSectionSize(80);
+        ui->tableViewFile->setColumnWidth(0, 300);
+        ui->tableViewFile->setColumnWidth(1, 250);
     }
 }
 
