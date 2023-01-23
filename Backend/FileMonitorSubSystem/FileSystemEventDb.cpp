@@ -64,61 +64,50 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
 {
     bool result = false;
 
-    QDir dir(pathToFolder);
-    bool isDirExist = dir.exists();
-
-    if(!isDirExist)
-        return false;
-
-    // Insert from bottom to up (including pathToFolder and root dir)
     if(database.transaction())
     {
-        bool isGoneUp = true;
+        QString nativePath = QDir::toNativeSeparators(pathToFolder);
 
-        while(isGoneUp)
+        if(nativePath.endsWith(QDir::separator()))
+            nativePath.chop(1);
+
+        QString queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2);" ;
+        QStringList folderNames = nativePath.split(QDir::separator());
+        QString parentFolderPath = "";
+
+        for(const QString &folder : folderNames)
         {
-            QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
+            // Start constructing from root path
+            QString currentSubFolderPath = folder + QDir::separator();
+            QString currentFolderPath = parentFolderPath + currentSubFolderPath;
 
-            if(!nativePath.endsWith(QDir::separator()))
-                nativePath.append(QDir::separator());
+            bool isInsertingRootPath = currentFolderPath == QDir::separator();
 
-            // If current folder exist in db (therefore all upper level folder also exist in Db),
-            //      then goto commit line
-            bool isAlreadyInDb = isFolderExist(nativePath);
-            if(isAlreadyInDb)
-                break;
+            bool isAlreadyInDb = isFolderExist(currentFolderPath);
 
-            QDir parentDir = dir;
-            parentDir.cdUp();
-
-            QString nativeParentPath = QDir::toNativeSeparators(parentDir.absolutePath());
-
-            if(!nativeParentPath.endsWith(QDir::separator()))
-                nativeParentPath.append(QDir::separator());
-
-            isGoneUp = dir.cdUp();
-
-            QString queryTemplate;
-
-            if(isGoneUp)
-                queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2);" ;
-            else
-                queryTemplate = "INSERT INTO Folder(folder_path) VALUES(:1);" ;
-
-            QSqlQuery query(database);
-            query.prepare(queryTemplate);
-
-            query.bindValue(":1", nativePath);
-            if(isGoneUp)
-                query.bindValue(":2", nativeParentPath);
-
-            query.exec();
-
-            if(query.lastError().type() != QSqlError::ErrorType::NoError)
+            if(!isAlreadyInDb) // If root path not in db
             {
-                database.rollback();
-                return false;
+                QSqlQuery query(database);
+                query.prepare(queryTemplate);
+
+                query.bindValue(":1", currentFolderPath);
+
+                if(isInsertingRootPath)
+                    query.bindValue(":2", QVariant()); // Bind null value.
+                else
+                    query.bindValue(":2", parentFolderPath);
+
+                query.exec();
+
+                if(query.lastError().type() != QSqlError::ErrorType::NoError)
+                {
+                    database.rollback();
+                    return false;
+                }
             }
+
+            // Set last inserted path as root path
+            parentFolderPath += currentSubFolderPath;
         }
 
         result = database.commit();
