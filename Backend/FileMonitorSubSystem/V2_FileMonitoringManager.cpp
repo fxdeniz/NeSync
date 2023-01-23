@@ -2,6 +2,7 @@
 
 #include "FileStorageSubSystem/FileStorageManager.h"
 
+#include <QDir>
 #include <QDebug>
 #include <QFileInfo>
 #include <QRandomGenerator>
@@ -45,12 +46,33 @@ void V2_FileMonitoringManager::start()
 {
     for(const QString &item : getPredictionList())
     {
-        efsw::WatchID watchId = fileWatcher.addWatch(item.toStdString(), &fileSystemEventListener, false);
+        QFileInfo info(item);
 
-        if(watchId > 0) // Successfully started monitoring folder
+        if(info.exists())
         {
-            database->addFolder(item);
-            database->setEfswIDofFolder(item, watchId);
+            QString folderPath;
+
+            if(info.isDir())
+                folderPath = item;
+            else
+                folderPath = info.absolutePath();
+
+            folderPath = QDir::toNativeSeparators(folderPath);
+
+            if(!folderPath.endsWith(QDir::separator()))
+                folderPath.append(QDir::separator());
+
+            efsw::WatchID watchId = fileWatcher.addWatch(folderPath.toStdString(), &fileSystemEventListener, false);
+
+            if(watchId > 0) // Successfully started monitoring folder
+            {
+                database->addFolder(folderPath);
+                database->setEfswIDofFolder(folderPath, watchId);
+
+                if(info.isFile())
+                    database->addFile(item);
+            }
+
         }
     }
 }
