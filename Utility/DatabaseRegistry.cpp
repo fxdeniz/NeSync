@@ -53,7 +53,7 @@ void DatabaseRegistry::createDbFileMonitor()
 
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
-    queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id > 0) UNIQUE,";
+    queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id >= 1) UNIQUE,";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
     queryCreateTableFolder += " parent_folder_path TEXT,";
     queryCreateTableFolder += " old_folder_name TEXT,";
@@ -69,13 +69,22 @@ void DatabaseRegistry::createDbFileMonitor()
     queryCreateTableFile += " folder_path TEXT NOT NULL,";
     queryCreateTableFile += " file_name TEXT NOT NULL,";
     queryCreateTableFile += " old_file_name TEXT,";
-    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0,";
+    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0 CHECK(status BETWEEN 0 AND 5),";
     queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
     queryCreateTableFile += " PRIMARY KEY(folder_path, file_name),";
     queryCreateTableFile += " FOREIGN KEY(folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
     queryCreateTableFile += " ); ";
 
+    QString queryCreateTableMonitoringError;
+    queryCreateTableMonitoringError += " CREATE TABLE MonitoringError (";
+    queryCreateTableMonitoringError += " location TEXT NOT NULL,";
+    queryCreateTableMonitoringError += " during TEXT NOT NULL,";
+    queryCreateTableMonitoringError += " error_type INTEGER NOT NULL CHECK(error_type BETWEEN -6 AND -1),";
+    queryCreateTableMonitoringError += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP";
+    queryCreateTableMonitoringError += " ); ";
+
     qDebug() << "create folder table query has error = " << dbFileMonitor.exec(queryCreateTableFolder).lastError();
     qDebug() << "create file table query has error = " << dbFileMonitor.exec(queryCreateTableFile).lastError();
+    qDebug() << "create monitroing error table query has error = " << dbFileMonitor.exec(queryCreateTableMonitoringError).lastError();
 
 }

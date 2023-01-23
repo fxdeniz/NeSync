@@ -463,6 +463,30 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     return result;
 }
 
+bool FileSystemEventDb::addMonitoringError(const QString &location, const QString &during, qlonglong error)
+{
+    bool result = false;
+
+    QString queryTemplate = "INSERT INTO MonitoringError (location, during, error_type, event_timestamp) "
+                            "VALUES(:1, :2, :3, :4);" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+
+    query.bindValue(":1", location);
+    query.bindValue(":2", during);
+    query.bindValue(":3", error);
+    query.bindValue(":4", QDateTime::currentDateTime());
+
+    query.exec();
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+        result = true;
+
+    return result;
+
+}
+
 QSqlRecord FileSystemEventDb::getFolderRow(const QString &pathToFolder) const
 {
     QString queryTemplate = "SELECT * FROM Folder WHERE folder_path = :1;" ;

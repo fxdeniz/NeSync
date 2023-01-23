@@ -48,7 +48,7 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
             delete ui->tableViewFile->model();
 
         QSqlQueryModel *fileModel = new QSqlQueryModel(this);
-        fileModel->setQuery("SELECT * FROM File ORDER BY file_path", database);
+        fileModel->setQuery("SELECT * FROM File ORDER BY file_path ASC", database);
 
         ui->tableViewFile->setModel(fileModel);
 
@@ -58,6 +58,23 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
         ui->tableViewFile->horizontalHeader()->setMinimumSectionSize(80);
         ui->tableViewFile->setColumnWidth(0, 300);
         ui->tableViewFile->setColumnWidth(1, 250);
+    }
+
+    {
+        bool isMonitroingErrorModelNull = (ui->tableViewMonitoringError->model() == nullptr);
+
+        if(!isMonitroingErrorModelNull)
+            delete ui->tableViewMonitoringError->model();
+
+        QSqlQueryModel *errorModel = new QSqlQueryModel(this);
+        errorModel->setQuery("SELECT * FROM MonitoringError ORDER BY location ASC, event_timestamp ASC", database);
+
+        ui->tableViewMonitoringError->setModel(errorModel);
+
+        ui->tableViewMonitoringError->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+        ui->tableViewMonitoringError->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeMode::Interactive);
+        ui->tableViewMonitoringError->horizontalHeader()->setMinimumSectionSize(80);
+        ui->tableViewMonitoringError->setColumnWidth(0, 300);
     }
 }
 

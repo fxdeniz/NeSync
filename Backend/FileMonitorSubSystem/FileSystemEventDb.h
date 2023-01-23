@@ -5,7 +5,6 @@
 #include "qdatetime.h"
 #include <QSqlDatabase>
 
-
 class FileSystemEventDb
 {
 public:
@@ -17,8 +16,7 @@ public:
         Updated = 2,
         Renamed = 3,
         UpdatedAndRenamed = 4,
-        Deleted = 5,
-        Missing = 6
+        Deleted = 5
     };
 
     FileSystemEventDb(const QSqlDatabase &eventDb);
@@ -40,6 +38,7 @@ public:
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
+    bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 
 private:
     QSqlDatabase database;

@@ -72,8 +72,9 @@ void V2_FileMonitoringManager::start()
                 if(info.isFile())
                     database->addFile(item);
             }
-
         }
+        else
+            database->addMonitoringError(item, "Initialization", efsw::Error::FileNotFound);
     }
 }
 
@@ -104,6 +105,8 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
             else
                 database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
         }
+        else
+            database->addMonitoringError(currentPath, "AddEvent", watchId);
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {

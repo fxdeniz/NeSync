@@ -255,7 +255,7 @@ void MainWindow::createV2_FileMonitorThread()
     monitoredPath.append(QDir::separator());
     monitoredPath.append("data");
 
-    monitor->setPredictionList({monitoredPath});
+    monitor->setPredictionList({monitoredPath, "/home/user/Desktop/non_exist", "/home/user/Desktop/no_such_file.txt"});
     //monitor->setPredictionList(queryResult);
 
     monitor->moveToThread(V2_fileMonitorThread);
