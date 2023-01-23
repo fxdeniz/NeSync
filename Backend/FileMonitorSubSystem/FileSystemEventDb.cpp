@@ -121,12 +121,6 @@ bool FileSystemEventDb::addFile(const QString &pathToFile)
     bool result = false;
     QFileInfo info(pathToFile);
 
-    if(!info.exists())
-        return false;
-
-    if(!info.isFile())
-        return false;
-
     bool isAlreadyInDb = isFileExist(pathToFile);
 
     if(isAlreadyInDb)
