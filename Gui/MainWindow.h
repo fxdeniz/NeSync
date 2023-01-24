@@ -9,9 +9,6 @@
 #include "Dialogs/DialogDebugFileMonitor.h"
 #include "Tabs/TabFileExplorer.h"
 
-#define DEBUG_FSM_TO_GUI
-#define DEBUG_FSM_TO_GUI_WITHOUT_THREAD_INFO
-
 namespace Ui
 {
     class MainWindow;

@@ -9,7 +9,6 @@
 #include <QTabBar>
 #include <QDir>
 
-#include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
 #include "Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h"
 #include "Utility/DatabaseRegistry.h"
 
