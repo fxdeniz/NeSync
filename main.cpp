@@ -5,6 +5,7 @@
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
+#include "Utility/DatabaseRegistry.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,11 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
+    storageDb.open();
+
+    qDebug() << "isStorageDbOpen = " << storageDb.isOpen();
 
 //    FileSystemEventDb database;
 //    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
