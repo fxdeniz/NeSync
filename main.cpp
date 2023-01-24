@@ -4,8 +4,7 @@
 #include "Gui/MainWindow.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
-#include "Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h"
-#include "Backend/FileMonitorSubSystem/MonitoredDirDb.h"
+#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +22,14 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+//    FileSystemEventDb database;
+//    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+//    QString filePath = desktopPath + QDir::separator() + "data" + QDir::separator() + "test.txt";
+//    database.addFolder(desktopPath);
+//    database.addFile(filePath);
+//    database.deleteFolder(desktopPath);
+//    database.deleteFile(filePath);
 
     return app.exec();
 }

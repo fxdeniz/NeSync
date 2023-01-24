@@ -1,65 +1,24 @@
-﻿#ifndef FILEMONITORINGMANAGER_H
+#ifndef FILEMONITORINGMANAGER_H
 #define FILEMONITORINGMANAGER_H
 
 #include <QObject>
-#include <QTimer>
 
 #include "Backend/FileMonitorSubSystem/FileSystemEventListener.h"
-#include "Backend/FileMonitorSubSystem/MonitoredDirDb.h"
+#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
-#define CONST_MIN_SNAPSHOT_DELAY 5
-#define CONST_DEFAULT_SLEEP_DURATION_FOR_RELEASABLE_FILE_CHECK 1
-
-#define DEBUG_FSM_SLOTS
 
 class FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileMonitoringManager(int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
-    explicit FileMonitoringManager(QTimer *_timer, int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY, QObject *parent = nullptr);
+    explicit FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent = nullptr);
+    ~FileMonitoringManager();
 
-    void startMonitoringOn(const QStringList &predictedTargetList);
-    int getSnapshotDelay() const;
-    void setSnapshotDelay(int newSnapshotDelay);
-
-    const QStringList &getPredictionList() const;
+    QStringList getPredictionList() const;
     void setPredictionList(const QStringList &newPredictionList);
 
 public slots:
     void start();
-
-signals:
-    void signalPredictionTargetNotFound(const QString &pathToTaget);
-    void signalUnPredictedFolderDetected(const QString &pathToFolder);
-    void signalUnPredictedFileDetected(const QString &pathToFile);
-    void signalFileSystemEventAnalysisStarted();
-    void signalNewFolderAdded(const QString &pathToFolder);
-    void signalFolderDeleted(const QString &pathToFolder);
-    void signalFolderMoved(const QString &pathToFolder, const QString &oldFolderName);
-    void signalNewFileAdded(const QString &pathToFile);
-    void signalFileDeleted(const QString &pathToFile);
-    void signalFileModified(const QString &pathToFile);
-    void signalFileMoved(const QString &pathToFile, const QString &oldFileName);
-    void signalFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
-
-private:
-    void addTargetsFromPredictionList(const QStringList predictedItemList);
-    QSet<QString> unPredictedFilesWithRespectTo(QString pathToDirOrFile) const;
-    QSet<QString> unPredictedFoldersWithRespectTo(QString pathToDirOrFile) const;
-    void addTargetFromDirPath(const QString &dir);
-    void addTargetFromFilePath(const QString &pathToFile);
-    void releaseNewAddedFolders();
-    void releaseDeletedFolders();
-    void releaseMovedFolders();
-    void releaseNewAddedFiles();
-    void releaseDeletedFiles();
-    void releaseMovedFiles();
-    void releaseModifiedFiles();
-    void releaseMovedAndModifiedFiles();
-
-    bool isFileReadyToRelease(const QString currentFilePath,
-                              int sleepDuration = CONST_DEFAULT_SLEEP_DURATION_FOR_RELEASABLE_FILE_CHECK);
 
 private slots:
     void slotOnAddEventDetected(const QString &fileName, const QString &dir);
@@ -67,15 +26,12 @@ private slots:
     void slotOnModificationEventDetected(const QString &fileName, const QString &dir);
     void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
 
-    void slotReleaseScheduledEvents();
-
 private:
-    efsw::FileWatcher fileWatcher;
-    FileSystemEventListener fileSystemEventListener;
-    MonitoredDirDb mddb;
-    QTimer *timer;
-    int snapshotDelay = CONST_MIN_SNAPSHOT_DELAY * 1000;
+    FileSystemEventDb *database;
     QStringList predictionList;
+    FileSystemEventListener fileSystemEventListener;
+    efsw::FileWatcher fileWatcher;
+
 };
 
 #endif // FILEMONITORINGMANAGER_H

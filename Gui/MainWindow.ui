@@ -66,6 +66,7 @@
     <property name="title">
      <string>About</string>
     </property>
+    <addaction name="menuAction_DebugFileMonitor"/>
     <addaction name="menuAction_AboutApp"/>
     <addaction name="menuAction_AboutQt"/>
    </widget>
@@ -136,6 +137,11 @@
    </property>
    <property name="toolTip">
     <string>Add New Folder</string>
+   </property>
+  </action>
+  <action name="menuAction_DebugFileMonitor">
+   <property name="text">
+    <string>Debug File Monitor</string>
    </property>
   </action>
  </widget>

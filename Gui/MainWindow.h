@@ -6,10 +6,8 @@
 #include "Tabs/TabFileMonitor.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
+#include "Dialogs/DialogDebugFileMonitor.h"
 #include "Tabs/TabFileExplorer.h"
-
-#define DEBUG_FSM_TO_GUI
-#define DEBUG_FSM_TO_GUI_WITHOUT_THREAD_INFO
 
 namespace Ui
 {
@@ -30,6 +28,7 @@ private slots:
     void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
     void on_tab1Action_AddNewFolder_triggered();
+    void on_menuAction_DebugFileMonitor_triggered();
 
 private:
     TabFileExplorer *tabFileExplorer;
@@ -47,23 +46,8 @@ private:
     Ui::MainWindow *ui;
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
+    DialogDebugFileMonitor *dialogDebugFileMonitor;
     QThread *fileMonitorThread;
-
-#ifdef DEBUG_FSM_TO_GUI
-private slots:
-    void slotOnPredictionTargetNotFound(const QString &pathToTaget);
-    void slotOnUnPredictedFolderDetected(const QString &pathToFolder);
-    void slotOnUnPredictedFileDetected(const QString &pathToFile);
-    void slotOnFileSystemEventAnalysisStarted();
-    void slotOnNewFolderAdded(const QString &pathToFolder);
-    void slotOnFolderDeleted(const QString &pathToFolder);
-    void slotOnFolderMoved(const QString &pathToFolder, const QString &oldFolderName);
-    void slotOnNewFileAdded(const QString &pathToFile);
-    void slotOnFileDeleted(const QString &pathToFile);
-    void slotOnFileModified(const QString &pathToFile);
-    void slotOnFileMoved(const QString &pathToFile, const QString &oldFileName);
-    void slotOnFileMovedAndModified(const QString &pathToFile, const QString &oldFileName);
-#endif
 
 };
 

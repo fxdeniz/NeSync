@@ -58,30 +58,18 @@ set(PROJECT_SOURCES
         #
         Gui/DataModels/TabFileExplorer/ListModelFileExplorer.h
         Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
-        #
-        Gui/Tasks/LambdaFactoryTabFileMonitor.h
-        Gui/Tasks/LambdaFactoryTabFileMonitor.cpp
     #
 
     # TabFileMonitor
         Gui/Tabs/TabFileMonitor.h
         Gui/Tabs/TabFileMonitor.cpp
         Gui/Tabs/TabFileMonitor.ui
-        #
-        Gui/DataModels/TabFileMonitor/TableModelFileMonitor.h
-        Gui/DataModels/TabFileMonitor/TableModelFileMonitor.cpp
-        #
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.h
-        Gui/ItemDelegates/TabFileMonitor/ComboBoxItemDelegateFileAction.cpp
-        #
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/IComboBoxNoteNotifier.h
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/IComboBoxNoteNotifier.cpp
-        #
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.h
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxItemDelegateNote.cpp
-        #
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxNote.h
-        Gui/ItemDelegates/TabFileMonitor/NoteColumnDelegate/ComboBoxNote.cpp
+    #
+
+    #   DialogDebugFileMonitor
+        Gui/Dialogs/DialogDebugFileMonitor.h
+        Gui/Dialogs/DialogDebugFileMonitor.cpp
+        Gui/Dialogs/DialogDebugFileMonitor.ui
     #
 
     # TabReleatedFiles
@@ -103,6 +91,9 @@ set(PROJECT_SOURCES
     #
 
     main.cpp
+
+    Utility/DatabaseRegistry.h
+    Utility/DatabaseRegistry.cpp
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileRecord.h
@@ -133,9 +124,8 @@ set(PROJECT_SOURCES
 
     #[[ FileMonitoringSubSystem ]]
     Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
-    Backend/FileMonitorSubSystem/MonitoredDirDb.h Backend/FileMonitorSubSystem/MonitoredDirDb.cpp
+    Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
     Backend/FileMonitorSubSystem/FileMonitoringManager.h Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
-    Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.h Backend/FileMonitorSubSystem/FileMonitoringManagerIntegrationTest.cpp
 
     #[[  ]]
     Backend/FileMonitorSubSystem/efsw/platform/platformimpl.hpp
