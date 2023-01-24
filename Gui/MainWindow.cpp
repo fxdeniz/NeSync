@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
 
-    createFileMonitorThread();
+    //createFileMonitorThread();
     createV2_FileMonitorThread();
 }
 
@@ -255,8 +255,12 @@ void MainWindow::createV2_FileMonitorThread()
     monitoredPath.append(QDir::separator());
     monitoredPath.append("data");
 
-    monitor->setPredictionList({monitoredPath, "/home/user/Desktop/non_exist", "/home/user/Desktop/no_such_file.txt"});
-    //monitor->setPredictionList(queryResult);
+//    monitor->setPredictionList({monitoredPath, "/home/user/Desktop/non_exist", "/home/user/Desktop/no_such_file.txt"});
+
+    auto fsm = FileStorageManager::instance();
+    auto queryResult = fsm->getMonitoredFilePathList();
+    queryResult.append(fsm->getMonitoredFolderPathList());
+    monitor->setPredictionList(queryResult);
 
     monitor->moveToThread(V2_fileMonitorThread);
 

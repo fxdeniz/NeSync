@@ -71,7 +71,7 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
         if(nativePath.endsWith(QDir::separator()))
             nativePath.chop(1);
 
-        QString queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path) VALUES(:1, :2);" ;
+        QString queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path, event_timestamp) VALUES(:1, :2, :3);" ;
         QStringList folderNames = nativePath.split(QDir::separator());
         QString parentFolderPath = "";
 
@@ -91,6 +91,7 @@ bool FileSystemEventDb::addFolder(const QString &pathToFolder)
                 query.prepare(queryTemplate);
 
                 query.bindValue(":1", currentFolderPath);
+                query.bindValue(":3", QDateTime::currentDateTime());
 
                 if(isInsertingRootPath)
                     query.bindValue(":2", QVariant()); // Bind null value.
@@ -135,12 +136,13 @@ bool FileSystemEventDb::addFile(const QString &pathToFile)
 
     if(isFolderAdded)
     {
-        QString queryTemplate = "INSERT INTO File(folder_path, file_name) VALUES(:1, :2);" ;
+        QString queryTemplate = "INSERT INTO File(folder_path, file_name, event_timestamp) VALUES(:1, :2, :3);" ;
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
         query.bindValue(":1", nativeFolderPath);
         query.bindValue(":2", info.fileName());
+        query.bindValue(":3", QDateTime::currentDateTime());
 
         query.exec();
 
