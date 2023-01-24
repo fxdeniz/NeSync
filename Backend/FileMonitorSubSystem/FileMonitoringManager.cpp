@@ -1,4 +1,4 @@
-#include "V2_FileMonitoringManager.h"
+#include "FileMonitoringManager.h"
 
 #include "FileStorageSubSystem/FileStorageManager.h"
 
@@ -8,42 +8,42 @@
 #include <QDirIterator>
 #include <QRandomGenerator>
 
-V2_FileMonitoringManager::V2_FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent)
+FileMonitoringManager::FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent)
     : QObject{parent}
 {
     database = new FileSystemEventDb(inMemoryDb);
 
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalAddEventDetected,
-                     this, &V2_FileMonitoringManager::slotOnAddEventDetected);
+                     this, &FileMonitoringManager::slotOnAddEventDetected);
 
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalDeleteEventDetected,
-                     this, &V2_FileMonitoringManager::slotOnDeleteEventDetected);
+                     this, &FileMonitoringManager::slotOnDeleteEventDetected);
 
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalModificationEventDetected,
-                     this, &V2_FileMonitoringManager::slotOnModificationEventDetected);
+                     this, &FileMonitoringManager::slotOnModificationEventDetected);
 
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalMoveEventDetected,
-                     this, &V2_FileMonitoringManager::slotOnMoveEventDetected);
+                     this, &FileMonitoringManager::slotOnMoveEventDetected);
 
     fileWatcher.watch();
 }
 
-V2_FileMonitoringManager::~V2_FileMonitoringManager()
+FileMonitoringManager::~FileMonitoringManager()
 {
     delete database;
 }
 
-QStringList V2_FileMonitoringManager::getPredictionList() const
+QStringList FileMonitoringManager::getPredictionList() const
 {
     return predictionList;
 }
 
-void V2_FileMonitoringManager::setPredictionList(const QStringList &newPredictionList)
+void FileMonitoringManager::setPredictionList(const QStringList &newPredictionList)
 {
     predictionList = newPredictionList;
 }
 
-void V2_FileMonitoringManager::start()
+void FileMonitoringManager::start()
 {
     for(const QString &item : getPredictionList())
     {
@@ -130,7 +130,7 @@ void V2_FileMonitoringManager::start()
     }
 }
 
-void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
+void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
     QString currentPath = dir + fileName;
     QFileInfo info(currentPath);
@@ -176,7 +176,7 @@ void V2_FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, c
     }
 }
 
-void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
+void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
     qDebug() << "deleteEvent = " << dir << fileName;
     qDebug() << "";
@@ -207,7 +207,7 @@ void V2_FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName
     }
 }
 
-void V2_FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
+void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
 {
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
@@ -224,7 +224,7 @@ void V2_FileMonitoringManager::slotOnModificationEventDetected(const QString &fi
     }
 }
 
-void V2_FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
+void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
 {
     qDebug() << "renameEvent (old) -> (new) = " << oldFileName << fileName << dir;
     qDebug() << "";

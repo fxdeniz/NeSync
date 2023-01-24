@@ -60,10 +60,10 @@ set(PROJECT_SOURCES
         Gui/DataModels/TabFileExplorer/ListModelFileExplorer.cpp
     #
 
-    # V2_TabFileMonitor
-        Gui/Tabs/V2_TabFileMonitor.h
-        Gui/Tabs/V2_TabFileMonitor.cpp
-        Gui/Tabs/V2_TabFileMonitor.ui
+    # TabFileMonitor
+        Gui/Tabs/TabFileMonitor.h
+        Gui/Tabs/TabFileMonitor.cpp
+        Gui/Tabs/TabFileMonitor.ui
     #
 
     #   DialogDebugFileMonitor
@@ -125,7 +125,7 @@ set(PROJECT_SOURCES
     #[[ FileMonitoringSubSystem ]]
     Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
     Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
-    Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h Backend/FileMonitorSubSystem/V2_FileMonitoringManager.cpp
+    Backend/FileMonitorSubSystem/FileMonitoringManager.h Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
 
     #[[  ]]
     Backend/FileMonitorSubSystem/efsw/platform/platformimpl.hpp

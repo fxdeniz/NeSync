@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>V2_TabFileMonitor</class>
- <widget class="QWidget" name="V2_TabFileMonitor">
+ <class>TabFileMonitor</class>
+ <widget class="QWidget" name="TabFileMonitor">
   <property name="geometry">
    <rect>
     <x>0</x>

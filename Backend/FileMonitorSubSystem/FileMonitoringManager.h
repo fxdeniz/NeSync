@@ -1,5 +1,5 @@
-#ifndef V2_FILEMONITORINGMANAGER_H
-#define V2_FILEMONITORINGMANAGER_H
+#ifndef FILEMONITORINGMANAGER_H
+#define FILEMONITORINGMANAGER_H
 
 #include <QObject>
 
@@ -7,12 +7,12 @@
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
 
-class V2_FileMonitoringManager : public QObject
+class FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit V2_FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent = nullptr);
-    ~V2_FileMonitoringManager();
+    explicit FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent = nullptr);
+    ~FileMonitoringManager();
 
     QStringList getPredictionList() const;
     void setPredictionList(const QStringList &newPredictionList);
@@ -34,4 +34,4 @@ private:
 
 };
 
-#endif // V2_FILEMONITORINGMANAGER_H
+#endif // FILEMONITORINGMANAGER_H

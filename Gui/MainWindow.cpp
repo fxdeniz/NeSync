@@ -9,7 +9,7 @@
 #include <QTabBar>
 #include <QDir>
 
-#include "Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Utility/DatabaseRegistry.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -49,13 +49,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
 
-    createV2_FileMonitorThread();
+    createFileMonitorThread();
 }
 
 MainWindow::~MainWindow()
 {
-    V2_fileMonitorThread->quit();
-    V2_fileMonitorThread->wait();
+    fileMonitorThread->quit();
+    fileMonitorThread->wait();
 
     delete ui;
 }
@@ -112,10 +112,10 @@ void MainWindow::allocateSeparators()
 void MainWindow::buildTabWidget()
 {
     tabFileExplorer = new TabFileExplorer(ui->tabWidget);
-    V2_tabFileMonitor = new V2_TabFileMonitor(ui->tabWidget);
+    tabFileMonitor = new TabFileMonitor(ui->tabWidget);
 
     ui->tabWidget->addTab(tabFileExplorer, "File Explorer");
-    ui->tabWidget->addTab(V2_tabFileMonitor, "V2 - File Monitor");
+    ui->tabWidget->addTab(tabFileMonitor, "File Monitor");
 }
 
 void MainWindow::disableCloseButtonOfPredefinedTabs()
@@ -128,12 +128,12 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
-void MainWindow::createV2_FileMonitorThread()
+void MainWindow::createFileMonitorThread()
 {
-    V2_fileMonitorThread = new QThread(this);
-    V2_fileMonitorThread->setObjectName(fileMonitorThreadName());
+    fileMonitorThread = new QThread(this);
+    fileMonitorThread->setObjectName(fileMonitorThreadName());
 
-    V2_FileMonitoringManager *monitor = new V2_FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
+    FileMonitoringManager *monitor = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
     QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
     monitoredPath.append(QDir::separator());
@@ -146,15 +146,15 @@ void MainWindow::createV2_FileMonitorThread()
     queryResult.append(fsm->getMonitoredFolderPathList());
     monitor->setPredictionList(queryResult);
 
-    monitor->moveToThread(V2_fileMonitorThread);
+    monitor->moveToThread(fileMonitorThread);
 
-    QObject::connect(V2_fileMonitorThread, &QThread::started,
-                     monitor, &V2_FileMonitoringManager::start);
+    QObject::connect(fileMonitorThread, &QThread::started,
+                     monitor, &FileMonitoringManager::start);
 
-    QObject::connect(V2_fileMonitorThread, &QThread::finished,
+    QObject::connect(fileMonitorThread, &QThread::finished,
                      monitor, &QObject::deleteLater);
 
-    V2_fileMonitorThread->start();
+    fileMonitorThread->start();
 }
 
 QString MainWindow::fileMonitorThreadName() const

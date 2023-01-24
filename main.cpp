@@ -3,7 +3,7 @@
 #include <QDebug>
 #include "Gui/MainWindow.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
-#include "Backend/FileMonitorSubSystem/V2_FileMonitoringManager.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
 int main(int argc, char *argv[])

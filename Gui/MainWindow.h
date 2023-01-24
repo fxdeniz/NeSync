@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "Tabs/V2_TabFileMonitor.h"
+#include "Tabs/TabFileMonitor.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Dialogs/DialogDebugFileMonitor.h"
@@ -32,14 +32,14 @@ private slots:
 
 private:
     TabFileExplorer *tabFileExplorer;
-    V2_TabFileMonitor *V2_tabFileMonitor;
+    TabFileMonitor *tabFileMonitor;
     QAction *separator1, *separator2, *separator3;
 
 private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
-    void createV2_FileMonitorThread();
+    void createFileMonitorThread();
     QString fileMonitorThreadName() const;
 
 private:
@@ -47,7 +47,7 @@ private:
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
     DialogDebugFileMonitor *dialogDebugFileMonitor;
-    QThread *V2_fileMonitorThread;
+    QThread *fileMonitorThread;
 
 };
 
