@@ -53,7 +53,7 @@ void DatabaseRegistry::createDbFileMonitor()
 
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
-    queryCreateTableFolder += " efsw_id INTEGER CHECK(efsw_id >= 1) UNIQUE,";
+    queryCreateTableFolder += " efsw_id INTEGER DEFAULT NULL CHECK(efsw_id >= 1) UNIQUE,";
     queryCreateTableFolder += " folder_path TEXT NOT NULL,";
     queryCreateTableFolder += " parent_folder_path TEXT,";
     queryCreateTableFolder += " old_folder_name TEXT,";

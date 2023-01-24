@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QFileInfo>
+#include <QDirIterator>
 #include <QRandomGenerator>
 
 V2_FileMonitoringManager::V2_FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent)
@@ -75,6 +76,57 @@ void V2_FileMonitoringManager::start()
         }
         else
             database->addMonitoringError(item, "Initialization", efsw::Error::FileNotFound);
+    }
+
+    // Discover not predicted folders & files
+    QStringList queryResult = database->getMonitoredFolderPathList();
+    for(const QString &queryItem : queryResult)
+    {
+        QDir dir(queryItem);
+        dir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+        QDirIterator dirIterator(dir, QDirIterator::IteratorFlag::Subdirectories);
+
+        // Insert folders
+        while(dirIterator.hasNext())
+        {
+            QFileInfo info = dirIterator.nextFileInfo();
+            QString candidateFolderPath = info.absoluteFilePath();
+
+            bool isFolderMonitored = database->isFolderExist(candidateFolderPath);
+
+            if(!isFolderMonitored)
+            {
+                efsw::WatchID watchId = fileWatcher.addWatch(candidateFolderPath.toStdString(), &fileSystemEventListener, false);
+
+                if(watchId > 0) // Successfully started monitoring folder
+                {
+                    database->addFolder(candidateFolderPath);
+                    database->setEfswIDofFolder(candidateFolderPath, watchId);
+                    database->setStatusOfFolder(candidateFolderPath, FileSystemEventDb::ItemStatus::NewAdded);
+                }
+                else
+                    database->addMonitoringError(candidateFolderPath, "Discovery", watchId);
+            }
+        }
+
+        dir.setPath(queryItem);
+        dir.setFilter(QDir::Filter::Files | QDir::Filter::NoDotAndDotDot);
+        QDirIterator fileIterator(dir, QDirIterator::IteratorFlag::Subdirectories);
+
+        // Now insert files
+        while(fileIterator.hasNext())
+        {
+            QFileInfo info = fileIterator.nextFileInfo();
+            QString candidateFilePath = info.absoluteFilePath();
+
+            bool isFileMonitored = database->isFileExist(candidateFilePath);
+
+            if(!isFileMonitored)
+            {
+                database->addFile(candidateFilePath);
+                database->setStatusOfFile(candidateFilePath, FileSystemEventDb::ItemStatus::NewAdded);
+            }
+        }
     }
 }
 

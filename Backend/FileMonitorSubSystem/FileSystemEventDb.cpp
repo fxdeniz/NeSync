@@ -463,6 +463,26 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     return result;
 }
 
+QStringList FileSystemEventDb::getMonitoredFolderPathList() const
+{
+    QStringList result;
+
+    QString queryTemplate = "SELECT * FROM Folder WHERE efsw_id IS NOT NULL;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("folder_path").toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
 bool FileSystemEventDb::addMonitoringError(const QString &location, const QString &during, qlonglong error)
 {
     bool result = false;
