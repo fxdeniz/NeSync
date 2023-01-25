@@ -1,12 +1,16 @@
 #include "FileRepository.h"
 
+#include "FileVersionRepository.h"
+
 #include <QSqlQuery>
 #include <QSqlRecord>
 
 FileRepository::FileRepository(const QSqlDatabase &db)
 {
     database = db;
-    database.open();
+
+    if(!database.isOpen())
+        database.open();
 }
 
 FileRepository::~FileRepository()
@@ -36,31 +40,7 @@ FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath, bool 
     }
 
     if(result.isExist() && includeVersions)
-    {
-        QSqlQuery versionQuery(database);
-        QString versionQueryTemplate = "SELECT * FROM FileVersionEntity WHERE symbol_file_path = :1;" ;
-
-        versionQuery.prepare(versionQueryTemplate);
-        versionQuery.bindValue(":1", result.symbolFilePath());
-        versionQuery.exec();
-
-        while(versionQuery.next())
-        {
-            QSqlRecord record = versionQuery.record();
-
-            FileVersionEntity currentVersion;
-            currentVersion.setIsExist(true);
-            currentVersion.symbolFilePath = record.value("symbol_file_path").toString();
-            currentVersion.versionNumber = record.value("version_number").toLongLong();
-            currentVersion.internalFileName = record.value("internal_file_name").toString();
-            currentVersion.size = record.value("size").toLongLong();
-            currentVersion.timestamp = record.value("timestamp").toDateTime();
-            currentVersion.description = record.value("description").toString();
-            currentVersion.hash = record.value("hash").toString();
-
-            result.versionList.append(currentVersion);
-        }
-    }
+        result.versionList = FileVersionRepository(database).findAllVersions(symbolFilePath);
 
     return result;
 }

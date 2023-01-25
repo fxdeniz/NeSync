@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
     versionRepo.save(versionResult);
 
     QList<FileVersionEntity> versionList = versionRepo.findAllVersions(fileResult.symbolFilePath());
+    fileResult = fileRepo.findBySymbolPath(fileResult.symbolFilePath(), true);
 
     return app.exec();
 }

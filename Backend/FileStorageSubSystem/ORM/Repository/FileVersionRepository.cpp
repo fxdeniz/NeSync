@@ -6,7 +6,9 @@
 FileVersionRepository::FileVersionRepository(const QSqlDatabase &db)
 {
     database = db;
-    database.open();
+
+    if(!database.isOpen())
+        database.open();
 }
 
 FileVersionRepository::~FileVersionRepository()
