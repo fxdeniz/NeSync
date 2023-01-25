@@ -3,8 +3,6 @@
 
 #include "FileEntity.h"
 
-#include <QList>
-
 class FolderEntity
 {
 public:

@@ -12,7 +12,7 @@ public:
     FileRepository(const QSqlDatabase &db);
     ~FileRepository();
 
-    FileEntity findBySymbolPath(const QString &symbolFilePath) const;
+    FileEntity findBySymbolPath(const QString &symbolFilePath, bool includeVersions = false) const;
     bool save(const FileEntity &entity, QSqlError *error = nullptr);
 
 private:

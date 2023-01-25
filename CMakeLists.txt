@@ -102,12 +102,16 @@ set(PROJECT_SOURCES
         Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.cpp
         Backend/FileStorageSubSystem/ORM/Repository/FileRepository.h
         Backend/FileStorageSubSystem/ORM/Repository/FileRepository.cpp
+        Backend/FileStorageSubSystem/ORM/Repository/FileVersionRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FileVersionRepository.cpp
 
         # Entity
         Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.h
         Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.cpp
         Backend/FileStorageSubSystem/ORM/Entity/FileEntity.h
         Backend/FileStorageSubSystem/ORM/Entity/FileEntity.cpp
+        Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
     #
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h

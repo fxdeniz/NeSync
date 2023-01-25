@@ -14,7 +14,7 @@ FileRepository::~FileRepository()
     database.close();
 }
 
-FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath) const
+FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath, bool includeVersions) const
 {
     FileEntity result;
 
@@ -33,6 +33,33 @@ FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath) const
         result.fileName = record.value("file_name").toString();
         result.symbolFolderPath = record.value("symbol_folder_path").toString();
         result.isFrozen = record.value("is_frozen").toBool();
+    }
+
+    if(result.isExist() && includeVersions)
+    {
+        QSqlQuery versionQuery(database);
+        QString versionQueryTemplate = "SELECT * FROM FileVersionEntity WHERE symbol_file_path = :1;" ;
+
+        versionQuery.prepare(versionQueryTemplate);
+        versionQuery.bindValue(":1", result.symbolFilePath());
+        versionQuery.exec();
+
+        while(versionQuery.next())
+        {
+            QSqlRecord record = versionQuery.record();
+
+            FileVersionEntity currentVersion;
+            currentVersion.setIsExist(true);
+            currentVersion.symbolFilePath = record.value("symbol_file_path").toString();
+            currentVersion.versionNumber = record.value("version_number").toLongLong();
+            currentVersion.internalFileName = record.value("internal_file_name").toString();
+            currentVersion.size = record.value("size").toLongLong();
+            currentVersion.timestamp = record.value("timestamp").toDateTime();
+            currentVersion.description = record.value("description").toString();
+            currentVersion.hash = record.value("hash").toString();
+
+            result.versionList.append(currentVersion);
+        }
     }
 
     return result;

@@ -19,6 +19,11 @@ bool FileEntity::isExist() const
     return _isExist;
 }
 
+QList<FileVersionEntity> FileEntity::getVersionList() const
+{
+    return versionList;
+}
+
 void FileEntity::setIsExist(bool newIsExist)
 {
     _isExist = newIsExist;
