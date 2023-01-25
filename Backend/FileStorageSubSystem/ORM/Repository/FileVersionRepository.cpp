@@ -44,6 +44,37 @@ FileVersionEntity FileVersionRepository::findVersion(const QString &symbolFilePa
     return result;
 }
 
+QList<FileVersionEntity> FileVersionRepository::findAllVersions(const QString &symbolFilePath) const
+{
+    QList<FileVersionEntity> result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT * FROM FileVersionEntity WHERE symbol_file_path = :1"
+                            " ORDER BY version_number ASC;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", symbolFilePath);
+    query.exec();
+
+    while(query.next())
+    {
+        FileVersionEntity entity;
+        QSqlRecord record = query.record();
+        entity.setIsExist(true);
+        entity.symbolFilePath = record.value("symbol_file_path").toString();
+        entity.versionNumber = record.value("version_number").toLongLong();
+        entity.internalFileName = record.value("internal_file_name").toString();
+        entity.size = record.value("size").toLongLong();
+        entity.timestamp = record.value("timestamp").toDateTime();
+        entity.description = record.value("description").toString();
+        entity.hash = record.value("hash").toString();
+
+        result.append(entity);
+    }
+
+    return result;
+}
+
 bool FileVersionRepository::save(const FileVersionEntity &entity, QSqlError *error)
 {
     bool result = false;

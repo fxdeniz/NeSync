@@ -13,6 +13,7 @@ public:
     ~FileVersionRepository();
 
     FileVersionEntity findVersion(const QString &symbolFilePath, qlonglong versionNumber) const;
+    QList<FileVersionEntity> findAllVersions(const QString &symbolFilePath) const;
     bool save(const FileVersionEntity &entity, QSqlError *error = nullptr);
 
 private:

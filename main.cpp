@@ -77,5 +77,12 @@ int main(int argc, char *argv[])
 
     FileVersionEntity versionResult = versionRepo.findVersion(fileResult.symbolFilePath(), 4);
 
+    versionResult.versionNumber = 1;
+    versionResult.internalFileName = "new_file_name";
+
+    versionRepo.save(versionResult);
+
+    QList<FileVersionEntity> versionList = versionRepo.findAllVersions(fileResult.symbolFilePath());
+
     return app.exec();
 }
