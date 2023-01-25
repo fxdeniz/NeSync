@@ -8,6 +8,7 @@
 #include "Utility/DatabaseRegistry.h"
 #include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
+#include "FileStorageSubSystem/ORM/Repository/FileVersionRepository.h"
 
 int main(int argc, char *argv[])
 {
@@ -62,6 +63,17 @@ int main(int argc, char *argv[])
     FolderEntity fatFolder = folderRepo.findBySymbolPath("/", true);
 
     FileEntity fileResult = fileRepo.findBySymbolPath(fileEntity.symbolFilePath());
+
+    FileVersionEntity version;
+    version.symbolFilePath = fileResult.symbolFilePath();
+    version.versionNumber = 4;
+    version.internalFileName = "file_name_here";
+    version.size = 100;
+    version.description = "description here";
+    version.hash = "a1b2c3d4e5";
+
+    FileVersionRepository versionRepo(storageDb);
+    versionRepo.save(version);
 
     return app.exec();
 }

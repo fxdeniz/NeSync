@@ -92,8 +92,8 @@ void DatabaseRegistry::createDbFileStorage()
     queryCreateTableFileVersionEntity += " internal_file_name TEXT NOT NULL UNIQUE CHECK (internal_file_name != \"\"),";
     queryCreateTableFileVersionEntity += " size INTEGER NOT NULL DEFAULT 0 CHECK(size >= 0),";
     queryCreateTableFileVersionEntity += " timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFileVersionEntity += " description	TEXT,";
-    queryCreateTableFileVersionEntity += " hash TEXT,";
+    queryCreateTableFileVersionEntity += " description TEXT DEFAULT NULL CHECK (description != \"\"),";
+    queryCreateTableFileVersionEntity += " hash TEXT DEFAULT NULL CHECK (hash != \"\"),";
     queryCreateTableFileVersionEntity += " FOREIGN KEY (symbol_file_path) REFERENCES FileEntity (symbol_file_path)";
     queryCreateTableFileVersionEntity += " ON DELETE CASCADE ON UPDATE CASCADE,";
     queryCreateTableFileVersionEntity += " PRIMARY KEY (symbol_file_path, version_number)";
