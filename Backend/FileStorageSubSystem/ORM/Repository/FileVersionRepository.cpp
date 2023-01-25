@@ -1,6 +1,7 @@
 #include "FileVersionRepository.h"
 
 #include <QSqlQuery>
+#include <QSqlRecord>
 
 FileVersionRepository::FileVersionRepository(const QSqlDatabase &db)
 {
@@ -11,6 +12,36 @@ FileVersionRepository::FileVersionRepository(const QSqlDatabase &db)
 FileVersionRepository::~FileVersionRepository()
 {
     database.close();
+}
+
+FileVersionEntity FileVersionRepository::findVersion(const QString &symbolFilePath, qlonglong versionNumber) const
+{
+    FileVersionEntity result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = "SELECT * FROM FileVersionEntity WHERE symbol_file_path = :1 AND version_number = :2;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", symbolFilePath);
+    query.bindValue(":2", versionNumber);
+    query.exec();
+
+    bool hasNext = query.next();
+
+    if(hasNext)
+    {
+        QSqlRecord record = query.record();
+        result.setIsExist(true);
+        result.symbolFilePath = record.value("symbol_file_path").toString();
+        result.versionNumber = record.value("version_number").toLongLong();
+        result.internalFileName = record.value("internal_file_name").toString();
+        result.size = record.value("size").toLongLong();
+        result.timestamp = record.value("timestamp").toDateTime();
+        result.description = record.value("description").toString();
+        result.hash = record.value("hash").toString();
+    }
+
+    return result;
 }
 
 bool FileVersionRepository::save(const FileVersionEntity &entity, QSqlError *error)

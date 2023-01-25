@@ -75,5 +75,7 @@ int main(int argc, char *argv[])
     FileVersionRepository versionRepo(storageDb);
     versionRepo.save(version);
 
+    FileVersionEntity versionResult = versionRepo.findVersion(fileResult.symbolFilePath(), 4);
+
     return app.exec();
 }

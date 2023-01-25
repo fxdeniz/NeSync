@@ -12,6 +12,7 @@ public:
     FileVersionRepository(const QSqlDatabase &db);
     ~FileVersionRepository();
 
+    FileVersionEntity findVersion(const QString &symbolFilePath, qlonglong versionNumber) const;
     bool save(const FileVersionEntity &entity, QSqlError *error = nullptr);
 
 private:
