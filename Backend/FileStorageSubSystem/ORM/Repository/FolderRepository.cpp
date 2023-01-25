@@ -47,13 +47,33 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
             while(childFolderQuery.next())
             {
                 QSqlRecord record = childFolderQuery.record();
-                FolderEntity child;
-                child.parentFolderPath = record.value("parent_folder_path").toString();
-                child.suffixPath = record.value("suffix_path").toString();
-                child.userFolderPath = record.value("user_folder_path").toString();
-                child.isFrozen = record.value("is_frozen").toBool();
+                FolderEntity childFolder;
+                childFolder.setIsExist(true);
+                childFolder.parentFolderPath = record.value("parent_folder_path").toString();
+                childFolder.suffixPath = record.value("suffix_path").toString();
+                childFolder.userFolderPath = record.value("user_folder_path").toString();
+                childFolder.isFrozen = record.value("is_frozen").toBool();
 
-                result.childFolders.append(child);
+                result.childFolders.append(childFolder);
+            }
+
+            QSqlQuery childFileQuery(database);
+            QString childFileQueryTemplate = "SELECT * FROM FileEntity WHERE symbol_folder_path = :1;" ;
+
+            childFileQuery.prepare(childFileQueryTemplate);
+            childFileQuery.bindValue(":1", result.symbolFolderPath());
+            childFileQuery.exec();
+
+            while(childFileQuery.next())
+            {
+                QSqlRecord record = childFileQuery.record();
+                FileEntity childFile;
+                childFile.setIsExist(true);
+                childFile.fileName = record.value("file_name").toString();
+                childFile.symbolFolderPath = record.value("symbol_folder_path").toString();
+                childFile.isFrozen = record.value("is_frozen").toBool();
+
+                result.childFiles.append(childFile);
             }
         }
     }

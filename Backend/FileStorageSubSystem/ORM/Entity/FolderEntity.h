@@ -1,7 +1,8 @@
 #ifndef FOLDERENTITY_H
 #define FOLDERENTITY_H
 
-#include <QString>
+#include "FileEntity.h"
+
 #include <QList>
 
 class FolderEntity
@@ -20,9 +21,11 @@ public:
     bool isExist() const;
 
     QList<FolderEntity> getChildFolders() const;
+    QList<FileEntity> getChildFiles() const;
 
 private:
     QList<FolderEntity> childFolders;
+    QList<FileEntity> childFiles;
 
     void setIsExist(bool newIsExist);
     bool _isExist;

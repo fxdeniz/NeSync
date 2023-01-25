@@ -7,6 +7,7 @@ class FileEntity
 {
 public:
     friend class FileRepository;
+    friend class FolderRepository;
 
     FileEntity();
 

@@ -26,6 +26,11 @@ QList<FolderEntity> FolderEntity::getChildFolders() const
     return childFolders;
 }
 
+QList<FileEntity> FolderEntity::getChildFiles() const
+{
+    return childFiles;
+}
+
 void FolderEntity::setIsExist(bool newIsExist)
 {
     _isExist = newIsExist;

@@ -50,10 +50,16 @@ int main(int argc, char *argv[])
     fileEntity.symbolFolderPath = childResult.symbolFolderPath();
     fileEntity.isFrozen = true;
 
-    FolderEntity fatFolder = folderRepo.findBySymbolPath("/", true);
+    FileEntity fileToRoot;
+    fileToRoot.fileName = "sample_file.pdf";
+    fileToRoot.symbolFolderPath = parent.symbolFolderPath();
+    fileToRoot.isFrozen = true;
 
     FileRepository fileRepo(storageDb);
     fileRepo.save(fileEntity);
+    fileRepo.save(fileToRoot);
+
+    FolderEntity fatFolder = folderRepo.findBySymbolPath("/", true);
 
     FileEntity fileResult = fileRepo.findBySymbolPath(fileEntity.symbolFilePath());
 
