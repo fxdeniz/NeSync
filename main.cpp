@@ -7,6 +7,7 @@
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 #include "Utility/DatabaseRegistry.h"
 #include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
+#include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +44,16 @@ int main(int argc, char *argv[])
 
     FolderEntity childResult = folderRepo.findBySymbolPath("/Desktop/");
     qDebug() << "symbol path = " << childResult.symbolFolderPath();
+
+    FileEntity fileEntity;
+    fileEntity.fileName = "text_file.txt";
+    fileEntity.symbolFolderPath = childResult.symbolFolderPath();
+    fileEntity.isFrozen = true;
+
+    FileRepository fileRepo(storageDb);
+    fileRepo.save(fileEntity);
+
+    FileEntity fileResult = fileRepo.findBySymbolPath(fileEntity.symbolFilePath());
 
     return app.exec();
 }

@@ -100,10 +100,14 @@ set(PROJECT_SOURCES
         # Repository
         Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.h
         Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.cpp
+        Backend/FileStorageSubSystem/ORM/Repository/FileRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FileRepository.cpp
 
         # Entity
         Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.h
         Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.cpp
+        Backend/FileStorageSubSystem/ORM/Entity/FileEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FileEntity.cpp
     #
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h

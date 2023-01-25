@@ -2,7 +2,7 @@
 
 FolderEntity::FolderEntity()
 {
-    _isExist = false;
+    setIsExist(false);
 
     parentFolderPath = "";
     suffixPath = "";

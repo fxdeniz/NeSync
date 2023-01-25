@@ -1,10 +1,10 @@
 #ifndef FOLDERREPOSITORY_H
 #define FOLDERREPOSITORY_H
 
+#include "Entity/FolderEntity.h"
+
 #include <QSqlError>
 #include <QSqlDatabase>
-
-#include "Entity/FolderEntity.h"
 
 class FolderRepository
 {
