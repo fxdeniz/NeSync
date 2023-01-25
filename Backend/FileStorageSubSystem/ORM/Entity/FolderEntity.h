@@ -2,6 +2,7 @@
 #define FOLDERENTITY_H
 
 #include <QString>
+#include <QList>
 
 class FolderEntity
 {
@@ -18,9 +19,12 @@ public:
     QString symbolFolderPath() const;
     bool isExist() const;
 
-private:
-    void setIsExist(bool newIsExist);
+    QList<FolderEntity> getChildFolders() const;
 
+private:
+    QList<FolderEntity> childFolders;
+
+    void setIsExist(bool newIsExist);
     bool _isExist;
 };
 

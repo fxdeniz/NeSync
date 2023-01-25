@@ -12,7 +12,7 @@ public:
     FolderRepository(const QSqlDatabase &db);
     ~FolderRepository();
 
-    FolderEntity findBySymbolPath(const QString &symbolFolderPath) const;
+    FolderEntity findBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
     bool save(const FolderEntity &entity, QSqlError *error = nullptr);
 
 private:

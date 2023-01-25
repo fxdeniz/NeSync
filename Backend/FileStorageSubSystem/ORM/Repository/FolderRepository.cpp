@@ -14,7 +14,7 @@ FolderRepository::~FolderRepository()
     database.close();
 }
 
-FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath) const
+FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     FolderEntity result;
 
@@ -34,6 +34,28 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath)
         result.suffixPath = record.value("suffix_path").toString();
         result.userFolderPath = record.value("user_folder_path").toString();
         result.isFrozen = record.value("is_frozen").toBool();
+
+        if(result.isExist() && includeChildren)
+        {
+            QSqlQuery childFolderQuery(database);
+            QString childFolderQueryTemplate = "SELECT * FROM FolderEntity WHERE parent_folder_path = :1;" ;
+
+            childFolderQuery.prepare(childFolderQueryTemplate);
+            childFolderQuery.bindValue(":1", result.symbolFolderPath());
+            childFolderQuery.exec();
+
+            while(childFolderQuery.next())
+            {
+                QSqlRecord record = childFolderQuery.record();
+                FolderEntity child;
+                child.parentFolderPath = record.value("parent_folder_path").toString();
+                child.suffixPath = record.value("suffix_path").toString();
+                child.userFolderPath = record.value("user_folder_path").toString();
+                child.isFrozen = record.value("is_frozen").toBool();
+
+                result.childFolders.append(child);
+            }
+        }
     }
 
     return result;
