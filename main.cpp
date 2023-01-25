@@ -6,6 +6,7 @@
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 #include "Utility/DatabaseRegistry.h"
+#include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,15 +28,21 @@ int main(int argc, char *argv[])
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
     storageDb.open();
 
-    qDebug() << "isStorageDbOpen = " << storageDb.isOpen();
+    FolderRepository folderRepo(storageDb);
 
-//    FileSystemEventDb database;
-//    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-//    QString filePath = desktopPath + QDir::separator() + "data" + QDir::separator() + "test.txt";
-//    database.addFolder(desktopPath);
-//    database.addFile(filePath);
-//    database.deleteFolder(desktopPath);
-//    database.deleteFile(filePath);
+    FolderEntity parent, child;
+    parent.suffixPath = "/";
+
+    child.parentFolderPath = parent.symbolFolderPath();
+    child.suffixPath = "Desktop/";
+    child.userFolderPath = "/home/user/Desktop/";
+    child.isFrozen = true;
+
+    folderRepo.save(parent);
+    folderRepo.save(child);
+
+    FolderEntity childResult = folderRepo.findBySymbolPath("/Desktop/");
+    qDebug() << "symbol path = " << childResult.symbolFolderPath();
 
     return app.exec();
 }

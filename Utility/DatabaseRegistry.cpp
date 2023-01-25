@@ -159,8 +159,8 @@ void DatabaseRegistry::createDbFileMonitor()
     queryCreateTableMonitoringError += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP";
     queryCreateTableMonitoringError += " ); " ;
 
-    qDebug() << "create folder table query has error = " << dbFileMonitor.exec(queryCreateTableFolder).lastError();
-    qDebug() << "create file table query has error = " << dbFileMonitor.exec(queryCreateTableFile).lastError();
-    qDebug() << "create monitroing error table query has error = " << dbFileMonitor.exec(queryCreateTableMonitoringError).lastError();
+    dbFileMonitor.exec(queryCreateTableFolder);
+    dbFileMonitor.exec(queryCreateTableFile);
+    dbFileMonitor.exec(queryCreateTableMonitoringError);
 
 }

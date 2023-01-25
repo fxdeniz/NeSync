@@ -17,6 +17,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent Widge
 include_directories(Gui/)
 include_directories(Gui/Tabs/)
 include_directories(Backend/)
+include_directories(Backend/FileStorageSubSystem/ORM/)
 include_directories(Backend/FileMonitorSubSystem/)
 include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/)
 include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/Test/)
@@ -94,6 +95,16 @@ set(PROJECT_SOURCES
 
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
+
+    # ORM
+        # Repository
+        Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.cpp
+
+        # Entity
+        Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.cpp
+    #
 
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
     Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileRecord.h
