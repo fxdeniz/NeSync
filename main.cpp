@@ -28,10 +28,15 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
+    QDir(tempPath).mkdir("backup_2");
+
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    V2_FileStorageManager v2fsm(storageDb);
+    V2_FileStorageManager v2fsm(storageDb, tempPath + "backup_2");
     v2fsm.addNewFolder("/", "test_folder/", "/home/user/Desktop/data");
+    v2fsm.addNewFile("/test_folder/","/home/user/Desktop/data/text_file.txt");
 
     return app.exec();
 }
