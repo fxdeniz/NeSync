@@ -96,6 +96,9 @@ set(PROJECT_SOURCES
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
 
+    Backend/FileStorageSubSystem/V2_FileStorageManager.h
+    Backend/FileStorageSubSystem/V2_FileStorageManager.cpp
+
     # ORM
         # Repository
         Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.h

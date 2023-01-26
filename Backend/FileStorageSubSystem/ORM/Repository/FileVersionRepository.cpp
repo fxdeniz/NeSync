@@ -13,7 +13,8 @@ FileVersionRepository::FileVersionRepository(const QSqlDatabase &db)
 
 FileVersionRepository::~FileVersionRepository()
 {
-    database.close();
+    if(database.isOpen())
+        database.close();
 }
 
 FileVersionEntity FileVersionRepository::findVersion(const QString &symbolFilePath, qlonglong versionNumber) const

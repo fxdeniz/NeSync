@@ -13,7 +13,8 @@ FolderRepository::FolderRepository(const QSqlDatabase &db)
 
 FolderRepository::~FolderRepository()
 {
-    database.close();
+    if(database.isOpen())
+        database.close();
 }
 
 FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
@@ -81,6 +82,25 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
                 result.childFiles.append(childFile);
             }
         }
+    }
+
+    return result;
+}
+
+QString FolderRepository::findSymbolPathByUserFolderPath(const QString &userFolderPath) const
+{
+    QString result = "";
+    QSqlQuery query(database);
+    QString queryTemplate = "SELECT * FROM FolderEntity WHERE user_folder_path = :1;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", userFolderPath);
+    query.exec();
+
+    if(query.next())
+    {
+        QSqlRecord record = query.record();
+        result = record.value("symbol_folder_path").toString();
     }
 
     return result;

@@ -9,6 +9,7 @@
 #include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileVersionRepository.h"
+#include "FileStorageSubSystem/V2_FileStorageManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,53 +29,9 @@ int main(int argc, char *argv[])
     w.show();
 
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
-    storageDb.open();
 
-    FolderRepository folderRepo(storageDb);
-
-    FolderEntity parent, child;
-    parent.suffixPath = "/";
-
-    child.parentFolderPath = parent.symbolFolderPath();
-    child.suffixPath = "Desktop/";
-    child.userFolderPath = "/home/user/Desktop/";
-    child.isFrozen = true;
-
-    folderRepo.save(parent);
-    folderRepo.save(child);
-
-    child.suffixPath = "Desktop/Project/";
-    folderRepo.save(child);
-
-    FileEntity file;
-    file.fileName = "text_file.txt";
-    file.symbolFolderPath = child.symbolFolderPath();
-    file.isFrozen = true;
-
-    FileRepository fileRepository(storageDb);
-    fileRepository.save(file);
-
-    file.fileName = "another.jpg";
-    file.isFrozen = false;
-
-    fileRepository.save(file);
-
-    FileEntity fileResult = fileRepository.findBySymbolPath(file.symbolFilePath());
-
-    FileVersionEntity firstVersion;
-    firstVersion.symbolFilePath = file.symbolFilePath();
-    firstVersion.versionNumber = 1;
-    firstVersion.internalFileName = "internal-file-name-here";
-    firstVersion.size = 100;
-    firstVersion.timestamp = QDateTime::currentDateTime();
-
-    FileVersionRepository versionRepository(storageDb);
-    versionRepository.save(firstVersion);
-
-    firstVersion.description = "description";
-    firstVersion.hash = "a1b2c3d4e5";
-
-    versionRepository.save(firstVersion);
+    V2_FileStorageManager v2fsm(storageDb);
+    v2fsm.addNewFolder("/", "test_folder/", "/home/user/Desktop/data");
 
     return app.exec();
 }

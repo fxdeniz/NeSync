@@ -102,6 +102,7 @@ void DatabaseRegistry::createDbFileStorage()
     dbFileStorage.exec(queryCreateTableFolderEntity);
     dbFileStorage.exec(queryCreateTableFileEntity);
     dbFileStorage.exec(queryCreateTableFileVersionEntity);
+    dbFileStorage.exec("INSERT INTO FolderEntity (suffix_path) VALUES('/');");
 }
 
 void DatabaseRegistry::createDbFileMonitor()

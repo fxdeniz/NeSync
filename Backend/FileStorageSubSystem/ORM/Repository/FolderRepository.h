@@ -13,6 +13,7 @@ public:
     ~FolderRepository();
 
     FolderEntity findBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
+    QString findSymbolPathByUserFolderPath(const QString &userFolderPath) const;
     bool save(FolderEntity &entity, QSqlError *error = nullptr);
 
 private:
