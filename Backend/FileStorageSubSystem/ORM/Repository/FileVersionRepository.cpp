@@ -36,6 +36,7 @@ FileVersionEntity FileVersionRepository::findVersion(const QString &symbolFilePa
         result.setIsExist(true);
         result.symbolFilePath = record.value("symbol_file_path").toString();
         result.versionNumber = record.value("version_number").toLongLong();
+        result.setPrimaryKey(result.symbolFilePath, result.versionNumber);
         result.internalFileName = record.value("internal_file_name").toString();
         result.size = record.value("size").toLongLong();
         result.timestamp = record.value("timestamp").toDateTime();
@@ -65,6 +66,7 @@ QList<FileVersionEntity> FileVersionRepository::findAllVersions(const QString &s
         entity.setIsExist(true);
         entity.symbolFilePath = record.value("symbol_file_path").toString();
         entity.versionNumber = record.value("version_number").toLongLong();
+        entity.setPrimaryKey(entity.symbolFilePath, entity.versionNumber);
         entity.internalFileName = record.value("internal_file_name").toString();
         entity.size = record.value("size").toLongLong();
         entity.timestamp = record.value("timestamp").toDateTime();
@@ -77,19 +79,38 @@ QList<FileVersionEntity> FileVersionRepository::findAllVersions(const QString &s
     return result;
 }
 
-bool FileVersionRepository::save(const FileVersionEntity &entity, QSqlError *error)
+bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
 {
     bool result = false;
+    bool isExist = findVersion(entity.getPrimaryKey().first,
+                               entity.getPrimaryKey().second).isExist();
 
     QSqlQuery query(database);
-    QString queryTemplate = " INSERT INTO FileVersionEntity (symbol_file_path, "
-                            "                                version_number,"
-                            "                                internal_file_name,"
-                            "                                size,"
-                            "                                timestamp,"
-                            "                                description,"
-                            "                                hash)"
-                            " VALUES (:1, :2, :3, :4, :5, :6, :7);" ;
+    QString queryTemplate;
+
+    if(isExist)
+    {
+        queryTemplate = " UPDATE FileVersionEntity "
+                        " SET symbol_file_path = :1,"
+                        "     version_number = :2,"
+                        "     internal_file_name = :3,"
+                        "     size = :4,"
+                        "     timestamp = :5,"
+                        "     description = :6,"
+                        "     hash = :7 "
+                        " WHERE symbol_file_path = :8 AND version_number = :9;" ;
+    }
+    else
+    {
+        queryTemplate = " INSERT INTO FileVersionEntity (symbol_file_path, "
+                        "                                version_number,"
+                        "                                internal_file_name,"
+                        "                                size,"
+                        "                                timestamp,"
+                        "                                description,"
+                        "                                hash)"
+                        " VALUES (:1, :2, :3, :4, :5, :6, :7);" ;
+    }
 
     query.prepare(queryTemplate);
 
@@ -113,13 +134,23 @@ bool FileVersionRepository::save(const FileVersionEntity &entity, QSqlError *err
     else
         query.bindValue(":7", entity.hash);
 
+    if(isExist)
+    {
+        query.bindValue(":8", entity.getPrimaryKey().first);
+        query.bindValue(":9", entity.getPrimaryKey().second);
+    }
+
     query.exec();
 
     if(error != nullptr)
         error = new QSqlError(query.lastError());
 
     if(query.lastError().type() == QSqlError::ErrorType::NoError)
+    {
         result = true;
+        entity.setIsExist(true);
+        entity.setPrimaryKey(entity.symbolFilePath, entity.versionNumber);
+    }
 
     return result;
 }

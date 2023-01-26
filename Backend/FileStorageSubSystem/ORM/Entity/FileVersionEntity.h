@@ -22,7 +22,11 @@ public:
 
     bool isExist() const;
 
+    QPair<QString, qlonglong> getPrimaryKey() const;
+
 private:
+    void setPrimaryKey(QString &symbolFilePath, qlonglong versionNumber);
+    QPair<QString, qlonglong> primaryKey;
 
     void setIsExist(bool newIsExist);
     bool _isExist;

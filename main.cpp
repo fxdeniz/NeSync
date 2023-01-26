@@ -61,5 +61,20 @@ int main(int argc, char *argv[])
 
     FileEntity fileResult = fileRepository.findBySymbolPath(file.symbolFilePath());
 
+    FileVersionEntity firstVersion;
+    firstVersion.symbolFilePath = file.symbolFilePath();
+    firstVersion.versionNumber = 1;
+    firstVersion.internalFileName = "internal-file-name-here";
+    firstVersion.size = 100;
+    firstVersion.timestamp = QDateTime::currentDateTime();
+
+    FileVersionRepository versionRepository(storageDb);
+    versionRepository.save(firstVersion);
+
+    firstVersion.description = "description";
+    firstVersion.hash = "a1b2c3d4e5";
+
+    versionRepository.save(firstVersion);
+
     return app.exec();
 }

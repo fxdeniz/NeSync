@@ -17,6 +17,17 @@ bool FileVersionEntity::isExist() const
     return _isExist;
 }
 
+QPair<QString, qlonglong> FileVersionEntity::getPrimaryKey() const
+{
+    return primaryKey;
+}
+
+void FileVersionEntity::setPrimaryKey(QString &symbolFilePath, qlonglong versionNumber)
+{
+    primaryKey.first = symbolFilePath;
+    primaryKey.second = versionNumber;
+}
+
 void FileVersionEntity::setIsExist(bool newIsExist)
 {
     _isExist = newIsExist;
