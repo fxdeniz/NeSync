@@ -98,10 +98,45 @@ bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QS
     if(fileEntity.isExist()) // Symbol folder is already exist
         return false;
 
+    fileEntity.fileName = info.fileName();
+    fileEntity.symbolFolderPath = folderEntity.symbolFolderPath();
+    fileEntity.isFrozen = isFrozen;
+
+    bool isFileInserted = fileRepository->save(fileEntity);
+
+    if(!isFileInserted)
+        return false;
+
+    bool result = appendVersion(symbolFilePath, pathToFile, description);
+    return result;
+}
+
+bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const QString &pathToFile, const QString &description)
+{
+    QFileInfo info(pathToFile);
+
+    if(!info.isFile() || !info.exists())
+        return false;
+
+    FileEntity fileEntity = fileRepository->findBySymbolPath(symbolFilePath);
+
+    if(!fileEntity.isExist())
+        return false;
+
+    qlonglong versionNumber = fileVersionRepository->maxVersionNumber(fileEntity.symbolFilePath());
+
+    if(versionNumber <= 0)
+        versionNumber = 1;
+    else
+        versionNumber += 1;
+
     QFile file(pathToFile);
     QString internalFileName = generateRandomFileName();
     QString generatedFilePath = getBackupFolderPath() + internalFileName;
     bool isCopied = file.copy(generatedFilePath);
+
+    if(!isCopied)
+        return false;
 
     QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
     QString fileHash = QString(hasher.result().toHex());
@@ -113,22 +148,9 @@ bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QS
 
     file.close();
 
-
-    if(!isCopied)
-        return false;
-
-    fileEntity.fileName = info.fileName();
-    fileEntity.symbolFolderPath = folderEntity.symbolFolderPath();
-    fileEntity.isFrozen = isFrozen;
-
-    bool isFileInserted = fileRepository->save(fileEntity);
-
-    if(!isFileInserted)
-        return false;
-
     FileVersionEntity versionEntity;
-    versionEntity.symbolFilePath = folderEntity.symbolFolderPath() + info.fileName();
-    versionEntity.versionNumber = 1;
+    versionEntity.symbolFilePath = fileEntity.symbolFilePath();
+    versionEntity.versionNumber = versionNumber;
     versionEntity.size = file.size();
     versionEntity.internalFileName = internalFileName;
     versionEntity.timestamp = QDateTime::currentDateTime();
@@ -136,6 +158,7 @@ bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QS
     versionEntity.hash = fileHash;
 
     bool isVersionInserted = fileVersionRepository->save(versionEntity);
+
     if(!isVersionInserted)
         return false;
 

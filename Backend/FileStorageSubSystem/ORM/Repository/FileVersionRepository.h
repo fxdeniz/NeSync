@@ -14,6 +14,7 @@ public:
 
     FileVersionEntity findVersion(const QString &symbolFilePath, qlonglong versionNumber) const;
     QList<FileVersionEntity> findAllVersions(const QString &symbolFilePath) const;
+    qlonglong maxVersionNumber(const QString &symbolFilePath) const;
     bool save(FileVersionEntity &entity, QSqlError *error = nullptr);
 
 private:

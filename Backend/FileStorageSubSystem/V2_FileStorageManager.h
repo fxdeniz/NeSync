@@ -22,6 +22,10 @@ public:
                     const QString &description = "",
                     bool isFrozen = false);
 
+    bool appendVersion(const QString &symbolFilePath,
+                       const QString &pathToFile,
+                       const QString &description = "");
+
     QString getBackupFolderPath() const;
     void setBackupFolderPath(const QString &newBackupFolderPath);
 

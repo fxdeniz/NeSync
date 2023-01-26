@@ -80,6 +80,31 @@ QList<FileVersionEntity> FileVersionRepository::findAllVersions(const QString &s
     return result;
 }
 
+qlonglong FileVersionRepository::maxVersionNumber(const QString &symbolFilePath) const
+{
+    qlonglong result = -1;
+
+    QString resultColumnName = "result_column";
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT MAX(version_number) AS %1"
+                            " FROM FileVersionEntity"
+                            " WHERE symbol_file_path = :1;" ;
+
+    queryTemplate = queryTemplate.arg(resultColumnName);
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", symbolFilePath);
+    query.exec();
+
+    if(query.next())
+    {
+        QSqlRecord record = query.record();
+        result = record.value(resultColumnName).toLongLong();
+    }
+
+    return result;
+}
+
 bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
 {
     bool result = false;
