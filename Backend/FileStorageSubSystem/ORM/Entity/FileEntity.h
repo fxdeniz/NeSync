@@ -23,8 +23,13 @@ public:
 
     QList<FileVersionEntity> getVersionList() const;
 
+    QString getPrimaryKey() const;
+
 private:
     QList<FileVersionEntity> versionList;
+
+    void setPrimaryKey(const QString &newPrimaryKey);
+    QString primaryKey;
 
     void setIsExist(bool newIsExist);
     bool _isExist;

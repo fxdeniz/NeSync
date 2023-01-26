@@ -73,6 +73,7 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
                 QSqlRecord record = childFileQuery.record();
                 FileEntity childFile;
                 childFile.setIsExist(true);
+                childFile.setPrimaryKey(record.value("symbol_file_path").toString());
                 childFile.fileName = record.value("file_name").toString();
                 childFile.symbolFolderPath = record.value("symbol_folder_path").toString();
                 childFile.isFrozen = record.value("is_frozen").toBool();

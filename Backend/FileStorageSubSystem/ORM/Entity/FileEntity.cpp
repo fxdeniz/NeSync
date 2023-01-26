@@ -3,6 +3,7 @@
 FileEntity::FileEntity()
 {
     setIsExist(false);
+    setPrimaryKey("");
 
     fileName = "";
     symbolFolderPath = "";
@@ -22,6 +23,16 @@ bool FileEntity::isExist() const
 QList<FileVersionEntity> FileEntity::getVersionList() const
 {
     return versionList;
+}
+
+QString FileEntity::getPrimaryKey() const
+{
+    return primaryKey;
+}
+
+void FileEntity::setPrimaryKey(const QString &newPrimaryKey)
+{
+    primaryKey = newPrimaryKey;
 }
 
 void FileEntity::setIsExist(bool newIsExist)

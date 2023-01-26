@@ -46,5 +46,20 @@ int main(int argc, char *argv[])
     child.suffixPath = "Desktop/Project/";
     folderRepo.save(child);
 
+    FileEntity file;
+    file.fileName = "text_file.txt";
+    file.symbolFolderPath = child.symbolFolderPath();
+    file.isFrozen = true;
+
+    FileRepository fileRepository(storageDb);
+    fileRepository.save(file);
+
+    file.fileName = "another.jpg";
+    file.isFrozen = false;
+
+    fileRepository.save(file);
+
+    FileEntity fileResult = fileRepository.findBySymbolPath(file.symbolFilePath());
+
     return app.exec();
 }
