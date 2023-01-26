@@ -39,5 +39,8 @@ int main(int argc, char *argv[])
     v2fsm.addNewFile("/test_folder/","/home/user/Desktop/data/text_file.txt");
     v2fsm.appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "second version");
 
+    QJsonObject rootFolderJson = v2fsm.getFolderJson("/", true);
+    QJsonObject childFolderJson = v2fsm.getFolderJson("/test_folder/", true);
+
     return app.exec();
 }

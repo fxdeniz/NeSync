@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QUuid>
+#include <QJsonArray>
 #include <QCryptographicHash>
 
 V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
@@ -165,6 +166,16 @@ bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const Q
     return true;
 }
 
+QJsonObject V2_FileStorageManager::getFolderJson(const QString &symbolFolderPath, bool includeChildren) const
+{
+    QJsonObject result;
+
+    FolderEntity entity = folderRepository->findBySymbolPath(symbolFolderPath, includeChildren);
+    result = folderEntityToJsonObject(entity);
+
+    return result;
+}
+
 QString V2_FileStorageManager::getBackupFolderPath() const
 {
     return backupFolderPath;
@@ -181,5 +192,100 @@ void V2_FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPa
 QString V2_FileStorageManager::generateRandomFileName()
 {
     QString result = QUuid::createUuid().toString(QUuid::StringFormat::Id128) + ".file";
+    return result;
+}
+
+QJsonObject V2_FileStorageManager::folderEntityToJsonObject(const FolderEntity &entity) const
+{
+    QJsonObject result;
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::Folder::ParentFolderPath] = entity.parentFolderPath;
+    result[JsonKeys::Folder::SuffixPath] = entity.suffixPath;
+    result[JsonKeys::Folder::SymbolFolderPath] = entity.symbolFolderPath();
+    result[JsonKeys::Folder::UserFolderPath] = entity.userFolderPath;
+    result[JsonKeys::Folder::IsFrozen] = entity.isFrozen;
+
+    result[JsonKeys::Folder::ChildFolders] = QJsonValue();
+    result[JsonKeys::Folder::ChildFiles] = QJsonValue();
+
+    if(!entity.getChildFolders().isEmpty())
+    {
+        QJsonArray jsonArrayChildFolder;
+        for(const FolderEntity &entityChildFolder : entity.getChildFolders())
+        {
+            QJsonObject jsonChildFolder;
+
+            jsonChildFolder[JsonKeys::IsExist] = entityChildFolder.isExist();
+            jsonChildFolder[JsonKeys::Folder::ParentFolderPath] = entityChildFolder.parentFolderPath;
+            jsonChildFolder[JsonKeys::Folder::SuffixPath] = entityChildFolder.suffixPath;
+            jsonChildFolder[JsonKeys::Folder::SymbolFolderPath] = entityChildFolder.symbolFolderPath();
+            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = entityChildFolder.userFolderPath;
+            jsonChildFolder[JsonKeys::Folder::IsFrozen] = entityChildFolder.isFrozen;
+
+            jsonChildFolder[JsonKeys::Folder::ChildFolders] = QJsonValue();
+            jsonChildFolder[JsonKeys::Folder::ChildFiles] = QJsonValue();
+            jsonArrayChildFolder.append(jsonChildFolder);
+        }
+
+        result[JsonKeys::Folder::ChildFolders] = jsonArrayChildFolder;
+    }
+
+    if(!entity.getChildFiles().isEmpty())
+    {
+        QJsonArray jsonArrayFileList;
+
+        for(const FileEntity &entityFile : entity.getChildFiles())
+        {
+            QJsonObject jsonChildFile;
+            jsonChildFile = fileEntityToJsonObject(entityFile);
+            jsonArrayFileList.append(jsonChildFile);
+        }
+
+        result[JsonKeys::Folder::ChildFiles] = jsonArrayFileList;
+    }
+
+    return result;
+}
+
+QJsonObject V2_FileStorageManager::fileEntityToJsonObject(const FileEntity &entity) const
+{
+    QJsonObject result;
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::File::FileName] = entity.fileName;
+    result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
+    result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
+    result[JsonKeys::File::IsFrozen] = entity.isFrozen;
+    result[JsonKeys::File::VersionList] = QJsonValue();
+
+    if(!entity.getVersionList().isEmpty())
+    {
+        QJsonArray jsonArrayVersionList;
+        for(const FileVersionEntity &entityFileVersion : entity.getVersionList())
+        {
+            QJsonObject jsonFileVersion;
+            jsonFileVersion = fileVersionEntityToJsonObject(entityFileVersion);
+            jsonArrayVersionList.append(jsonFileVersion);
+        }
+
+        result[JsonKeys::File::VersionList] = jsonArrayVersionList;
+    }
+
+    return result;
+}
+
+QJsonObject V2_FileStorageManager::fileVersionEntityToJsonObject(const FileVersionEntity &entity) const
+{
+    QJsonObject result;
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::FileVersion::SymbolFilePath] = entity.symbolFilePath;
+    result[JsonKeys::FileVersion::VersionNumber] = entity.versionNumber;
+    result[JsonKeys::FileVersion::Size] = entity.size;
+    result[JsonKeys::FileVersion::Timestamp] = entity.timestamp.toString(Qt::DateFormat::TextDate);
+    result[JsonKeys::FileVersion::Description] = entity.description;
+    result[JsonKeys::FileVersion::Hash] = entity.hash;
+
     return result;
 }
