@@ -3,6 +3,7 @@
 FolderEntity::FolderEntity()
 {
     setIsExist(false);
+    setPrimaryKey("");
 
     parentFolderPath = "";
     suffixPath = "";
@@ -29,6 +30,16 @@ QList<FolderEntity> FolderEntity::getChildFolders() const
 QList<FileEntity> FolderEntity::getChildFiles() const
 {
     return childFiles;
+}
+
+QString FolderEntity::getPrimaryKey() const
+{
+    return primaryKey;
+}
+
+void FolderEntity::setPrimaryKey(const QString &newPrimaryKey)
+{
+    primaryKey = newPrimaryKey;
 }
 
 void FolderEntity::setIsExist(bool newIsExist)

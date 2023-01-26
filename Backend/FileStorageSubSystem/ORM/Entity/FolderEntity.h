@@ -21,9 +21,14 @@ public:
     QList<FolderEntity> getChildFolders() const;
     QList<FileEntity> getChildFiles() const;
 
+    QString getPrimaryKey() const;
+
 private:
     QList<FolderEntity> childFolders;
     QList<FileEntity> childFiles;
+
+    void setPrimaryKey(const QString &newPrimaryKey);
+    QString primaryKey;
 
     void setIsExist(bool newIsExist);
     bool _isExist;

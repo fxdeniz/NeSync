@@ -43,47 +43,8 @@ int main(int argc, char *argv[])
     folderRepo.save(parent);
     folderRepo.save(child);
 
-    FolderEntity childResult = folderRepo.findBySymbolPath("/Desktop/");
-    qDebug() << "symbol path = " << childResult.symbolFolderPath();
-
-    FileEntity fileEntity;
-    fileEntity.fileName = "text_file.txt";
-    fileEntity.symbolFolderPath = childResult.symbolFolderPath();
-    fileEntity.isFrozen = true;
-
-    FileEntity fileToRoot;
-    fileToRoot.fileName = "sample_file.pdf";
-    fileToRoot.symbolFolderPath = parent.symbolFolderPath();
-    fileToRoot.isFrozen = true;
-
-    FileRepository fileRepo(storageDb);
-    fileRepo.save(fileEntity);
-    fileRepo.save(fileToRoot);
-
-    FolderEntity fatFolder = folderRepo.findBySymbolPath("/", true);
-
-    FileEntity fileResult = fileRepo.findBySymbolPath(fileEntity.symbolFilePath());
-
-    FileVersionEntity version;
-    version.symbolFilePath = fileResult.symbolFilePath();
-    version.versionNumber = 4;
-    version.internalFileName = "file_name_here";
-    version.size = 100;
-    version.description = "description here";
-    version.hash = "a1b2c3d4e5";
-
-    FileVersionRepository versionRepo(storageDb);
-    versionRepo.save(version);
-
-    FileVersionEntity versionResult = versionRepo.findVersion(fileResult.symbolFilePath(), 4);
-
-    versionResult.versionNumber = 1;
-    versionResult.internalFileName = "new_file_name";
-
-    versionRepo.save(versionResult);
-
-    QList<FileVersionEntity> versionList = versionRepo.findAllVersions(fileResult.symbolFilePath());
-    fileResult = fileRepo.findBySymbolPath(fileResult.symbolFilePath(), true);
+    child.suffixPath = "Desktop/Project/";
+    folderRepo.save(child);
 
     return app.exec();
 }

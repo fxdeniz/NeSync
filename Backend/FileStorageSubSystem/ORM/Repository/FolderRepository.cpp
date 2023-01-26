@@ -32,6 +32,7 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
         QSqlRecord record = query.record();
 
         result.setIsExist(true);
+        result.setPrimaryKey(record.value("symbol_folder_path").toString());
         result.parentFolderPath = record.value("parent_folder_path").toString();
         result.suffixPath = record.value("suffix_path").toString();
         result.userFolderPath = record.value("user_folder_path").toString();
@@ -51,6 +52,7 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
                 QSqlRecord record = childFolderQuery.record();
                 FolderEntity childFolder;
                 childFolder.setIsExist(true);
+                childFolder.setPrimaryKey(record.value("symbol_folder_path").toString());
                 childFolder.parentFolderPath = record.value("parent_folder_path").toString();
                 childFolder.suffixPath = record.value("suffix_path").toString();
                 childFolder.userFolderPath = record.value("user_folder_path").toString();
@@ -83,31 +85,43 @@ FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath,
     return result;
 }
 
-bool FolderRepository::save(const FolderEntity &entity, QSqlError *error)
+bool FolderRepository::save(FolderEntity &entity, QSqlError *error)
 {
     bool result = false;
-
+    bool isExist = findBySymbolPath(entity.getPrimaryKey()).isExist();
     QSqlQuery query(database);
-    QString queryTemplate = " INSERT INTO FolderEntity (parent_folder_path, suffix_path, user_folder_path, is_frozen)"
-                            " VALUES(:1, :2, :3, :4);" ;
+    QString queryTemplate;
+
+    if(isExist)
+    {
+        queryTemplate = " UPDATE FolderEntity"
+                        " SET parent_folder_path = :1, suffix_path = :2, user_folder_path = :3, is_frozen = :4"
+                        " WHERE symbol_folder_path = :5;" ;
+    }
+    else
+    {
+        queryTemplate = " INSERT INTO FolderEntity (parent_folder_path, suffix_path, user_folder_path, is_frozen)"
+                        " VALUES(:1, :2, :3, :4);" ;
+    }
 
     query.prepare(queryTemplate);
 
-    { // Bind values
-        if(entity.parentFolderPath.isEmpty())
-            query.bindValue(":1", QVariant());
-        else
-            query.bindValue(":1", entity.parentFolderPath);
+    if(entity.parentFolderPath.isEmpty())
+        query.bindValue(":1", QVariant());
+    else
+        query.bindValue(":1", entity.parentFolderPath);
 
-        query.bindValue(":2", entity.suffixPath);
+    query.bindValue(":2", entity.suffixPath);
 
-        if(entity.userFolderPath.isEmpty())
-            query.bindValue(":3", QVariant());
-        else
-            query.bindValue(":3", entity.userFolderPath);
+    if(entity.userFolderPath.isEmpty())
+        query.bindValue(":3", QVariant());
+    else
+        query.bindValue(":3", entity.userFolderPath);
 
-        query.bindValue(":4", entity.isFrozen);
-    }
+    query.bindValue(":4", entity.isFrozen);
+
+    if(isExist)
+        query.bindValue(":5", entity.getPrimaryKey());
 
     query.exec();
 
@@ -115,7 +129,11 @@ bool FolderRepository::save(const FolderEntity &entity, QSqlError *error)
         error = new QSqlError(query.lastError());
 
     if(query.lastError().type() == QSqlError::ErrorType::NoError)
+    {
         result = true;
+        entity.setIsExist(true);
+        entity.setPrimaryKey(entity.symbolFolderPath());
+    }
 
     return result;
 }
