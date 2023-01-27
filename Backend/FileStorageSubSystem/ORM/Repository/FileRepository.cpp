@@ -15,8 +15,7 @@ FileRepository::FileRepository(const QSqlDatabase &db)
 
 FileRepository::~FileRepository()
 {
-    if(database.isOpen())
-        database.close();
+
 }
 
 FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath, bool includeVersions) const

@@ -13,8 +13,7 @@ FolderRepository::FolderRepository(const QSqlDatabase &db)
 
 FolderRepository::~FolderRepository()
 {
-    if(database.isOpen())
-        database.close();
+
 }
 
 FolderEntity FolderRepository::findBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const

@@ -186,6 +186,16 @@ QJsonObject V2_FileStorageManager::getFileJson(const QString &symbolFilePath, bo
     return result;
 }
 
+QJsonObject V2_FileStorageManager::getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const
+{
+    QJsonObject result;
+
+    FileVersionEntity entity = fileVersionRepository->findVersion(symbolFilePath, versionNumber);
+    result = fileVersionEntityToJsonObject(entity);
+
+    return result;
+}
+
 QString V2_FileStorageManager::getBackupFolderPath() const
 {
     return backupFolderPath;
