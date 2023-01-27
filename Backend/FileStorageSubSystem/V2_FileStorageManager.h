@@ -49,7 +49,7 @@ private:
 
 public:
     static const inline QString separator = "/";
-    static V2_FileStorageManager instance();
+    static QSharedPointer<V2_FileStorageManager> instance();
 
     ~V2_FileStorageManager();
 

@@ -21,7 +21,7 @@ V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QStri
     fileVersionRepository = new FileVersionRepository(database);
 }
 
-V2_FileStorageManager V2_FileStorageManager::instance()
+QSharedPointer<V2_FileStorageManager> V2_FileStorageManager::instance()
 {
     QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
     tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
@@ -30,7 +30,10 @@ V2_FileStorageManager V2_FileStorageManager::instance()
 
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    return V2_FileStorageManager(storageDb, tempPath + folderName);
+    auto *rawPtr = new V2_FileStorageManager(storageDb, tempPath + folderName);
+    auto result = QSharedPointer<V2_FileStorageManager>(rawPtr);
+
+    return result;
 }
 
 V2_FileStorageManager::~V2_FileStorageManager()

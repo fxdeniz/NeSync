@@ -71,9 +71,9 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 
     if(dialog.exec())
     {
-        V2_FileStorageManager fsm = V2_FileStorageManager::instance();
+        auto fsm = V2_FileStorageManager::instance();
 
-        QStorageInfo storageInfo(fsm.getBackupFolderPath());
+        QStorageInfo storageInfo(fsm->getBackupFolderPath());
         qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
         qint64 availableSize = storageInfo.bytesFree();
 
@@ -83,7 +83,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
-        QJsonObject folderJson = fsm.getFolderJsonByUserPath(dialog.selectedFiles().at(0));
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(dialog.selectedFiles().at(0));
         bool isFolderExistByUserPath = folderJson[JsonKeys::IsExist].toBool();
 
         if(isFolderExistByUserPath)
