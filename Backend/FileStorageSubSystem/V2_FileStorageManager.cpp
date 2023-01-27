@@ -42,48 +42,61 @@ V2_FileStorageManager::~V2_FileStorageManager()
     delete fileVersionRepository;
 }
 
-bool V2_FileStorageManager::addNewFolder(const QString &parentSymbolFolderPath, const QString &suffixSymbolFolderPath, const QString &userFolderPath)
+bool V2_FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QString &userFolderPath)
 {
     bool result = false;
 
-    QString _parentSymbolFolderPath = QDir::fromNativeSeparators(parentSymbolFolderPath);
-    QString _suffixSymbolFolderPath = suffixSymbolFolderPath;
+    QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
     QString _userFolderPath = QDir::toNativeSeparators(userFolderPath);
 
-    bool isUserFolderExist = QDir(userFolderPath).exists(userFolderPath);
+    bool isUserFolderExist = QDir(userFolderPath).exists();
     if(!isUserFolderExist)
         return false;
 
-    if(!_userFolderPath.endsWith(QDir::separator()))
+    if(!_userFolderPath.endsWith(QDir::separator()) && !_userFolderPath.isEmpty())
         _userFolderPath.append(QDir::separator());
 
-    if(!_parentSymbolFolderPath.startsWith(separator))
-        _parentSymbolFolderPath.prepend(separator);
+    if(!_symbolFolderPath.startsWith(separator))
+        _symbolFolderPath.prepend(separator);
 
-    if(!_parentSymbolFolderPath.endsWith(separator))
-        _parentSymbolFolderPath.append(separator);
+    if(!_symbolFolderPath.endsWith(separator))
+        _symbolFolderPath.append(separator);
 
-    if(_suffixSymbolFolderPath.startsWith(separator))
-        _suffixSymbolFolderPath.remove(0, 1); // Remove first character
-
-    if(!_suffixSymbolFolderPath.endsWith(separator))
-        _suffixSymbolFolderPath.append(separator);
-
-    QString symbolFolerPath = _parentSymbolFolderPath + _suffixSymbolFolderPath;
-    FolderEntity entityBySymbolPath = folderRepository->findBySymbolPath(symbolFolerPath);
+    FolderEntity entityBySymbolPath = folderRepository->findBySymbolPath(_symbolFolderPath);
 
     QString symbolPathFromUserPath = folderRepository->findSymbolPathByUserFolderPath(_userFolderPath);
     FolderEntity entityByUserPath = folderRepository->findBySymbolPath(symbolPathFromUserPath);
 
     if(!entityBySymbolPath.isExist() && !entityByUserPath.isExist())
     {
-        FolderEntity entity;
-        entity.parentFolderPath = _parentSymbolFolderPath;
-        entity.suffixPath = _suffixSymbolFolderPath;
-        entity.userFolderPath = _userFolderPath;
-        entity.isFrozen = false;
+        QStringList tokenList = _symbolFolderPath.chopped(1).split(separator); // Remove last seperator.
+        for(QString &currentToken : tokenList)
+            currentToken.append(separator);
 
-        result = folderRepository->save(entity);
+        QString parentSymbolFolderPath = "";
+        QString suffixPath = "";
+
+        for(const QString &currentToken : tokenList)
+        {
+            suffixPath = currentToken;
+            QString currentSymbolFolder = parentSymbolFolderPath + suffixPath;
+            FolderEntity entity = folderRepository->findBySymbolPath(currentSymbolFolder);
+
+            if(!entity.isExist())
+            {
+                entity.parentFolderPath = parentSymbolFolderPath;
+                entity.suffixPath = suffixPath;
+                entity.isFrozen = false;
+                entity.userFolderPath = "";
+
+                if(currentSymbolFolder == _symbolFolderPath)
+                    entity.userFolderPath = _userFolderPath;
+
+                result = folderRepository->save(entity);
+            }
+
+            parentSymbolFolderPath.append(suffixPath);
+        }
     }
 
     return result;

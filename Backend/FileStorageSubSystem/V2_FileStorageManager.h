@@ -53,8 +53,7 @@ public:
 
     ~V2_FileStorageManager();
 
-    bool addNewFolder(const QString &parentSymbolFolderPath,
-                      const QString &suffixSymbolFolderPath,
+    bool addNewFolder(const QString &symbolFolderPath,
                       const QString &userFolderPath);
 
     bool addNewFile(const QString &symbolFolderPath,
