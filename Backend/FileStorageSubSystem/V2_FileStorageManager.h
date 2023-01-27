@@ -44,10 +44,13 @@ namespace JsonKeys
 
 class V2_FileStorageManager
 {
+private:
+    V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath);
+
 public:
     static const inline QString separator = "/";
+    static V2_FileStorageManager instance();
 
-    V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath);
     ~V2_FileStorageManager();
 
     bool addNewFolder(const QString &parentSymbolFolderPath,
@@ -63,7 +66,8 @@ public:
                        const QString &pathToFile,
                        const QString &description = "");
 
-    QJsonObject getFolderJson(const QString &symbolFolderPath, bool includeChildren) const;
+    QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const;
+    QJsonObject getFolderJsonByUserPath(const QString &symbolFolderPath, bool includeChildren) const;
     QJsonObject getFileJson(const QString &symbolFilePath, bool includeVersions) const;
     QJsonObject getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const;
 

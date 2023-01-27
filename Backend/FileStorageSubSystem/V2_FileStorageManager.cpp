@@ -1,8 +1,11 @@
 #include "V2_FileStorageManager.h"
 
+#include "Utility/DatabaseRegistry.h"
+
 #include <QDir>
 #include <QUuid>
 #include <QJsonArray>
+#include <QStandardPaths>
 #include <QCryptographicHash>
 
 V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
@@ -16,6 +19,18 @@ V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QStri
     folderRepository = new FolderRepository(database);
     fileRepository = new FileRepository(database);
     fileVersionRepository = new FileVersionRepository(database);
+}
+
+V2_FileStorageManager V2_FileStorageManager::instance()
+{
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
+    QString folderName = "backup_2";
+    QDir(tempPath).mkdir(folderName);
+
+    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
+
+    return V2_FileStorageManager(storageDb, tempPath + folderName);
 }
 
 V2_FileStorageManager::~V2_FileStorageManager()
@@ -166,13 +181,20 @@ bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const Q
     return true;
 }
 
-QJsonObject V2_FileStorageManager::getFolderJson(const QString &symbolFolderPath, bool includeChildren) const
+QJsonObject V2_FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;
 
     FolderEntity entity = folderRepository->findBySymbolPath(symbolFolderPath, includeChildren);
     result = folderEntityToJsonObject(entity);
 
+    return result;
+}
+
+QJsonObject V2_FileStorageManager::getFolderJsonByUserPath(const QString &symbolFolderPath, bool includeChildren) const
+{
+    QString symbolPath = folderRepository->findSymbolPathByUserFolderPath(symbolFolderPath);
+    QJsonObject result = getFolderJsonBySymbolPath(symbolPath, includeChildren);
     return result;
 }
 

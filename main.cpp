@@ -34,13 +34,13 @@ int main(int argc, char *argv[])
 
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    V2_FileStorageManager v2fsm(storageDb, tempPath + "backup_2");
+    V2_FileStorageManager v2fsm = V2_FileStorageManager::instance();
     v2fsm.addNewFolder("/", "test_folder/", "/home/user/Desktop/data");
     v2fsm.addNewFile("/test_folder/","/home/user/Desktop/data/text_file.txt");
     v2fsm.appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "second version");
 
-    QJsonObject rootFolderJson = v2fsm.getFolderJson("/", true);
-    QJsonObject childFolderJson = v2fsm.getFolderJson("/test_folder/", true);
+    QJsonObject rootFolderJson = v2fsm.getFolderJsonBySymbolPath("/", true);
+    QJsonObject childFolderJson = v2fsm.getFolderJsonBySymbolPath("/test_folder/", true);
     QJsonObject fileJson = v2fsm.getFileJson("/test_folder/text_file.txt", true);
     QJsonObject versionJson = v2fsm.getFileVersionJson("/test_folder/text_file.txt", 2);
 
