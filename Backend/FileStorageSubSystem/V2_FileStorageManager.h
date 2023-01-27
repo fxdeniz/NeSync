@@ -64,6 +64,7 @@ public:
                        const QString &description = "");
 
     QJsonObject getFolderJson(const QString &symbolFolderPath, bool includeChildren) const;
+    QJsonObject getFileJson(const QString &symbolFilePath, bool includeVersions) const;
 
     QString getBackupFolderPath() const;
     void setBackupFolderPath(const QString &newBackupFolderPath);

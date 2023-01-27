@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 
     QJsonObject rootFolderJson = v2fsm.getFolderJson("/", true);
     QJsonObject childFolderJson = v2fsm.getFolderJson("/test_folder/", true);
+    QJsonObject fileJson = v2fsm.getFileJson("/test_folder/text_file.txt", true);
 
     return app.exec();
 }

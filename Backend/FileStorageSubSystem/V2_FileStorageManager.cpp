@@ -176,6 +176,16 @@ QJsonObject V2_FileStorageManager::getFolderJson(const QString &symbolFolderPath
     return result;
 }
 
+QJsonObject V2_FileStorageManager::getFileJson(const QString &symbolFilePath, bool includeVersions) const
+{
+    QJsonObject result;
+
+    FileEntity entity = fileRepository->findBySymbolPath(symbolFilePath, includeVersions);
+    result = fileEntityToJsonObject(entity);
+
+    return result;
+}
+
 QString V2_FileStorageManager::getBackupFolderPath() const
 {
     return backupFolderPath;
