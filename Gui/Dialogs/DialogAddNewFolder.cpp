@@ -2,7 +2,7 @@
 #include "ui_DialogAddNewFolder.h"
 
 #include "Tasks/TaskAddNewFolders.h"
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
 
 #include <QFileIconProvider>
 #include <QStandardPaths>
@@ -71,9 +71,9 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 
     if(dialog.exec())
     {
-        auto fsm = FileStorageManager::instance();
+        V2_FileStorageManager fsm = V2_FileStorageManager::instance();
 
-        QStorageInfo storageInfo(fsm->getBackupDirectory());
+        QStorageInfo storageInfo(fsm.getBackupFolderPath());
         qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
         qint64 availableSize = storageInfo.bytesFree();
 
@@ -83,7 +83,8 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
-        bool isFolderExistByUserPath = fsm->isFolderExistByUserFolderPath(dialog.selectedFiles().at(0));
+        QJsonObject folderJson = fsm.getFolderJsonByUserPath(dialog.selectedFiles().at(0));
+        bool isFolderExistByUserPath = folderJson[JsonKeys::IsExist].toBool();
 
         if(isFolderExistByUserPath)
         {
@@ -130,7 +131,7 @@ QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWi
 
     FolderItem firstItem;
     firstItem.userDir = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
-    firstItem.symbolDir = parentSymbolDir + FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
+    firstItem.symbolDir = parentSymbolDir + V2_FileStorageManager::separator;
     result.insert(model->rootPath(), firstItem);
 
     while(cursor.hasNext())
@@ -167,7 +168,7 @@ QString DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const 
     auto suffix = currentUserDir.split(parentDir).last();
     suffix = QDir::toNativeSeparators(suffix);
     suffix.prepend(parentSymbolDir);
-    suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    suffix.replace(QDir::separator(), V2_FileStorageManager::separator);
 
     return suffix;
 }
