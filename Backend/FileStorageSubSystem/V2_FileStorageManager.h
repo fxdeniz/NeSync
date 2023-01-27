@@ -58,8 +58,8 @@ public:
 
     bool addNewFile(const QString &symbolFolderPath,
                     const QString &pathToFile,
-                    const QString &description = "",
-                    bool isFrozen = false);
+                    bool isFrozen = false,
+                    const QString &description = "");
 
     bool appendVersion(const QString &symbolFilePath,
                        const QString &pathToFile,

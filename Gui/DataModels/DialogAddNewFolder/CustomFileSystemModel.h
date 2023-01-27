@@ -14,7 +14,7 @@ public:
         Size = 1,
         Type = 2,
         DateModified = 3,
-        AutoSync = 4,
+        Frozen = 4,
         Status = 5
     };
 
@@ -31,12 +31,12 @@ public:
 
     // QFileSystemModel interface
 public:
-    void updateAutoSyncStatusOfItem(const QModelIndex &index);
+    void updateFrozenStatusOfItem(const QModelIndex &index);
 
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    bool isAutoSyncEnabledFor(const QString &pathToFile);
+    bool isFileMarkedAsFrozen(const QString &pathToFile);
 
 public slots:
     void markItemAsPending(const QString &pathToFile);
@@ -49,7 +49,7 @@ private slots:
 private:
     static QString itemStatusToString(ItemStatus status);
     void markItem(const QString &pathToFile, ItemStatus status);
-    QSet<QString> autoSyncDisabledFiles;
+    QSet<QString> frozenFiles;
     QHash<QString, ItemStatus> statusOfFiles;
 };
 

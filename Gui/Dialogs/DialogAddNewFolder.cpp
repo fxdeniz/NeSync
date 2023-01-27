@@ -100,7 +100,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
                 ui->buttonAddFilesToDb->setEnabled(true);
                 showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
                 ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
-                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
+                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
             }
         });
 
@@ -117,7 +117,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 void DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
 {
     if(ui->buttonAddFilesToDb->isEnabled())
-        model->updateAutoSyncStatusOfItem(index);
+        model->updateFrozenStatusOfItem(index);
 }
 
 QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWithFolderOnly()
@@ -154,8 +154,8 @@ void DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
     {
         QFileInfo info = cursor.nextFileInfo();
         FolderItem item = buffer.value(info.absolutePath());
-        bool isEnabled = model->isAutoSyncEnabledFor(info.filePath());
-        item.files.insert(info.filePath(), isEnabled);
+        bool isFrozen = model->isFileMarkedAsFrozen(info.filePath());
+        item.files.insert(info.filePath(), isFrozen);
         buffer.insert(info.absolutePath(), item);
     }
 }
@@ -282,7 +282,7 @@ void DialogAddNewFolder::refreshTreeView()
 {
     ui->treeView->viewport()->update();
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
-    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
 

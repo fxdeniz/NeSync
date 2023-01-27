@@ -6,7 +6,7 @@ CustomFileSystemModel::CustomFileSystemModel(QObject *parent)
     QObject::connect(this, &QAbstractItemModel::rowsInserted, this, &CustomFileSystemModel::addToStatusColumn);
 }
 
-void CustomFileSystemModel::updateAutoSyncStatusOfItem(const QModelIndex &index)
+void CustomFileSystemModel::updateFrozenStatusOfItem(const QModelIndex &index)
 {
     QFileInfo info = fileInfo(index);
     bool isFile = info.isFile();
@@ -14,12 +14,12 @@ void CustomFileSystemModel::updateAutoSyncStatusOfItem(const QModelIndex &index)
     if(isFile)
     {
         auto key = info.absoluteFilePath();
-        bool isContains = autoSyncDisabledFiles.contains(key);
+        bool isContains = frozenFiles.contains(key);
 
         if(isContains)
-            autoSyncDisabledFiles.remove(key);
+            frozenFiles.remove(key);
         else
-            autoSyncDisabledFiles.insert(key);
+            frozenFiles.insert(key);
     }
 
     //emit dataChanged(index, index);
@@ -40,7 +40,7 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
 
     if(role == Qt::DisplayRole)
     {
-        if(column == ColumnIndex::AutoSync)
+        if(column == ColumnIndex::Frozen)
         {
             QFileInfo info = fileInfo(index);
             bool isFile = info.isFile();
@@ -50,12 +50,12 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
             else
             {
                 auto key = info.absoluteFilePath();
-                bool isContains = autoSyncDisabledFiles.contains(key);
+                bool isContains = frozenFiles.contains(key);
 
                 if(isContains)
-                    return "✘";
-                else
                     return "✔";
+                else
+                    return "✘";
 
             }
         }
@@ -67,7 +67,7 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::TextAlignmentRole)
     {
-        if(column == ColumnIndex::AutoSync || column == ColumnIndex::Status)
+        if(column == ColumnIndex::Frozen || column == ColumnIndex::Status)
             return Qt::AlignHCenter;
 
     }
@@ -77,8 +77,8 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
 
 QVariant CustomFileSystemModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(section == ColumnIndex::AutoSync)
-        return tr("Auto-Sync");
+    if(section == ColumnIndex::Frozen)
+        return tr("Frozen");
 
     else if(section == ColumnIndex::Status)
         return tr("Status");
@@ -87,14 +87,14 @@ QVariant CustomFileSystemModel::headerData(int section, Qt::Orientation orientat
         return QFileSystemModel::headerData(section, orientation, role);
 }
 
-bool CustomFileSystemModel::isAutoSyncEnabledFor(const QString &pathToFile)
+bool CustomFileSystemModel::isFileMarkedAsFrozen(const QString &pathToFile)
 {
-    bool isContains = autoSyncDisabledFiles.contains(pathToFile);
+    bool isContains = frozenFiles.contains(pathToFile);
 
     if(isContains)
-        return false;
-    else
         return true;
+    else
+        return false;
 }
 
 void CustomFileSystemModel::markItemAsPending(const QString &pathToFile)

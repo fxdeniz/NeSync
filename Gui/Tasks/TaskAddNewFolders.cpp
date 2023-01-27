@@ -1,6 +1,6 @@
 #include "TaskAddNewFolders.h"
 
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
 
 #include <QDir>
 
@@ -26,11 +26,11 @@ int TaskAddNewFolders::fileCount() const
 
 void TaskAddNewFolders::run()
 {
-    auto fsm = FileStorageManager::instance();
+    auto fsm = V2_FileStorageManager::instance();
     int fileNumber = 1;
     bool isAllRequestSuccessful = true;
 
-    // first create folders
+    // First create folders
     for(const DialogAddNewFolder::FolderItem &item : list)
     {
         fsm->addNewFolder(item.symbolDir, item.userDir);
@@ -44,7 +44,7 @@ void TaskAddNewFolders::run()
             emit signalFileBeingProcessed(cursor.key());
             emit signalGenericFileEvent();
 
-            bool requestResult = fsm->addNewFile(cursor.key(), item.symbolDir, false, cursor.value(), item.userDir);
+            bool requestResult = fsm->addNewFile(item.symbolDir, cursor.key(), cursor.value());
 
             if(requestResult == true)
                 emit signalFileAddedSuccessfully(cursor.key());

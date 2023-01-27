@@ -105,7 +105,7 @@ bool V2_FileStorageManager::addNewFolder(const QString &symbolFolderPath, const 
     return result;
 }
 
-bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, const QString &description, bool isFrozen)
+bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, bool isFrozen, const QString &description)
 {
     QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
     QFileInfo info(pathToFile);
