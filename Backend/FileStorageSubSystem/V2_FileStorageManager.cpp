@@ -170,13 +170,14 @@ bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const Q
     if(!isCopied)
         return false;
 
-    QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
-    QString fileHash = QString(hasher.result().toHex());
-    file.open(QFile::OpenModeFlag::ReadOnly);
+    bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
 
-    bool isHashed = hasher.addData(&file);
-    if(!isHashed)
+    if(!isOpen)
         return false;
+
+    QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
+    hasher.addData(&file);
+    QString fileHash = QString(hasher.result().toHex());
 
     file.close();
 
