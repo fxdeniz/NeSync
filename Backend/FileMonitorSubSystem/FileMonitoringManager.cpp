@@ -1,6 +1,7 @@
 #include "FileMonitoringManager.h"
 
 #include "FileStorageSubSystem/FileStorageManager.h"
+#include "Utility/JsonDtoFormat.h"
 
 #include <QDir>
 #include <QDebug>
@@ -140,8 +141,10 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     if(info.isDir())
     {
         bool isFolderMonitored = database->isFolderExist(currentPath);
+
         auto fsm = FileStorageManager::instance();
-        bool isFolderPersists = fsm->isFolderExistByUserFolderPath(currentPath);
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
+        bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
 
         efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
 
@@ -163,8 +166,10 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
         auto status = FileSystemEventDb::ItemStatus::Undefined;
+
         auto fsm = FileStorageManager::instance();
-        bool isFilePersists = fsm->isFileExistByUserFilePath(currentPath);
+        QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+        bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
 
         if(isFilePersists)
             status = FileSystemEventDb::ItemStatus::Updated;

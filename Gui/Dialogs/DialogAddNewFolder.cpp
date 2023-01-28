@@ -1,6 +1,7 @@
 #include "DialogAddNewFolder.h"
 #include "ui_DialogAddNewFolder.h"
 
+#include "Utility/JsonDtoFormat.h"
 #include "Tasks/TaskAddNewFolders.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
@@ -73,7 +74,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
     {
         auto fsm = FileStorageManager::instance();
 
-        QStorageInfo storageInfo(fsm->getBackupDirectory());
+        QStorageInfo storageInfo(fsm->getBackupFolderPath());
         qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
         qint64 availableSize = storageInfo.bytesFree();
 
@@ -83,7 +84,8 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
             return;
         }
 
-        bool isFolderExistByUserPath = fsm->isFolderExistByUserFolderPath(dialog.selectedFiles().at(0));
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(dialog.selectedFiles().at(0));
+        bool isFolderExistByUserPath = folderJson[JsonKeys::IsExist].toBool();
 
         if(isFolderExistByUserPath)
         {
@@ -99,7 +101,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
                 ui->buttonAddFilesToDb->setEnabled(true);
                 showStatusInfo(statusTextContentReadyToAdd(), ui->labelStatus);
                 ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
-                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
+                ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
             }
         });
 
@@ -116,7 +118,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 void DialogAddNewFolder::on_treeView_doubleClicked(const QModelIndex &index)
 {
     if(ui->buttonAddFilesToDb->isEnabled())
-        model->updateAutoSyncStatusOfItem(index);
+        model->updateFrozenStatusOfItem(index);
 }
 
 QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWithFolderOnly()
@@ -130,7 +132,7 @@ QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWi
 
     FolderItem firstItem;
     firstItem.userDir = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
-    firstItem.symbolDir = parentSymbolDir + FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR;
+    firstItem.symbolDir = parentSymbolDir + FileStorageManager::separator;
     result.insert(model->rootPath(), firstItem);
 
     while(cursor.hasNext())
@@ -153,8 +155,8 @@ void DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
     {
         QFileInfo info = cursor.nextFileInfo();
         FolderItem item = buffer.value(info.absolutePath());
-        bool isEnabled = model->isAutoSyncEnabledFor(info.filePath());
-        item.files.insert(info.filePath(), isEnabled);
+        bool isFrozen = model->isFileMarkedAsFrozen(info.filePath());
+        item.files.insert(info.filePath(), isFrozen);
         buffer.insert(info.absolutePath(), item);
     }
 }
@@ -167,7 +169,7 @@ QString DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const 
     auto suffix = currentUserDir.split(parentDir).last();
     suffix = QDir::toNativeSeparators(suffix);
     suffix.prepend(parentSymbolDir);
-    suffix.replace(QDir::separator(), FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    suffix.replace(QDir::separator(), FileStorageManager::separator);
 
     return suffix;
 }
@@ -281,7 +283,7 @@ void DialogAddNewFolder::refreshTreeView()
 {
     ui->treeView->viewport()->update();
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
-    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::AutoSync);
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
     ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
 

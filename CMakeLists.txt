@@ -17,6 +17,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent Widge
 include_directories(Gui/)
 include_directories(Gui/Tabs/)
 include_directories(Backend/)
+include_directories(Backend/FileStorageSubSystem/ORM/)
 include_directories(Backend/FileMonitorSubSystem/)
 include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/)
 include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/Test/)
@@ -79,9 +80,6 @@ set(PROJECT_SOURCES
     #
 
     # Tasks
-        # TaskAddNewFiles
-        Gui/Tasks/TaskAddNewFiles.h
-        Gui/Tasks/TaskAddNewFiles.cpp
         # TaskAddNewFolders
         Gui/Tasks/TaskAddNewFolders.h
         Gui/Tasks/TaskAddNewFolders.cpp
@@ -94,33 +92,28 @@ set(PROJECT_SOURCES
 
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
+    Utility/JsonDtoFormat.h
 
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileRecord.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileVersion.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileEvent.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoSaveGroupItem.h
-    Backend/FileStorageSubSystem/SqlPrimitives/BaseSqlPrimitive.h Backend/FileStorageSubSystem/SqlPrimitives/BaseSqlPrimitive.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/BaseRow.h Backend/FileStorageSubSystem/SqlPrimitives/BaseRow.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.h Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileVersion.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileVersion.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileEvent.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileEvent.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowSaveGroupItem.h Backend/FileStorageSubSystem/SqlPrimitives/RowSaveGroupItem.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFolderRecord.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFolderRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileRecord.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileVersion.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileVersion.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileEvent.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileEvent.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QuerySaveGroupItem.h Backend/FileStorageSubSystem/SqlPrimitives/QuerySaveGroupItem.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.h Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.h Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.cpp
+    Backend/FileStorageSubSystem/FileStorageManager.h
+    Backend/FileStorageSubSystem/FileStorageManager.cpp
 
-    Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.h Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/FileRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.cpp
-    Backend/FileStorageSubSystem/FileStorageManager.h Backend/FileStorageSubSystem/FileStorageManager.cpp
+    # ORM
+        # Repository
+        Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FolderRepository.cpp
+        Backend/FileStorageSubSystem/ORM/Repository/FileRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FileRepository.cpp
+        Backend/FileStorageSubSystem/ORM/Repository/FileVersionRepository.h
+        Backend/FileStorageSubSystem/ORM/Repository/FileVersionRepository.cpp
 
+        # Entity
+        Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FolderEntity.cpp
+        Backend/FileStorageSubSystem/ORM/Entity/FileEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FileEntity.cpp
+        Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.h
+        Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
+    #
 
     #[[ FileMonitoringSubSystem ]]
     Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
@@ -208,10 +201,6 @@ set(PROJECT_SOURCES
 
     Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.h
     Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.cpp
-
-    #[[ Global scope ]]
-
-    resources.qrc
 
 )
 

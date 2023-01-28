@@ -1,147 +1,58 @@
 #ifndef FILESTORAGEMANAGER_H
 #define FILESTORAGEMANAGER_H
 
-#include "RequestResults/SaveGroupItemMetaData.h"
-#include "RequestResults/FileVersionRequestResult.h"
-#include "RequestResults/FolderRequestResult.h"
-#include "RequestResults/FileRequestResult.h"
-#include "SqlPrimitives/RowFolderRecord.h"
-#include "SqlPrimitives/RowFileRecord.h"
-#include "SqlPrimitives/RowFileEvent.h"
+#include "ORM/Repository/FolderRepository.h"
+#include "ORM/Repository/FileRepository.h"
+#include "ORM/Repository/FileVersionRepository.h"
 
-#include <QSqlDatabase>
+#include <QJsonObject>
 
 class FileStorageManager
 {
 private:
-    FileStorageManager(const QString &backupDirectory);
+    FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath);
 
 public:
-    static const QString DB_FILE_NAME;
-    static const QString INTERNAL_FILE_NAME_EXTENSION;
-    static const QString CONST_SYMBOL_DIRECTORY_SEPARATOR;
-
+    static const inline QString separator = "/";
     static QSharedPointer<FileStorageManager> instance();
 
-    bool addNewFile(const QString &pathToFile,
-                    const QString &symbolDirectory,
-                    bool isFrozenFile,
-                    bool isAutoSyncEnabled,
-                    const QString &userDirectory,
-                    const QString &description = "",
-                    const QString &newFileName = "");
+    ~FileStorageManager();
 
-    bool addNewVersion(const QString &pathToSourceFile,
-                       const QString &pathToSymbolFile,
-                       qlonglong versionNumber,
+    bool addNewFolder(const QString &symbolFolderPath,
+                      const QString &userFolderPath);
+
+    bool addNewFile(const QString &symbolFolderPath,
+                    const QString &pathToFile,
+                    bool isFrozen = false,
+                    const QString &description = "");
+
+    bool appendVersion(const QString &symbolFilePath,
+                       const QString &pathToFile,
                        const QString &description = "");
 
-    bool appendNewVersion(const QString &pathToSourceFile,
-                          const QString &pathToSymbolFile,
-                          const QString &description = "");
+    QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
+    QJsonObject getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren = false) const;
+    QJsonObject getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions = false) const;
+    QJsonObject getFileJsonByUserPath(const QString &userFilePath, bool includeVersions = false) const;
+    QJsonObject getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const;
+    QJsonArray getActiveFolderList() const;
+    QJsonArray getActiveFileList() const;
 
-    bool deleteFiles(const QStringList &symbolFilePathList);
-    bool deleteVersions(const QString &pathToSymbolFile, QList<qlonglong> versionNumberList);
-
-    bool updateNameOfFile(const QString &pathToSymbolFile, const QString &newName);
-    bool updateExtensionOfFile(const QString &pathToSymbolFile, const QString &newExtension);
-    bool updateSymbolDirectoryOfFile(const QString &pathToSymbolFile, const QString &newSymbolDir);
-    bool updateUserDirectoryOfFile(const QString &pathToSymbolFile, const QString &newUserDir);
-    bool updateFrozenStatusOfFile(const QString &pathToSymbolFile, bool isFrozen);
-    bool updateVersionNumberOfFile(const QString &pathToSymbolFile, qlonglong oldNumber, qlonglong newNumber);
-    bool updateContentOfFile(const QString &pathToSymbolFile, qlonglong versionNumber, const QString &pathToNewContent);
-    bool markFileAsFavorite(const QString &pathToSymbolFile, bool status);
-    void incrementSaveGroupNumber();
-
-    bool isFileExistByUserFilePath(const QString &userFilePath) const;
-    bool isFolderExistByUserFolderPath(const QString &userFolderPath) const;
-
-    QStringList getMonitoredFilePathList() const;
-    QStringList getMonitoredFolderPathList() const;
-
-    // TODO <--- Will be removed when FolderRecord entity equipped with UserDir column --->
-    QString getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const;
-    bool updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir);
-    // <--- --->
-
-    qlonglong getCurrentSaveGroupNumber() const;
-    QList<qlonglong> getAvailableSaveGroupNumbers() const;
-    QList<SaveGroupItemMetaData> getSaveGroupItems(qlonglong saveGropuNumber) const;
-    FolderRequestResult getFolderMetaData(const QString &directory) const;
-    QList<FolderRequestResult> getFavoriteFolderMetaDataList() const;
-    FileRequestResult getFileMetaData(const QString &symbolOrUserPathToFile) const;
-    QList<FileRequestResult> getFavoriteFileMetaDataList() const;
-    FileVersionRequestResult getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
-    SaveGroupItemMetaData getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const;
-
-    static const QString &rootFolderPath();
-
-    // TODO Remove when V2_DialogAddNewFolder compeleted
-    // NOTE this method maybe converted to addRootSymbolFolder(void);
-    bool addNewFolder(const QString &symbolDirectory);
-
-    bool addNewFolder(const QString &symbolDirectory, const QString &userDirectory);
-
-    bool markFolderAsFavorite(const QString &directory, bool status);
-    bool isFolderSymbolExist(const QString &directory) const;
-    bool deleteFolder(const QString &directory);
-    bool renameFolder(const QString &directory, const QString &newSuffix);
-
-    const QString &getBackupDirectory() const;
-    const QString &getSymbolDirectory() const;
-
-    virtual ~FileStorageManager();
-
-//signals:
-//    void signalMonitoredFileAddedByBackend(const QString &userFilePath);
-//    void signalMonitoredFileRemovedByBackend(const QString &userFilePath);
-//    void signalMonitoredFilePathChangedByBackend(const QString &oldUserFilePath, const QString &newUserFilePath);
+    QString getBackupFolderPath() const;
+    void setBackupFolderPath(const QString &newBackupFolderPath);
 
 private:
-    qlonglong currentSaveGroupNumber;
-    QString backupDirectory;
-    QSqlDatabase db;
+    QString generateRandomFileName();
+    QJsonObject folderEntityToJsonObject(const FolderEntity &entity) const;
+    QJsonObject fileEntityToJsonObject(const FileEntity &entity) const;
+    QJsonObject fileVersionEntityToJsonObject(const FileVersionEntity &entity) const;
 
-    PtrTo_RowFolderRecord getRootFolderSymbol() const;
-    PtrTo_RowFileEvent addUnRegisteredFile(const QString &pathToSourceFile,
-                                     QString *resultInternalFileName,
-                                     QString *resultFileHash,
-                                     qlonglong *resultSize);
-
-    bool deleteUnRegisteredFile(PtrTo_RowFileEvent event);
-
-    bool transactionInsertRowFileRecord(const QString &fileName,
-                                        const QString &fileExtension,
-                                        const QString &symbolDirectory,
-                                        const QString &userDirectory,
-                                        bool isFrozen,
-                                        bool isAutoSyncEnabled,
-                                        qlonglong fileSize,
-                                        const QString &fileHash,
-                                        const QString &description,
-                                        const QString &internalFileName,
-                                        PtrTo_RowFileEvent unRegisteredFileEvent);
-
-    bool transactionInsertRowFileVersion(const QString &pathToSymbolFile,
-                                         qlonglong versionNumber,
-                                         const QString &internalFileName,
-                                         qlonglong fileSize,
-                                         const QString &fileHash,
-                                         const QString &description,
-                                         PtrTo_RowFileEvent unRegisteredFileEvent);
-
-    bool transactionUpdateRowFileVersion(const QString &pathToSymbolFile,
-                                         qlonglong versionNumber,
-                                         const QString &internalFileName,
-                                         const QString &newHash,
-                                         qlonglong fileSize,
-                                         PtrTo_RowFileEvent rowUnRegisteredFileEvent);
-
-    QList<PtrTo_RowFileEvent> transactionDeleteRowFileRecord(QList<PtrTo_RowFileRecord> targetRecords);
-    QList<PtrTo_RowFileEvent> transactionDeleteRowFileVersion(QList<PtrTo_RowFileVersion> targetVersions);
-    QString getHashOf(const QByteArray &input) const;
-    QString generateInternalFileName() const;
-    void extractSqliteDBIfNotExist();
+private:
+    QString backupFolderPath;
+    QSqlDatabase database;
+    FolderRepository *folderRepository;
+    FileRepository *fileRepository;
+    FileVersionRepository *fileVersionRepository;
 };
 
 #endif // FILESTORAGEMANAGER_H

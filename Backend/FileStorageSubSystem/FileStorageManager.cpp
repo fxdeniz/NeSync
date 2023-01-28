@@ -1,1182 +1,399 @@
 #include "FileStorageManager.h"
 
-#include "SqlPrimitives/QuerySaveGroupItem.h"
-#include "SqlPrimitives/QueryFolderRecord.h"
-#include "SqlPrimitives/QueryFileVersion.h"
-#include "SqlPrimitives/QueryFileRecord.h"
-#include "SqlPrimitives/QueryFileEvent.h"
-#include "SqlPrimitives/RowInserter.h"
-#include "SqlPrimitives/RowDeleter.h"
+#include "Utility/JsonDtoFormat.h"
+#include "Utility/DatabaseRegistry.h"
 
-#include <QCryptographicHash>
-#include <QStandardPaths>
-#include <QSqlRecord>
-#include <QSqlQuery>
-#include <QDateTime>
-#include <QUuid>
 #include <QDir>
+#include <QUuid>
+#include <QJsonArray>
+#include <QStandardPaths>
+#include <QCryptographicHash>
 
-const QString FileStorageManager::DB_FILE_NAME = "ff_database.db3";
-const QString FileStorageManager::INTERNAL_FILE_NAME_EXTENSION = ".file";
-const QString FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR = "/";
-
-FileStorageManager::FileStorageManager(const QString &backupDirectory)
+FileStorageManager::FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
 {
-    this->backupDirectory = backupDirectory;
-    QString connectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-    this->extractSqliteDBIfNotExist();
+    setBackupFolderPath(backupFolderPath);
+    database = db;
 
-    this->db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-    QString dbFilePath = getBackupDirectory() + DB_FILE_NAME;
-    this->db.setDatabaseName(dbFilePath);
-    this->db.open();
-    this->db.exec("PRAGMA foreign_keys = ON;");
-    this->db.exec("PRAGMA synchronous = FULL;");
+    if(!database.isOpen())
+        database.open();
 
-    auto *rowInserter = new RowInserter(this->db);
-    ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
-    folderInserter->insertRootFolder(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    QuerySaveGroupItem queries(this->db);
-    this->currentSaveGroupNumber = queries.selectCurrentSaveGroupID();
+    folderRepository = new FolderRepository(database);
+    fileRepository = new FileRepository(database);
+    fileVersionRepository = new FileVersionRepository(database);
 }
 
 QSharedPointer<FileStorageManager> FileStorageManager::instance()
 {
-    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    appDataDir = QDir::toNativeSeparators(appDataDir);
-    appDataDir += QDir::separator();
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
+    QString folderName = "backup_2";
+    QDir(tempPath).mkdir(folderName);
 
-    auto backupDir = appDataDir + "backup" + QDir::separator();
+    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    QDir dir;
-    dir.mkdir(backupDir);
-
-    auto *rawPtr = new FileStorageManager(backupDir);
-    QSharedPointer<FileStorageManager> result(rawPtr);
+    auto *rawPtr = new FileStorageManager(storageDb, tempPath + folderName);
+    auto result = QSharedPointer<FileStorageManager>(rawPtr);
 
     return result;
-}
-
-bool FileStorageManager::addNewFile(const QString &pathToFile,
-                                    const QString &symbolDirectory,
-                                    bool isFrozenFile,
-                                    bool isAutoSyncEnabled,
-                                    const QString &userDirectory,
-                                    const QString &description,
-                                    const QString &newFileName)
-{
-    QString fileName, fileExtension, internalFileName, fileHash;
-    qlonglong fileSize;
-
-    PtrTo_RowFileEvent rowUnRegisteredFileEvent = this->addUnRegisteredFile(pathToFile,
-                                                                      &internalFileName,
-                                                                      &fileHash,
-                                                                      &fileSize);
-
-    if(!rowUnRegisteredFileEvent->isExistInDB())
-        return false;
-
-    bool isFolderCreated = this->addNewFolder(symbolDirectory, userDirectory);
-
-    if(!isFolderCreated)
-        return false;
-
-    QFileInfo fileInfo(pathToFile);
-
-    if(newFileName.isEmpty())
-        fileName = fileInfo.baseName();
-    else
-        fileName = newFileName;
-
-    if(fileInfo.completeSuffix().isEmpty())
-        fileExtension = "";
-    else
-        fileExtension = ("." + fileInfo.completeSuffix());
-
-    bool result = this->transactionInsertRowFileRecord(fileName,
-                                                       fileExtension,
-                                                       symbolDirectory,
-                                                       userDirectory,
-                                                       isFrozenFile,
-                                                       isAutoSyncEnabled,
-                                                       fileSize,
-                                                       fileHash,
-                                                       description,
-                                                       internalFileName,
-                                                       rowUnRegisteredFileEvent);
-
-    if(result == true && isFrozenFile == false)
-    {
-        QString userFilePath = userDirectory + fileName + fileExtension;
-        //emit signalMonitoredFileAddedByBackend(userFilePath);
-    }
-
-    return result;
-}
-
-bool FileStorageManager::addNewVersion(const QString &pathToSourceFile,
-                                       const QString &pathToSymbolFile,
-                                       qlonglong versionNumber,
-                                       const QString &description)
-{
-    QString internalFileName, fileHash;
-    qlonglong fileSize;
-
-    PtrTo_RowFileEvent rowUnRegisteredFileEvent = this->addUnRegisteredFile(pathToSourceFile,
-                                                                      &internalFileName,
-                                                                      &fileHash,
-                                                                      &fileSize);
-
-    if(!rowUnRegisteredFileEvent->isExistInDB())
-        return false;
-
-    bool result = this->transactionInsertRowFileVersion(pathToSymbolFile,
-                                                        versionNumber,
-                                                        internalFileName,
-                                                        fileSize,
-                                                        fileHash,
-                                                        description,
-                                                        rowUnRegisteredFileEvent);
-
-    return result;
-}
-
-bool FileStorageManager::appendNewVersion(const QString &pathToSourceFile,
-                                          const QString &pathToSymbolFile,
-                                          const QString &description)
-{
-    auto parentRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!parentRecord->isExistInDB())
-        return false;
-
-    qlonglong newVersionNumber = parentRecord->getLatestVersionNumber() + 1;
-
-    auto result = this->addNewVersion(pathToSourceFile, pathToSymbolFile, newVersionNumber, description);
-
-    return result;
-}
-
-bool FileStorageManager::deleteFiles(const QStringList &symbolFilePathList)
-{
-    if(symbolFilePathList.isEmpty())
-        return false;
-
-    QList<PtrTo_RowFileRecord> argument;
-    QStringList userFilePathList;
-
-    for(const auto &currentSymbolPath : symbolFilePathList)
-    {
-        PtrTo_RowFileRecord targetRow = QueryFileRecord(this->db).selectRowBySymbolFilePath(currentSymbolPath);
-
-        if(!targetRow->isExistInDB())
-            return false;
-
-        userFilePathList << targetRow->getUserFilePath();
-        argument << targetRow;
-    }
-
-    QList<PtrTo_RowFileEvent> events = this->transactionDeleteRowFileRecord(argument);
-
-    if(!events.isEmpty())
-    {
-//        for(const auto currentUserFilePath : userFilePathList)
-//        {
-//            emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
-//        }
-
-        for(const auto currentEvent : events)
-        {
-            bool isFileDeleted = this->deleteUnRegisteredFile(currentEvent);
-
-            if(!isFileDeleted)
-                return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool FileStorageManager::deleteVersions(const QString &pathToSymbolFile, QList<qlonglong> versionNumberList)
-{
-    if(versionNumberList.isEmpty())
-        return false;
-
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    QList<PtrTo_RowFileVersion> argument;
-
-    for(auto currentVersionNumber : versionNumberList)
-    {
-        PtrTo_RowFileVersion rowVersion = rowRecord->getRowFileVersion(currentVersionNumber);
-
-        if(!rowVersion->isExistInDB())
-            return false;
-
-        argument << rowVersion;
-    }
-
-    QList<PtrTo_RowFileEvent> events = this->transactionDeleteRowFileVersion(argument);
-
-    if(!events.isEmpty())
-    {
-        for(const auto currentEvent : events)
-        {
-            bool isFileDeleted = this->deleteUnRegisteredFile(currentEvent);
-
-            if(!isFileDeleted)
-                return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool FileStorageManager::updateNameOfFile(const QString &pathToSymbolFile, const QString &newName)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    if(rowRecord->getFileName() == newName)
-        return true;
-
-    auto oldUserFilePath = rowRecord->getUserFilePath();
-
-    bool result = rowRecord->setFileName(newName);
-
-//    if(result == true)
-//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
-
-    return result;
-}
-
-bool FileStorageManager::updateExtensionOfFile(const QString &pathToSymbolFile, const QString &newExtension)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    if(rowRecord->getFileExtension() == newExtension)
-        return true;
-
-    auto oldUserFilePath = rowRecord->getUserFilePath();
-    bool result = rowRecord->setFileExtension(newExtension);
-
-//    if(result == true)
-//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
-
-    return result;
-}
-
-bool FileStorageManager::updateSymbolDirectoryOfFile(const QString &pathToSymbolFile, const QString &newSymbolDir)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    if(rowRecord->getSymbolDirectory() == newSymbolDir)
-        return true;
-
-    bool result = rowRecord->setSymbolDirectory(newSymbolDir);
-
-    return result;
-}
-
-bool FileStorageManager::updateUserDirectoryOfFile(const QString &pathToSymbolFile, const QString &newUserDir)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    if(rowRecord->getUserDirectory() == newUserDir)
-        return true;
-
-    auto oldUserFilePath = rowRecord->getUserFilePath();
-    bool result = rowRecord->setUserDirectory(newUserDir);
-
-//    if(result == true)
-//        emit signalMonitoredFilePathChangedByBackend(oldUserFilePath, rowRecord->getUserFilePath());
-
-    return result;
-}
-
-bool FileStorageManager::updateFrozenStatusOfFile(const QString &pathToSymbolFile, bool isFrozen)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    if(rowRecord->getIsFrozen() == isFrozen)
-        return true;
-
-    bool result = rowRecord->setIsFrozen(isFrozen);
-
-    //if(result == true && isFrozen == true)
-        //emit signalMonitoredFileRemovedByBackend(rowRecord->getUserFilePath());
-
-    return result;
-}
-
-bool FileStorageManager::updateVersionNumberOfFile(const QString &pathToSymbolFile, qlonglong oldNumber, qlonglong newNumber)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return false;
-
-    PtrTo_RowFileVersion rowVersion = rowRecord->getRowFileVersion(oldNumber);
-
-    if(!rowVersion->isExistInDB())
-        return false;
-
-    if(rowVersion->getVersionNumber() == newNumber)
-        return true;
-
-    bool result = rowVersion->setVersionNumber(newNumber);
-
-    return result;
-}
-
-bool FileStorageManager::updateContentOfFile(const QString &pathToSymbolFile, qlonglong versionNumber, const QString &pathToNewContent)
-{
-    QString internalFileName, fileHash;
-    qlonglong fileSize;
-
-    PtrTo_RowFileEvent rowUnRegisteredFileEvent = this->addUnRegisteredFile(pathToNewContent,
-                                                                      &internalFileName,
-                                                                      &fileHash,
-                                                                      &fileSize);
-
-    if(!rowUnRegisteredFileEvent->isExistInDB())
-        return false;
-
-    bool isTransactionSuccessful = this->transactionUpdateRowFileVersion(pathToSymbolFile,
-                                                                         versionNumber,
-                                                                         internalFileName,
-                                                                         fileHash,
-                                                                         fileSize,
-                                                                         rowUnRegisteredFileEvent);
-
-    if(!isTransactionSuccessful)
-        return false;
-
-    bool result = this->deleteUnRegisteredFile(rowUnRegisteredFileEvent);
-
-    return result;
-}
-
-bool FileStorageManager::markFileAsFavorite(const QString &pathToSymbolFile, bool status)
-{
-    auto rowFileRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowFileRecord->isExistInDB())
-        return false;
-
-    bool result = rowFileRecord->setIsFavorite(status);
-
-    return result;
-}
-
-void FileStorageManager::incrementSaveGroupNumber()
-{
-    this->currentSaveGroupNumber += 1;
-}
-
-bool FileStorageManager::isFileExistByUserFilePath(const QString &userFilePath) const
-{
-    bool queryResult = QueryFileRecord(this->db).isRowExistByUserFilePath(userFilePath);
-
-    return queryResult;
-}
-
-bool FileStorageManager::isFolderExistByUserFolderPath(const QString &userFolderPath) const
-{
-    bool result = false;
-
-    QString dir = userFolderPath;
-    if(!dir.endsWith(QDir::separator()))
-        dir.append(QDir::separator());
-
-    auto queryResult = QueryFolderRecord(this->db).selectRowByUserDirectory(dir);
-
-    if(queryResult->isExistInDB())
-        result = true;
-
-    return result;
-}
-
-QStringList FileStorageManager::getMonitoredFilePathList() const
-{
-    auto queryResult = QueryFileRecord(this->db).selectUserFilePathListFromActiveFiles();
-
-    return queryResult;
-}
-
-QStringList FileStorageManager::getMonitoredFolderPathList() const
-{
-    auto queryResult = QueryFileRecord(this->db).selectUserFolderPathListFromActiveFiles();
-
-    return queryResult;
-}
-
-QString FileStorageManager::getMatchingSymbolFolderPathForUserDirectory(const QString &userDirectory) const
-{
-    QString result = "";
-
-    // TODO remove this method with better conceptual design in FolderRecord entity.
-    QList<PtrTo_RowFileRecord> fileList = QueryFileRecord(this->db).selectRowsByUserDirectory(userDirectory);
-
-    if(!fileList.isEmpty())
-        result =  fileList.first()->getSymbolDirectory();
-
-    return result;
-}
-
-bool FileStorageManager::updateAllUserDirs(const QString &oldUserDir, const QString &newUserDir)
-{
-    return QueryFileRecord(this->db).updateAllUserDirs(oldUserDir, newUserDir);
-}
-
-qlonglong FileStorageManager::getCurrentSaveGroupNumber() const
-{
-    return this->currentSaveGroupNumber;
-}
-
-QList<qlonglong> FileStorageManager::getAvailableSaveGroupNumbers() const
-{
-    auto result = QuerySaveGroupItem(this->db).selectSaveGroupIDList();
-
-    return result;
-}
-
-QList<SaveGroupItemMetaData> FileStorageManager::getSaveGroupItems(qlonglong saveGropuNumber) const
-{
-    QList<SaveGroupItemMetaData> result;
-
-    auto queryResult = QuerySaveGroupItem(this->db).selectRowsInSaveGroup(saveGropuNumber);
-
-    for(const auto rowSaveGroupItem : queryResult)
-    {
-        result.append(rowSaveGroupItem);
-    }
-
-    return result;
-}
-
-FolderRequestResult FileStorageManager::getFolderMetaData(const QString &directory) const
-{
-    QString dir = directory;
-    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    FolderRequestResult result;
-
-    auto rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
-
-    if(rowFolder->isExistInDB())
-        result = FolderRequestResult(rowFolder);
-
-    return result;
-}
-
-QList<FolderRequestResult> FileStorageManager::getFavoriteFolderMetaDataList() const
-{
-    QList<FolderRequestResult> result;
-
-    auto queryResult = QueryFolderRecord(this->db).selectFavoriteFolderList();
-
-    for(auto currentRow : queryResult)
-    {
-        FolderRequestResult item(currentRow);
-        result.append(item);
-    }
-
-    return result;
-}
-
-FileRequestResult FileStorageManager::getFileMetaData(const QString &symbolOrUserPathToFile) const
-{
-    FileRequestResult result;
-
-    auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(symbolOrUserPathToFile);
-
-    if(rowRecord->isExistInDB())
-        result = FileRequestResult(rowRecord);
-    else
-    {
-        rowRecord = QueryFileRecord(this->db).selectRowByUserFilePath(symbolOrUserPathToFile);
-
-        if(rowRecord->isExistInDB())
-            result = FileRequestResult(rowRecord);
-    }
-
-    return result;
-}
-
-QList<FileRequestResult> FileStorageManager::getFavoriteFileMetaDataList() const
-{
-    QList<FileRequestResult> result;
-
-    auto queryResult = QueryFileRecord(this->db).selectFavoriteFileList();
-
-    for(auto currentRow : queryResult)
-    {
-        FileRequestResult item(currentRow);
-        result.append(item);
-    }
-
-    return result;
-}
-
-FileVersionRequestResult FileStorageManager::getFileVersionMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
-{
-    FileVersionRequestResult result;
-
-    auto rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
-        return result;
-
-    auto rowVersion = rowRecord->getRowFileVersion(versionNumber);
-
-    if(!rowVersion->isExistInDB())
-        return result;
-
-    result = FileVersionRequestResult(rowVersion);
-
-    return result;
-}
-
-SaveGroupItemMetaData FileStorageManager::getSaveGroupItemMetaData(const QString &pathToSymbolFile, qlonglong versionNumber) const
-{
-    SaveGroupItemMetaData result;
-
-    auto rowFileRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(rowFileRecord->isExistInDB())
-    {
-        auto rowFileVersion = rowFileRecord->getRowFileVersion(versionNumber);
-
-        if(rowFileVersion->isExistInDB())
-        {
-            auto queryResult = rowFileVersion->getSaveGroupItem();
-
-            result = SaveGroupItemMetaData(queryResult);
-        }
-    }
-
-    return result;
-}
-
-const QString &FileStorageManager::rootFolderPath()
-{
-    return CONST_SYMBOL_DIRECTORY_SEPARATOR;
-}
-
-// TODO Remove when V2_DialogAddNewFolder compeleted
-bool FileStorageManager::addNewFolder(const QString &symbolDirectory)
-{
-    QString dir = symbolDirectory;
-    if(!symbolDirectory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    if(!this->isFolderSymbolExist(dir))
-    {
-        dir.truncate(dir.lastIndexOf(CONST_SYMBOL_DIRECTORY_SEPARATOR));
-
-        QStringList tokenList = dir.split(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        PtrTo_RowFolderRecord currentFolder;
-
-        auto *rowInserter = new RowInserter(this->db);
-        ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
-
-        for(auto const &token : tokenList)
-        {
-            if(token.isEmpty())
-            {
-                currentFolder = folderInserter->insertRootFolder(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-                if(!currentFolder->isExistInDB())
-                    return false;
-            }
-            else
-            {
-                QString suffix = token + CONST_SYMBOL_DIRECTORY_SEPARATOR;
-                bool isChildAdded = currentFolder->addChildFolder(suffix);
-
-                if(!isChildAdded)
-                    return false;
-                else
-                    currentFolder = currentFolder->getChildFolderBySuffix(suffix);
-            }
-        }
-
-        return true;
-    }
-
-    return true;
-}
-
-bool FileStorageManager::addNewFolder(const QString &symbolDirectory, const QString &userDirectory)
-{
-    QString dir = symbolDirectory;
-    if(!symbolDirectory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    if(!this->isFolderSymbolExist(dir))
-    {
-        dir.truncate(dir.lastIndexOf(CONST_SYMBOL_DIRECTORY_SEPARATOR));
-
-        QStringList tokenList = dir.split(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-        PtrTo_RowFolderRecord currentFolder;
-
-        auto *rowInserter = new RowInserter(this->db);
-        ScopedPtrTo_RowFolderRecordInserter folderInserter(rowInserter);
-
-        for(auto const &token : tokenList)
-        {
-            if(token.isEmpty())
-            {
-                currentFolder = folderInserter->insertRootFolder(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-                if(!currentFolder->isExistInDB())
-                    return false;
-            }
-            else
-            {
-                QString suffix = token + CONST_SYMBOL_DIRECTORY_SEPARATOR;
-                bool isChildAdded = currentFolder->addChildFolder(suffix, userDirectory);
-
-                if(!isChildAdded)
-                    return false;
-                else
-                    currentFolder = currentFolder->getChildFolderBySuffix(suffix);
-            }
-        }
-
-        return true;
-    }
-
-    return true;
-}
-
-bool FileStorageManager::markFolderAsFavorite(const QString &directory, bool status)
-{
-    auto rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(directory);
-
-    if(!rowFolder->isExistInDB())
-        return false;
-
-    bool result = rowFolder->setIsFavorite(status);
-
-    return result;
-}
-
-bool FileStorageManager::isFolderSymbolExist(const QString &directory) const
-{
-    QString dir = directory;
-
-    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    PtrTo_RowFolderRecord rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
-
-    if(rowFolder->isExistInDB())
-        return true;
-
-    return false;
-}
-
-bool FileStorageManager::deleteFolder(const QString &directory)
-{
-    QString dir = directory;
-
-    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    PtrTo_RowFolderRecord rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
-
-    if(!rowFolder->isExistInDB())
-        return false;
-
-    QList<PtrTo_RowFolderRecord> parentFolders;
-    parentFolders.append(rowFolder);
-
-    QList<PtrTo_RowFileRecord> targetFiles;
-    QStringList userFilePathList;
-
-    while(!parentFolders.isEmpty())
-    {
-        parentFolders << parentFolders.first()->getAllChildRowFolderRecords();
-        targetFiles << parentFolders.first()->getAllChildRowFileRecords();
-        parentFolders.removeFirst();
-    }
-
-    for(const auto currentRowFileRecord : targetFiles)
-    {
-        userFilePathList << currentRowFileRecord->getUserFilePath();
-    }
-
-    QList<PtrTo_RowFileEvent> events = this->transactionDeleteRowFileRecord(targetFiles);
-
-    if(events.isEmpty())
-        return false;
-
-//    for(const auto currentUserFilePath : userFilePathList)
-//    {
-//        emit signalMonitoredFileRemovedByBackend(currentUserFilePath);
-//    }
-
-    for(const auto &currentEvent : events)
-    {
-        bool isFileDeleted = this->deleteUnRegisteredFile(currentEvent);
-
-        if(!isFileDeleted)
-            return false;
-    }
-
-    RowDeleter folderDeleter(rowFolder);
-
-    bool result = folderDeleter.deleteRow();
-
-    return result;
-}
-
-bool FileStorageManager::renameFolder(const QString &directory, const QString &newSuffix)
-{
-    QString dir = directory;
-
-    if(!directory.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        dir.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    PtrTo_RowFolderRecord rowFolder = QueryFolderRecord(this->db).selectRowByDirectory(dir);
-
-    if(!rowFolder->isExistInDB())
-        return false;
-
-    QString suffix = newSuffix;
-
-    if(!newSuffix.endsWith(CONST_SYMBOL_DIRECTORY_SEPARATOR))
-        suffix = suffix.append(CONST_SYMBOL_DIRECTORY_SEPARATOR);
-
-    if(rowFolder->getSuffixDirectory() == suffix)
-        return true;
-
-    bool result = rowFolder->setSuffixDirectory(suffix);
-
-    return result;
-}
-
-const QString &FileStorageManager::getBackupDirectory() const
-{
-    return backupDirectory;
 }
 
 FileStorageManager::~FileStorageManager()
 {
-    this->db.close();
+    database.close();
+
+    delete folderRepository;
+    delete fileRepository;
+    delete fileVersionRepository;
 }
 
-PtrTo_RowFolderRecord FileStorageManager::getRootFolderSymbol() const
+bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QString &userFolderPath)
 {
-    QueryFolderRecord queries(this->db);
+    bool result = false;
 
-    PtrTo_RowFolderRecord result = queries.selectRowByDirectory(CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
+    QString _userFolderPath = QDir::toNativeSeparators(userFolderPath);
+
+    bool isUserFolderExist = QDir(userFolderPath).exists();
+    if(!isUserFolderExist)
+        return false;
+
+    if(!_userFolderPath.endsWith(QDir::separator()) && !_userFolderPath.isEmpty())
+        _userFolderPath.append(QDir::separator());
+
+    if(!_symbolFolderPath.startsWith(separator))
+        _symbolFolderPath.prepend(separator);
+
+    if(!_symbolFolderPath.endsWith(separator))
+        _symbolFolderPath.append(separator);
+
+    FolderEntity entityBySymbolPath = folderRepository->findBySymbolPath(_symbolFolderPath);
+
+    QString symbolPathFromUserPath = folderRepository->findSymbolPathByUserFolderPath(_userFolderPath);
+    FolderEntity entityByUserPath = folderRepository->findBySymbolPath(symbolPathFromUserPath);
+
+    if(!entityBySymbolPath.isExist() && !entityByUserPath.isExist())
+    {
+        QStringList tokenList = _symbolFolderPath.chopped(1).split(separator); // Remove last seperator.
+        for(QString &currentToken : tokenList)
+            currentToken.append(separator);
+
+        QString parentSymbolFolderPath = "";
+        QString suffixPath = "";
+
+        for(const QString &currentToken : tokenList)
+        {
+            suffixPath = currentToken;
+            QString currentSymbolFolder = parentSymbolFolderPath + suffixPath;
+            FolderEntity entity = folderRepository->findBySymbolPath(currentSymbolFolder);
+
+            if(!entity.isExist())
+            {
+                entity.parentFolderPath = parentSymbolFolderPath;
+                entity.suffixPath = suffixPath;
+                entity.isFrozen = false;
+                entity.userFolderPath = "";
+
+                if(currentSymbolFolder == _symbolFolderPath)
+                    entity.userFolderPath = _userFolderPath;
+
+                result = folderRepository->save(entity);
+            }
+
+            parentSymbolFolderPath.append(suffixPath);
+        }
+    }
 
     return result;
 }
 
-PtrTo_RowFileEvent FileStorageManager::addUnRegisteredFile(const QString &pathToSourceFile,
-                                                     QString *resultInternalFileName,
-                                                     QString *resultFileHash,
-                                                     qlonglong *resultSize)
+bool FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, bool isFrozen, const QString &description)
 {
-    *resultInternalFileName = INVALID_FIELD_VALUE_QSTRING;
-    *resultFileHash = INVALID_FIELD_VALUE_QSTRING;
-    *resultSize = INVALID_FIELD_VALUE_QLONGLONG;
-    PtrTo_RowFileEvent resultEmptyEvent(new RowFileEvent());
+    QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
+    QFileInfo info(pathToFile);
 
-    QFile sourceFile(pathToSourceFile);
-    QString internalFileName = this->generateInternalFileName();
-    QString internalFilePath = this->getBackupDirectory() + internalFileName;
+    if(!info.isFile() || !info.exists())
+        return false;
 
-    bool isFileExist = sourceFile.exists();
+    if(!_symbolFolderPath.startsWith(separator))
+        _symbolFolderPath.prepend(separator);
 
-    if(!isFileExist)
-        return resultEmptyEvent;
+    if(!_symbolFolderPath.endsWith(separator))
+        _symbolFolderPath.append(separator);
 
-    bool isFileOpened = sourceFile.open(QFile::OpenModeFlag::ReadOnly);
+    FolderEntity folderEntity = folderRepository->findBySymbolPath(_symbolFolderPath);
 
-    if(!isFileOpened)
-        return resultEmptyEvent;
+    if(!folderEntity.isExist()) // Symbol folder does not exist
+        return false;
 
-    QString fileHash = this->getHashOf(sourceFile.readAll());
-    sourceFile.close();
+    QString symbolFilePath = folderEntity.symbolFolderPath() + info.fileName();
+    FileEntity fileEntity = fileRepository->findBySymbolPath(symbolFilePath);
 
-    auto *rowInserter = new RowInserter(this->db);
-    ScopedPtrTo_RowFileEventInserter eventInserter(rowInserter);
-    PtrTo_RowFileEvent rowUnRegisteredFileEvent = eventInserter->insertUnRegisteredFileEvent(internalFileName);
+    if(fileEntity.isExist()) // Symbol folder is already exist
+        return false;
 
-    bool isFileCopied = sourceFile.copy(internalFilePath);
+    fileEntity.fileName = info.fileName();
+    fileEntity.symbolFolderPath = folderEntity.symbolFolderPath();
+    fileEntity.isFrozen = isFrozen;
 
-    if(!isFileCopied)
-        return resultEmptyEvent;
+    bool isFileInserted = fileRepository->save(fileEntity);
 
-    if(rowUnRegisteredFileEvent->isExistInDB())
-    {
-        *resultInternalFileName = internalFileName;
-        *resultFileHash = fileHash;
-        *resultSize = sourceFile.size();
+    if(!isFileInserted)
+        return false;
 
-        return rowUnRegisteredFileEvent;
-    }
+    bool result = appendVersion(symbolFilePath, pathToFile, description);
+    return result;
+}
+
+bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QString &pathToFile, const QString &description)
+{
+    QFileInfo info(pathToFile);
+
+    if(!info.isFile() || !info.exists())
+        return false;
+
+    FileEntity fileEntity = fileRepository->findBySymbolPath(symbolFilePath);
+
+    if(!fileEntity.isExist())
+        return false;
+
+    qlonglong versionNumber = fileVersionRepository->maxVersionNumber(fileEntity.symbolFilePath());
+
+    if(versionNumber <= 0)
+        versionNumber = 1;
     else
-        return resultEmptyEvent;
-}
+        versionNumber += 1;
 
-bool FileStorageManager::deleteUnRegisteredFile(PtrTo_RowFileEvent event)
-{
-    if(event->isUnRegisteredFileEvent())
-    {
-        QFile targetFile(this->getBackupDirectory() + event->getData());
+    QFile file(pathToFile);
+    QString internalFileName = generateRandomFileName();
+    QString generatedFilePath = getBackupFolderPath() + internalFileName;
+    bool isCopied = file.copy(generatedFilePath);
 
-        if(targetFile.exists())
-        {
-            bool isFileDeleted = targetFile.remove();
-
-            if(!isFileDeleted)
-                return false;
-        }
-
-        RowDeleter deleteEvent(event);
-        bool result = deleteEvent.deleteRow();
-
-        return result;
-    }
-
-    return false;
-}
-
-bool FileStorageManager::transactionInsertRowFileRecord(const QString &fileName,
-                                                        const QString &fileExtension,
-                                                        const QString &symbolDirectory,
-                                                        const QString &userDirectory,
-                                                        bool isFrozen,
-                                                        bool isAutoSyncEnabled,
-                                                        qlonglong fileSize,
-                                                        const QString &fileHash,
-                                                        const QString &description,
-                                                        const QString &internalFileName,
-                                                        PtrTo_RowFileEvent unRegisteredFileEvent)
-{
-    if(this->db.transaction())
-    {
-        auto *rowInserter = new RowInserter(this->db);
-        ScopedPtrTo_RowFileRecordInserter fileRecordInserter(rowInserter);
-        PtrTo_RowFileRecord rowRecord;
-
-        if(isFrozen == false)
-        {
-            rowRecord = fileRecordInserter->insertActiveFile(fileName, fileExtension, symbolDirectory, userDirectory, isAutoSyncEnabled);
-        }
-        else
-        {
-            if(userDirectory.isEmpty())
-                rowRecord = fileRecordInserter->insertFrozenFile(fileName, fileExtension, symbolDirectory, isAutoSyncEnabled);
-            else
-                rowRecord = fileRecordInserter->insertFrozenFile(fileName, fileExtension, symbolDirectory, isAutoSyncEnabled, userDirectory);
-        }
-
-        if(rowRecord->isExistInDB())
-        {
-            auto rowVersion = rowRecord->insertVersion(1,
-                                                       internalFileName,
-                                                       fileSize,
-                                                       fileHash,
-                                                       description);
-
-            if(rowVersion->isExistInDB())
-            {
-                auto rowSaveGroupItem = rowVersion->includeInSaveGroup(this->getCurrentSaveGroupNumber());
-
-                if(rowSaveGroupItem->isExistInDB())
-                {
-                    RowDeleter deleteEvent(unRegisteredFileEvent);
-                    bool isUnRegisterEventDeleted = deleteEvent.deleteRow();
-
-                    if(isUnRegisterEventDeleted)
-                    {
-                        if(this->db.commit())
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        this->db.rollback();
-    }
-
-    return false;
-}
-
-bool FileStorageManager::transactionInsertRowFileVersion(const QString &pathToSymbolFile,
-                                                         qlonglong versionNumber,
-                                                         const QString &internalFileName,
-                                                         qlonglong fileSize,
-                                                         const QString &fileHash,
-                                                         const QString &description,
-                                                         PtrTo_RowFileEvent unRegisteredFileEvent)
-{
-    PtrTo_RowFileRecord parentRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!parentRecord->isExistInDB())
+    if(!isCopied)
         return false;
 
-    if(this->db.transaction())
-    {
-        if(parentRecord->isExistInDB())
-        {
-            auto rowVersion = parentRecord->insertVersion(versionNumber,
-                                                         internalFileName,
-                                                         fileSize,
-                                                         fileHash,
-                                                         description);
+    bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
 
-            if(rowVersion->isExistInDB())
-            {
-                auto rowSaveGroupItem = rowVersion->includeInSaveGroup(this->getCurrentSaveGroupNumber());
-
-                if(rowSaveGroupItem->isExistInDB())
-                {
-                    RowDeleter rowDeleter(unRegisteredFileEvent);
-                    bool isEventDeleted = rowDeleter.deleteRow();
-
-                    if(isEventDeleted)
-                    {
-                        if(this->db.commit())
-                            return true;
-                    }
-                }
-            }
-
-            this->db.rollback();
-        }
-    }
-
-    return false;
-}
-
-bool FileStorageManager::transactionUpdateRowFileVersion(const QString &pathToSymbolFile,
-                                                         qlonglong versionNumber,
-                                                         const QString &internalFileName,
-                                                         const QString &newHash,
-                                                         qlonglong fileSize,
-                                                         PtrTo_RowFileEvent rowUnRegisteredFileEvent)
-{
-    PtrTo_RowFileRecord rowRecord = QueryFileRecord(this->db).selectRowBySymbolFilePath(pathToSymbolFile);
-
-    if(!rowRecord->isExistInDB())
+    if(!isOpen)
         return false;
 
-    PtrTo_RowFileVersion rowVerison = rowRecord->getRowFileVersion(versionNumber);
+    QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
+    hasher.addData(&file);
+    QString fileHash = QString(hasher.result().toHex());
 
-    if(!rowVerison->isExistInDB())
+    file.close();
+
+    FileVersionEntity versionEntity;
+    versionEntity.symbolFilePath = fileEntity.symbolFilePath();
+    versionEntity.versionNumber = versionNumber;
+    versionEntity.size = file.size();
+    versionEntity.internalFileName = internalFileName;
+    versionEntity.timestamp = QDateTime::currentDateTime();
+    versionEntity.description = description;
+    versionEntity.hash = fileHash;
+
+    bool isVersionInserted = fileVersionRepository->save(versionEntity);
+
+    if(!isVersionInserted)
         return false;
-
-    if(this->db.transaction())
-    {
-        bool isOldFileNameSaved = rowUnRegisteredFileEvent->setData(rowVerison->getInternalFileName());
-
-        if(!isOldFileNameSaved)
-        {
-            this->db.rollback();
-            return false;
-        }
-
-        bool isNameUpdated = rowVerison->setInternalFileName(internalFileName);
-        bool isHashUpdated = rowVerison->setHash(newHash);
-        bool isSizeUpdated = rowVerison->setSize(fileSize);
-        bool isTimestampUpdated = rowVerison->setTimestamp(QDateTime::currentDateTime());
-
-        if(!isNameUpdated || !isHashUpdated || !isSizeUpdated || !isTimestampUpdated)
-        {
-            this->db.rollback();
-            return false;
-        }
-
-        if(!this->db.commit())
-        {
-            this->db.rollback();
-            return false;
-        }
-    }
 
     return true;
 }
 
-QList<PtrTo_RowFileEvent> FileStorageManager::transactionDeleteRowFileRecord(QList<PtrTo_RowFileRecord> targetRecords)
+QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
-    QList<PtrTo_RowFileEvent> result;
-    QList<PtrTo_RowFileEvent> emptyList;
+    QJsonObject result;
 
-    if(targetRecords.isEmpty())
-        return emptyList;
+    FolderEntity entity = folderRepository->findBySymbolPath(symbolFolderPath, includeChildren);
+    result = folderEntityToJsonObject(entity);
 
-    if(this->db.transaction())
-    {
-        for(auto &currentRecord : targetRecords)
-        {
-            for(auto &currentVersion : currentRecord->getAllRowFileVersions())
-            {
-                PtrTo_RowFileEvent unRegisterEvent = currentVersion->markAsUnRegistered();
-
-                if(!unRegisterEvent->isExistInDB())
-                {
-                    this->db.rollback();
-                    return emptyList;
-                }
-                else
-                    result.append(unRegisterEvent);
-            }
-
-            RowDeleter deleteRecord(currentRecord);
-            bool isDeleted = deleteRecord.deleteRow();
-
-            if(!isDeleted)
-            {
-                this->db.rollback();
-                return emptyList;
-            }
-        }
-
-        if(this->db.commit())
-            return result;
-        else
-        {
-            this->db.rollback();
-            return emptyList;
-        }
-
-    }
-
-    return emptyList;
+    return result;
 }
 
-QList<PtrTo_RowFileEvent> FileStorageManager::transactionDeleteRowFileVersion(QList<PtrTo_RowFileVersion> targetVersions)
+QJsonObject FileStorageManager::getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren) const
 {
-    QList<PtrTo_RowFileEvent> emptyList, result;
-    PtrTo_RowFileRecord rowRecord = targetVersions.first()->getParentRowFileRecord();
-
-    if(this->db.transaction())
-    {
-        for(auto currentRowFileVersion : targetVersions)
-        {
-            PtrTo_RowFileEvent markedEvent = currentRowFileVersion->markAsUnRegistered();
-
-            if(!markedEvent->isExistInDB())
-            {
-                this->db.rollback();
-                return emptyList;
-            }
-
-            result.append(markedEvent);
-        }
-
-        qlonglong versionCount = rowRecord->getRowFileVersionCount();
-        bool isRowDeleted = false;
-
-        if(versionCount == targetVersions.size())
-        {
-            RowDeleter recordDeleter(rowRecord);
-            isRowDeleted = recordDeleter.deleteRow();
-        }
-        else
-        {
-            for(auto &currentRowFileVersion : targetVersions)
-            {
-                RowDeleter versionDeleter(currentRowFileVersion);
-                isRowDeleted = versionDeleter.deleteRow();
-
-                if(isRowDeleted == false)
-                    break;
-            }
-        }
-
-        if(!isRowDeleted)
-        {
-            this->db.rollback();
-            return emptyList;
-        }
-
-        if(this->db.commit())
-            return result;
-        else
-        {
-            this->db.rollback();
-            return emptyList;
-        }
-    }
-
-    return emptyList;
+    QString symbolPath = folderRepository->findSymbolPathByUserFolderPath(userFolderPath);
+    QJsonObject result = getFolderJsonBySymbolPath(symbolPath, includeChildren);
+    return result;
 }
 
-QString FileStorageManager::getHashOf(const QByteArray &input) const
+QJsonObject FileStorageManager::getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions) const
 {
-    QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
-    hasher.addData(input);
+    QJsonObject result;
 
-    return QString(hasher.result().toHex());
+    FileEntity entity = fileRepository->findBySymbolPath(symbolFilePath, includeVersions);
+    result = fileEntityToJsonObject(entity);
+
+    return result;
 }
 
-QString FileStorageManager::generateInternalFileName() const
+QJsonObject FileStorageManager::getFileJsonByUserPath(const QString &userFilePath, bool includeVersions) const
 {
-    QString uniquePart = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-    QString fileName = uniquePart + INTERNAL_FILE_NAME_EXTENSION;
+    QFileInfo info(userFilePath);
+    QString userFolderPath = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+    QString symbolFolderPath = folderRepository->findSymbolPathByUserFolderPath(userFolderPath);
+    QString symbolFilePath = symbolFolderPath + info.fileName();
 
-    do
+    QJsonObject result = getFileJsonBySymbolPath(symbolFilePath, includeVersions);
+    return result;
+}
+
+QJsonObject FileStorageManager::getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const
+{
+    QJsonObject result;
+
+    FileVersionEntity entity = fileVersionRepository->findVersion(symbolFilePath, versionNumber);
+    result = fileVersionEntityToJsonObject(entity);
+
+    return result;
+}
+
+QJsonArray FileStorageManager::getActiveFolderList() const
+{
+    QJsonArray result;
+
+    QList<FolderEntity> queryResult = folderRepository->findActiveFolders();
+
+    for(const FolderEntity &entity : queryResult)
     {
-        QFileInfo info(this->getBackupDirectory() + fileName);
-        bool isFileNameUnique = info.exists();
+        QJsonObject folderJson = folderEntityToJsonObject(entity);
+        result.append(folderJson);
+    }
 
-        if(isFileNameUnique) // If collision happened.
+    return result;
+}
+
+QJsonArray FileStorageManager::getActiveFileList() const
+{
+    QJsonArray result;
+
+    QList<FileEntity> queryResult = fileRepository->findActiveFiles();
+
+    for(const FileEntity &entity : queryResult)
+    {
+        QJsonObject folderJson = fileEntityToJsonObject(entity);
+        result.append(folderJson);
+    }
+
+    return result;
+}
+
+QString FileStorageManager::getBackupFolderPath() const
+{
+    return backupFolderPath;
+}
+
+void FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPath)
+{
+    backupFolderPath = QDir::toNativeSeparators(newBackupFolderPath);
+
+    if(!backupFolderPath.endsWith(QDir::separator()))
+        backupFolderPath.append(QDir::separator());
+}
+
+QString FileStorageManager::generateRandomFileName()
+{
+    QString result = QUuid::createUuid().toString(QUuid::StringFormat::Id128) + ".file";
+    return result;
+}
+
+QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &entity) const
+{
+    QJsonObject result;
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::Folder::ParentFolderPath] = entity.parentFolderPath;
+    result[JsonKeys::Folder::SuffixPath] = entity.suffixPath;
+    result[JsonKeys::Folder::SymbolFolderPath] = entity.symbolFolderPath();
+    result[JsonKeys::Folder::UserFolderPath] = entity.userFolderPath;
+    result[JsonKeys::Folder::IsFrozen] = entity.isFrozen;
+
+    result[JsonKeys::Folder::ChildFolders] = QJsonValue();
+    result[JsonKeys::Folder::ChildFiles] = QJsonValue();
+
+    if(!entity.getChildFolders().isEmpty())
+    {
+        QJsonArray jsonArrayChildFolder;
+        for(const FolderEntity &entityChildFolder : entity.getChildFolders())
         {
-            uniquePart += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-            fileName = uniquePart + INTERNAL_FILE_NAME_EXTENSION;
-        }
-        else
-            break;
-    }
-    while (true);
+            QJsonObject jsonChildFolder;
 
-    return fileName;
+            jsonChildFolder[JsonKeys::IsExist] = entityChildFolder.isExist();
+            jsonChildFolder[JsonKeys::Folder::ParentFolderPath] = entityChildFolder.parentFolderPath;
+            jsonChildFolder[JsonKeys::Folder::SuffixPath] = entityChildFolder.suffixPath;
+            jsonChildFolder[JsonKeys::Folder::SymbolFolderPath] = entityChildFolder.symbolFolderPath();
+            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = entityChildFolder.userFolderPath;
+            jsonChildFolder[JsonKeys::Folder::IsFrozen] = entityChildFolder.isFrozen;
+
+            jsonChildFolder[JsonKeys::Folder::ChildFolders] = QJsonValue();
+            jsonChildFolder[JsonKeys::Folder::ChildFiles] = QJsonValue();
+            jsonArrayChildFolder.append(jsonChildFolder);
+        }
+
+        result[JsonKeys::Folder::ChildFolders] = jsonArrayChildFolder;
+    }
+
+    if(!entity.getChildFiles().isEmpty())
+    {
+        QJsonArray jsonArrayFileList;
+
+        for(const FileEntity &entityFile : entity.getChildFiles())
+        {
+            QJsonObject jsonChildFile;
+            jsonChildFile = fileEntityToJsonObject(entityFile);
+            jsonArrayFileList.append(jsonChildFile);
+        }
+
+        result[JsonKeys::Folder::ChildFiles] = jsonArrayFileList;
+    }
+
+    return result;
 }
 
-void FileStorageManager::extractSqliteDBIfNotExist()
+QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity) const
 {
-    QDir().mkdir(this->getBackupDirectory());
-    QString dbFilePath = QDir::toNativeSeparators(this->getBackupDirectory() + DB_FILE_NAME);
-    QFile dbFile(dbFilePath);
+    QJsonObject result;
 
-    if(!dbFile.exists())
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::File::FileName] = entity.fileName;
+    result[JsonKeys::File::IsFrozen] = entity.isFrozen;
+    result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
+    result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
+    result[JsonKeys::File::UserFilePath] = QJsonValue();
+    result[JsonKeys::File::VersionList] = QJsonValue();
+
+    FolderEntity parentEntity = folderRepository->findBySymbolPath(entity.symbolFolderPath);
+
+    if(!parentEntity.userFolderPath.isEmpty())
+        result[JsonKeys::File::UserFilePath] = parentEntity.userFolderPath + entity.fileName;
+
+    if(!entity.getVersionList().isEmpty())
     {
-        QFile db_file_res(":/resources/sql/" + DB_FILE_NAME);
-        db_file_res.copy(dbFilePath);
-        dbFile.setPermissions(QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner);
+        QJsonArray jsonArrayVersionList;
+        for(const FileVersionEntity &entityFileVersion : entity.getVersionList())
+        {
+            QJsonObject jsonFileVersion;
+            jsonFileVersion = fileVersionEntityToJsonObject(entityFileVersion);
+            jsonArrayVersionList.append(jsonFileVersion);
+        }
+
+        result[JsonKeys::File::VersionList] = jsonArrayVersionList;
     }
+
+    return result;
+}
+
+QJsonObject FileStorageManager::fileVersionEntityToJsonObject(const FileVersionEntity &entity) const
+{
+    QJsonObject result;
+
+    result[JsonKeys::IsExist] = entity.isExist();
+    result[JsonKeys::FileVersion::SymbolFilePath] = entity.symbolFilePath;
+    result[JsonKeys::FileVersion::VersionNumber] = entity.versionNumber;
+    result[JsonKeys::FileVersion::Size] = entity.size;
+    result[JsonKeys::FileVersion::Timestamp] = entity.timestamp.toString(Qt::DateFormat::TextDate);
+    result[JsonKeys::FileVersion::Description] = entity.description;
+    result[JsonKeys::FileVersion::Hash] = entity.hash;
+
+    return result;
 }

@@ -1,7 +1,6 @@
 #ifndef TABLEMODELFILEEXPLORER_H
 #define TABLEMODELFILEEXPLORER_H
 
-#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include <QAbstractTableModel>
 #include <QIcon>
 
@@ -31,7 +30,7 @@ public:
     };
 
 public:
-    TableModelFileExplorer(const FolderRequestResult &result, QObject *parent = nullptr);
+    TableModelFileExplorer(QJsonObject result, QObject *parent = nullptr);
     QString symbolPathFromModelIndex(const QModelIndex &index) const;
     TableItemType itemTypeFromModelIndex(const QModelIndex &index) const;
 
@@ -47,7 +46,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
 private:
-    static QList<TableItem> tableItemListFrom(const FolderRequestResult &parentFolder);
+    static QList<TableItem> tableItemListFrom(QJsonObject parentFolder);
 
 private:
     QList<TableItem> itemList;

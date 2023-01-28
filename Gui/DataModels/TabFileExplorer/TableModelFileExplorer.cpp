@@ -1,10 +1,14 @@
 #include "TableModelFileExplorer.h"
 
-#include <QFileIconProvider>
-#include <QPixmap>
-#include <QColor>
+#include "Utility/JsonDtoFormat.h"
 
-TableModelFileExplorer::TableModelFileExplorer(const FolderRequestResult &result, QObject *parent)
+#include <QColor>
+#include <QPixmap>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QFileIconProvider>
+
+TableModelFileExplorer::TableModelFileExplorer(QJsonObject result, QObject *parent)
     : QAbstractTableModel(parent)
 {
     itemList = tableItemListFrom(result);
@@ -176,29 +180,37 @@ bool TableModelFileExplorer::removeRows(int position, int rows, const QModelInde
     return true;
 }
 
-QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFrom(const FolderRequestResult &parentFolder)
+QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFrom(QJsonObject parentFolder)
 {
     QList<TableItem> result;
+    QFileIconProvider iconProvider;
+    QJsonArray childFolders = parentFolder[JsonKeys::Folder::ChildFolders].toArray();
 
-
-    for(const FolderRequestResult &child : parentFolder.childFolderList())
+    for(const QJsonValue &jsonValue : childFolders)
     {
-
-        TableItem item {child.folderName().chopped(1), // Remove / character at end
-                        child.directory(),
+        QJsonObject child = jsonValue.toObject();
+        TableItem item {
+                        child[JsonKeys::Folder::SuffixPath].toString().chopped(1), // Remove / character at end
+                        child[JsonKeys::Folder::SymbolFolderPath].toString(),
                         TableItemType::Folder,
-                        child.folderIcon()};
+                        iconProvider.icon(QFileIconProvider::IconType::Folder)
+                       };
 
         result.append(item);
     }
 
-    for(const FileRequestResult &child : parentFolder.childFileList())
-    {
+    QJsonArray childFiles = parentFolder[JsonKeys::Folder::ChildFiles].toArray();
 
-        TableItem item {child.fileName() + child.fileExtension(),
-                        child.symbolFilePath(),
+    for(const QJsonValue &jsonValue : childFiles)
+    {
+        QJsonObject child = jsonValue.toObject();
+        QFileInfo info(child[JsonKeys::File::UserFilePath].toString());
+        TableItem item {
+                        child[JsonKeys::File::FileName].toString(),
+                        child[JsonKeys::File::SymbolFilePath].toString(),
                         TableItemType::File,
-                        child.fileIcon()};
+                        iconProvider.icon(info)
+                       };
 
         result.append(item);
     }
