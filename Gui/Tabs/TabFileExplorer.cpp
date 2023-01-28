@@ -31,7 +31,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
     ui->listView->setModel(listModelFileExplorer);
 
-    ui->lineEditWorkingDir->setText(FileStorageManager::rootFolderPath());
+    ui->lineEditWorkingDir->setText(V2_FileStorageManager::separator);
     fillTableFileExplorerWith(V2_FileStorageManager::separator);
 
     createNavigationTask();
@@ -118,11 +118,11 @@ void TabFileExplorer::createNavigationTask()
 
 void TabFileExplorer::createNavigationHistoryIndex(const QString &path)
 {
-    auto tokenList = path.split(FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+    auto tokenList = path.split(V2_FileStorageManager::separator);
     tokenList.removeLast();
 
     for(QString &token : tokenList)
-        token.append(FileStorageManager::CONST_SYMBOL_DIRECTORY_SEPARATOR);
+        token.append(V2_FileStorageManager::separator);
 
     QString aggregator;
     int index = 0;

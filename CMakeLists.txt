@@ -80,9 +80,6 @@ set(PROJECT_SOURCES
     #
 
     # Tasks
-        # TaskAddNewFiles
-        Gui/Tasks/TaskAddNewFiles.h
-        Gui/Tasks/TaskAddNewFiles.cpp
         # TaskAddNewFolders
         Gui/Tasks/TaskAddNewFolders.h
         Gui/Tasks/TaskAddNewFolders.cpp
@@ -142,7 +139,6 @@ set(PROJECT_SOURCES
     Backend/FileStorageSubSystem/RequestResults/FileRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileRequestResult.cpp
     Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.cpp
     Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.cpp
-    Backend/FileStorageSubSystem/FileStorageManager.h Backend/FileStorageSubSystem/FileStorageManager.cpp
 
 
     #[[ FileMonitoringSubSystem ]]
