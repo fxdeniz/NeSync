@@ -57,7 +57,7 @@ QList<FileEntity> FileRepository::findActiveFiles() const
     query.prepare(queryTemplate);
     query.exec();
 
-    if(query.next())
+    while(query.next())
     {
         QSqlRecord record = query.record();
         FileEntity entity;
