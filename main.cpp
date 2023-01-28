@@ -41,8 +41,9 @@ int main(int argc, char *argv[])
 
 //    QJsonObject rootFolderJson = v2fsm->getFolderJsonBySymbolPath("/", true);
 //    QJsonObject childFolderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/", true);
-//    QJsonObject fileJson = v2fsm->getFileJson("/test_folder/text_file.txt", true);
+//    QJsonObject fileJson = v2fsm->getFileJsonBySymbolPath("/test_folder/text_file.txt", true);
 //    QJsonObject versionJson = v2fsm->getFileVersionJson("/test_folder/text_file.txt", 2);
+//    QJsonObject fileJsonByUserPath = v2fsm->getFileJsonByUserPath("/home/user/Desktop/data/text_file.txt", true);
 
     return app.exec();
 }

@@ -209,20 +209,31 @@ QJsonObject V2_FileStorageManager::getFolderJsonBySymbolPath(const QString &symb
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFolderJsonByUserPath(const QString &symbolFolderPath, bool includeChildren) const
+QJsonObject V2_FileStorageManager::getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren) const
 {
-    QString symbolPath = folderRepository->findSymbolPathByUserFolderPath(symbolFolderPath);
+    QString symbolPath = folderRepository->findSymbolPathByUserFolderPath(userFolderPath);
     QJsonObject result = getFolderJsonBySymbolPath(symbolPath, includeChildren);
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFileJson(const QString &symbolFilePath, bool includeVersions) const
+QJsonObject V2_FileStorageManager::getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions) const
 {
     QJsonObject result;
 
     FileEntity entity = fileRepository->findBySymbolPath(symbolFilePath, includeVersions);
     result = fileEntityToJsonObject(entity);
 
+    return result;
+}
+
+QJsonObject V2_FileStorageManager::getFileJsonByUserPath(const QString &userFilePath, bool includeVersions) const
+{
+    QFileInfo info(userFilePath);
+    QString userFolderPath = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
+    QString symbolFolderPath = folderRepository->findSymbolPathByUserFolderPath(userFolderPath);
+    QString symbolFilePath = symbolFolderPath + info.fileName();
+
+    QJsonObject result = getFileJsonBySymbolPath(symbolFilePath, includeVersions);
     return result;
 }
 

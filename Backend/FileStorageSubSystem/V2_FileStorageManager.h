@@ -31,8 +31,9 @@ public:
                        const QString &description = "");
 
     QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
-    QJsonObject getFolderJsonByUserPath(const QString &symbolFolderPath, bool includeChildren = false) const;
-    QJsonObject getFileJson(const QString &symbolFilePath, bool includeVersions) const;
+    QJsonObject getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren = false) const;
+    QJsonObject getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions = false) const;
+    QJsonObject getFileJsonByUserPath(const QString &userFilePath, bool includeVersions = false) const;
     QJsonObject getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const;
 
     QString getBackupFolderPath() const;
