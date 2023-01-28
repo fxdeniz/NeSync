@@ -73,12 +73,6 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogDebugFileMonitor.ui
     #
 
-    # TabReleatedFiles
-        Gui/Tabs/TabRelatedFiles.h
-        Gui/Tabs/TabRelatedFiles.cpp
-        Gui/Tabs/TabRelatedFiles.ui
-    #
-
     # Tasks
         # TaskAddNewFolders
         Gui/Tasks/TaskAddNewFolders.h

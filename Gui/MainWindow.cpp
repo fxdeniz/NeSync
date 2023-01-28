@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "Tabs/TabRelatedFiles.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
@@ -33,9 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
-
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
-                     this, &MainWindow::on_router_ShowRelatedFiles);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
@@ -81,10 +77,6 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         toolBar->addAction(ui->tab2Action_SaveAll);
         toolBar->addAction(ui->tab2Action_SaveSelected);
-    }
-    else // If TabRelatedFiles accessed at runtime.
-    {
-        toolBar->addAction(ui->tabRelatedFilesAction_Refresh);
     }
 }
 
@@ -154,15 +146,6 @@ void MainWindow::createFileMonitorThread()
 QString MainWindow::fileMonitorThreadName() const
 {
     return "File Monitor Thread";
-}
-
-void MainWindow::on_router_ShowRelatedFiles()
-{
-    TabRelatedFiles *tab = new TabRelatedFiles(ui->tabWidget);
-    QTabWidget *tabWidget = ui->tabWidget;
-    tabWidget->addTab(tab, "Related Files");
-
-    QObject::connect(tabWidget->tabBar(), &QTabBar::tabCloseRequested, tabWidget->tabBar(), &QTabBar::removeTab);
 }
 
 void MainWindow::on_router_ShowDialogTableItemEditor()

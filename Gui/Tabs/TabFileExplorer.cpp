@@ -192,11 +192,6 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
     }
 }
 
-void TabFileExplorer::on_contextActionListFileExplorer_ShowRelatedFiles_triggered()
-{
-    emit signalToRouter_ShowRelatedFiles();
-}
-
 void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
 {
     emit signalToRouter_ShowDialogTableItemEditor();

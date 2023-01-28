@@ -25,7 +25,6 @@ public:
 
 private slots:
     void on_tabWidget_currentChanged(int index);
-    void on_router_ShowRelatedFiles();
     void on_router_ShowDialogTableItemEditor();
     void on_tab1Action_AddNewFolder_triggered();
     void on_menuAction_DebugFileMonitor_triggered();
