@@ -1,6 +1,8 @@
 #include <QStandardPaths>
 #include <QApplication>
 #include <QDebug>
+#include <QJsonArray>
+
 #include "Gui/MainWindow.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
 //    QJsonObject fileJson = v2fsm->getFileJsonBySymbolPath("/test_folder/text_file.txt", true);
 //    QJsonObject versionJson = v2fsm->getFileVersionJson("/test_folder/text_file.txt", 2);
 //    QJsonObject fileJsonByUserPath = v2fsm->getFileJsonByUserPath("/home/user/Desktop/data/text_file.txt", true);
+//    qDebug() << V2_FileStorageManager::instance()->getActiveFolderList();
 
     return app.exec();
 }

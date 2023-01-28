@@ -46,6 +46,34 @@ FileEntity FileRepository::findBySymbolPath(const QString &symbolFilePath, bool 
     return result;
 }
 
+QList<FileEntity> FileRepository::findActiveFiles() const
+{
+    QList<FileEntity> result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT * FROM FileEntity NATURAL JOIN FolderEntity"
+                            " WHERE user_folder_path IS NOT NULL AND is_frozen IS FALSE;" ;
+
+    query.prepare(queryTemplate);
+    query.exec();
+
+    if(query.next())
+    {
+        QSqlRecord record = query.record();
+        FileEntity entity;
+
+        entity.setIsExist(true);
+        entity.setPrimaryKey(record.value("symbol_file_path").toString());
+        entity.fileName = record.value("file_name").toString();
+        entity.symbolFolderPath = record.value("symbol_folder_path").toString();
+        entity.isFrozen = record.value("is_frozen").toBool();
+
+        result.append(entity);
+    }
+
+    return result;
+}
+
 bool FileRepository::save(FileEntity &entity, QSqlError *error)
 {
     bool result = false;

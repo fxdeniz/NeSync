@@ -35,6 +35,8 @@ public:
     QJsonObject getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions = false) const;
     QJsonObject getFileJsonByUserPath(const QString &userFilePath, bool includeVersions = false) const;
     QJsonObject getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const;
+    QJsonArray getActiveFolderList() const;
+    QJsonArray getActiveFileList() const;
 
     QString getBackupFolderPath() const;
     void setBackupFolderPath(const QString &newBackupFolderPath);

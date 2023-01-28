@@ -105,6 +105,35 @@ QString FolderRepository::findSymbolPathByUserFolderPath(const QString &userFold
     return result;
 }
 
+QList<FolderEntity> FolderRepository::findActiveFolders() const
+{
+    QList<FolderEntity> result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT * FROM FolderEntity"
+                            " WHERE user_folder_path IS NOT NULL AND is_frozen IS FALSE;" ;
+
+    query.prepare(queryTemplate);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        FolderEntity entity;
+
+        entity.setIsExist(true);
+        entity.setPrimaryKey(record.value("symbol_folder_path").toString());
+        entity.parentFolderPath = record.value("parent_folder_path").toString();
+        entity.suffixPath = record.value("suffix_path").toString();
+        entity.userFolderPath = record.value("user_folder_path").toString();
+        entity.isFrozen = record.value("is_frozen").toBool();
+
+        result.append(entity);
+    }
+
+    return result;
+}
+
 bool FolderRepository::save(FolderEntity &entity, QSqlError *error)
 {
     bool result = false;

@@ -247,6 +247,36 @@ QJsonObject V2_FileStorageManager::getFileVersionJson(const QString &symbolFileP
     return result;
 }
 
+QJsonArray V2_FileStorageManager::getActiveFolderList() const
+{
+    QJsonArray result;
+
+    QList<FolderEntity> queryResult = folderRepository->findActiveFolders();
+
+    for(const FolderEntity &entity : queryResult)
+    {
+        QJsonObject folderJson = folderEntityToJsonObject(entity);
+        result.append(folderJson);
+    }
+
+    return result;
+}
+
+QJsonArray V2_FileStorageManager::getActiveFileList() const
+{
+    QJsonArray result;
+
+    QList<FileEntity> queryResult = fileRepository->findActiveFiles();
+
+    for(const FileEntity &entity : queryResult)
+    {
+        QJsonObject folderJson = fileEntityToJsonObject(entity);
+        result.append(folderJson);
+    }
+
+    return result;
+}
+
 QString V2_FileStorageManager::getBackupFolderPath() const
 {
     return backupFolderPath;

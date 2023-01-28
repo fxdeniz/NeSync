@@ -1,16 +1,17 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Tabs/TabRelatedFiles.h"
+#include "Utility/JsonDtoFormat.h"
+#include "Utility/DatabaseRegistry.h"
+#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QStandardPaths>
 #include <QtConcurrent>
 #include <QTabBar>
 #include <QDir>
 
-#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
-#include "Utility/DatabaseRegistry.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,16 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
-
-    auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    appDataDir = QDir::toNativeSeparators(appDataDir);
-    appDataDir += QDir::separator();
-
-    auto backupDir = appDataDir + "backup" + QDir::separator();
-    auto symbolDir = appDataDir + "symbols" + QDir::separator();
-    QDir dir;
-    dir.mkdir(backupDir);
-    dir.mkdir(symbolDir);
 
     dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
@@ -135,16 +126,19 @@ void MainWindow::createFileMonitorThread()
 
     FileMonitoringManager *monitor = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
-    QString monitoredPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-    monitoredPath.append(QDir::separator());
-    monitoredPath.append("data");
+    auto fsm = V2_FileStorageManager::instance();
 
-//    monitor->setPredictionList({monitoredPath, "/home/user/Desktop/non_exist", "/home/user/Desktop/no_such_file.txt"});
+    QJsonArray activeFolders = fsm->getActiveFolderList();
+    QJsonArray activeFiles = fsm->getActiveFileList();
+    QStringList predictionList;
 
-    auto fsm = FileStorageManager::instance();
-    auto queryResult = fsm->getMonitoredFilePathList();
-    queryResult.append(fsm->getMonitoredFolderPathList());
-    monitor->setPredictionList(queryResult);
+    for(const QJsonValue &value : activeFolders)
+        predictionList << value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
+
+    for(const QJsonValue &value : activeFiles)
+        predictionList << value.toObject()[JsonKeys::File::UserFilePath].toString();
+
+    monitor->setPredictionList(predictionList);
 
     monitor->moveToThread(fileMonitorThread);
 

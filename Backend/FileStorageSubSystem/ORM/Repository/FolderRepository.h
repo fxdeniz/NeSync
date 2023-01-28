@@ -14,6 +14,7 @@ public:
 
     FolderEntity findBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
     QString findSymbolPathByUserFolderPath(const QString &userFolderPath) const;
+    QList<FolderEntity> findActiveFolders() const;
     bool save(FolderEntity &entity, QSqlError *error = nullptr);
 
 private:
