@@ -4,7 +4,6 @@
 #include <QJsonArray>
 
 #include "Gui/MainWindow.h"
-#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 #include "Utility/DatabaseRegistry.h"

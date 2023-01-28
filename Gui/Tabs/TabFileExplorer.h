@@ -5,7 +5,6 @@
 #include <QWidget>
 #include <QJsonObject>
 
-#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 
 namespace Ui {

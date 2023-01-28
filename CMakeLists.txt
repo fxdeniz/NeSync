@@ -115,32 +115,6 @@ set(PROJECT_SOURCES
         Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
     #
 
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFolderRecord.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileRecord.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileVersion.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoFileEvent.h
-    Backend/FileStorageSubSystem/SqlPrimitives/TableInfoSaveGroupItem.h
-    Backend/FileStorageSubSystem/SqlPrimitives/BaseSqlPrimitive.h Backend/FileStorageSubSystem/SqlPrimitives/BaseSqlPrimitive.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/BaseRow.h Backend/FileStorageSubSystem/SqlPrimitives/BaseRow.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.h Backend/FileStorageSubSystem/SqlPrimitives/RowFolderRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileVersion.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileVersion.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowFileEvent.h Backend/FileStorageSubSystem/SqlPrimitives/RowFileEvent.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowSaveGroupItem.h Backend/FileStorageSubSystem/SqlPrimitives/RowSaveGroupItem.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFolderRecord.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFolderRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileRecord.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileRecord.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileVersion.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileVersion.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QueryFileEvent.h Backend/FileStorageSubSystem/SqlPrimitives/QueryFileEvent.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/QuerySaveGroupItem.h Backend/FileStorageSubSystem/SqlPrimitives/QuerySaveGroupItem.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.h Backend/FileStorageSubSystem/SqlPrimitives/RowInserter.cpp
-    Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.h Backend/FileStorageSubSystem/SqlPrimitives/RowDeleter.cpp
-
-    Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.h Backend/FileStorageSubSystem/RequestResults/FolderRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/FileRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.h Backend/FileStorageSubSystem/RequestResults/FileVersionRequestResult.cpp
-    Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.h Backend/FileStorageSubSystem/RequestResults/SaveGroupItemMetaData.cpp
-
-
     #[[ FileMonitoringSubSystem ]]
     Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
     Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
@@ -227,10 +201,6 @@ set(PROJECT_SOURCES
 
     Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.h
     Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.cpp
-
-    #[[ Global scope ]]
-
-    resources.qrc
 
 )
 

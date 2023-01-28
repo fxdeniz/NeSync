@@ -1,6 +1,5 @@
 #include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
-#include "FileStorageSubSystem/FileStorageManager.h"
 #include "Tasks/TaskNaviagateFileSystem.h"
 #include "ui_TabFileExplorer.h"
 

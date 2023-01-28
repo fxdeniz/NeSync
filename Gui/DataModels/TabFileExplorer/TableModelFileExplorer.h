@@ -1,7 +1,6 @@
 #ifndef TABLEMODELFILEEXPLORER_H
 #define TABLEMODELFILEEXPLORER_H
 
-#include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include <QAbstractTableModel>
 #include <QIcon>
 
