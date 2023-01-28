@@ -1,4 +1,4 @@
-#include "V2_FileStorageManager.h"
+#include "FileStorageManager.h"
 
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
@@ -9,7 +9,7 @@
 #include <QStandardPaths>
 #include <QCryptographicHash>
 
-V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
+FileStorageManager::FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
 {
     setBackupFolderPath(backupFolderPath);
     database = db;
@@ -22,7 +22,7 @@ V2_FileStorageManager::V2_FileStorageManager(const QSqlDatabase &db, const QStri
     fileVersionRepository = new FileVersionRepository(database);
 }
 
-QSharedPointer<V2_FileStorageManager> V2_FileStorageManager::instance()
+QSharedPointer<FileStorageManager> FileStorageManager::instance()
 {
     QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
     tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
@@ -31,13 +31,13 @@ QSharedPointer<V2_FileStorageManager> V2_FileStorageManager::instance()
 
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    auto *rawPtr = new V2_FileStorageManager(storageDb, tempPath + folderName);
-    auto result = QSharedPointer<V2_FileStorageManager>(rawPtr);
+    auto *rawPtr = new FileStorageManager(storageDb, tempPath + folderName);
+    auto result = QSharedPointer<FileStorageManager>(rawPtr);
 
     return result;
 }
 
-V2_FileStorageManager::~V2_FileStorageManager()
+FileStorageManager::~FileStorageManager()
 {
     database.close();
 
@@ -46,7 +46,7 @@ V2_FileStorageManager::~V2_FileStorageManager()
     delete fileVersionRepository;
 }
 
-bool V2_FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QString &userFolderPath)
+bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QString &userFolderPath)
 {
     bool result = false;
 
@@ -106,7 +106,7 @@ bool V2_FileStorageManager::addNewFolder(const QString &symbolFolderPath, const 
     return result;
 }
 
-bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, bool isFrozen, const QString &description)
+bool FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, bool isFrozen, const QString &description)
 {
     QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
     QFileInfo info(pathToFile);
@@ -144,7 +144,7 @@ bool V2_FileStorageManager::addNewFile(const QString &symbolFolderPath, const QS
     return result;
 }
 
-bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const QString &pathToFile, const QString &description)
+bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QString &pathToFile, const QString &description)
 {
     QFileInfo info(pathToFile);
 
@@ -199,7 +199,7 @@ bool V2_FileStorageManager::appendVersion(const QString &symbolFilePath, const Q
     return true;
 }
 
-QJsonObject V2_FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
+QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;
 
@@ -209,14 +209,14 @@ QJsonObject V2_FileStorageManager::getFolderJsonBySymbolPath(const QString &symb
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren) const
+QJsonObject FileStorageManager::getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren) const
 {
     QString symbolPath = folderRepository->findSymbolPathByUserFolderPath(userFolderPath);
     QJsonObject result = getFolderJsonBySymbolPath(symbolPath, includeChildren);
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions) const
+QJsonObject FileStorageManager::getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions) const
 {
     QJsonObject result;
 
@@ -226,7 +226,7 @@ QJsonObject V2_FileStorageManager::getFileJsonBySymbolPath(const QString &symbol
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFileJsonByUserPath(const QString &userFilePath, bool includeVersions) const
+QJsonObject FileStorageManager::getFileJsonByUserPath(const QString &userFilePath, bool includeVersions) const
 {
     QFileInfo info(userFilePath);
     QString userFolderPath = QDir::toNativeSeparators(info.absolutePath()) + QDir::separator();
@@ -237,7 +237,7 @@ QJsonObject V2_FileStorageManager::getFileJsonByUserPath(const QString &userFile
     return result;
 }
 
-QJsonObject V2_FileStorageManager::getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const
+QJsonObject FileStorageManager::getFileVersionJson(const QString &symbolFilePath, qlonglong versionNumber) const
 {
     QJsonObject result;
 
@@ -247,7 +247,7 @@ QJsonObject V2_FileStorageManager::getFileVersionJson(const QString &symbolFileP
     return result;
 }
 
-QJsonArray V2_FileStorageManager::getActiveFolderList() const
+QJsonArray FileStorageManager::getActiveFolderList() const
 {
     QJsonArray result;
 
@@ -262,7 +262,7 @@ QJsonArray V2_FileStorageManager::getActiveFolderList() const
     return result;
 }
 
-QJsonArray V2_FileStorageManager::getActiveFileList() const
+QJsonArray FileStorageManager::getActiveFileList() const
 {
     QJsonArray result;
 
@@ -277,12 +277,12 @@ QJsonArray V2_FileStorageManager::getActiveFileList() const
     return result;
 }
 
-QString V2_FileStorageManager::getBackupFolderPath() const
+QString FileStorageManager::getBackupFolderPath() const
 {
     return backupFolderPath;
 }
 
-void V2_FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPath)
+void FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPath)
 {
     backupFolderPath = QDir::toNativeSeparators(newBackupFolderPath);
 
@@ -290,13 +290,13 @@ void V2_FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPa
         backupFolderPath.append(QDir::separator());
 }
 
-QString V2_FileStorageManager::generateRandomFileName()
+QString FileStorageManager::generateRandomFileName()
 {
     QString result = QUuid::createUuid().toString(QUuid::StringFormat::Id128) + ".file";
     return result;
 }
 
-QJsonObject V2_FileStorageManager::folderEntityToJsonObject(const FolderEntity &entity) const
+QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &entity) const
 {
     QJsonObject result;
 
@@ -349,7 +349,7 @@ QJsonObject V2_FileStorageManager::folderEntityToJsonObject(const FolderEntity &
     return result;
 }
 
-QJsonObject V2_FileStorageManager::fileEntityToJsonObject(const FileEntity &entity) const
+QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity) const
 {
     QJsonObject result;
 
@@ -383,7 +383,7 @@ QJsonObject V2_FileStorageManager::fileEntityToJsonObject(const FileEntity &enti
     return result;
 }
 
-QJsonObject V2_FileStorageManager::fileVersionEntityToJsonObject(const FileVersionEntity &entity) const
+QJsonObject FileStorageManager::fileVersionEntityToJsonObject(const FileVersionEntity &entity) const
 {
     QJsonObject result;
 

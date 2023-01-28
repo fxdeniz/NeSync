@@ -1,6 +1,6 @@
 #include "TaskAddNewFolders.h"
 
-#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QDir>
 
@@ -26,7 +26,7 @@ int TaskAddNewFolders::fileCount() const
 
 void TaskAddNewFolders::run()
 {
-    auto fsm = V2_FileStorageManager::instance();
+    auto fsm = FileStorageManager::instance();
     int fileNumber = 1;
     bool isAllRequestSuccessful = true;
 

@@ -4,7 +4,7 @@
 #include "Tabs/TabRelatedFiles.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
-#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QStandardPaths>
@@ -126,7 +126,7 @@ void MainWindow::createFileMonitorThread()
 
     FileMonitoringManager *monitor = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
-    auto fsm = V2_FileStorageManager::instance();
+    auto fsm = FileStorageManager::instance();
 
     QJsonArray activeFolders = fsm->getActiveFolderList();
     QJsonArray activeFiles = fsm->getActiveFileList();

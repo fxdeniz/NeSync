@@ -5,7 +5,7 @@
 
 #include "TabFileExplorer.h"
 #include "Utility/JsonDtoFormat.h"
-#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QThread>
 
@@ -30,8 +30,8 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
     ui->listView->setModel(listModelFileExplorer);
 
-    ui->lineEditWorkingDir->setText(V2_FileStorageManager::separator);
-    fillTableFileExplorerWith(V2_FileStorageManager::separator);
+    ui->lineEditWorkingDir->setText(FileStorageManager::separator);
+    fillTableFileExplorerWith(FileStorageManager::separator);
 
     createNavigationTask();
 }
@@ -91,7 +91,7 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
 
 void TabFileExplorer::fillTableFileExplorerWith(const QString &symbolDirPath)
 {
-    auto fsm = V2_FileStorageManager::instance();
+    auto fsm = FileStorageManager::instance();
     QJsonObject result = fsm->getFolderJsonBySymbolPath(symbolDirPath, true);
     slotOnDirContentFetched(result);
 }
@@ -117,11 +117,11 @@ void TabFileExplorer::createNavigationTask()
 
 void TabFileExplorer::createNavigationHistoryIndex(const QString &path)
 {
-    auto tokenList = path.split(V2_FileStorageManager::separator);
+    auto tokenList = path.split(FileStorageManager::separator);
     tokenList.removeLast();
 
     for(QString &token : tokenList)
-        token.append(V2_FileStorageManager::separator);
+        token.append(FileStorageManager::separator);
 
     QString aggregator;
     int index = 0;

@@ -1,6 +1,6 @@
 #include "FileMonitoringManager.h"
 
-#include "FileStorageSubSystem/V2_FileStorageManager.h"
+#include "FileStorageSubSystem/FileStorageManager.h"
 #include "Utility/JsonDtoFormat.h"
 
 #include <QDir>
@@ -142,7 +142,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     {
         bool isFolderMonitored = database->isFolderExist(currentPath);
 
-        auto fsm = V2_FileStorageManager::instance();
+        auto fsm = FileStorageManager::instance();
         QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
         bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
 
@@ -167,7 +167,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     {
         auto status = FileSystemEventDb::ItemStatus::Undefined;
 
-        auto fsm = V2_FileStorageManager::instance();
+        auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
 

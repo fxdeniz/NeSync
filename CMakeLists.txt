@@ -94,8 +94,8 @@ set(PROJECT_SOURCES
     Utility/DatabaseRegistry.cpp
     Utility/JsonDtoFormat.h
 
-    Backend/FileStorageSubSystem/V2_FileStorageManager.h
-    Backend/FileStorageSubSystem/V2_FileStorageManager.cpp
+    Backend/FileStorageSubSystem/FileStorageManager.h
+    Backend/FileStorageSubSystem/FileStorageManager.cpp
 
     # ORM
         # Repository

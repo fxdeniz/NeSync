@@ -1,5 +1,5 @@
-#ifndef V2_FILESTORAGEMANAGER_H
-#define V2_FILESTORAGEMANAGER_H
+#ifndef FILESTORAGEMANAGER_H
+#define FILESTORAGEMANAGER_H
 
 #include "ORM/Repository/FolderRepository.h"
 #include "ORM/Repository/FileRepository.h"
@@ -7,16 +7,16 @@
 
 #include <QJsonObject>
 
-class V2_FileStorageManager
+class FileStorageManager
 {
 private:
-    V2_FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath);
+    FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath);
 
 public:
     static const inline QString separator = "/";
-    static QSharedPointer<V2_FileStorageManager> instance();
+    static QSharedPointer<FileStorageManager> instance();
 
-    ~V2_FileStorageManager();
+    ~FileStorageManager();
 
     bool addNewFolder(const QString &symbolFolderPath,
                       const QString &userFolderPath);
@@ -55,4 +55,4 @@ private:
     FileVersionRepository *fileVersionRepository;
 };
 
-#endif // V2_FILESTORAGEMANAGER_H
+#endif // FILESTORAGEMANAGER_H

@@ -10,7 +10,7 @@
 #include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileVersionRepository.h"
-#include "FileStorageSubSystem/V2_FileStorageManager.h"
+#include "FileStorageSubSystem/FileStorageManager.h"
 
 int main(int argc, char *argv[])
 {

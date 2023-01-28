@@ -3,7 +3,7 @@
 
 #include "Utility/JsonDtoFormat.h"
 #include "Tasks/TaskAddNewFolders.h"
-#include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
+#include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QFileIconProvider>
 #include <QStandardPaths>
@@ -72,7 +72,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
 
     if(dialog.exec())
     {
-        auto fsm = V2_FileStorageManager::instance();
+        auto fsm = FileStorageManager::instance();
 
         QStorageInfo storageInfo(fsm->getBackupFolderPath());
         qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
@@ -132,7 +132,7 @@ QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWi
 
     FolderItem firstItem;
     firstItem.userDir = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
-    firstItem.symbolDir = parentSymbolDir + V2_FileStorageManager::separator;
+    firstItem.symbolDir = parentSymbolDir + FileStorageManager::separator;
     result.insert(model->rootPath(), firstItem);
 
     while(cursor.hasNext())
@@ -169,7 +169,7 @@ QString DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const 
     auto suffix = currentUserDir.split(parentDir).last();
     suffix = QDir::toNativeSeparators(suffix);
     suffix.prepend(parentSymbolDir);
-    suffix.replace(QDir::separator(), V2_FileStorageManager::separator);
+    suffix.replace(QDir::separator(), FileStorageManager::separator);
 
     return suffix;
 }
