@@ -70,10 +70,10 @@ void FileMonitoringManager::start()
             {
                 database->addFolder(folderPath);
                 database->setEfswIDofFolder(folderPath, watchId);
-
-                if(info.isFile())
-                    database->addFile(item);
             }
+
+            if(info.isFile()) // Add files in any case
+                database->addFile(item);
         }
         else
             database->addMonitoringError(item, "Initialization", efsw::Error::FileNotFound);
