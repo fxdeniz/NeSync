@@ -1,8 +1,9 @@
 #ifndef TABFILEEXPLORER_H
 #define TABFILEEXPLORER_H
 
-#include <QWidget>
 #include <QMenu>
+#include <QWidget>
+#include <QJsonObject>
 
 #include "FileStorageSubSystem/RequestResults/FolderRequestResult.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
@@ -30,7 +31,7 @@ signals:
     void signalRequestDirContent(const QString &directory);
 
 private slots:
-    void slotOnDirContentFetched(FolderRequestResult result);
+    void slotOnDirContentFetched(QJsonObject result);
 
     void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
@@ -48,7 +49,7 @@ private:
 
     void createNavigationHistoryIndex(const QString &path);
     QString navigationTaskThreadName() const;
-    void displayInTableViewFileExplorer(const FolderRequestResult &result);
+    void displayInTableViewFileExplorer(QJsonObject result);
 
 private:
     Ui::TabFileExplorer *ui;

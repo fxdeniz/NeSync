@@ -1,8 +1,8 @@
 #ifndef TASKNAVIAGATEFILESYSTEM_H
 #define TASKNAVIAGATEFILESYSTEM_H
 
-
 #include <QObject>
+#include <QJsonObject>
 
 class TaskNaviagateFileSystem : public QObject
 {
@@ -11,10 +11,10 @@ public:
     explicit TaskNaviagateFileSystem(QObject *parent = nullptr);
 
 public slots:
-    void slotOnDirContentRequested(const QString &directory);
+    void slotOnDirContentRequested(const QString &symbolDirPath);
 
 signals:
-    void signalDirContentFetched(FolderRequestResult data);
+    void signalDirContentFetched(QJsonObject data);
 };
 
 #endif // TASKNAVIAGATEFILESYSTEM_H

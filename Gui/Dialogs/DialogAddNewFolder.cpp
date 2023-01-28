@@ -1,6 +1,7 @@
 #include "DialogAddNewFolder.h"
 #include "ui_DialogAddNewFolder.h"
 
+#include "Utility/JsonDtoFormat.h"
 #include "Tasks/TaskAddNewFolders.h"
 #include "Backend/FileStorageSubSystem/V2_FileStorageManager.h"
 

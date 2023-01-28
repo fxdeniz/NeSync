@@ -95,6 +95,7 @@ set(PROJECT_SOURCES
 
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
+    Utility/JsonDtoFormat.h
 
     Backend/FileStorageSubSystem/V2_FileStorageManager.h
     Backend/FileStorageSubSystem/V2_FileStorageManager.cpp

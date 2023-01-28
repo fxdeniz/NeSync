@@ -1,5 +1,6 @@
 #include "V2_FileStorageManager.h"
 
+#include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 
 #include <QDir>
@@ -311,12 +312,19 @@ QJsonObject V2_FileStorageManager::fileEntityToJsonObject(const FileEntity &enti
 {
     QJsonObject result;
 
+
     result[JsonKeys::IsExist] = entity.isExist();
     result[JsonKeys::File::FileName] = entity.fileName;
+    result[JsonKeys::File::IsFrozen] = entity.isFrozen;
     result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
     result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
-    result[JsonKeys::File::IsFrozen] = entity.isFrozen;
+    result[JsonKeys::File::UserFilePath] = QJsonValue();
     result[JsonKeys::File::VersionList] = QJsonValue();
+
+    FolderEntity parentEntity = folderRepository->findBySymbolPath(entity.symbolFolderPath);
+
+    if(!parentEntity.userFolderPath.isEmpty())
+        result[JsonKeys::File::UserFilePath] = parentEntity.userFolderPath + entity.fileName;
 
     if(!entity.getVersionList().isEmpty())
     {
