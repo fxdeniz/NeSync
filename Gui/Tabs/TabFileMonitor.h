@@ -15,6 +15,9 @@ public:
     explicit TabFileMonitor(QWidget *parent = nullptr);
     ~TabFileMonitor();
 
+public slots:
+    void onEventDbUpdated();
+
 private:
     Ui::TabFileMonitor *ui;
 };

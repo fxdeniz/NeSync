@@ -20,6 +20,9 @@ public:
 public slots:
     void start();
 
+signals:
+    void signalEventDbUpdated();
+
 private slots:
     void slotOnAddEventDetected(const QString &fileName, const QString &dir);
     void slotOnDeleteEventDetected(const QString &fileName, const QString &dir);

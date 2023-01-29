@@ -90,18 +90,21 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
-            return tr("Name");
-        case 1:
-            return tr("Symbol Path");
-        case 2:
-            return tr("Type");
-        default:
-            break;
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:
+                return tr("Name");
+            case 1:
+                return tr("Symbol Path");
+            case 2:
+                return tr("Type");
+            default:
+                break;
         }
     }
+
     return QVariant();
 }
 

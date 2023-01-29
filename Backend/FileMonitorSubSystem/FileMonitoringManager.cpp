@@ -129,6 +129,8 @@ void FileMonitoringManager::start()
             }
         }
     }
+
+    emit signalEventDbUpdated();
 }
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
@@ -162,6 +164,8 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         }
         else
             database->addMonitoringError(currentPath, "AddEvent", watchId);
+
+        emit signalEventDbUpdated();
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
@@ -178,6 +182,8 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
         database->addFile(currentPath);
         database->setStatusOfFile(currentPath, status);
+
+        emit signalEventDbUpdated();
     }
 }
 
@@ -200,6 +206,8 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
             database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
 
         fileWatcher.removeWatch(watchId);
+
+        emit signalEventDbUpdated();
     }
     else if(database->isFileExist(currentPath)) // File deleted
     {
@@ -209,6 +217,8 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
             database->deleteFile(currentPath);
         else
             database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+
+        emit signalEventDbUpdated();
     }
 }
 
@@ -226,6 +236,8 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
         if(status != FileSystemEventDb::ItemStatus::NewAdded) // Do not count update events on new added file
             database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
+
+        emit signalEventDbUpdated();
     }
 }
 
@@ -262,6 +274,8 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
             database->setOldNameOfFile(currentOldPath, oldFileName);
             database->setNameOfFile(currentOldPath, fileName);
+
+            emit signalEventDbUpdated();
         }
     }
     else if(info.isDir())
@@ -279,6 +293,8 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
             database->setOldNameOfFolder(currentOldPath, oldFileName);
             database->setPathOfFolder(currentOldPath, currentNewPath);
+
+            emit signalEventDbUpdated();
         }
 
     }

@@ -134,6 +134,9 @@ void MainWindow::createFileMonitorThread()
 
     monitor->moveToThread(fileMonitorThread);
 
+    QObject::connect(monitor, &FileMonitoringManager::signalEventDbUpdated,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
+
     QObject::connect(fileMonitorThread, &QThread::started,
                      monitor, &FileMonitoringManager::start);
 

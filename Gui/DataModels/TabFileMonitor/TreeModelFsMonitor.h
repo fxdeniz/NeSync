@@ -3,6 +3,7 @@
 
 #include "TreeItem.h"
 
+#include <QSqlDatabase>
 #include <QAbstractItemModel>
 
 class TreeModelFsMonitor : public QAbstractItemModel
@@ -10,7 +11,7 @@ class TreeModelFsMonitor : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit TreeModelFsMonitor(const QString &data, QObject *parent = nullptr);
+    explicit TreeModelFsMonitor(const QSqlDatabase &db, QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
     QVariant data(const QModelIndex &index, int role) const override;
@@ -24,9 +25,10 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
 private:
-    void setupModelData(const QStringList &lines, TreeItem *parent);
+    void setupModelData();
 
     TreeItem *rootItem;
+    QSqlDatabase database;
 
 };
 

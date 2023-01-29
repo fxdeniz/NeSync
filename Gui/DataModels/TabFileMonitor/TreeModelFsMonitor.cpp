@@ -1,10 +1,20 @@
 #include "TreeModelFsMonitor.h"
 
-TreeModelFsMonitor::TreeModelFsMonitor(const QString &data, QObject *parent)
+#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
+
+#include <QSqlQuery>
+#include <QSqlRecord>
+
+TreeModelFsMonitor::TreeModelFsMonitor(const QSqlDatabase &db, QObject *parent)
     : QAbstractItemModel(parent)
 {
-    rootItem = new TreeItem({tr("Title"), tr("Summary")});
-    setupModelData(data.split('\n'), rootItem);
+    rootItem = new TreeItem();
+    database = db;
+
+    if(!database.isOpen())
+        database.open();
+
+    setupModelData();
 }
 
 TreeModelFsMonitor::~TreeModelFsMonitor()
@@ -43,8 +53,25 @@ Qt::ItemFlags TreeModelFsMonitor::flags(const QModelIndex &index) const
 QVariant TreeModelFsMonitor::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case TreeItem::ColumnIndexUserPath:
+                return tr("Path");
+            case TreeItem::ColumnIndexStatus:
+                return tr("Status");
+            case TreeItem::ColumnIndexDescription:
+                return tr("Description");
+            case TreeItem::ColumnIndexAction:
+                return tr("Action");
+            default:
+                break;
+        }
+    }
 
     return QVariant();
 }
@@ -95,52 +122,41 @@ int TreeModelFsMonitor::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
-void TreeModelFsMonitor::setupModelData(const QStringList &lines, TreeItem *parent)
+void TreeModelFsMonitor::setupModelData()
 {
-    QList<TreeItem *> parents;
-    QList<int> indentations;
-    parents << parent;
-    indentations << 0;
+    QString queryTemplate = "SELECT * FROM Folder WHERE efsw_id IS NOT NULL;" ;
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.exec();
 
-    int number = 0;
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
 
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].at(position) != ' ')
-                break;
-            position++;
-        }
+        TreeItem *item = new TreeItem(rootItem);
+        item->setUserPath(record.value("folder_path").toString());
 
-        const QString lineData = lines[number].mid(position).trimmed();
+        auto status = record.value("status").value<FileSystemEventDb::ItemStatus>();
 
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            const QStringList columnStrings =
-                lineData.split(QLatin1Char('\t'), Qt::SkipEmptyParts);
-            QList<QVariant> columnData;
-            columnData.reserve(columnStrings.count());
-            for (const QString &columnString : columnStrings)
-                columnData << columnString;
+        if(status == FileSystemEventDb::ItemStatus::NewAdded)
+            item->setStatus("New Added");
+        else if(status ==  FileSystemEventDb::ItemStatus::Updated)
+            item->setStatus("Updated");
+        else if(status == FileSystemEventDb::ItemStatus::Renamed)
+            item->setStatus("Renamed");
+        else if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+            item->setStatus("Updated & Renamed");
+        else if(status == FileSystemEventDb::ItemStatus::Deleted)
+            item->setStatus("Deleted");
+        else if(status == FileSystemEventDb::ItemStatus::Undefined)
+            item->setStatus("");
+        else
+            item->setStatus("NaN");
 
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
+        QString oldName = record.value("old_name").toString();
+        if(!oldName.isEmpty())
+            item->setOldName(oldName);
 
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount()-1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new TreeItem(columnData, parents.last()));
-        }
-        ++number;
+        rootItem->appendChild(item);
     }
 }
