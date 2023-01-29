@@ -507,12 +507,36 @@ QStringList FileSystemEventDb::getActiveRootFolderList() const
     query.prepare(queryTemplate);
     query.exec();
 
-    qDebug() << "error = " << query.lastError();
-
     while(query.next())
     {
         QSqlRecord record = query.record();
         QString item = record.value(columnName).toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getDirectChildFolderListOfFolder(const QString pathToFolder) const
+{
+    QStringList result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = " SELECT * FROM Folder WHERE parent_folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("folder_path").toString();
         result.append(item);
     }
 
