@@ -13,6 +13,8 @@ DialogDebugFileMonitor::DialogDebugFileMonitor(QWidget *parent) :
 
     database = DatabaseRegistry::fileSystemEventDatabase();
     database.open();
+    ui->tabWidget->setCurrentIndex(0);
+    ui->buttonExecute->setText("Refresh Folders");
 }
 
 DialogDebugFileMonitor::~DialogDebugFileMonitor()
@@ -20,8 +22,10 @@ DialogDebugFileMonitor::~DialogDebugFileMonitor()
     delete ui;
 }
 
-void DialogDebugFileMonitor::on_buttonRefresh_clicked()
-{    
+void DialogDebugFileMonitor::on_buttonExecute_clicked()
+{
+    int currentIndex = ui->tabWidget->currentIndex();
+    if(currentIndex == 0)
     {
         bool isFolderModelNull = (ui->tableViewFolder->model() == nullptr);
 
@@ -40,7 +44,7 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
         ui->tableViewFolder->setColumnWidth(1, 250);
         ui->tableViewFolder->setColumnWidth(2, 250);
     }
-
+    else if(currentIndex == 1)
     {
         bool isFileModelNull = (ui->tableViewFile->model() == nullptr);
 
@@ -59,7 +63,7 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
         ui->tableViewFile->setColumnWidth(0, 300);
         ui->tableViewFile->setColumnWidth(1, 250);
     }
-
+    else if(currentIndex == 2)
     {
         bool isMonitroingErrorModelNull = (ui->tableViewMonitoringError->model() == nullptr);
 
@@ -76,5 +80,30 @@ void DialogDebugFileMonitor::on_buttonRefresh_clicked()
         ui->tableViewMonitoringError->horizontalHeader()->setMinimumSectionSize(80);
         ui->tableViewMonitoringError->setColumnWidth(0, 300);
     }
+    else if(currentIndex == 3)
+    {
+        bool isQueryModelNull = (ui->tableViewQuery->model() == nullptr);
+
+        if(!isQueryModelNull)
+            delete ui->tableViewQuery->model();
+
+        QSqlQueryModel *queryModel = new QSqlQueryModel(this);
+        queryModel->setQuery(ui->textEditQuery->toPlainText(), database);
+
+        ui->tableViewQuery->setModel(queryModel);
+    }
+}
+
+
+void DialogDebugFileMonitor::on_tabWidget_currentChanged(int index)
+{
+    if(index == 0)
+        ui->buttonExecute->setText("Refresh Folders");
+    else if(index == 1)
+        ui->buttonExecute->setText("Refresh Files");
+    else if(index == 2)
+        ui->buttonExecute->setText("Refresh Monitoring Errors");
+    else if(index == 3)
+        ui->buttonExecute->setText("Execute Query");
 }
 
