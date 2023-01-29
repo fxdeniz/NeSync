@@ -543,6 +543,32 @@ QStringList FileSystemEventDb::getDirectChildFolderListOfFolder(const QString pa
     return result;
 }
 
+QStringList FileSystemEventDb::getChildFileListOfFolder(const QString &pathToFolder) const
+{
+    QStringList result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = " SELECT * FROM File WHERE folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("file_path").toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
 bool FileSystemEventDb::addMonitoringError(const QString &location, const QString &during, qlonglong error)
 {
     bool result = false;

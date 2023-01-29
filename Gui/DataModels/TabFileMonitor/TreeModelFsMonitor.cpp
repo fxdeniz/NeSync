@@ -131,7 +131,8 @@ void TreeModelFsMonitor::setupModelData()
 
     FileSystemEventDb eventDb(database);
     qDebug() << "root folder list = " << eventDb.getActiveRootFolderList();
-    qDebug() << " direct childs = " << eventDb.getDirectChildFolderListOfFolder("/home/user/Desktop/data");
+    qDebug() << "direct child folders = " << eventDb.getDirectChildFolderListOfFolder("/home/user/Desktop/data");
+    qDebug() << "direct child files = " << eventDb.getChildFileListOfFolder("/home/user/Desktop/data/");
 
     while(query.next())
     {
