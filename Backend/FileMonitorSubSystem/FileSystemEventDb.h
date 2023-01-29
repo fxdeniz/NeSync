@@ -39,6 +39,7 @@ public:
     ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
     QStringList getMonitoredFolderPathList() const;
+    QStringList getActiveRootFolderList() const;
     bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 
 private:

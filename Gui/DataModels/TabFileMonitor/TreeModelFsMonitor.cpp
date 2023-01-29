@@ -129,6 +129,9 @@ void TreeModelFsMonitor::setupModelData()
     query.prepare(queryTemplate);
     query.exec();
 
+    FileSystemEventDb eventDb(database);
+    qDebug() << "root folder list = " << eventDb.getActiveRootFolderList();
+
     while(query.next())
     {
         QSqlRecord record = query.record();
