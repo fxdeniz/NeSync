@@ -65,6 +65,12 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabFileMonitor.h
         Gui/Tabs/TabFileMonitor.cpp
         Gui/Tabs/TabFileMonitor.ui
+        #
+        Gui/DataModels/TabFileMonitor/TreeItem.h
+        Gui/DataModels/TabFileMonitor/TreeItem.cpp
+        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.h
+        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.cpp
+        #
     #
 
     #   DialogDebugFileMonitor
