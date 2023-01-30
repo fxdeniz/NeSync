@@ -44,6 +44,7 @@ public:
     QStringList getActiveRootFolderList() const;
     QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;
     QStringList getChildFileListOfFolder(const QString &pathToFolder) const;
+    QStringList getEventfulFileListOfFolder(const QString &pathToFolder) const;
     bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 
 private:

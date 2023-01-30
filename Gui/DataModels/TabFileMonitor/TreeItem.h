@@ -20,7 +20,6 @@ public:
 
     void setUserPath(const QString &newUserPath);
     QString getUserPath() const;
-    void setStatus(const QString &newStatus);
     void setOldName(const QString &newOldName);
     void setDescription(const QString &newDescription);
     void setAction(const QString &newAction);
@@ -33,9 +32,12 @@ public:
     QVariant data(int column) const;
     int row() const;
 
+    int getStatus() const;
+    void setStatus(int newStatus);
+
 private:
     QString userPath;
-    QString status;
+    int status;
     QString oldName;
     QString description;
     QString action;

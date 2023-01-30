@@ -145,20 +145,32 @@ void TreeModelFsMonitor::setupModelData()
 
     for(const QString &currentRootFolderPath : rootFolders)
     {
-        TreeItem *activeRoot = createTreeItemForFolder(currentRootFolderPath, treeRoot);
-        treeRoot->appendChild(activeRoot);
-
+        TreeItem *activeRoot = createTreeItem(currentRootFolderPath, true, nullptr);
         QStack<TreeItem *> itemStack;
         itemStack.push(activeRoot);
 
         while(!itemStack.isEmpty())
         {
             TreeItem *parentItem = itemStack.pop();
+
+            if(parentItem->getParentItem() == nullptr)
+            {
+                parentItem->setParentItem(treeRoot);
+                treeRoot->appendChild(activeRoot);
+            }
+
             QStringList childFolderPathList = fsEventDb->getDirectChildFolderListOfFolder(parentItem->getUserPath());
+            QStringList eventFulFileList = fsEventDb->getEventfulFileListOfFolder(parentItem->getUserPath());
+
+            for(const QString &childFilePath : eventFulFileList)
+            {
+                TreeItem *fileItem = createTreeItem(childFilePath, false, parentItem);
+                parentItem->appendChild(fileItem);
+            }
 
             for(const QString &currentChildFolderPath : childFolderPathList)
             {
-                TreeItem *childItem = createTreeItemForFolder(currentChildFolderPath, parentItem);
+                TreeItem *childItem = createTreeItem(currentChildFolderPath, true, parentItem);
                 parentItem->appendChild(childItem);
                 itemStack.push(childItem);
             }
@@ -166,15 +178,21 @@ void TreeModelFsMonitor::setupModelData()
     }
 }
 
-TreeItem *TreeModelFsMonitor::createTreeItemForFolder(const QString &pathToFolder, TreeItem *root) const
+TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, bool shouldCreateFolder, TreeItem *root) const
 {
     TreeItem *result = new TreeItem(root);
-    result->setUserPath(pathToFolder);
+    result->setUserPath(pathToFileOrFolder);
 
-    auto status = fsEventDb->getStatusOfFolder(pathToFolder);
-    result->setStatus(itemStatusToString(status));
+    auto status = fsEventDb->getStatusOfFolder(pathToFileOrFolder);
+    result->setStatus(status);
 
-    QString oldName = fsEventDb->getOldNameOfFolder(pathToFolder);
+    QString oldName;
+
+    if(shouldCreateFolder)
+        oldName = fsEventDb->getOldNameOfFolder(pathToFileOrFolder);
+    else
+        oldName = fsEventDb->getOldNameOfFile(pathToFileOrFolder);
+
     if(!oldName.isEmpty())
         result->setOldName(oldName);
 

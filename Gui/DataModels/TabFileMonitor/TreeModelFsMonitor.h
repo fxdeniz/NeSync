@@ -27,7 +27,7 @@ public:
 
 private:
     void setupModelData();
-    TreeItem *createTreeItemForFolder(const QString &pathToFolder, TreeItem *root) const;
+    TreeItem *createTreeItem(const QString &pathToFileOrFolder, bool shouldCreateFolder, TreeItem *root) const;
     QString itemStatusToString(FileSystemEventDb::ItemStatus status) const;
 
     TreeItem *treeRoot;

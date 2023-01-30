@@ -29,14 +29,19 @@ QString TreeItem::getUserPath() const
     return userPath;
 }
 
-void TreeItem::setStatus(const QString &newStatus)
-{
-    status = newStatus;
-}
-
 void TreeItem::setOldName(const QString &newOldName)
 {
     oldName = newOldName;
+}
+
+int TreeItem::getStatus() const
+{
+    return status;
+}
+
+void TreeItem::setStatus(int newStatus)
+{
+    status = newStatus;
 }
 
 void TreeItem::setDescription(const QString &newDescription)
