@@ -38,6 +38,7 @@ public:
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
+    QString getOldNameOfFolder(const QString &pathToFolder) const;
     QStringList getMonitoredFolderPathList() const;
     QStringList getActiveRootFolderList() const;
     QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;

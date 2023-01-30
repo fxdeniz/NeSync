@@ -1,7 +1,6 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
 
-#include "Utility/DatabaseRegistry.h"
 #include "DataModels/TabFileMonitor/TreeModelFsMonitor.h"
 
 TabFileMonitor::TabFileMonitor(QWidget *parent) :
@@ -18,7 +17,7 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::onEventDbUpdated()
 {
-    TreeModelFsMonitor *newModel = new TreeModelFsMonitor(DatabaseRegistry::fileSystemEventDatabase());
+    TreeModelFsMonitor *newModel = new TreeModelFsMonitor();
     QAbstractItemModel *oldModel = ui->treeView->model();
 
     if(oldModel != nullptr)

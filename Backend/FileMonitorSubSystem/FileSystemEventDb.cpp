@@ -467,6 +467,25 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     return result;
 }
 
+QString FileSystemEventDb::getOldNameOfFolder(const QString &pathToFolder) const
+{
+    QString result = "";
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QSqlRecord row = getFolderRow(nativePath);
+        result = row.value("old_folder_name").toString();
+    }
+
+    return result;
+}
+
 QStringList FileSystemEventDb::getMonitoredFolderPathList() const
 {
     QStringList result;

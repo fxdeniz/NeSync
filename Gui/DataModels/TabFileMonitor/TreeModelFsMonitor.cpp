@@ -1,18 +1,12 @@
 #include "TreeModelFsMonitor.h"
 
-#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
+#include "Utility/DatabaseRegistry.h"
 
-#include <QSqlQuery>
-#include <QSqlRecord>
-
-TreeModelFsMonitor::TreeModelFsMonitor(const QSqlDatabase &db, QObject *parent)
+TreeModelFsMonitor::TreeModelFsMonitor(QObject *parent)
     : QAbstractItemModel(parent)
 {
     rootItem = new TreeItem();
-    database = db;
-
-    if(!database.isOpen())
-        database.open();
+    fsEventDb = new FileSystemEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
     setupModelData();
 }
@@ -20,6 +14,7 @@ TreeModelFsMonitor::TreeModelFsMonitor(const QSqlDatabase &db, QObject *parent)
 TreeModelFsMonitor::~TreeModelFsMonitor()
 {
     delete rootItem;
+    delete fsEventDb;
 }
 
 int TreeModelFsMonitor::columnCount(const QModelIndex &parent) const
@@ -124,24 +119,13 @@ int TreeModelFsMonitor::rowCount(const QModelIndex &parent) const
 
 void TreeModelFsMonitor::setupModelData()
 {
-    QString queryTemplate = "SELECT * FROM Folder WHERE efsw_id IS NOT NULL;" ;
-    QSqlQuery query(database);
-    query.prepare(queryTemplate);
-    query.exec();
-
-    FileSystemEventDb eventDb(database);
-    qDebug() << "root folder list = " << eventDb.getActiveRootFolderList();
-    qDebug() << "direct child folders = " << eventDb.getDirectChildFolderListOfFolder("/home/user/Desktop/data");
-    qDebug() << "direct child files = " << eventDb.getChildFileListOfFolder("/home/user/Desktop/data/");
-
-    while(query.next())
+    QStringList rootFolders = fsEventDb->getActiveRootFolderList();
+    for(const QString &currentRoot : rootFolders)
     {
-        QSqlRecord record = query.record();
-
         TreeItem *item = new TreeItem(rootItem);
-        item->setUserPath(record.value("folder_path").toString());
+        item->setUserPath(currentRoot);
 
-        auto status = record.value("status").value<FileSystemEventDb::ItemStatus>();
+        auto status = fsEventDb->getStatusOfFolder(currentRoot);
 
         if(status == FileSystemEventDb::ItemStatus::NewAdded)
             item->setStatus("New Added");
@@ -158,7 +142,7 @@ void TreeModelFsMonitor::setupModelData()
         else
             item->setStatus("NaN");
 
-        QString oldName = record.value("old_name").toString();
+        QString oldName = fsEventDb->getOldNameOfFolder(currentRoot);
         if(!oldName.isEmpty())
             item->setOldName(oldName);
 

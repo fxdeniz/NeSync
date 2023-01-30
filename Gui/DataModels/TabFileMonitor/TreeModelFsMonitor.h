@@ -3,7 +3,8 @@
 
 #include "TreeItem.h"
 
-#include <QSqlDatabase>
+#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
+
 #include <QAbstractItemModel>
 
 class TreeModelFsMonitor : public QAbstractItemModel
@@ -11,7 +12,7 @@ class TreeModelFsMonitor : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit TreeModelFsMonitor(const QSqlDatabase &db, QObject *parent = nullptr);
+    explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
     QVariant data(const QModelIndex &index, int role) const override;
@@ -28,7 +29,7 @@ private:
     void setupModelData();
 
     TreeItem *rootItem;
-    QSqlDatabase database;
+    FileSystemEventDb *fsEventDb;
 
 };
 
