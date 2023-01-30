@@ -1,6 +1,6 @@
 #include "TreeItem.h"
 
-TreeItem::TreeItem(TreeItem *parent) : _parentItem(parent)
+TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
 {}
 
 TreeItem::~TreeItem()
@@ -8,9 +8,25 @@ TreeItem::~TreeItem()
     qDeleteAll(childItems);
 }
 
+TreeItem *TreeItem::getParentItem() const
+{
+    return parentItem;
+}
+
+void TreeItem::setParentItem(TreeItem *newParentItem)
+{
+    parentItem = newParentItem;
+}
+
 void TreeItem::setUserPath(const QString &newUserPath)
 {
     userPath = newUserPath;
+}
+
+
+QString TreeItem::getUserPath() const
+{
+    return userPath;
 }
 
 void TreeItem::setStatus(const QString &newStatus)
@@ -69,15 +85,10 @@ QVariant TreeItem::data(int column) const
         return QVariant();
 }
 
-TreeItem *TreeItem::parentItem()
-{
-    return _parentItem;
-}
-
 int TreeItem::row() const
 {
-    if (_parentItem != nullptr)
-        return _parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
+    if (getParentItem() != nullptr)
+        return getParentItem()->childItems.indexOf(const_cast<TreeItem*>(this));
 
     return 0;
 }

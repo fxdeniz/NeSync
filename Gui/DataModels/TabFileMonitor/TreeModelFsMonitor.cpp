@@ -2,6 +2,10 @@
 
 #include "Utility/DatabaseRegistry.h"
 
+#include <QDir>
+#include <QStack>
+#include <QFileIconProvider>
+
 TreeModelFsMonitor::TreeModelFsMonitor(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -29,12 +33,30 @@ QVariant TreeModelFsMonitor::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
-    return item->data(index.column());
+    if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
+    {
+        QFileIconProvider provider;
+        QFileInfo info(item->getUserPath());
+        return provider.icon(info);
+    }
+    else if(role == Qt::ItemDataRole::DisplayRole)
+    {
+        if(index.column() == 0)
+        {
+            if(item->getParentItem() == treeRoot)
+                return item->getUserPath();
+            else
+            {
+                QString userPath = item->getUserPath();
+                userPath.chop(1); // Remove QDir::seperator()
+                return userPath.split(QDir::separator()).last();
+            }
+        }
+    }
+
+    return QVariant();
 }
 
 Qt::ItemFlags TreeModelFsMonitor::flags(const QModelIndex &index) const
@@ -95,7 +117,7 @@ QModelIndex TreeModelFsMonitor::parent(const QModelIndex &index) const
         return QModelIndex();
 
     TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
-    TreeItem *parentItem = childItem->parentItem();
+    TreeItem *parentItem = childItem->getParentItem();
 
     if (parentItem == treeRoot)
         return QModelIndex();
@@ -126,19 +148,20 @@ void TreeModelFsMonitor::setupModelData()
         TreeItem *activeRoot = createTreeItemForFolder(currentRootFolderPath, treeRoot);
         treeRoot->appendChild(activeRoot);
 
-        QStringList childFileList = fsEventDb->getChildFileListOfFolder(currentRootFolderPath);
+        QStack<TreeItem *> itemStack;
+        itemStack.push(activeRoot);
 
-        for(const QString &currentChildPath : childFileList)
+        while(!itemStack.isEmpty())
         {
-            TreeItem *childTreeItem = new TreeItem(activeRoot);
-            childTreeItem->setUserPath(currentChildPath);
+            TreeItem *parentItem = itemStack.pop();
+            QStringList childFolderPathList = fsEventDb->getDirectChildFolderListOfFolder(parentItem->getUserPath());
 
-            auto status = fsEventDb->getStatusOfFile(currentChildPath);
-            childTreeItem->setStatus(itemStatusToString(status));
-
-            childTreeItem->setOldName(fsEventDb->getOldNameOfFile(currentChildPath));
-
-            activeRoot->appendChild(childTreeItem);
+            for(const QString &currentChildFolderPath : childFolderPathList)
+            {
+                TreeItem *childItem = createTreeItemForFolder(currentChildFolderPath, parentItem);
+                parentItem->appendChild(childItem);
+                itemStack.push(childItem);
+            }
         }
     }
 }

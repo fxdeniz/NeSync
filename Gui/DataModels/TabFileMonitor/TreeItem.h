@@ -15,7 +15,11 @@ public:
     explicit TreeItem(TreeItem *parentItem = nullptr);
     ~TreeItem();
 
+    TreeItem *getParentItem() const;
+    void setParentItem(TreeItem *newParentItem);
+
     void setUserPath(const QString &newUserPath);
+    QString getUserPath() const;
     void setStatus(const QString &newStatus);
     void setOldName(const QString &newOldName);
     void setDescription(const QString &newDescription);
@@ -28,7 +32,6 @@ public:
     int columnCount() const;
     QVariant data(int column) const;
     int row() const;
-    TreeItem *parentItem();
 
 private:
     QString userPath;
@@ -37,7 +40,7 @@ private:
     QString description;
     QString action;
     QList<TreeItem *> childItems;
-    TreeItem *_parentItem;
+    TreeItem *parentItem;
 };
 
 #endif // TREEITEM_H
