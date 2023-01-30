@@ -486,6 +486,23 @@ QString FileSystemEventDb::getOldNameOfFolder(const QString &pathToFolder) const
     return result;
 }
 
+QString FileSystemEventDb::getOldNameOfFile(const QString &pathToFile) const
+{
+    QString result = "";
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QSqlRecord row = getFileRow(nativePath);
+        result = row.value("old_file_name").toString();
+    }
+
+    return result;
+}
+
 QStringList FileSystemEventDb::getMonitoredFolderPathList() const
 {
     QStringList result;

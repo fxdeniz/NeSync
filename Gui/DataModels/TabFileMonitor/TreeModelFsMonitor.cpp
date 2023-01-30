@@ -5,7 +5,7 @@
 TreeModelFsMonitor::TreeModelFsMonitor(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    rootItem = new TreeItem();
+    treeRoot = new TreeItem();
     fsEventDb = new FileSystemEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
     setupModelData();
@@ -13,7 +13,7 @@ TreeModelFsMonitor::TreeModelFsMonitor(QObject *parent)
 
 TreeModelFsMonitor::~TreeModelFsMonitor()
 {
-    delete rootItem;
+    delete treeRoot;
     delete fsEventDb;
 }
 
@@ -21,7 +21,7 @@ int TreeModelFsMonitor::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
-    return rootItem->columnCount();
+    return treeRoot->columnCount();
 }
 
 QVariant TreeModelFsMonitor::data(const QModelIndex &index, int role) const
@@ -79,7 +79,7 @@ QModelIndex TreeModelFsMonitor::index(int row, int column, const QModelIndex &pa
     TreeItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = treeRoot;
     else
         parentItem = static_cast<TreeItem*>(parent.internalPointer());
 
@@ -97,7 +97,7 @@ QModelIndex TreeModelFsMonitor::parent(const QModelIndex &index) const
     TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
     TreeItem *parentItem = childItem->parentItem();
 
-    if (parentItem == rootItem)
+    if (parentItem == treeRoot)
         return QModelIndex();
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -110,7 +110,7 @@ int TreeModelFsMonitor::rowCount(const QModelIndex &parent) const
         return 0;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = treeRoot;
     else
         parentItem = static_cast<TreeItem*>(parent.internalPointer());
 
@@ -120,32 +120,62 @@ int TreeModelFsMonitor::rowCount(const QModelIndex &parent) const
 void TreeModelFsMonitor::setupModelData()
 {
     QStringList rootFolders = fsEventDb->getActiveRootFolderList();
-    for(const QString &currentRoot : rootFolders)
+
+    for(const QString &currentRootFolderPath : rootFolders)
     {
-        TreeItem *item = new TreeItem(rootItem);
-        item->setUserPath(currentRoot);
+        TreeItem *activeRoot = createTreeItemForFolder(currentRootFolderPath, treeRoot);
+        treeRoot->appendChild(activeRoot);
 
-        auto status = fsEventDb->getStatusOfFolder(currentRoot);
+        QStringList childFileList = fsEventDb->getChildFileListOfFolder(currentRootFolderPath);
 
-        if(status == FileSystemEventDb::ItemStatus::NewAdded)
-            item->setStatus("New Added");
-        else if(status ==  FileSystemEventDb::ItemStatus::Updated)
-            item->setStatus("Updated");
-        else if(status == FileSystemEventDb::ItemStatus::Renamed)
-            item->setStatus("Renamed");
-        else if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-            item->setStatus("Updated & Renamed");
-        else if(status == FileSystemEventDb::ItemStatus::Deleted)
-            item->setStatus("Deleted");
-        else if(status == FileSystemEventDb::ItemStatus::Undefined)
-            item->setStatus("");
-        else
-            item->setStatus("NaN");
+        for(const QString &currentChildPath : childFileList)
+        {
+            TreeItem *childTreeItem = new TreeItem(activeRoot);
+            childTreeItem->setUserPath(currentChildPath);
 
-        QString oldName = fsEventDb->getOldNameOfFolder(currentRoot);
-        if(!oldName.isEmpty())
-            item->setOldName(oldName);
+            auto status = fsEventDb->getStatusOfFile(currentChildPath);
+            childTreeItem->setStatus(itemStatusToString(status));
 
-        rootItem->appendChild(item);
+            childTreeItem->setOldName(fsEventDb->getOldNameOfFile(currentChildPath));
+
+            activeRoot->appendChild(childTreeItem);
+        }
     }
+}
+
+TreeItem *TreeModelFsMonitor::createTreeItemForFolder(const QString &pathToFolder, TreeItem *root) const
+{
+    TreeItem *result = new TreeItem(root);
+    result->setUserPath(pathToFolder);
+
+    auto status = fsEventDb->getStatusOfFolder(pathToFolder);
+    result->setStatus(itemStatusToString(status));
+
+    QString oldName = fsEventDb->getOldNameOfFolder(pathToFolder);
+    if(!oldName.isEmpty())
+        result->setOldName(oldName);
+
+    return result;
+}
+
+QString TreeModelFsMonitor::itemStatusToString(FileSystemEventDb::ItemStatus status) const
+{
+    QString result;
+
+    if(status == FileSystemEventDb::ItemStatus::NewAdded)
+        result = "New Added";
+    else if(status ==  FileSystemEventDb::ItemStatus::Updated)
+        result = "Updated";
+    else if(status == FileSystemEventDb::ItemStatus::Renamed)
+        result = "Renamed";
+    else if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+        result = "Updated & Renamed";
+    else if(status == FileSystemEventDb::ItemStatus::Deleted)
+        result = "Deleted";
+    else if(status == FileSystemEventDb::ItemStatus::Undefined)
+        result = "";
+    else
+        result = "NaN";
+
+    return result;
 }
