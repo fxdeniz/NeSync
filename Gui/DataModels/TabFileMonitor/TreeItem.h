@@ -1,6 +1,8 @@
 #ifndef TREEITEM_H
 #define TREEITEM_H
 
+#include <Backend/FileMonitorSubSystem/FileSystemEventDb.h>
+
 #include <QList>
 #include <QVariant>
 
@@ -34,15 +36,15 @@ public:
     int columnCount() const;
     int row() const;
 
-    int getStatus() const;
-    void setStatus(int newStatus);
+    FileSystemEventDb::ItemStatus getStatus() const;
+    void setStatus(FileSystemEventDb::ItemStatus newStatus);
 
     ItemType getType() const;
     void setType(ItemType newType);
 
 private:
     QString userPath;
-    int status;
+    FileSystemEventDb::ItemStatus status;
     QString oldName;
     QString description;
     QString action;

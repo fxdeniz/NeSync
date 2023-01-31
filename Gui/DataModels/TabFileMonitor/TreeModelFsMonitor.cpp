@@ -49,7 +49,7 @@ QVariant TreeModelFsMonitor::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::ItemDataRole::DisplayRole)
     {
-        if(index.column() == 0)
+        if(index.column() == ColumnIndexUserPath)
         {
             if(item->getType() == TreeItem::ItemType::Folder)
             {
@@ -67,6 +67,11 @@ QVariant TreeModelFsMonitor::data(const QModelIndex &index, int role) const
                 QString userPath = item->getUserPath();
                 return userPath.split(QDir::separator()).last();
             }
+        }
+        else if(index.column() == ColumnIndexStatus)
+        {
+            QString result = itemStatusToString(item->getStatus());
+            return result;
         }
     }
 
@@ -196,7 +201,13 @@ TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, 
     TreeItem *result = new TreeItem(root);
     result->setUserPath(pathToFileOrFolder);
 
-    auto status = fsEventDb->getStatusOfFolder(pathToFileOrFolder);
+    auto status = FileSystemEventDb::ItemStatus::Invalid;
+
+    if(type == TreeItem::ItemType::Folder)
+        status = fsEventDb->getStatusOfFolder(pathToFileOrFolder);
+    else
+        status = fsEventDb->getStatusOfFile(pathToFileOrFolder);
+
     result->setStatus(status);
 
     QString oldName;

@@ -36,12 +36,12 @@ void TreeItem::setOldName(const QString &newOldName)
     oldName = newOldName;
 }
 
-int TreeItem::getStatus() const
+FileSystemEventDb::ItemStatus TreeItem::getStatus() const
 {
     return status;
 }
 
-void TreeItem::setStatus(int newStatus)
+void TreeItem::setStatus(FileSystemEventDb::ItemStatus newStatus)
 {
     status = newStatus;
 }
