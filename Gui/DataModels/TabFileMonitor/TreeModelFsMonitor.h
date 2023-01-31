@@ -20,6 +20,10 @@ public:
     explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
+    void appendDescription(const QString &data);
+    QString getDescription(int number) const;
+    QList<int> descriptionNumberList() const;
+
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -37,6 +41,7 @@ private:
 
     TreeItem *treeRoot;
     FileSystemEventDb *fsEventDb;
+    QMap<int, QString> descriptionMap;
 
 };
 

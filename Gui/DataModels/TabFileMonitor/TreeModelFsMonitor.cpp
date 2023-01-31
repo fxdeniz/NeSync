@@ -21,6 +21,34 @@ TreeModelFsMonitor::~TreeModelFsMonitor()
     delete fsEventDb;
 }
 
+void TreeModelFsMonitor::appendDescription(const QString &data)
+{
+    if(descriptionMap.isEmpty())
+        descriptionMap.insert(1, data);
+    else
+    {
+        int number = descriptionMap.lastKey() + 1;
+        descriptionMap.insert(number, data);
+    }
+}
+
+QString TreeModelFsMonitor::getDescription(int number) const
+{
+    QString result;
+
+    bool isContains = descriptionMap.contains(number);
+
+    if(isContains)
+        result = descriptionMap.value(number);
+
+    return result;
+}
+
+QList<int> TreeModelFsMonitor::descriptionNumberList() const
+{
+    return descriptionMap.keys();
+}
+
 int TreeModelFsMonitor::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
