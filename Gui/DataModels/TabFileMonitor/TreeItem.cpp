@@ -3,6 +3,7 @@
 TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
 {
     setType(ItemType::Undefined);
+    setAction(TreeItem::Action::NotSelected);
 }
 
 TreeItem::~TreeItem()
@@ -56,14 +57,19 @@ void TreeItem::setType(ItemType newType)
     type = newType;
 }
 
+TreeItem::Action TreeItem::getAction() const
+{
+    return action;
+}
+
+void TreeItem::setAction(Action newAction)
+{
+    action = newAction;
+}
+
 void TreeItem::setDescription(const QString &newDescription)
 {
     description = newDescription;
-}
-
-void TreeItem::setAction(const QString &newAction)
-{
-    action = newAction;
 }
 
 void TreeItem::appendChild(TreeItem *item)

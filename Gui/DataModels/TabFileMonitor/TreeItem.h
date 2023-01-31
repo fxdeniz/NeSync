@@ -17,6 +17,15 @@ public:
         File = 2
     };
 
+    enum Action
+    {
+        NotSelected = 0,
+        Save = 1,
+        Restore = 2,
+        Freeze = 3,
+        Delete = 4
+    };
+
     explicit TreeItem(TreeItem *parentItem = nullptr);
     ~TreeItem();
 
@@ -27,7 +36,6 @@ public:
     QString getUserPath() const;
     void setOldName(const QString &newOldName);
     void setDescription(const QString &newDescription);
-    void setAction(const QString &newAction);
 
     void appendChild(TreeItem *child);
 
@@ -42,12 +50,15 @@ public:
     ItemType getType() const;
     void setType(ItemType newType);
 
+    Action getAction() const;
+    void setAction(Action newAction);
+
 private:
     QString userPath;
     FileSystemEventDb::ItemStatus status;
     QString oldName;
     QString description;
-    QString action;
+    Action action;
     ItemType type;
     QList<TreeItem *> childItems;
     TreeItem *parentItem;

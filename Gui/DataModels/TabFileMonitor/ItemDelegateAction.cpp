@@ -28,17 +28,21 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
     FileSystemEventDb::ItemStatus status = item->getStatus();
 
     if(status == FileSystemEventDb::ItemStatus::NewAdded)
+    {
+        item->setAction(TreeItem::Action::Save);
         result->addItem(ITEM_TEXT_SAVE);
-
+    }
     else if(status == FileSystemEventDb::ItemStatus::Updated ||
             status == FileSystemEventDb::ItemStatus::Renamed ||
             status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
     {
+        item->setAction(TreeItem::Action::Save);
         result->addItem(ITEM_TEXT_SAVE);
         result->addItem(ITEM_TEXT_RESTORE);
     }
     else if(status == FileSystemEventDb::ItemStatus::Deleted)
     {
+        item->setAction(TreeItem::Action::Delete);
         result->addItem(ITEM_TEXT_DELETE);
         result->addItem(ITEM_TEXT_RESTORE);
         result->addItem(ITEM_TEXT_FREEZE);
@@ -69,24 +73,24 @@ void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
 
-//    auto tableModel = qobject_cast<TableModelFileMonitor *>(model);
-//    QModelIndex indexPath = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Path);
+    TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
 
-//    enum TableModelFileMonitor::Action action;
+    TreeItem::Action action;
 
-//    if(cb->currentText() == ITEM_TEXT_SAVE)
-//        action = TableModelFileMonitor::Action::Save;
-//    else if(cb->currentText() == ITEM_TEXT_RESTORE)
-//        action = TableModelFileMonitor::Action::Restore;
-//    else if(cb->currentText() == ITEM_TEXT_FREEZE)
-//        action = TableModelFileMonitor::Action::Freeze;
-//    else if(cb->currentText() == ITEM_TEXT_DELETE)
-//        action = TableModelFileMonitor::Action::Delete;
-//    else
-//        action = TableModelFileMonitor::Action::UndefinedAction;
+    if(cb->currentText() == ITEM_TEXT_SAVE)
+        action = TreeItem::Action::Save;
 
-//    tableModel->saveActionContentOfRow(indexPath.data().toString(), action);
+    else if(cb->currentText() == ITEM_TEXT_RESTORE)
+        action = TreeItem::Action::Restore;
 
-    // TODO make new designs use line below.
-    // model->setData(index, cb->currentText(), Qt::EditRole);
+    else if(cb->currentText() == ITEM_TEXT_FREEZE)
+        action = TreeItem::Action::Freeze;
+
+    else if(cb->currentText() == ITEM_TEXT_DELETE)
+        action = TreeItem::Action::Delete;
+
+    else
+        action = TreeItem::Action::NotSelected;
+
+    item->setAction(action);
 }
