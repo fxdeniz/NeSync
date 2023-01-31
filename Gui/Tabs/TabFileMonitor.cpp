@@ -33,5 +33,16 @@ void TabFileMonitor::onEventDbUpdated()
     ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
 
     ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexAction, itemDelegateAction);
-    ui->treeView->openPersistentEditor(newModel->index(0, 0));
+
+    ui->treeView->expandAll();
+
+    ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ContiguousSelection);
+    ui->treeView->selectAll();
+    QModelIndexList selectedIndices = ui->treeView->selectionModel()->selectedIndexes();
+
+    for(const QModelIndex &current : selectedIndices)
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFsMonitor::ColumnIndexAction));
+
+    ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+    ui->treeView->selectionModel()->clearSelection();
 }
