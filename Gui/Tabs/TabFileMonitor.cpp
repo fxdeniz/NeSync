@@ -8,6 +8,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui(new Ui::TabFileMonitor)
 {
     ui->setupUi(this);
+    itemDelegateAction = new ItemDelegateAction(this);
 }
 
 TabFileMonitor::~TabFileMonitor()
@@ -30,4 +31,7 @@ void TabFileMonitor::onEventDbUpdated()
     header->setSectionResizeMode(TreeModelFsMonitor::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
     header->setMinimumSectionSize(120);
     ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
+
+    ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexAction, itemDelegateAction);
+    ui->treeView->openPersistentEditor(newModel->index(0, 0));
 }

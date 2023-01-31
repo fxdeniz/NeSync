@@ -1,6 +1,8 @@
 #ifndef TABFILEMONITOR_H
 #define TABFILEMONITOR_H
 
+#include "DataModels/TabFileMonitor/ItemDelegateAction.h"
+
 #include <QWidget>
 
 namespace Ui {
@@ -20,6 +22,7 @@ public slots:
 
 private:
     Ui::TabFileMonitor *ui;
+    ItemDelegateAction *itemDelegateAction;
 };
 
 #endif // TABFILEMONITOR_H
