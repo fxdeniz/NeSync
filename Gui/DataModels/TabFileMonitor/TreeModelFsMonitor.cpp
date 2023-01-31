@@ -38,19 +38,33 @@ QVariant TreeModelFsMonitor::data(const QModelIndex &index, int role) const
     if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
     {
         QFileIconProvider provider;
-        QFileInfo info(item->getUserPath());
-        return provider.icon(info);
+
+        if(item->getType() == TreeItem::ItemType::Folder)
+            return provider.icon(QFileIconProvider::IconType::Folder);
+        else
+        {
+            QFileInfo info(item->getUserPath());
+            return provider.icon(info);
+        }
     }
     else if(role == Qt::ItemDataRole::DisplayRole)
     {
         if(index.column() == 0)
         {
-            if(item->getParentItem() == treeRoot)
-                return item->getUserPath();
-            else
+            if(item->getType() == TreeItem::ItemType::Folder)
+            {
+                if(item->getParentItem() == treeRoot)
+                    return item->getUserPath();
+                else
+                {
+                    QString userPath = item->getUserPath();
+                    userPath.chop(1); // Remove QDir::seperator()
+                    return userPath.split(QDir::separator()).last();
+                }
+            }
+            else if(item->getType() == TreeItem::ItemType::File)
             {
                 QString userPath = item->getUserPath();
-                userPath.chop(1); // Remove QDir::seperator()
                 return userPath.split(QDir::separator()).last();
             }
         }
@@ -67,8 +81,7 @@ Qt::ItemFlags TreeModelFsMonitor::flags(const QModelIndex &index) const
     return QAbstractItemModel::flags(index);
 }
 
-QVariant TreeModelFsMonitor::headerData(int section, Qt::Orientation orientation,
-                               int role) const
+QVariant TreeModelFsMonitor::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -77,13 +90,13 @@ QVariant TreeModelFsMonitor::headerData(int section, Qt::Orientation orientation
     {
         switch (section)
         {
-            case TreeItem::ColumnIndexUserPath:
+            case ColumnIndexUserPath:
                 return tr("Path");
-            case TreeItem::ColumnIndexStatus:
+            case ColumnIndexStatus:
                 return tr("Status");
-            case TreeItem::ColumnIndexDescription:
+            case ColumnIndexDescription:
                 return tr("Description");
-            case TreeItem::ColumnIndexAction:
+            case ColumnIndexAction:
                 return tr("Action");
             default:
                 break;
@@ -145,7 +158,7 @@ void TreeModelFsMonitor::setupModelData()
 
     for(const QString &currentRootFolderPath : rootFolders)
     {
-        TreeItem *activeRoot = createTreeItem(currentRootFolderPath, true, nullptr);
+        TreeItem *activeRoot = createTreeItem(currentRootFolderPath, TreeItem::ItemType::Folder, nullptr);
         QStack<TreeItem *> itemStack;
         itemStack.push(activeRoot);
 
@@ -164,13 +177,13 @@ void TreeModelFsMonitor::setupModelData()
 
             for(const QString &childFilePath : eventFulFileList)
             {
-                TreeItem *fileItem = createTreeItem(childFilePath, false, parentItem);
+                TreeItem *fileItem = createTreeItem(childFilePath, TreeItem::ItemType::File, parentItem);
                 parentItem->appendChild(fileItem);
             }
 
             for(const QString &currentChildFolderPath : childFolderPathList)
             {
-                TreeItem *childItem = createTreeItem(currentChildFolderPath, true, parentItem);
+                TreeItem *childItem = createTreeItem(currentChildFolderPath, TreeItem::ItemType::Folder, parentItem);
                 parentItem->appendChild(childItem);
                 itemStack.push(childItem);
             }
@@ -178,7 +191,7 @@ void TreeModelFsMonitor::setupModelData()
     }
 }
 
-TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, bool shouldCreateFolder, TreeItem *root) const
+TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, TreeItem::ItemType type, TreeItem *root) const
 {
     TreeItem *result = new TreeItem(root);
     result->setUserPath(pathToFileOrFolder);
@@ -188,10 +201,12 @@ TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, 
 
     QString oldName;
 
-    if(shouldCreateFolder)
+    if(type == TreeItem::ItemType::Folder)
         oldName = fsEventDb->getOldNameOfFolder(pathToFileOrFolder);
-    else
+    else if(type == TreeItem::ItemType::File)
         oldName = fsEventDb->getOldNameOfFile(pathToFileOrFolder);
+
+    result->setType(type);
 
     if(!oldName.isEmpty())
         result->setOldName(oldName);

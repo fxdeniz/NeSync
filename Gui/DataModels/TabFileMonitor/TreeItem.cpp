@@ -1,7 +1,9 @@
 #include "TreeItem.h"
 
 TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
-{}
+{
+    setType(ItemType::Undefined);
+}
 
 TreeItem::~TreeItem()
 {
@@ -44,6 +46,16 @@ void TreeItem::setStatus(int newStatus)
     status = newStatus;
 }
 
+TreeItem::ItemType TreeItem::getType() const
+{
+    return type;
+}
+
+void TreeItem::setType(ItemType newType)
+{
+    type = newType;
+}
+
 void TreeItem::setDescription(const QString &newDescription)
 {
     description = newDescription;
@@ -76,19 +88,6 @@ int TreeItem::columnCount() const
     return 4;
 }
 
-QVariant TreeItem::data(int column) const
-{
-    if(column == ColumnIndexUserPath)
-        return userPath;
-    else if(column == ColumnIndexStatus)
-        return status;
-    else if(column == ColumnIndexDescription)
-        return description;
-    else if(column == ColumnIndexAction)
-        return action;
-    else
-        return QVariant();
-}
 
 int TreeItem::row() const
 {

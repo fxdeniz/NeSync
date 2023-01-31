@@ -12,6 +12,11 @@ class TreeModelFsMonitor : public QAbstractItemModel
     Q_OBJECT
 
 public:
+    static const inline int ColumnIndexUserPath = 0;
+    static const inline int ColumnIndexStatus = 1;
+    static const inline int ColumnIndexDescription = 2;
+    static const inline int ColumnIndexAction = 3;
+
     explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
@@ -27,7 +32,7 @@ public:
 
 private:
     void setupModelData();
-    TreeItem *createTreeItem(const QString &pathToFileOrFolder, bool shouldCreateFolder, TreeItem *root) const;
+    TreeItem *createTreeItem(const QString &pathToFileOrFolder, TreeItem::ItemType type, TreeItem *root) const;
     QString itemStatusToString(FileSystemEventDb::ItemStatus status) const;
 
     TreeItem *treeRoot;

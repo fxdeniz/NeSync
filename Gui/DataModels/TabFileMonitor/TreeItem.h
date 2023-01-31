@@ -7,10 +7,13 @@
 class TreeItem
 {
 public:
-    static const inline int ColumnIndexUserPath = 0;
-    static const inline int ColumnIndexStatus = 1;
-    static const inline int ColumnIndexDescription = 2;
-    static const inline int ColumnIndexAction = 3;
+
+    enum ItemType
+    {
+        Undefined = 0,
+        Folder = 1,
+        File = 2
+    };
 
     explicit TreeItem(TreeItem *parentItem = nullptr);
     ~TreeItem();
@@ -29,11 +32,13 @@ public:
     TreeItem *child(int row);
     int childCount() const;
     int columnCount() const;
-    QVariant data(int column) const;
     int row() const;
 
     int getStatus() const;
     void setStatus(int newStatus);
+
+    ItemType getType() const;
+    void setType(ItemType newType);
 
 private:
     QString userPath;
@@ -41,6 +46,7 @@ private:
     QString oldName;
     QString description;
     QString action;
+    ItemType type;
     QList<TreeItem *> childItems;
     TreeItem *parentItem;
 };
