@@ -9,6 +9,7 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 {
     ui->setupUi(this);
     itemDelegateAction = new ItemDelegateAction(this);
+    itemDelegateDescription = new ItemDelegateDescription(this);
 }
 
 TabFileMonitor::~TabFileMonitor()
@@ -33,6 +34,7 @@ void TabFileMonitor::onEventDbUpdated()
     ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
 
     ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexAction, itemDelegateAction);
+    ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexDescription, itemDelegateDescription);
 
     ui->treeView->expandAll();
 
@@ -41,7 +43,10 @@ void TabFileMonitor::onEventDbUpdated()
     QModelIndexList selectedIndices = ui->treeView->selectionModel()->selectedIndexes();
 
     for(const QModelIndex &current : selectedIndices)
+    {
         ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFsMonitor::ColumnIndexAction));
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFsMonitor::ColumnIndexDescription));
+    }
 
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     ui->treeView->selectionModel()->clearSelection();

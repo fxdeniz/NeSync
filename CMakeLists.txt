@@ -72,6 +72,8 @@ set(PROJECT_SOURCES
         Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.cpp
         Gui/DataModels/TabFileMonitor/ItemDelegateAction.h
         Gui/DataModels/TabFileMonitor/ItemDelegateAction.cpp
+        Gui/DataModels/TabFileMonitor/ItemDelegateDescription.h
+        Gui/DataModels/TabFileMonitor/ItemDelegateDescription.cpp
         #
     #
 
