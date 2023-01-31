@@ -24,4 +24,10 @@ void TabFileMonitor::onEventDbUpdated()
         delete oldModel;
 
     ui->treeView->setModel(newModel);
+
+    QHeaderView *header = ui->treeView->header();
+    header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    header->setSectionResizeMode(TreeModelFsMonitor::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
+    header->setMinimumSectionSize(120);
+    ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
 }

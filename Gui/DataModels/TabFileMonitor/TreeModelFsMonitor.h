@@ -14,8 +14,8 @@ class TreeModelFsMonitor : public QAbstractItemModel
 public:
     static const inline int ColumnIndexUserPath = 0;
     static const inline int ColumnIndexStatus = 1;
-    static const inline int ColumnIndexDescription = 2;
-    static const inline int ColumnIndexAction = 3;
+    static const inline int ColumnIndexAction = 2;
+    static const inline int ColumnIndexDescription = 3;
 
     explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
