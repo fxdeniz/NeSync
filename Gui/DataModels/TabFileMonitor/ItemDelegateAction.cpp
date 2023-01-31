@@ -22,51 +22,34 @@ ItemDelegateAction::~ItemDelegateAction()
 
 QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    // Create the combobox and populate it
-    QComboBox *cb = new QComboBox(parent);
+    QComboBox *result = new QComboBox(parent);
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
-    qDebug() << "setting = " << item->getUserPath();
+    FileSystemEventDb::ItemStatus status = item->getStatus();
 
-//    QModelIndex statusIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Status);
-//    auto statusText = statusIndex.data().toString();
-//    auto statusCode = TableModelFileMonitor::statusCodeFromString(statusText);
+    if(status == FileSystemEventDb::ItemStatus::NewAdded)
+        result->addItem(ITEM_TEXT_SAVE);
 
-//    if(statusCode == TableModelFileMonitor::ItemStatus::Missing)
-//    {
-//        cb->addItem(ITEM_TEXT_RESTORE);
-//        cb->addItem(ITEM_TEXT_FREEZE);
-//        cb->addItem(ITEM_TEXT_DELETE);
-//    }
-//    else if(statusCode == TableModelFileMonitor::ItemStatus::NewAdded)
-//    {
-//        cb->addItem(ITEM_TEXT_SAVE);
-//    }
-//    else if(statusCode == TableModelFileMonitor::ItemStatus::Modified ||
-//            statusCode == TableModelFileMonitor::ItemStatus::Moved ||
-//            statusCode == TableModelFileMonitor::ItemStatus::MovedAndModified)
-//    {
-//        cb->addItem(ITEM_TEXT_SAVE);
-//        cb->addItem(ITEM_TEXT_RESTORE);
+    else if(status == FileSystemEventDb::ItemStatus::Updated ||
+            status == FileSystemEventDb::ItemStatus::Renamed ||
+            status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+    {
+        result->addItem(ITEM_TEXT_SAVE);
+        result->addItem(ITEM_TEXT_RESTORE);
+    }
+    else if(status == FileSystemEventDb::ItemStatus::Deleted)
+    {
+        result->addItem(ITEM_TEXT_DELETE);
+        result->addItem(ITEM_TEXT_RESTORE);
+        result->addItem(ITEM_TEXT_FREEZE);
+    }
+    else
+    {
+        delete result;
+        result = nullptr;
+    }
 
-//        QModelIndex progressIndex = index.siblingAtColumn(TableModelFileMonitor::ColumnIndex::Progress);
-//        auto progressCodeText = progressIndex.data().toString();
-//        auto progressCode = TableModelFileMonitor::progressStatusCodeFromString(progressCodeText);
-
-//        if(progressCode == TableModelFileMonitor::ProgressStatus::ApplyingAutoAction)
-//        {
-//            cb->setCurrentIndex(0);
-//            cb->setDisabled(true);
-//        }
-//    }
-//    else if(statusCode == TableModelFileMonitor::ItemStatus::Deleted)
-//    {
-//        cb->addItem(ITEM_TEXT_DELETE);
-//        cb->addItem(ITEM_TEXT_RESTORE);
-//        cb->addItem(ITEM_TEXT_FREEZE);
-//    }
-
-    return cb;
+    return result;
 }
 
 void ItemDelegateAction::setEditorData(QWidget *editor, const QModelIndex &index) const
