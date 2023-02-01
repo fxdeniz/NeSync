@@ -19,6 +19,9 @@
      <property name="alternatingRowColors">
       <bool>true</bool>
      </property>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
     </widget>
    </item>
    <item>
@@ -150,7 +153,7 @@
         <item>
          <widget class="QLabel" name="labelDescriptionDetail">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Description % details:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Description details:</string>
           </property>
          </widget>
         </item>

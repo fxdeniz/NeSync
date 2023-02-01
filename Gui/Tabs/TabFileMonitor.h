@@ -26,6 +26,8 @@ private slots:
     void on_buttonDeleteDescription_clicked();
     void on_textEditDescription_textChanged();
 
+    void on_comboBoxDescriptionNumber_activated(int index);
+
 private:
     Ui::TabFileMonitor *ui;
     ItemDelegateAction *itemDelegateAction;

@@ -25,6 +25,7 @@ public:
     void updateDescription(int number, const QString &data);
     void deleteDescription(int number);
     QString getDescription(int number) const;
+    int getMaxDescriptionNumber() const;
     QStringListModel *getDescriptionNumberListModel() const;
 
     QVariant data(const QModelIndex &index, int role) const override;

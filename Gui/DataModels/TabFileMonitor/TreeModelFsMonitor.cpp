@@ -70,6 +70,16 @@ QString TreeModelFsMonitor::getDescription(int number) const
     return result;
 }
 
+int TreeModelFsMonitor::getMaxDescriptionNumber() const
+{
+    int result = -1;
+
+    if(!descriptionMap.isEmpty())
+        result = descriptionMap.lastKey();
+
+    return result;
+}
+
 QStringListModel *TreeModelFsMonitor::getDescriptionNumberListModel() const
 {
     return descriptionNumberListModel;

@@ -56,17 +56,49 @@ void TabFileMonitor::onEventDbUpdated()
 void TabFileMonitor::on_buttonAddDescription_clicked()
 {
     QTextEdit *textEdit = ui->textEditDescription;
+    textEdit->blockSignals(true); // Disable updating descriptionMap in TreeModel
+
     textEdit->clear();
 
     auto model = (TreeModelFsMonitor *) ui->treeView->model();
     model->appendDescription();
+
+    int number = model->getMaxDescriptionNumber();
+    textEdit->setText(model->getDescription(number));
+
+    int lastIndex = model->getDescriptionNumberListModel()->stringList().size() - 1;
+    ui->comboBoxDescriptionNumber->setCurrentIndex(lastIndex);
+
+    textEdit->blockSignals(false);
 }
 
 void TabFileMonitor::on_buttonDeleteDescription_clicked()
 {
+    QTextEdit *textEdit = ui->textEditDescription;
+    QComboBox *comboBox = ui->comboBoxDescriptionNumber;
+    textEdit->blockSignals(true); // Disable updating descriptionMap in TreeModel
+
+    textEdit->clear();
+
     auto model = (TreeModelFsMonitor *) ui->treeView->model();
-    int number = ui->comboBoxDescriptionNumber->currentText().toInt();
+    int number = comboBox->currentText().toInt();
+    int previousIndex = comboBox->currentIndex();
     model->deleteDescription(number);
+
+    auto list = model->getDescriptionNumberListModel()->stringList();
+
+    if(list.size() > 1)
+    {
+        if(previousIndex == list.size())
+            comboBox->setCurrentIndex(0);
+        else
+            comboBox->setCurrentIndex(previousIndex);
+    }
+
+    int descIndex = comboBox->currentText().toInt();
+    textEdit->setText(model->getDescription(descIndex));
+
+    textEdit->blockSignals(false);
 }
 
 void TabFileMonitor::on_textEditDescription_textChanged()
@@ -75,3 +107,19 @@ void TabFileMonitor::on_textEditDescription_textChanged()
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     model->updateDescription(number, ui->textEditDescription->toPlainText());
 }
+
+void TabFileMonitor::on_comboBoxDescriptionNumber_activated(int index)
+{
+    Q_UNUSED(index);
+
+    QTextEdit *textEdit = ui->textEditDescription;
+    textEdit->blockSignals(true); // Disable updating descriptionMap in TreeModel
+
+    textEdit->clear();
+    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    int number = ui->comboBoxDescriptionNumber->currentText().toInt();
+    textEdit->setText(model->getDescription(number));
+
+    textEdit->blockSignals(false);
+}
+
