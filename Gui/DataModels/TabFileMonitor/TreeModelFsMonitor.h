@@ -5,6 +5,7 @@
 
 #include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
 
+#include <QStringListModel>
 #include <QAbstractItemModel>
 
 class TreeModelFsMonitor : public QAbstractItemModel
@@ -20,9 +21,10 @@ public:
     explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
-    void appendDescription(const QString &data);
+    void appendDescription();
+    void updateDescription(int number, const QString &data);
     QString getDescription(int number) const;
-    QList<int> descriptionNumberList() const;
+    QStringListModel *getDescriptionNumberListModel() const;
 
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -42,6 +44,7 @@ private:
     TreeItem *treeRoot;
     FileSystemEventDb *fsEventDb;
     QMap<int, QString> descriptionMap;
+    QStringListModel *descriptionNumberListModel;
 
 };
 

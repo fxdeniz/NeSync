@@ -11,7 +11,7 @@ TreeModelFsMonitor::TreeModelFsMonitor(QObject *parent)
 {
     treeRoot = new TreeItem();
     fsEventDb = new FileSystemEventDb(DatabaseRegistry::fileSystemEventDatabase());
-
+    descriptionNumberListModel = new QStringListModel(this);
     setupModelData();
 }
 
@@ -21,15 +21,30 @@ TreeModelFsMonitor::~TreeModelFsMonitor()
     delete fsEventDb;
 }
 
-void TreeModelFsMonitor::appendDescription(const QString &data)
+void TreeModelFsMonitor::appendDescription()
 {
     if(descriptionMap.isEmpty())
-        descriptionMap.insert(1, data);
+    {
+        descriptionMap.insert(1, "");
+        descriptionNumberListModel->setStringList(QStringList{ QString::number(1) });
+    }
     else
     {
         int number = descriptionMap.lastKey() + 1;
-        descriptionMap.insert(number, data);
+        descriptionMap.insert(number, "");
+
+        auto list = descriptionNumberListModel->stringList();
+        list.append(QString::number(number));
+        descriptionNumberListModel->setStringList(list);
     }
+}
+
+void TreeModelFsMonitor::updateDescription(int number, const QString &data)
+{
+    bool isContains = descriptionMap.contains(number);
+
+    if(isContains)
+        descriptionMap.insert(number, data);
 }
 
 QString TreeModelFsMonitor::getDescription(int number) const
@@ -44,9 +59,9 @@ QString TreeModelFsMonitor::getDescription(int number) const
     return result;
 }
 
-QList<int> TreeModelFsMonitor::descriptionNumberList() const
+QStringListModel *TreeModelFsMonitor::getDescriptionNumberListModel() const
 {
-    return descriptionMap.keys();
+    return descriptionNumberListModel;
 }
 
 int TreeModelFsMonitor::columnCount(const QModelIndex &parent) const
@@ -274,3 +289,4 @@ QString TreeModelFsMonitor::itemStatusToString(FileSystemEventDb::ItemStatus sta
 
     return result;
 }
+

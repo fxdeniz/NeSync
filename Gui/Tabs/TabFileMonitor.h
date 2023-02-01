@@ -21,6 +21,10 @@ public:
 public slots:
     void onEventDbUpdated();
 
+private slots:
+    void on_buttonAddDescription_clicked();
+    void on_textEditDescription_textChanged();
+
 private:
     Ui::TabFileMonitor *ui;
     ItemDelegateAction *itemDelegateAction;

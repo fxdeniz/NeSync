@@ -2,7 +2,10 @@
 
 #include "TreeItem.h"
 
+#include "TreeModelFsMonitor.h"
+
 #include <QComboBox>
+#include <QStringListModel>
 
 ItemDelegateDescription::ItemDelegateDescription(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -21,7 +24,14 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
     if(item->getType() == TreeItem::ItemType::File)
+    {
         result = new QComboBox(parent);
+
+        const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
+        Q_ASSERT(treeModel);
+
+        result->setModel(treeModel->getDescriptionNumberListModel());
+    }
 
 //    FileSystemEventDb::ItemStatus status = item->getStatus();
 
