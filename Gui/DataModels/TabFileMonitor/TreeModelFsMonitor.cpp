@@ -47,6 +47,17 @@ void TreeModelFsMonitor::updateDescription(int number, const QString &data)
         descriptionMap.insert(number, data);
 }
 
+void TreeModelFsMonitor::deleteDescription(int number)
+{
+    if(!descriptionMap.isEmpty())
+    {
+        descriptionMap.remove(number);
+        auto list = descriptionNumberListModel->stringList();
+        list.removeOne(QString::number(number));
+        descriptionNumberListModel->setStringList(list);
+    }
+}
+
 QString TreeModelFsMonitor::getDescription(int number) const
 {
     QString result;

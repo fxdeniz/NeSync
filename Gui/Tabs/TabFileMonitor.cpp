@@ -58,15 +58,20 @@ void TabFileMonitor::on_buttonAddDescription_clicked()
     QTextEdit *textEdit = ui->textEditDescription;
     textEdit->clear();
 
-    TreeModelFsMonitor *model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFsMonitor *) ui->treeView->model();
     model->appendDescription();
 }
 
+void TabFileMonitor::on_buttonDeleteDescription_clicked()
+{
+    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    int number = ui->comboBoxDescriptionNumber->currentText().toInt();
+    model->deleteDescription(number);
+}
 
 void TabFileMonitor::on_textEditDescription_textChanged()
 {
-    TreeModelFsMonitor *model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFsMonitor *) ui->treeView->model();
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     model->updateDescription(number, ui->textEditDescription->toPlainText());
 }
-

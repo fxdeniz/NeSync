@@ -23,6 +23,7 @@ public slots:
 
 private slots:
     void on_buttonAddDescription_clicked();
+    void on_buttonDeleteDescription_clicked();
     void on_textEditDescription_textChanged();
 
 private:

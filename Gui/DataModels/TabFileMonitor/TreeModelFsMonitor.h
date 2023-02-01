@@ -23,6 +23,7 @@ public:
 
     void appendDescription();
     void updateDescription(int number, const QString &data);
+    void deleteDescription(int number);
     QString getDescription(int number) const;
     QStringListModel *getDescriptionNumberListModel() const;
 
