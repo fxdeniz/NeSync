@@ -170,3 +170,9 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 {
     dialogDebugFileMonitor->show();
 }
+
+void MainWindow::on_tab2Action_SaveAll_triggered()
+{
+    tabFileMonitor->saveChanges();
+}
+

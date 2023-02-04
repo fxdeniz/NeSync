@@ -29,6 +29,9 @@ public:
     int getMaxDescriptionNumber() const;
     QStringListModel *getDescriptionNumberListModel() const;
 
+    QHash<QString, TreeItem *> getFolderItemMap() const;
+    QHash<QString, TreeItem *> getFileItemMap() const;
+
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -48,6 +51,9 @@ private:
     FileSystemEventDb *fsEventDb;
     QMap<int, QString> descriptionMap;
     QStringListModel *descriptionNumberListModel;
+
+    QHash<QString, TreeItem *> folderItemMap;
+    QHash<QString, TreeItem *> fileItemMap;
 
 };
 

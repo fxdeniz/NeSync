@@ -68,6 +68,11 @@ void TreeItem::setAction(Action newAction)
     action = newAction;
 }
 
+QString TreeItem::getDescription() const
+{
+    return description;
+}
+
 void TreeItem::setDescription(const QString &newDescription)
 {
     description = newDescription;

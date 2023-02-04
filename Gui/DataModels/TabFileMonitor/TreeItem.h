@@ -53,6 +53,8 @@ public:
     Action getAction() const;
     void setAction(Action newAction);
 
+    QString getDescription() const;
+
 private:
     QString userPath;
     FileSystemEventDb::ItemStatus status;

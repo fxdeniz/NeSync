@@ -2,6 +2,7 @@
 #include "ui_TabFileMonitor.h"
 
 #include "DataModels/TabFileMonitor/TreeModelFsMonitor.h"
+#include "Tasks/TaskSaveChanges.h"
 
 TabFileMonitor::TabFileMonitor(QWidget *parent) :
     QWidget(parent),
@@ -15,6 +16,21 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
 TabFileMonitor::~TabFileMonitor()
 {
     delete ui;
+}
+
+void TabFileMonitor::saveChanges()
+{
+    auto treeModel = qobject_cast<const TreeModelFsMonitor *>(ui->treeView->model());
+    Q_ASSERT(treeModel);
+
+    TaskSaveChanges *task = new TaskSaveChanges(treeModel->getFolderItemMap(),
+                                                treeModel->getFileItemMap(),
+                                                this);
+
+    QObject::connect(task, &QThread::finished,
+                     task, &QThread::deleteLater);
+
+    task->start();
 }
 
 void TabFileMonitor::onEventDbUpdated()

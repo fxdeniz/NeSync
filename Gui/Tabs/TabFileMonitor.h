@@ -18,6 +18,8 @@ public:
     explicit TabFileMonitor(QWidget *parent = nullptr);
     ~TabFileMonitor();
 
+    void saveChanges();
+
 public slots:
     void onEventDbUpdated();
 

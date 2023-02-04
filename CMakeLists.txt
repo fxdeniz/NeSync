@@ -90,6 +90,9 @@ set(PROJECT_SOURCES
         # TaskNavigateFileSystem
         Gui/Tasks/TaskNaviagateFileSystem.h
         Gui/Tasks/TaskNaviagateFileSystem.cpp
+        # TaskSaveChanges
+        Gui/Tasks/TaskSaveChanges.h
+        Gui/Tasks/TaskSaveChanges.cpp
     #
 
     main.cpp

@@ -90,6 +90,16 @@ QStringListModel *TreeModelFsMonitor::getDescriptionNumberListModel() const
     return descriptionNumberListModel;
 }
 
+QHash<QString, TreeItem *> TreeModelFsMonitor::getFileItemMap() const
+{
+    return fileItemMap;
+}
+
+QHash<QString, TreeItem *> TreeModelFsMonitor::getFolderItemMap() const
+{
+    return folderItemMap;
+}
+
 int TreeModelFsMonitor::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
@@ -244,6 +254,7 @@ void TreeModelFsMonitor::setupModelData()
             {
                 parentItem->setParentItem(treeRoot);
                 treeRoot->appendChild(activeRoot);
+                folderItemMap.insert(parentItem->getUserPath(), parentItem);
             }
 
             QStringList childFolderPathList = fsEventDb->getDirectChildFolderListOfFolder(parentItem->getUserPath());
@@ -253,6 +264,7 @@ void TreeModelFsMonitor::setupModelData()
             {
                 TreeItem *fileItem = createTreeItem(childFilePath, TreeItem::ItemType::File, parentItem);
                 parentItem->appendChild(fileItem);
+                fileItemMap.insert(fileItem->getUserPath(), fileItem);
             }
 
             for(const QString &currentChildFolderPath : childFolderPathList)
@@ -260,6 +272,7 @@ void TreeModelFsMonitor::setupModelData()
                 TreeItem *childItem = createTreeItem(currentChildFolderPath, TreeItem::ItemType::Folder, parentItem);
                 parentItem->appendChild(childItem);
                 itemStack.push(childItem);
+                folderItemMap.insert(childItem->getUserPath(), childItem);
             }
         }
     }
@@ -315,4 +328,3 @@ QString TreeModelFsMonitor::itemStatusToString(FileSystemEventDb::ItemStatus sta
 
     return result;
 }
-
