@@ -199,6 +199,31 @@ bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QStr
     return true;
 }
 
+bool FileStorageManager::deleteFile(const QString &symbolFilePath)
+{
+    bool result = false;
+    FileEntity entity = fileRepository->findBySymbolPath(symbolFilePath, true);
+
+    if(entity.isExist())
+    {
+        QList<FileVersionEntity> fileVersionList = entity.getVersionList();
+        QStringList internalPathList;
+
+        for(const FileVersionEntity &version : fileVersionList)
+            internalPathList.append(getBackupFolderPath() + version.internalFileName);
+
+        result = fileRepository->deleteEntity(entity);
+
+        if(result == true)
+        {
+            for(const QString &filePath : internalPathList)
+                QFile::remove(filePath);
+        }
+    }
+
+    return result;
+}
+
 QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;

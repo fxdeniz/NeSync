@@ -117,3 +117,26 @@ bool FileRepository::save(FileEntity &entity, QSqlError *error)
 
     return result;
 }
+
+bool FileRepository::deleteEntity(FileEntity &entity, QSqlError *error)
+{
+    bool result = false;
+
+    QSqlQuery query(database);
+    QString queryTemplate = "DELETE FROM FileEntity WHERE symbol_file_path = :1;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", entity.getPrimaryKey());
+    query.exec();
+
+    if(error != nullptr)
+        error = new QSqlError(query.lastError());
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+    {
+        entity.setIsExist(false);
+        result = true;
+    }
+
+    return result;
+}

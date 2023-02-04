@@ -26,9 +26,17 @@ void TaskSaveChanges::run()
 
         if(fileJson[JsonKeys::IsExist].toBool())
         {
-            fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(),
-                               fileItemIterator.key(),
-                               fileItemIterator.value()->getDescription());
+            TreeItem *item = fileItemIterator.value();
+            TreeItem::Action action = item->getAction();
+
+            if(action == TreeItem::Action::Delete)
+                fsm->deleteFile(fileJson[JsonKeys::File::SymbolFilePath].toString());
+            if(action == TreeItem::Action::Save)
+            {
+                fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(),
+                                   item->getUserPath(),
+                                   item->getDescription());
+            }
         }
     }
 }

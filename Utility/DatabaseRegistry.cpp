@@ -25,6 +25,8 @@ QSqlDatabase DatabaseRegistry::fileStorageDatabase()
     QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 
     QSqlDatabase result =  QSqlDatabase::cloneDatabase(dbFileStorage, newConnectionName);
+    result.open();
+    result.exec("PRAGMA foreign_keys = ON;");
 
     return result;
 }
@@ -39,7 +41,6 @@ QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
     QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 
     QSqlDatabase result =  QSqlDatabase::cloneDatabase(dbFileMonitor, newConnectionName);
-
     return result;
 }
 
@@ -64,7 +65,6 @@ void DatabaseRegistry::createDbFileStorage()
     dbFileStorage = QSqlDatabase::addDatabase("QSQLITE", "file_storage_db");
     dbFileStorage.setDatabaseName(dbPath);
     dbFileStorage.open();
-    dbFileStorage.exec("PRAGMA foreign_keys = ON;");
 
     if(!isExist)
     {
@@ -176,5 +176,4 @@ void DatabaseRegistry::createDbFileMonitor()
     dbFileMonitor.exec(queryCreateTableFolder);
     dbFileMonitor.exec(queryCreateTableFile);
     dbFileMonitor.exec(queryCreateTableMonitoringError);
-
 }
