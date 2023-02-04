@@ -4,6 +4,7 @@ TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
 {
     setType(ItemType::Undefined);
     setAction(TreeItem::Action::NotSelected);
+    setDescription("");
 }
 
 TreeItem::~TreeItem()

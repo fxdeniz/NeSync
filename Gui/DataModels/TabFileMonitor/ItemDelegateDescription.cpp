@@ -36,6 +36,13 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
         result->setCurrentIndex(-1);
         result->setPlaceholderText(ITEM_TEXT_DEFAULT);
 
+        // This lambda connection causes immediate trigger of ItemDelegateDescription::setModelData()
+        QObject::connect(result, &QComboBox::textActivated,
+                         this, [=](const QString &item){
+            Q_UNUSED(item);
+            result->clearFocus();
+        });
+
         QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelAboutToBeReset,
                          this, [=]{
             result->setProperty("prevDescIndex", result->currentIndex());
@@ -51,7 +58,10 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
             if(isPreviousDescExist)
                 result->setCurrentIndex(prevDescIndex); // Preserve the previous selection
             else
+            {
                 result->setCurrentIndex(-1);
+                item->setDescription("");
+            }
 
         });
     }
@@ -73,27 +83,17 @@ void ItemDelegateDescription::setEditorData(QWidget *editor, const QModelIndex &
 
 void ItemDelegateDescription::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    QComboBox *cb = qobject_cast<QComboBox *>(editor);
-    Q_ASSERT(cb);
+    QComboBox *comboBox = qobject_cast<QComboBox *>(editor);
+    Q_ASSERT(comboBox);
 
     TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
 
-    TreeItem::Action action;
+    QString currentText = comboBox->currentText();
+    if(!currentText.isEmpty())
+    {
+        const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
 
-//    if(cb->currentText() == ITEM_TEXT_SAVE)
-//        action = TreeItem::Action::Save;
-
-//    else if(cb->currentText() == ITEM_TEXT_RESTORE)
-//        action = TreeItem::Action::Restore;
-
-//    else if(cb->currentText() == ITEM_TEXT_FREEZE)
-//        action = TreeItem::Action::Freeze;
-
-//    else if(cb->currentText() == ITEM_TEXT_DELETE)
-//        action = TreeItem::Action::Delete;
-
-//    else
-//        action = TreeItem::Action::NotSelected;
-
-    item->setAction(action);
+        int number = currentText.toInt();
+        item->setDescription(treeModel->getDescription(number));
+    }
 }
