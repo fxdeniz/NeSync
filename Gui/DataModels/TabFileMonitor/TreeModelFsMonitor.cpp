@@ -58,6 +58,11 @@ void TreeModelFsMonitor::deleteDescription(int number)
     }
 }
 
+bool TreeModelFsMonitor::isDescriptionExist(int number) const
+{
+    return descriptionMap.contains(number);
+}
+
 QString TreeModelFsMonitor::getDescription(int number) const
 {
     QString result;

@@ -24,6 +24,7 @@ public:
     void appendDescription();
     void updateDescription(int number, const QString &data);
     void deleteDescription(int number);
+    bool isDescriptionExist(int number) const;
     QString getDescription(int number) const;
     int getMaxDescriptionNumber() const;
     QStringListModel *getDescriptionNumberListModel() const;

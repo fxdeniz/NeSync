@@ -7,6 +7,8 @@
 #include <QComboBox>
 #include <QStringListModel>
 
+const QString ItemDelegateDescription::ITEM_TEXT_DEFAULT = tr("Not selected");
+
 ItemDelegateDescription::ItemDelegateDescription(QObject *parent)
     : QStyledItemDelegate(parent)
 {
@@ -31,35 +33,28 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
         Q_ASSERT(treeModel);
 
         result->setModel(treeModel->getDescriptionNumberListModel());
+        result->setCurrentIndex(-1);
+        result->setPlaceholderText(ITEM_TEXT_DEFAULT);
+
+        QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelAboutToBeReset,
+                         this, [=]{
+            result->setProperty("prevDescIndex", result->currentIndex());
+            result->setProperty("prevDescNumber", result->currentText().toInt());
+        });
+
+        QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelReset,
+                         this, [=]{
+            int prevDescIndex = result->property("prevDescIndex").toInt();
+            int prevDescNumber = result->property("prevDescNumber").toInt();
+            bool isPreviousDescExist = treeModel->isDescriptionExist(prevDescNumber);
+
+            if(isPreviousDescExist)
+                result->setCurrentIndex(prevDescIndex); // Preserve the previous selection
+            else
+                result->setCurrentIndex(-1);
+
+        });
     }
-
-//    FileSystemEventDb::ItemStatus status = item->getStatus();
-
-//    if(status == FileSystemEventDb::ItemStatus::NewAdded)
-//    {
-//        item->setAction(TreeItem::Action::Save);
-//        result->addItem(ITEM_TEXT_SAVE);
-//    }
-//    else if(status == FileSystemEventDb::ItemStatus::Updated ||
-//            status == FileSystemEventDb::ItemStatus::Renamed ||
-//            status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-//    {
-//        item->setAction(TreeItem::Action::Save);
-//        result->addItem(ITEM_TEXT_SAVE);
-//        result->addItem(ITEM_TEXT_RESTORE);
-//    }
-//    else if(status == FileSystemEventDb::ItemStatus::Deleted)
-//    {
-//        item->setAction(TreeItem::Action::Delete);
-//        result->addItem(ITEM_TEXT_DELETE);
-//        result->addItem(ITEM_TEXT_RESTORE);
-//        result->addItem(ITEM_TEXT_FREEZE);
-//    }
-//    else
-//    {
-//        delete result;
-//        result = nullptr;
-//    }
 
     return result;
 }

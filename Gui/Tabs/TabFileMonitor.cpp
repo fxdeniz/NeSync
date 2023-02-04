@@ -31,7 +31,7 @@ void TabFileMonitor::onEventDbUpdated()
     QHeaderView *header = ui->treeView->header();
     header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     header->setSectionResizeMode(TreeModelFsMonitor::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
-    header->setMinimumSectionSize(120);
+    header->setMinimumSectionSize(130);
     ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
 
     ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexAction, itemDelegateAction);
