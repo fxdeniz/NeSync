@@ -3,6 +3,8 @@
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 #include "Utility/JsonDtoFormat.h"
 
+#include <QFile>
+
 TaskSaveChanges::TaskSaveChanges(const QHash<QString, TreeItem *> folderItemMap,
                                  const QHash<QString, TreeItem *> fileItemMap,
                                  QObject *parent)
@@ -23,6 +25,7 @@ void TaskSaveChanges::run()
     {
         fileItemIterator.next();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(fileItemIterator.key());
+        QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
 
         if(fileJson[JsonKeys::IsExist].toBool())
         {
@@ -30,7 +33,10 @@ void TaskSaveChanges::run()
             TreeItem::Action action = item->getAction();
 
             if(action == TreeItem::Action::Delete)
-                fsm->deleteFile(fileJson[JsonKeys::File::SymbolFilePath].toString());
+                fsm->deleteFile(symbolFilePath);
+
+            else if(action == TreeItem::Action::Save)
+                fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
 
             else if(action == TreeItem::Action::Freeze)
             {
@@ -38,11 +44,15 @@ void TaskSaveChanges::run()
                 fsm->updateFileEntity(fileJson);
             }
 
-            else if(action == TreeItem::Action::Save)
+            else if(action == TreeItem::Action::Restore)
             {
-                fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(),
-                                   item->getUserPath(),
-                                   item->getDescription());
+                qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+                QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+                QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
+
+                QFile::copy(internalFilePath, userFilePath);
             }
         }
     }
