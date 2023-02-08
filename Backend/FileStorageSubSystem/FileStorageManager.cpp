@@ -412,6 +412,7 @@ QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity)
     result[JsonKeys::File::IsFrozen] = entity.isFrozen;
     result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
     result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
+    result[JsonKeys::File::MaxVersionNumber] = fileVersionRepository->maxVersionNumber(entity.symbolFilePath());
     result[JsonKeys::File::UserFilePath] = QJsonValue();
     result[JsonKeys::File::VersionList] = QJsonValue();
 
