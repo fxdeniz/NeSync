@@ -224,6 +224,34 @@ bool FileStorageManager::deleteFile(const QString &symbolFilePath)
     return result;
 }
 
+bool FileStorageManager::updateFileEntity(QJsonObject fileDto)
+{
+    bool isFileNameExist = fileDto.contains(JsonKeys::File::FileName);
+    bool isSymbolFilePathExist = fileDto.contains(JsonKeys::File::SymbolFilePath);
+    bool isSymbolFolderPath = fileDto.contains(JsonKeys::File::SymbolFolderPath);
+    bool isFrozenExist = fileDto.contains(JsonKeys::File::IsFrozen);
+
+    if(!isFileNameExist || !isSymbolFilePathExist || !isSymbolFolderPath || !isFrozenExist)
+        return false;
+
+    bool isFileNameString = fileDto[JsonKeys::File::FileName].isString();
+    bool isSymbolFilePathString = fileDto[JsonKeys::File::SymbolFilePath].isString();
+    bool isSymbolFolderPathString = fileDto[JsonKeys::File::SymbolFolderPath].isString();
+    bool isFrozenBool = fileDto[JsonKeys::File::IsFrozen].isBool();
+
+    if(!isFileNameString || !isSymbolFilePathString || !isSymbolFolderPathString || !isFrozenBool)
+        return false;
+
+    FileEntity entity = fileRepository->findBySymbolPath(fileDto[JsonKeys::File::SymbolFilePath].toString());
+    entity.fileName = fileDto[JsonKeys::File::FileName].toString();
+    entity.symbolFolderPath = fileDto[JsonKeys::File::SymbolFolderPath].toString();
+    entity.isFrozen = fileDto[JsonKeys::File::IsFrozen].toBool();
+
+    bool result = fileRepository->save(entity);
+
+    return result;
+}
+
 QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;

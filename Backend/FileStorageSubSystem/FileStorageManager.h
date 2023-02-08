@@ -32,6 +32,8 @@ public:
 
     bool deleteFile(const QString &symbolFilePath);
 
+    bool updateFileEntity(QJsonObject fileDto);
+
     QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
     QJsonObject getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren = false) const;
     QJsonObject getFileJsonBySymbolPath(const QString &symbolFilePath, bool includeVersions = false) const;

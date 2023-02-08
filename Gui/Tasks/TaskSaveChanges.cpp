@@ -31,7 +31,14 @@ void TaskSaveChanges::run()
 
             if(action == TreeItem::Action::Delete)
                 fsm->deleteFile(fileJson[JsonKeys::File::SymbolFilePath].toString());
-            if(action == TreeItem::Action::Save)
+
+            else if(action == TreeItem::Action::Freeze)
+            {
+                fileJson[JsonKeys::File::IsFrozen] = true;
+                fsm->updateFileEntity(fileJson);
+            }
+
+            else if(action == TreeItem::Action::Save)
             {
                 fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(),
                                    item->getUserPath(),

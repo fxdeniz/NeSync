@@ -53,6 +53,16 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
         result = nullptr;
     }
 
+    if(result != nullptr)
+    {
+        // This lambda connection causes immediate trigger of ItemDelegateDescription::setModelData()
+        QObject::connect(result, &QComboBox::textActivated,
+                         this, [=](const QString &item){
+            Q_UNUSED(item);
+            result->clearFocus();
+        });
+    }
+
     return result;
 }
 
