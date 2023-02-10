@@ -4,6 +4,7 @@
 #include "Utility/DatabaseRegistry.h"
 #include "Utility/JsonDtoFormat.h"
 
+#include <QDir>
 #include <QFile>
 
 TaskSaveChanges::TaskSaveChanges(const QHash<QString, TreeItem *> folderItemMap,
@@ -31,8 +32,17 @@ void TaskSaveChanges::saveFolderChanges()
     while(folderItemIterator.hasNext())
     {
         folderItemIterator.next();
+        TreeItem *item = folderItemIterator.value();
+        TreeItem::Action action = item->getAction();
 
-        qDebug() << "folder = " << folderItemIterator.key();
+        if(action == TreeItem::Action::Save)
+        {
+            QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
+            QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+            symbolFolderPath += QDir(item->getUserPath()).dirName();
+
+            fsm->addNewFolder(symbolFolderPath, item->getUserPath());
+        }
     }
 }
 
