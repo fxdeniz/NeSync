@@ -20,7 +20,20 @@ TaskSaveChanges::~TaskSaveChanges()
 
 void TaskSaveChanges::run()
 {
+    saveFolderChanges();
     saveFileChanges();
+}
+
+void TaskSaveChanges::saveFolderChanges()
+{
+    auto fsm = FileStorageManager::instance();
+
+    while(folderItemIterator.hasNext())
+    {
+        folderItemIterator.next();
+
+        qDebug() << "folder = " << folderItemIterator.key();
+    }
 }
 
 void TaskSaveChanges::saveFileChanges()
