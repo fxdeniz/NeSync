@@ -34,7 +34,6 @@ public:
 
     void setUserPath(const QString &newUserPath);
     QString getUserPath() const;
-    void setOldName(const QString &newOldName);
     void setDescription(const QString &newDescription);
 
     void appendChild(TreeItem *child);
@@ -58,7 +57,6 @@ public:
 private:
     QString userPath;
     FileSystemEventDb::ItemStatus status;
-    QString oldName;
     QString description;
     Action action;
     ItemType type;

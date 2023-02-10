@@ -33,11 +33,6 @@ QString TreeItem::getUserPath() const
     return userPath;
 }
 
-void TreeItem::setOldName(const QString &newOldName)
-{
-    oldName = newOldName;
-}
-
 FileSystemEventDb::ItemStatus TreeItem::getStatus() const
 {
     return status;

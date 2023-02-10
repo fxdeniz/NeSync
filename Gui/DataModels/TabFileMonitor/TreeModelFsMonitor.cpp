@@ -291,18 +291,7 @@ TreeItem *TreeModelFsMonitor::createTreeItem(const QString &pathToFileOrFolder, 
         status = fsEventDb->getStatusOfFile(pathToFileOrFolder);
 
     result->setStatus(status);
-
-    QString oldName;
-
-    if(type == TreeItem::ItemType::Folder)
-        oldName = fsEventDb->getOldNameOfFolder(pathToFileOrFolder);
-    else if(type == TreeItem::ItemType::File)
-        oldName = fsEventDb->getOldNameOfFile(pathToFileOrFolder);
-
     result->setType(type);
-
-    if(!oldName.isEmpty())
-        result->setOldName(oldName);
 
     return result;
 }

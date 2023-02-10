@@ -467,6 +467,23 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     return result;
 }
 
+QString FileSystemEventDb::getNameOfFile(const QString &pathToFile) const
+{
+    QString result = "";
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QSqlRecord row = getFileRow(nativePath);
+        result = row.value("file_name").toString();
+    }
+
+    return result;
+}
+
 QString FileSystemEventDb::getOldNameOfFolder(const QString &pathToFolder) const
 {
     QString result = "";

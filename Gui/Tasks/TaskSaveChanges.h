@@ -20,6 +20,8 @@ protected:
     void run();
 
 private:
+    void saveFileChanges();
+
     QHashIterator<QString, TreeItem *> folderItemIterator;
     QHashIterator<QString, TreeItem *> fileItemIterator;
 };
