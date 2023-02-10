@@ -34,19 +34,15 @@ void TaskSaveChanges::saveFileChanges()
         QJsonObject fileJson = fsm->getFileJsonByUserPath(fileItemIterator.key());
         QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
         FileSystemEventDb::ItemStatus status = item->getStatus();
+        TreeItem::Action action = item->getAction();
 
-        if(fileJson[JsonKeys::IsExist].toBool()) // If file is persists
+        if(fileJson[JsonKeys::IsExist].toBool()) // If file info exist in db
         {
-            TreeItem::Action action = item->getAction();
-
             if(action == TreeItem::Action::Delete)
                 fsm->deleteFile(symbolFilePath);
-            else if(action == TreeItem::Action::Save)
-            {
-                if(status == FileSystemEventDb::ItemStatus::Updated)
-                    fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
-            }
-            else if(action == TreeItem::Action::Freeze)
+            else if(action == TreeItem::Action::Save) // Saves FileSystemEventDb::ItemStatus::Updated files
+                fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+            else if(action == TreeItem::Action::Freeze) // Freezes FileSystemEventDb::ItemStatus::Deleted files
             {
                 fileJson[JsonKeys::File::IsFrozen] = true;
                 fsm->updateFileEntity(fileJson);
@@ -62,30 +58,41 @@ void TaskSaveChanges::saveFileChanges()
                 QFile::copy(internalFilePath, userFilePath);
             }
         }
-        else // If file is NOT persists
+        else // If file info NOT exist in db
         {
-            if(status == FileSystemEventDb::ItemStatus::NewAdded)
+            FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
+            QString userPathToOldFile = item->getParentItem()->getUserPath() + fsEventDb.getOldNameOfFile(item->getUserPath());
+            fileJson = fsm->getFileJsonByUserPath(userPathToOldFile);
+            symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+
+            if(action == TreeItem::Action::Restore) // Restores FileSystemEventDb::ItemStatus::Renamed and UpdatedAndRenamed files
             {
-                QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
-                fsm->addNewFile(folderJson[JsonKeys::Folder::SymbolFolderPath].toString(), item->getUserPath());
+                qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+                QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+                QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
+
+                QFile::copy(internalFilePath, userFilePath);
+                QFile::remove(item->getUserPath());
             }
-            else if(status == FileSystemEventDb::ItemStatus::Renamed ||
-                    status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+            else if(action == TreeItem::Action::Save)
             {
-                FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
-                QString userPathToOldFile = item->getParentItem()->getUserPath() + fsEventDb.getOldNameOfFile(item->getUserPath());
-                fileJson = fsm->getFileJsonByUserPath(userPathToOldFile);
-
-                if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+                if(status == FileSystemEventDb::ItemStatus::NewAdded)
                 {
-                    fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(),
-                                       item->getUserPath(),
-                                       item->getDescription());
+                    QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
+                    fsm->addNewFile(folderJson[JsonKeys::Folder::SymbolFolderPath].toString(), item->getUserPath());
                 }
+                else if(status == FileSystemEventDb::ItemStatus::Renamed ||
+                        status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+                {
+                    if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+                        fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
 
-                // Rename file
-                fileJson[JsonKeys::File::FileName] = fsEventDb.getNameOfFile(item->getUserPath());
-                fsm->updateFileEntity(fileJson);
+                    // Rename file
+                    fileJson[JsonKeys::File::FileName] = fsEventDb.getNameOfFile(item->getUserPath());
+                    fsm->updateFileEntity(fileJson);
+                }
             }
         }
     }
