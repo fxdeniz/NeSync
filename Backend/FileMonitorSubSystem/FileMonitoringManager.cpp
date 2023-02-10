@@ -294,7 +294,11 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             if(currentStatus != FileSystemEventDb::ItemStatus::NewAdded)
                 database->setStatusOfFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
 
-            database->setOldNameOfFolder(currentOldPath, oldFileName);
+            QString userFolderPath = currentOldPath + FileStorageManager::separator;
+            bool isFolderPersists = fsm->getFolderJsonByUserPath(userFolderPath)[JsonKeys::IsExist].toBool();
+            if(isFolderPersists)
+                database->setOldNameOfFolder(currentOldPath, oldFileName);
+
             database->setPathOfFolder(currentOldPath, currentNewPath);
 
             emit signalEventDbUpdated();

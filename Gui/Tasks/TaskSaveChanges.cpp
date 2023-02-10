@@ -33,15 +33,37 @@ void TaskSaveChanges::saveFolderChanges()
     {
         folderItemIterator.next();
         TreeItem *item = folderItemIterator.value();
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getUserPath());
+        FileSystemEventDb::ItemStatus status = item->getStatus();
         TreeItem::Action action = item->getAction();
+        QDir dir(item->getUserPath());
 
-        if(action == TreeItem::Action::Save)
+        if(!folderJson[JsonKeys::IsExist].toBool()) // If folder info not exist in db
         {
-            QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
-            QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
-            symbolFolderPath += QDir(item->getUserPath()).dirName();
+            if(action == TreeItem::Action::Save) // Save newly added folders
+            {
+                QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
+                QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
 
-            fsm->addNewFolder(symbolFolderPath, item->getUserPath());
+                if(status == FileSystemEventDb::ItemStatus::NewAdded)
+                {
+                    symbolFolderPath += dir.dirName();
+
+                    fsm->addNewFolder(symbolFolderPath, item->getUserPath());
+                }
+                else if(status == FileSystemEventDb::ItemStatus::Renamed)
+                {
+                    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
+                    symbolFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
+                    symbolFolderPath += FileStorageManager::separator;
+
+                    folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+                    folderJson[JsonKeys::Folder::SuffixPath] = dir.dirName();
+                    folderJson[JsonKeys::Folder::UserFolderPath] = item->getUserPath();
+
+                    fsm->updateFolderEntity(folderJson);
+                }
+            }
         }
     }
 }

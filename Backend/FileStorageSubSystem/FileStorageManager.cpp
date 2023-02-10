@@ -224,6 +224,46 @@ bool FileStorageManager::deleteFile(const QString &symbolFilePath)
     return result;
 }
 
+bool FileStorageManager::updateFolderEntity(QJsonObject folderDto)
+{
+    bool isParentFolderPathExist = folderDto.contains(JsonKeys::Folder::ParentFolderPath);
+    bool isSuffixPathExist = folderDto.contains(JsonKeys::Folder::SuffixPath);
+    bool isSymbolFolderPathExist = folderDto.contains(JsonKeys::Folder::SymbolFolderPath);
+    bool isUserFolderPathExist = folderDto.contains(JsonKeys::Folder::UserFolderPath);
+    bool isFrozenExist = folderDto.contains(JsonKeys::Folder::IsFrozen);
+
+    if(!isParentFolderPathExist || !isSuffixPathExist || !isSymbolFolderPathExist || !isUserFolderPathExist || !isFrozenExist)
+        return false;
+
+    bool isParentFolderPathString = folderDto[JsonKeys::Folder::ParentFolderPath].isString();
+    bool isSuffixPathString = folderDto[JsonKeys::Folder::SuffixPath].isString();
+    bool isSymbolFolderPathString = folderDto[JsonKeys::Folder::SymbolFolderPath].isString();
+    bool isUserFolderPathString = folderDto[JsonKeys::Folder::UserFolderPath].isString();
+    bool isFrozenBool = folderDto[JsonKeys::Folder::IsFrozen].isBool();
+
+    if(!isParentFolderPathString || !isSuffixPathString || !isSymbolFolderPathString || !isUserFolderPathString || !isFrozenBool)
+        return false;
+
+    FolderEntity entity = folderRepository->findBySymbolPath(folderDto[JsonKeys::Folder::SymbolFolderPath].toString());
+    entity.parentFolderPath = folderDto[JsonKeys::Folder::ParentFolderPath].toString();
+    entity.suffixPath = folderDto[JsonKeys::Folder::SuffixPath].toString();
+    entity.userFolderPath = folderDto[JsonKeys::Folder::UserFolderPath].toString();
+    entity.isFrozen = folderDto[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(!entity.parentFolderPath.startsWith(separator))
+        entity.parentFolderPath.prepend(separator);
+
+    if(!entity.parentFolderPath.endsWith(separator))
+        entity.parentFolderPath.append(separator);
+
+    if(!entity.suffixPath.endsWith(separator))
+        entity.suffixPath.append(separator);
+
+    bool result = folderRepository->save(entity);
+
+    return result;
+}
+
 bool FileStorageManager::updateFileEntity(QJsonObject fileDto)
 {
     bool isFileNameExist = fileDto.contains(JsonKeys::File::FileName);
