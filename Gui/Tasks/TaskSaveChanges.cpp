@@ -24,26 +24,27 @@ void TaskSaveChanges::run()
     while(fileItemIterator.hasNext())
     {
         fileItemIterator.next();
+        TreeItem *item = fileItemIterator.value();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(fileItemIterator.key());
         QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+        FileSystemEventDb::ItemStatus status = item->getStatus();
 
-        if(fileJson[JsonKeys::IsExist].toBool())
+        if(fileJson[JsonKeys::IsExist].toBool()) // If file is persists
         {
-            TreeItem *item = fileItemIterator.value();
             TreeItem::Action action = item->getAction();
 
             if(action == TreeItem::Action::Delete)
                 fsm->deleteFile(symbolFilePath);
-
             else if(action == TreeItem::Action::Save)
-                fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
-
+            {
+                if(status == FileSystemEventDb::ItemStatus::Updated)
+                    fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+            }
             else if(action == TreeItem::Action::Freeze)
             {
                 fileJson[JsonKeys::File::IsFrozen] = true;
                 fsm->updateFileEntity(fileJson);
             }
-
             else if(action == TreeItem::Action::Restore)
             {
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
@@ -53,6 +54,14 @@ void TaskSaveChanges::run()
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
                 QFile::copy(internalFilePath, userFilePath);
+            }
+        }
+        else // If file is NOT persists
+        {
+            if(status == FileSystemEventDb::ItemStatus::NewAdded)
+            {
+                QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
+                fsm->addNewFile(folderJson[JsonKeys::Folder::SymbolFolderPath].toString(), item->getUserPath());
             }
         }
     }
