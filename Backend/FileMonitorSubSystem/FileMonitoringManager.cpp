@@ -248,7 +248,7 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
     QString currentOldPath = dir + oldFileName;
     QString currentNewPath = dir + fileName;
-
+    auto fsm = FileStorageManager::instance();
     QFileInfo info(currentNewPath);
 
     if(info.isFile() && !info.isHidden()) // Only accept real files.
@@ -272,7 +272,10 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
                     database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
             }
 
-            database->setOldNameOfFile(currentOldPath, oldFileName);
+            bool isFilePersists = fsm->getFileJsonByUserPath(currentOldPath)[JsonKeys::IsExist].toBool();
+            if(isFilePersists)
+                database->setOldNameOfFile(currentOldPath, oldFileName);
+
             database->setNameOfFile(currentOldPath, fileName);
 
             emit signalEventDbUpdated();

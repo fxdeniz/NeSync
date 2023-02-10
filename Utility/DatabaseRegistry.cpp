@@ -143,14 +143,14 @@ void DatabaseRegistry::createDbFileMonitor()
 
     QString queryCreateTableFolder;
     queryCreateTableFolder += " CREATE TABLE Folder (";
-    queryCreateTableFolder += " efsw_id INTEGER DEFAULT NULL CHECK(efsw_id >= 1) UNIQUE,";
+    queryCreateTableFolder += " efsw_id INTEGER DEFAULT NULL CHECK (efsw_id >= 1) UNIQUE,";
     queryCreateTableFolder += " folder_path TEXT NOT NULL UNIQUE,";
     queryCreateTableFolder += " parent_folder_path TEXT,";
-    queryCreateTableFolder += " old_folder_name TEXT,";
+    queryCreateTableFolder += " old_folder_name TEXT DEFAULT NULL CHECK (old_folder_name != \"\"),";
     queryCreateTableFolder += " status INTEGER NOT NULL DEFAULT 0,";
     queryCreateTableFolder += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFolder += " PRIMARY KEY(folder_path),";
-    queryCreateTableFolder += "	FOREIGN KEY(parent_folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED";
+    queryCreateTableFolder += " PRIMARY KEY (folder_path),";
+    queryCreateTableFolder += "	FOREIGN KEY (parent_folder_path) REFERENCES Folder (folder_path) ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED";
     queryCreateTableFolder += ");" ;
 
     QString queryCreateTableFile;
@@ -158,11 +158,11 @@ void DatabaseRegistry::createDbFileMonitor()
     queryCreateTableFile += " file_path TEXT NOT NULL UNIQUE GENERATED ALWAYS AS (folder_path || file_name) STORED,";
     queryCreateTableFile += " folder_path TEXT NOT NULL,";
     queryCreateTableFile += " file_name TEXT NOT NULL,";
-    queryCreateTableFile += " old_file_name TEXT,";
-    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0 CHECK(status BETWEEN 0 AND 5),";
+    queryCreateTableFile += " old_file_name TEXT DEFAULT NULL CHECK (old_file_name != \"\"),";
+    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0 CHECK (status BETWEEN 0 AND 5),";
     queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
-    queryCreateTableFile += " PRIMARY KEY(folder_path, file_name),";
-    queryCreateTableFile += " FOREIGN KEY(folder_path) REFERENCES Folder(folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
+    queryCreateTableFile += " PRIMARY KEY (folder_path, file_name),";
+    queryCreateTableFile += " FOREIGN KEY (folder_path) REFERENCES Folder (folder_path) ON DELETE CASCADE ON UPDATE CASCADE";
     queryCreateTableFile += " ); " ;
 
     QString queryCreateTableMonitoringError;
