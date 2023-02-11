@@ -38,7 +38,12 @@ void TaskSaveChanges::saveFolderChanges()
         TreeItem::Action action = item->getAction();
         QDir dir(item->getUserPath());
 
-        if(!folderJson[JsonKeys::IsExist].toBool()) // If folder info not exist in db
+        if(folderJson[JsonKeys::IsExist].toBool()) // If folder info exist in db
+        {
+            if(action == TreeItem::Action::Restore) // Restore deleted folders
+                dir.mkpath(item->getUserPath());
+        }
+        else // If folder info not exist in db
         {
             QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
             QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
@@ -68,8 +73,8 @@ void TaskSaveChanges::saveFolderChanges()
             {
                 QString oldFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
                 oldFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
-                dir.mkpath(oldFolderPath);
                 dir.removeRecursively();
+                dir.mkpath(oldFolderPath);
             }
         }
     }
