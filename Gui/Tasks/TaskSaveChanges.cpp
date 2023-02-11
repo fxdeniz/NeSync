@@ -40,12 +40,13 @@ void TaskSaveChanges::saveFolderChanges()
 
         if(!folderJson[JsonKeys::IsExist].toBool()) // If folder info not exist in db
         {
-            if(action == TreeItem::Action::Save) // Save newly added folders
-            {
-                QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
-                QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+            QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
+            QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+            FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
-                if(status == FileSystemEventDb::ItemStatus::NewAdded)
+            if(action == TreeItem::Action::Save)
+            {
+                if(status == FileSystemEventDb::ItemStatus::NewAdded) // Save newly added folders
                 {
                     symbolFolderPath += dir.dirName();
 
@@ -53,7 +54,6 @@ void TaskSaveChanges::saveFolderChanges()
                 }
                 else if(status == FileSystemEventDb::ItemStatus::Renamed)
                 {
-                    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
                     symbolFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
                     symbolFolderPath += FileStorageManager::separator;
 
@@ -63,6 +63,13 @@ void TaskSaveChanges::saveFolderChanges()
 
                     fsm->updateFolderEntity(folderJson);
                 }
+            }
+            else if(action == TreeItem::Action::Restore) // Restore renamed files
+            {
+                QString oldFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
+                oldFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
+                dir.mkpath(oldFolderPath);
+                dir.removeRecursively();
             }
         }
     }
