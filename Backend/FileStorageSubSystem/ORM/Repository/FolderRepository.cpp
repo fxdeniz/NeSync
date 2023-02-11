@@ -186,3 +186,42 @@ bool FolderRepository::save(FolderEntity &entity, QSqlError *error)
 
     return result;
 }
+
+bool FolderRepository::setIsFrozenOfChildren(const QString &symbolFolderPath, bool isFrozen, QSqlError *error)
+{
+    bool result = false;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " UPDATE FileEntity"
+                            " SET is_frozen = :1"
+                            " WHERE symbol_folder_path LIKE :2;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", isFrozen);
+    query.bindValue(":2", QString("%1%").arg(symbolFolderPath));
+    query.exec();
+
+
+    if(error != nullptr)
+        error = new QSqlError(query.lastError());
+
+    if(query.lastError().type() != QSqlError::ErrorType::NoError)
+        return false;
+
+    queryTemplate = " UPDATE FolderEntity"
+                    " SET is_frozen = :1"
+                    " WHERE parent_folder_path LIKE :2;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", isFrozen);
+    query.bindValue(":2", QString("%1%").arg(symbolFolderPath));
+    query.exec();
+
+    if(error != nullptr)
+        error = new QSqlError(query.lastError());
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+        result = true;
+
+    return result;
+}

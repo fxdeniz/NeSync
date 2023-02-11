@@ -224,7 +224,7 @@ bool FileStorageManager::deleteFile(const QString &symbolFilePath)
     return result;
 }
 
-bool FileStorageManager::updateFolderEntity(QJsonObject folderDto)
+bool FileStorageManager::updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren)
 {
     bool isParentFolderPathExist = folderDto.contains(JsonKeys::Folder::ParentFolderPath);
     bool isSuffixPathExist = folderDto.contains(JsonKeys::Folder::SuffixPath);
@@ -260,6 +260,12 @@ bool FileStorageManager::updateFolderEntity(QJsonObject folderDto)
         entity.suffixPath.append(separator);
 
     bool result = folderRepository->save(entity);
+
+    if(result == true && updateFrozenStatusOfChildren == true)
+    {
+        result = folderRepository->setIsFrozenOfChildren(entity.getPrimaryKey(),
+                                                         folderDto[JsonKeys::Folder::IsFrozen].toBool());
+    }
 
     return result;
 }
