@@ -42,6 +42,8 @@ void TaskSaveChanges::saveFolderChanges()
         {
             if(action == TreeItem::Action::Restore) // Restore deleted folders
                 dir.mkpath(item->getUserPath());
+            else if(action == TreeItem::Action::Delete) // Remove deleted folders from db
+                fsm->deleteFolder(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
             else if(action ==  TreeItem::Action::Freeze) // Freeze deleted folders
             {
                 folderJson[JsonKeys::Folder::IsFrozen] = true;
