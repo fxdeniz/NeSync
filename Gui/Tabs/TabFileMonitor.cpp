@@ -11,6 +11,12 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui->setupUi(this);
     itemDelegateAction = new ItemDelegateAction(this);
     itemDelegateDescription = new ItemDelegateDescription(this);
+
+    timer.setInterval(2000);
+    timer.stop();
+
+    QObject::connect(&timer, &QTimer::timeout,
+                     this, &TabFileMonitor::displayFileMonitorContent);
 }
 
 TabFileMonitor::~TabFileMonitor()
@@ -35,6 +41,18 @@ void TabFileMonitor::saveChanges()
 
 void TabFileMonitor::onEventDbUpdated()
 {
+    QString statusText = "Analyzing detected changes...";
+    ui->labelStatus->setHidden(false);
+    ui->labelStatus->setText(statusText);
+
+    timer.start();
+}
+
+void TabFileMonitor::displayFileMonitorContent()
+{
+    timer.stop();
+    ui->labelStatus->setHidden(true);
+
     TreeModelFsMonitor *treeModel = new TreeModelFsMonitor();
     QAbstractItemModel *oldModel = ui->treeView->model();
 
