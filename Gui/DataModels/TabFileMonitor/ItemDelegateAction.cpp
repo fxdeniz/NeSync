@@ -2,6 +2,7 @@
 
 #include "TreeItem.h"
 
+#include <QQueue>
 #include <QComboBox>
 
 const QString ItemDelegateAction::ITEM_TEXT_SAVE = tr("Save");
@@ -48,6 +49,15 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
         result->addItem(ITEM_TEXT_FREEZE);
     }
     else
+    {
+        delete result;
+        result = nullptr;
+    }
+
+    // Don't add ItemDelegateAction for children of deleted folder
+    if(item->getParentItem() != nullptr &&
+       item->getParentItem()->getType() == TreeItem::ItemType::Folder &&
+       item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Deleted)
     {
         delete result;
         result = nullptr;
@@ -103,4 +113,23 @@ void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model
         action = TreeItem::Action::NotSelected;
 
     item->setAction(action);
+
+    // Update action for children of deleted folder
+    if(item->getType() == TreeItem::ItemType::Folder &&
+       item->getStatus() == FileSystemEventDb::ItemStatus::Deleted)
+    {
+        QQueue<TreeItem *> children;
+
+        for(int index = 0; index < item->childCount(); index++)
+            children.enqueue(item->child(index));
+
+        while(!children.isEmpty())
+        {
+            TreeItem *current = children.dequeue();
+            current->setAction(action);
+
+            for(int i = 0; i < current->childCount(); i++)
+                children.enqueue(current->child(i));
+        }
+    }
 }

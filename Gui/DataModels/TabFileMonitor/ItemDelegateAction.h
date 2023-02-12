@@ -1,6 +1,7 @@
 #ifndef ITEMDELEGATEACTION_H
 #define ITEMDELEGATEACTION_H
 
+
 #include <QStyledItemDelegate>
 
 class ItemDelegateAction : public QStyledItemDelegate
