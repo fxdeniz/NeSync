@@ -74,6 +74,35 @@ QList<FileEntity> FileRepository::findActiveFiles() const
     return result;
 }
 
+QList<FileEntity> FileRepository::findAllChildFiles(const QString &symbolFolderPath) const
+{
+    QList<FileEntity> result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT * FROM FileEntity"
+                            " WHERE symbol_file_path LIKE :1;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", QString("%1%").arg(symbolFolderPath));
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        FileEntity entity;
+
+        entity.setIsExist(true);
+        entity.setPrimaryKey(record.value("symbol_file_path").toString());
+        entity.fileName = record.value("file_name").toString();
+        entity.symbolFolderPath = record.value("symbol_folder_path").toString();
+        entity.isFrozen = record.value("is_frozen").toBool();
+
+        result.append(entity);
+    }
+
+    return result;
+}
+
 bool FileRepository::save(FileEntity &entity, QSqlError *error)
 {
     bool result = false;

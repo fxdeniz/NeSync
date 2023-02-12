@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
 //    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "second version");
 //    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "third version");
 
+//    v2fsm->deleteFolder("/test_folder/");
+
 //    QJsonObject folderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/");
 //    folderJson[JsonKeys::Folder::IsFrozen] = true;
 //    v2fsm->updateFolderEntity(folderJson, true);

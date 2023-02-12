@@ -199,6 +199,23 @@ bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QStr
     return true;
 }
 
+bool FileStorageManager::deleteFolder(const QString &symbolFolderPath)
+{
+    bool result = false;
+    FolderEntity entity = folderRepository->findBySymbolPath(symbolFolderPath);
+
+    if(entity.isExist())
+    {
+        QList<FileEntity> fileList = fileRepository->findAllChildFiles(symbolFolderPath);
+        for(const FileEntity &fileEntity : fileList)
+            deleteFile(fileEntity.symbolFilePath());
+
+        result = folderRepository->deleteEntity(entity);
+    }
+
+    return result;
+}
+
 bool FileStorageManager::deleteFile(const QString &symbolFilePath)
 {
     bool result = false;

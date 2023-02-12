@@ -30,6 +30,7 @@ public:
                        const QString &pathToFile,
                        const QString &description = "");
 
+    bool deleteFolder(const QString &symbolFolderPath);
     bool deleteFile(const QString &symbolFilePath);
 
     bool updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren = false);
