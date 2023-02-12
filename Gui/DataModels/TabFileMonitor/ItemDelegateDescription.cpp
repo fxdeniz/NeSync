@@ -25,7 +25,10 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
     QComboBox *result = nullptr;
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
-    if(item->getType() == TreeItem::ItemType::File)
+    // Only create ItemDelegateDescription for files
+    //      and do not create ItemDelegateDescription for deleted files
+    if(item->getType() == TreeItem::ItemType::File &&
+       item->getStatus() != FileSystemEventDb::ItemStatus::Deleted)
     {
         result = new QComboBox(parent);
 
