@@ -179,7 +179,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
-        auto status = FileSystemEventDb::ItemStatus::Undefined;
+        auto status = FileSystemEventDb::ItemStatus::Monitored;
 
         auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);

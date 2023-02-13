@@ -11,7 +11,7 @@ public:
     enum ItemStatus
     {
         Invalid = -1,
-        Undefined = 0,
+        Monitored = 0,
         NewAdded = 1,
         Updated = 2,
         Renamed = 3,

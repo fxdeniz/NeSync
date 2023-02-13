@@ -28,6 +28,7 @@ void TaskSaveChanges::run()
 void TaskSaveChanges::saveFolderChanges()
 {
     auto fsm = FileStorageManager::instance();
+    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
     while(folderItemIterator.hasNext())
     {
@@ -43,7 +44,11 @@ void TaskSaveChanges::saveFolderChanges()
             if(action == TreeItem::Action::Restore) // Restore deleted folders
                 dir.mkpath(item->getUserPath());
             else if(action == TreeItem::Action::Delete) // Remove deleted folders from db
-                fsm->deleteFolder(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
+            {
+                bool isRemoved = fsm->deleteFolder(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
+                if(isRemoved)
+                    fsEventDb.deleteFolder(item->getUserPath());
+            }
             else if(action ==  TreeItem::Action::Freeze) // Freeze deleted folders
             {
                 folderJson[JsonKeys::Folder::IsFrozen] = true;
@@ -54,7 +59,6 @@ void TaskSaveChanges::saveFolderChanges()
         {
             QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
             QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
-            FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
             if(action == TreeItem::Action::Save)
             {
@@ -63,7 +67,7 @@ void TaskSaveChanges::saveFolderChanges()
                     symbolFolderPath += dir.dirName();
                     bool isSaved = fsm->addNewFolder(symbolFolderPath, item->getUserPath());
                     if(isSaved)
-                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
+                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
                 }
                 else if(status == FileSystemEventDb::ItemStatus::Renamed)
                 {
@@ -79,7 +83,7 @@ void TaskSaveChanges::saveFolderChanges()
                     if(isSaved)
                     {
                         fsEventDb.setOldNameOfFolder(item->getUserPath(), "");
-                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
+                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
                     }
                 }
             }
@@ -93,7 +97,7 @@ void TaskSaveChanges::saveFolderChanges()
                 if(isCreated)
                 {
                     fsEventDb.setOldNameOfFolder(item->getUserPath(), "");
-                    fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
+                    fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
                     fsEventDb.setPathOfFolder(item->getUserPath(), oldFolderPath);
                 }
             }
