@@ -52,7 +52,9 @@ void TaskSaveChanges::saveFolderChanges()
             else if(action ==  TreeItem::Action::Freeze) // Freeze deleted folders
             {
                 folderJson[JsonKeys::Folder::IsFrozen] = true;
-                fsm->updateFolderEntity(folderJson, true);
+                bool isUpdated = fsm->updateFolderEntity(folderJson, true);
+                if(isUpdated)
+                    fsEventDb.deleteFolder(item->getUserPath());
             }
         }
         else // If folder info not exist in db
