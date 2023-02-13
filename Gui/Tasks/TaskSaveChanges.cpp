@@ -119,6 +119,7 @@ void TaskSaveChanges::saveFileChanges()
                 auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
+                QFile::remove(item->getUserPath()); // If restored file exist remove it
                 QFile::copy(internalFilePath, userFilePath);
             }
         }

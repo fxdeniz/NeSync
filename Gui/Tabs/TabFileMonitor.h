@@ -24,6 +24,10 @@ public:
 public slots:
     void onEventDbUpdated();
 
+signals:
+    void signalSavingChangesStarted();
+    void signalSavingChangesFinished();
+
 private slots:
     void displayFileMonitorContent();
 

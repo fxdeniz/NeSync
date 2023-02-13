@@ -19,6 +19,8 @@ public:
 
 public slots:
     void start();
+    void pauseMonitoring();
+    void continueMonitoring();
 
 signals:
     void signalEventDbUpdated();

@@ -133,6 +133,16 @@ void FileMonitoringManager::start()
     emit signalEventDbUpdated();
 }
 
+void FileMonitoringManager::pauseMonitoring()
+{
+    fileSystemEventListener.blockSignals(true);
+}
+
+void FileMonitoringManager::continueMonitoring()
+{
+    fileSystemEventListener.blockSignals(false);
+}
+
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
     QString currentPath = dir + fileName;

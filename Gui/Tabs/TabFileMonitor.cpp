@@ -33,6 +33,12 @@ void TabFileMonitor::saveChanges()
                                                 treeModel->getFileItemMap(),
                                                 this);
 
+    QObject::connect(task, &QThread::started,
+                     this, &TabFileMonitor::signalSavingChangesStarted);
+
+    QObject::connect(task, &QThread::finished,
+                     this, &TabFileMonitor::signalSavingChangesFinished);
+
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);
 

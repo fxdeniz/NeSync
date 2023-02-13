@@ -116,7 +116,7 @@ void MainWindow::createFileMonitorThread()
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
 
-    FileMonitoringManager *monitor = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
+    FileMonitoringManager *monitoringManager = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
     auto fsm = FileStorageManager::instance();
 
@@ -130,18 +130,24 @@ void MainWindow::createFileMonitorThread()
     for(const QJsonValue &value : activeFiles)
         predictionList << value.toObject()[JsonKeys::File::UserFilePath].toString();
 
-    monitor->setPredictionList(predictionList);
+    monitoringManager->setPredictionList(predictionList);
 
-    monitor->moveToThread(fileMonitorThread);
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalSavingChangesStarted,
+                     monitoringManager, &FileMonitoringManager::pauseMonitoring);
 
-    QObject::connect(monitor, &FileMonitoringManager::signalEventDbUpdated,
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalSavingChangesFinished,
+                     monitoringManager, &FileMonitoringManager::continueMonitoring);
+
+    QObject::connect(monitoringManager, &FileMonitoringManager::signalEventDbUpdated,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
     QObject::connect(fileMonitorThread, &QThread::started,
-                     monitor, &FileMonitoringManager::start);
+                     monitoringManager, &FileMonitoringManager::start);
 
     QObject::connect(fileMonitorThread, &QThread::finished,
-                     monitor, &QObject::deleteLater);
+                     monitoringManager, &QObject::deleteLater);
+
+    monitoringManager->moveToThread(fileMonitorThread);
 
     fileMonitorThread->start();
 }
