@@ -76,12 +76,19 @@ void TaskSaveChanges::saveFolderChanges()
                     fsm->updateFolderEntity(folderJson);
                 }
             }
-            else if(action == TreeItem::Action::Restore) // Restore renamed files
+            else if(action == TreeItem::Action::Restore) // Restore renamed folders
             {
                 QString oldFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
                 oldFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
                 dir.removeRecursively();
-                dir.mkpath(oldFolderPath);
+                bool isCreated = dir.mkpath(oldFolderPath);
+
+                if(isCreated)
+                {
+                    fsEventDb.setOldNameOfFolder(item->getUserPath(), "");
+                    fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
+                    fsEventDb.setPathOfFolder(item->getUserPath(), oldFolderPath);
+                }
             }
         }
     }
