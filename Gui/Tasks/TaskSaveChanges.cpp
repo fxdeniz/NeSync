@@ -61,8 +61,9 @@ void TaskSaveChanges::saveFolderChanges()
                 if(status == FileSystemEventDb::ItemStatus::NewAdded) // Save newly added folders
                 {
                     symbolFolderPath += dir.dirName();
-
-                    fsm->addNewFolder(symbolFolderPath, item->getUserPath());
+                    bool isSaved = fsm->addNewFolder(symbolFolderPath, item->getUserPath());
+                    if(isSaved)
+                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
                 }
                 else if(status == FileSystemEventDb::ItemStatus::Renamed)
                 {
