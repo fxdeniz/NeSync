@@ -42,7 +42,11 @@ void TaskSaveChanges::saveFolderChanges()
         if(folderJson[JsonKeys::IsExist].toBool()) // If folder info exist in db
         {
             if(action == TreeItem::Action::Restore) // Restore deleted folders
-                dir.mkpath(item->getUserPath());
+            {
+                bool isCreated = dir.mkpath(item->getUserPath());
+                if(isCreated)
+                    emit folderRestored(item->getUserPath());
+            }
             else if(action == TreeItem::Action::Delete) // Remove deleted folders from db
             {
                 bool isRemoved = fsm->deleteFolder(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());

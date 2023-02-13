@@ -132,6 +132,9 @@ void MainWindow::createFileMonitorThread()
 
     monitoringManager->setPredictionList(predictionList);
 
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalFolderAdded,
+                     monitoringManager, &FileMonitoringManager::addFolderAtRuntime);
+
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalSavingChangesStarted,
                      monitoringManager, &FileMonitoringManager::pauseMonitoring);
 

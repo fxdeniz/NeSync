@@ -27,6 +27,7 @@ public slots:
 signals:
     void signalSavingChangesStarted();
     void signalSavingChangesFinished();
+    void signalFolderAdded(const QString &pathToFolder);
 
 private slots:
     void displayFileMonitorContent();

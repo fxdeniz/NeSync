@@ -15,6 +15,9 @@ public:
                              QObject *parent = nullptr);
     ~TaskSaveChanges();
 
+signals:
+    void folderRestored(const QString &pathToFolder);
+
     // QThread interface
 protected:
     void run();

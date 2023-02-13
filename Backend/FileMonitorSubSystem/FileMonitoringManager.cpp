@@ -143,16 +143,24 @@ void FileMonitoringManager::continueMonitoring()
     fileSystemEventListener.blockSignals(false);
 }
 
+void FileMonitoringManager::addFolderAtRuntime(const QString &pathToFolder)
+{
+    QFileInfo info(pathToFolder);
+    if(info.isDir())
+        slotOnAddEventDetected("", pathToFolder);
+}
+
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    QString currentPath = dir + fileName;
+    QString currentPath = QDir::toNativeSeparators(dir + fileName);
     QFileInfo info(currentPath);
     qDebug() << "addEvent = " << currentPath;
     qDebug() << "";
 
     if(info.isDir())
     {
-        currentPath.append(QDir::separator());
+        if(!currentPath.endsWith(QDir::separator()))
+            currentPath.append(QDir::separator());
 
         bool isFolderMonitored = database->isFolderExist(currentPath);
 
@@ -165,20 +173,25 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         {
             efsw::WatchID watchId = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
 
-            if(watchId > 0) // Successfully started monitoring folder
+            if(watchId <= 0) // Coludn't start monitoring folder
+                database->addMonitoringError(currentPath, "AddEvent", watchId);
+            else    // Successfully started monitoring folder
             {
                 if(!isFolderMonitored)
                     database->addFolder(currentPath);
 
                 database->setEfswIDofFolder(currentPath, watchId);
 
-                if(isFolderPersists)
-                    database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
-                else
+                if(!isFolderPersists)
                     database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
+                else
+                {
+                    if(fileSystemEventListener.signalsBlocked()) // If restoring folder
+                        database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Monitored);
+                    else
+                        database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
+                }
             }
-            else
-                database->addMonitoringError(currentPath, "AddEvent", watchId);
 
             emit signalEventDbUpdated();
         }
@@ -208,7 +221,7 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
     qDebug() << "deleteEvent = " << dir << fileName;
     qDebug() << "";
 
-    QString currentPath = dir + fileName;
+    QString currentPath = QDir::toNativeSeparators(dir + fileName);
     FileSystemEventDb::ItemStatus currentStatus;
 
     if(database->isFolderExist(currentPath)) // When folder deleted
@@ -243,7 +256,7 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
 
-    QString currentPath = dir + fileName;
+    QString currentPath = QDir::toNativeSeparators(dir + fileName);
 
     bool isFileMonitored = database->isFileExist(currentPath);
     if(isFileMonitored)
@@ -262,8 +275,8 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
     qDebug() << "renameEvent (old) -> (new) = " << oldFileName << fileName << dir;
     qDebug() << "";
 
-    QString currentOldPath = dir + oldFileName;
-    QString currentNewPath = dir + fileName;
+    QString currentOldPath = QDir::toNativeSeparators(dir + oldFileName);
+    QString currentNewPath = QDir::toNativeSeparators(dir + fileName);
     auto fsm = FileStorageManager::instance();
     QFileInfo info(currentNewPath);
 
