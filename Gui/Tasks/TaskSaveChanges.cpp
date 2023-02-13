@@ -73,7 +73,13 @@ void TaskSaveChanges::saveFolderChanges()
                     folderJson[JsonKeys::Folder::SuffixPath] = dir.dirName();
                     folderJson[JsonKeys::Folder::UserFolderPath] = item->getUserPath();
 
-                    fsm->updateFolderEntity(folderJson);
+                    bool isSaved = fsm->updateFolderEntity(folderJson);
+
+                    if(isSaved)
+                    {
+                        fsEventDb.setOldNameOfFolder(item->getUserPath(), "");
+                        fsEventDb.setStatusOfFolder(item->getUserPath(), FileSystemEventDb::ItemStatus::Undefined);
+                    }
                 }
             }
             else if(action == TreeItem::Action::Restore) // Restore renamed folders
