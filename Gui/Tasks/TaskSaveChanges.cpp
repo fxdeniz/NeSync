@@ -142,7 +142,9 @@ void TaskSaveChanges::saveFileChanges()
             else if(action == TreeItem::Action::Freeze) // Freezes FileSystemEventDb::ItemStatus::Deleted files
             {
                 fileJson[JsonKeys::File::IsFrozen] = true;
-                fsm->updateFileEntity(fileJson);
+                bool isUpdated = fsm->updateFileEntity(fileJson);
+                if(isUpdated)
+                    fsEventDb.deleteFile(item->getUserPath());
             }
             else if(action == TreeItem::Action::Restore)
             {

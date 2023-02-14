@@ -203,16 +203,20 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
-        if(isFilePersists)
-            status = FileSystemEventDb::ItemStatus::Updated;
-        else
-            status = FileSystemEventDb::ItemStatus::NewAdded;
+        if(!isFileFrozen) // Only monitor active (un-frozen) files
+        {
+            if(isFilePersists)
+                status = FileSystemEventDb::ItemStatus::Updated;
+            else
+                status = FileSystemEventDb::ItemStatus::NewAdded;
 
-        database->addFile(currentPath);
-        database->setStatusOfFile(currentPath, status);
+            database->addFile(currentPath);
+            database->setStatusOfFile(currentPath, status);
 
-        emit signalEventDbUpdated();
+            emit signalEventDbUpdated();
+        }
     }
 }
 
