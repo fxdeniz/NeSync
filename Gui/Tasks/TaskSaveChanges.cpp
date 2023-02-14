@@ -153,7 +153,9 @@ void TaskSaveChanges::saveFileChanges()
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
                 QFile::remove(item->getUserPath()); // If restored file exist remove it
-                QFile::copy(internalFilePath, userFilePath);
+                bool isCopied = QFile::copy(internalFilePath, userFilePath);
+                if(isCopied)
+                    fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
             }
         }
         else // If file info NOT exist in db
@@ -170,8 +172,10 @@ void TaskSaveChanges::saveFileChanges()
                 auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
-                QFile::copy(internalFilePath, userFilePath);
                 QFile::remove(item->getUserPath());
+                bool isCopied = QFile::copy(internalFilePath, userFilePath);
+                if(isCopied)
+                    fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
             }
             else if(action == TreeItem::Action::Save)
             {
