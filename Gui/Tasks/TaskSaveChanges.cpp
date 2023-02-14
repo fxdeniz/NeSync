@@ -190,11 +190,20 @@ void TaskSaveChanges::saveFileChanges()
                         status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
                 {
                     if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-                        fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+                    {
+                        bool isAppended = fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+                        if(!isAppended)
+                            break;
+                    }
 
                     // Rename file
                     fileJson[JsonKeys::File::FileName] = fsEventDb.getNameOfFile(item->getUserPath());
-                    fsm->updateFileEntity(fileJson);
+                    bool isUpdated = fsm->updateFileEntity(fileJson);
+                    if(isUpdated)
+                    {
+                        fsEventDb.setOldNameOfFile(item->getUserPath(), "");
+                        fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
+                    }
                 }
             }
         }

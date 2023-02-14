@@ -371,7 +371,11 @@ bool FileSystemEventDb::setOldNameOfFile(const QString &pathToFile, const QStrin
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
-        query.bindValue(":1", oldName);
+        if(oldName.isEmpty())
+            query.bindValue(":1", QVariant()); // Bind null value
+        else
+            query.bindValue(":1", oldName);
+
         query.bindValue(":2", nativePath);
 
         query.exec();
