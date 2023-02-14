@@ -109,22 +109,27 @@ void FileMonitoringManager::start()
         while(dirIterator.hasNext())
         {
             QFileInfo info = dirIterator.nextFileInfo();
-            QString candidateFolderPath = info.absoluteFilePath();
+            QString candidateFolderPath = QDir::toNativeSeparators(info.absoluteFilePath());
+            if(!candidateFolderPath.endsWith(QDir::separator()))
+                candidateFolderPath.append(QDir::separator());
+
+            QJsonObject folderJson = fsm->getFolderJsonByUserPath(candidateFolderPath);
 
             bool isFolderMonitored = database->isFolderExist(candidateFolderPath);
+            bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
 
-            if(!isFolderMonitored)
+            if(!isFolderMonitored && !isFolderFrozen)
             {
                 efsw::WatchID watchId = fileWatcher.addWatch(candidateFolderPath.toStdString(), &fileSystemEventListener, false);
 
-                if(watchId > 0) // Successfully started monitoring folder
+                if(watchId <= 0) // Couldn't start monitoring folder successfully
+                    database->addMonitoringError(candidateFolderPath, "Discovery", watchId);
+                else // Successfully started monitoring folder
                 {
                     database->addFolder(candidateFolderPath);
                     database->setEfswIDofFolder(candidateFolderPath, watchId);
                     database->setStatusOfFolder(candidateFolderPath, FileSystemEventDb::ItemStatus::NewAdded);
                 }
-                else
-                    database->addMonitoringError(candidateFolderPath, "Discovery", watchId);
             }
         }
 
@@ -136,11 +141,13 @@ void FileMonitoringManager::start()
         while(fileIterator.hasNext())
         {
             QFileInfo info = fileIterator.nextFileInfo();
-            QString candidateFilePath = info.absoluteFilePath();
+            QString candidateFilePath = QDir::toNativeSeparators(info.absoluteFilePath());
+            QJsonObject fileJson = fsm->getFileJsonByUserPath(candidateFilePath);
 
             bool isFileMonitored = database->isFileExist(candidateFilePath);
+            bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
-            if(!isFileMonitored)
+            if(!isFileMonitored && !isFileFrozen)
             {
                 database->addFile(candidateFilePath);
                 database->setStatusOfFile(candidateFilePath, FileSystemEventDb::ItemStatus::NewAdded);
