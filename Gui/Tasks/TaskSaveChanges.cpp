@@ -182,7 +182,9 @@ void TaskSaveChanges::saveFileChanges()
                 if(status == FileSystemEventDb::ItemStatus::NewAdded)
                 {
                     QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
-                    fsm->addNewFile(folderJson[JsonKeys::Folder::SymbolFolderPath].toString(), item->getUserPath());
+                    bool isAdded = fsm->addNewFile(folderJson[JsonKeys::Folder::SymbolFolderPath].toString(), item->getUserPath());
+                    if(isAdded)
+                        fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
                 }
                 else if(status == FileSystemEventDb::ItemStatus::Renamed ||
                         status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
