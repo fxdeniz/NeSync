@@ -268,7 +268,14 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
         FileSystemEventDb::ItemStatus status = database->getStatusOfFile(currentPath);
 
         if(status != FileSystemEventDb::ItemStatus::NewAdded) // Do not count update events on new added file
-            database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
+        {
+            QString oldFileName = database->getOldNameOfFile(currentPath);
+
+            if(oldFileName.isEmpty())
+                database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
+            else
+                database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
+        }
 
         emit signalEventDbUpdated();
     }
