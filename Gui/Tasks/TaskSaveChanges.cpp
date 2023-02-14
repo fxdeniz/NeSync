@@ -114,6 +114,7 @@ void TaskSaveChanges::saveFolderChanges()
 void TaskSaveChanges::saveFileChanges()
 {
     auto fsm = FileStorageManager::instance();
+    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
     while(fileItemIterator.hasNext())
     {
@@ -129,7 +130,11 @@ void TaskSaveChanges::saveFileChanges()
             if(action == TreeItem::Action::Delete)
                 fsm->deleteFile(symbolFilePath);
             else if(action == TreeItem::Action::Save) // Saves FileSystemEventDb::ItemStatus::Updated files
-                fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+            {
+                bool isAppended = fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
+                if(isAppended)
+                    fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
+            }
             else if(action == TreeItem::Action::Freeze) // Freezes FileSystemEventDb::ItemStatus::Deleted files
             {
                 fileJson[JsonKeys::File::IsFrozen] = true;
@@ -149,7 +154,6 @@ void TaskSaveChanges::saveFileChanges()
         }
         else // If file info NOT exist in db
         {
-            FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
             QString userPathToOldFile = item->getParentItem()->getUserPath() + fsEventDb.getOldNameOfFile(item->getUserPath());
             fileJson = fsm->getFileJsonByUserPath(userPathToOldFile);
             symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
