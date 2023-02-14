@@ -159,7 +159,7 @@ void DatabaseRegistry::createDbFileMonitor()
     queryCreateTableFile += " folder_path TEXT NOT NULL,";
     queryCreateTableFile += " file_name TEXT NOT NULL,";
     queryCreateTableFile += " old_file_name TEXT DEFAULT NULL CHECK (old_file_name != \"\"),";
-    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0 CHECK (status BETWEEN 0 AND 5),";
+    queryCreateTableFile += " status INTEGER NOT NULL DEFAULT 0,";
     queryCreateTableFile += " event_timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
     queryCreateTableFile += " PRIMARY KEY (folder_path, file_name),";
     queryCreateTableFile += " FOREIGN KEY (folder_path) REFERENCES Folder (folder_path) ON DELETE CASCADE ON UPDATE CASCADE";

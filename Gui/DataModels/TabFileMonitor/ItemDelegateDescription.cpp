@@ -27,46 +27,49 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
 
     // Only create ItemDelegateDescription for files
     //      and do not create ItemDelegateDescription for deleted files
-    if(item->getType() == TreeItem::ItemType::File &&
-       item->getStatus() != FileSystemEventDb::ItemStatus::Deleted)
+    if(item->getType() == TreeItem::ItemType::File)
     {
-        result = new QComboBox(parent);
+        if(item->getStatus() != FileSystemEventDb::ItemStatus::Deleted &&
+           item->getStatus() != FileSystemEventDb::ItemStatus::Missing)
+        {
+            result = new QComboBox(parent);
 
-        const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
-        Q_ASSERT(treeModel);
+            const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
+            Q_ASSERT(treeModel);
 
-        result->setModel(treeModel->getDescriptionNumberListModel());
-        result->setCurrentIndex(-1);
-        result->setPlaceholderText(ITEM_TEXT_DEFAULT);
+            result->setModel(treeModel->getDescriptionNumberListModel());
+            result->setCurrentIndex(-1);
+            result->setPlaceholderText(ITEM_TEXT_DEFAULT);
 
-        // This lambda connection causes immediate trigger of ItemDelegateDescription::setModelData()
-        QObject::connect(result, &QComboBox::textActivated,
-                         this, [=](const QString &item){
-            Q_UNUSED(item);
-            result->clearFocus();
-        });
+            // This lambda connection causes immediate trigger of ItemDelegateDescription::setModelData()
+            QObject::connect(result, &QComboBox::textActivated,
+                             this, [=](const QString &item){
+                Q_UNUSED(item);
+                result->clearFocus();
+            });
 
-        QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelAboutToBeReset,
-                         this, [=]{
-            result->setProperty("prevDescIndex", result->currentIndex());
-            result->setProperty("prevDescNumber", result->currentText().toInt());
-        });
+            QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelAboutToBeReset,
+                             this, [=]{
+                result->setProperty("prevDescIndex", result->currentIndex());
+                result->setProperty("prevDescNumber", result->currentText().toInt());
+            });
 
-        QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelReset,
-                         this, [=]{
-            int prevDescIndex = result->property("prevDescIndex").toInt();
-            int prevDescNumber = result->property("prevDescNumber").toInt();
-            bool isPreviousDescExist = treeModel->isDescriptionExist(prevDescNumber);
+            QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelReset,
+                             this, [=]{
+                int prevDescIndex = result->property("prevDescIndex").toInt();
+                int prevDescNumber = result->property("prevDescNumber").toInt();
+                bool isPreviousDescExist = treeModel->isDescriptionExist(prevDescNumber);
 
-            if(isPreviousDescExist)
-                result->setCurrentIndex(prevDescIndex); // Preserve the previous selection
-            else
-            {
-                result->setCurrentIndex(-1);
-                item->setDescription("");
-            }
+                if(isPreviousDescExist)
+                    result->setCurrentIndex(prevDescIndex); // Preserve the previous selection
+                else
+                {
+                    result->setCurrentIndex(-1);
+                    item->setDescription("");
+                }
 
-        });
+            });
+        }
     }
 
     return result;

@@ -46,6 +46,8 @@ void FileMonitoringManager::setPredictionList(const QStringList &newPredictionLi
 
 void FileMonitoringManager::start()
 {
+    auto fsm = FileStorageManager::instance();
+
     for(const QString &item : getPredictionList())
     {
         QFileInfo info(item);
@@ -76,7 +78,23 @@ void FileMonitoringManager::start()
                 database->addFile(item);
         }
         else
-            database->addMonitoringError(item, "Initialization", efsw::Error::FileNotFound);
+        {
+            QJsonObject folderJson = fsm->getFolderJsonByUserPath(item);
+            QJsonObject fileJson = fsm->getFileJsonByUserPath(item);
+
+            if(folderJson[JsonKeys::IsExist].toBool()) // If folder is missing
+            {
+                database->addFolder(item);
+                database->setStatusOfFolder(item, FileSystemEventDb::ItemStatus::Missing);
+            }
+            else if(fileJson[JsonKeys::IsExist].toBool())
+            {
+                database->addFile(item);
+                database->setStatusOfFile(item, FileSystemEventDb::ItemStatus::Missing);
+            }
+            else
+                database->addMonitoringError(item, "Initialization", efsw::Error::FileNotFound);
+        }
     }
 
     // Discover not predicted folders & files
@@ -193,7 +211,8 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
                 }
             }
 
-            emit signalEventDbUpdated();
+            if(!fileSystemEventListener.signalsBlocked()) // If monitoring paused, do not trigger ui events
+                emit signalEventDbUpdated();
         }
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files

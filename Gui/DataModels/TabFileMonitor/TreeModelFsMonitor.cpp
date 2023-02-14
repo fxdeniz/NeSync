@@ -310,6 +310,8 @@ QString TreeModelFsMonitor::itemStatusToString(FileSystemEventDb::ItemStatus sta
         result = "Updated & Renamed";
     else if(status == FileSystemEventDb::ItemStatus::Deleted)
         result = "Deleted";
+    else if(status == FileSystemEventDb::ItemStatus::Missing)
+        result = "Missing";
     else if(status == FileSystemEventDb::ItemStatus::Monitored)
         result = "";
     else

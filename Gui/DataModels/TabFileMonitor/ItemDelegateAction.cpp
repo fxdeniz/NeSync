@@ -48,19 +48,29 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
         result->addItem(ITEM_TEXT_RESTORE);
         result->addItem(ITEM_TEXT_FREEZE);
     }
+    else if(status == FileSystemEventDb::ItemStatus::Missing)
+    {
+        item->setAction(TreeItem::Action::Restore);
+        result->addItem(ITEM_TEXT_RESTORE);
+        result->addItem(ITEM_TEXT_DELETE);
+        result->addItem(ITEM_TEXT_FREEZE);
+    }
     else
     {
         delete result;
         result = nullptr;
     }
 
-    // Don't add ItemDelegateAction for children of deleted folder
+    // Don't add ItemDelegateAction for children of deleted or missing folder
     if(item->getParentItem() != nullptr &&
-       item->getParentItem()->getType() == TreeItem::ItemType::Folder &&
-       item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Deleted)
+       item->getParentItem()->getType() == TreeItem::ItemType::Folder)
     {
-        delete result;
-        result = nullptr;
+        if(item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Deleted ||
+           item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Missing)
+        {
+            delete result;
+            result = nullptr;
+        }
     }
 
     if(result != nullptr)
@@ -114,22 +124,25 @@ void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model
 
     item->setAction(action);
 
-    // Update action for children of deleted folder
-    if(item->getType() == TreeItem::ItemType::Folder &&
-       item->getStatus() == FileSystemEventDb::ItemStatus::Deleted)
+    // Update action for children of deleted or missing folder
+    if(item->getType() == TreeItem::ItemType::Folder)
     {
-        QQueue<TreeItem *> children;
-
-        for(int index = 0; index < item->childCount(); index++)
-            children.enqueue(item->child(index));
-
-        while(!children.isEmpty())
+        if(item->getStatus() == FileSystemEventDb::ItemStatus::Deleted ||
+           item->getStatus() == FileSystemEventDb::ItemStatus::Missing)
         {
-            TreeItem *current = children.dequeue();
-            current->setAction(action);
+            QQueue<TreeItem *> children;
 
-            for(int i = 0; i < current->childCount(); i++)
-                children.enqueue(current->child(i));
+            for(int index = 0; index < item->childCount(); index++)
+                children.enqueue(item->child(index));
+
+            while(!children.isEmpty())
+            {
+                TreeItem *current = children.dequeue();
+                current->setAction(action);
+
+                for(int i = 0; i < current->childCount(); i++)
+                    children.enqueue(current->child(i));
+            }
         }
     }
 }
