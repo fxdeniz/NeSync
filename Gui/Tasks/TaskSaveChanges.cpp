@@ -128,7 +128,11 @@ void TaskSaveChanges::saveFileChanges()
         if(fileJson[JsonKeys::IsExist].toBool()) // If file info exist in db
         {
             if(action == TreeItem::Action::Delete)
-                fsm->deleteFile(symbolFilePath);
+            {
+                bool isDeleted = fsm->deleteFile(symbolFilePath);
+                if(isDeleted)
+                    fsEventDb.deleteFile(item->getUserPath());
+            }
             else if(action == TreeItem::Action::Save) // Saves FileSystemEventDb::ItemStatus::Updated files
             {
                 bool isAppended = fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
