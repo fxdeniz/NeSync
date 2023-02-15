@@ -21,6 +21,11 @@ TreeModelFsMonitor::~TreeModelFsMonitor()
     delete fsEventDb;
 }
 
+void TreeModelFsMonitor::disableComboBoxes()
+{
+    emit signalDisableItemDelegates();
+}
+
 void TreeModelFsMonitor::appendDescription()
 {
     if(descriptionMap.isEmpty())

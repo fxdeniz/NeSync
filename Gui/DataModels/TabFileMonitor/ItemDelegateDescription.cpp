@@ -34,7 +34,7 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
         {
             result = new QComboBox(parent);
 
-            const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
+            TreeModelFsMonitor *treeModel = (TreeModelFsMonitor *) index.model();
             Q_ASSERT(treeModel);
 
             result->setModel(treeModel->getDescriptionNumberListModel());
@@ -46,6 +46,18 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
                              this, [=](const QString &item){
                 Q_UNUSED(item);
                 result->clearFocus();
+            });
+
+            QObject::connect(treeModel, &TreeModelFsMonitor::signalDisableItemDelegates,
+                             result, [=]{
+                    result->setDisabled(true);
+                    if(result->currentText().isEmpty())
+                        item->setDescription("");
+                    else
+                    {
+                        int number = result->currentText().toInt();
+                        item->setDescription(treeModel->getDescription(number));
+                    }
             });
 
             QObject::connect(treeModel->getDescriptionNumberListModel(), &QAbstractListModel::modelAboutToBeReset,

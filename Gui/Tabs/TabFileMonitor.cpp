@@ -26,7 +26,7 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::saveChanges()
 {
-    auto treeModel = qobject_cast<const TreeModelFsMonitor *>(ui->treeView->model());
+    auto treeModel = (TreeModelFsMonitor *)(ui->treeView->model());
     Q_ASSERT(treeModel);
 
     TaskSaveChanges *task = new TaskSaveChanges(treeModel->getFolderItemMap(),
@@ -44,6 +44,8 @@ void TabFileMonitor::saveChanges()
 
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);
+
+    treeModel->disableComboBoxes();
 
     task->start();
 }

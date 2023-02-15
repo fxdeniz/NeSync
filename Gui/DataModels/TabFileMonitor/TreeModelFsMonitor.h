@@ -21,6 +21,8 @@ public:
     explicit TreeModelFsMonitor(QObject *parent = nullptr);
     ~TreeModelFsMonitor();
 
+    void disableComboBoxes();
+
     void appendDescription();
     void updateDescription(int number, const QString &data);
     void deleteDescription(int number);
@@ -41,6 +43,9 @@ public:
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+signals:
+    void signalDisableItemDelegates();
 
 private:
     void setupModelData();
