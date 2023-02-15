@@ -33,6 +33,7 @@ public:
 
     QHash<QString, TreeItem *> getFolderItemMap() const;
     QHash<QString, TreeItem *> getFileItemMap() const;
+    int getTotalItemCount() const;
 
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;

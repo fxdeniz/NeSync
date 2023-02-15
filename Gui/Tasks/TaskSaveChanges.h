@@ -15,8 +15,11 @@ public:
                              QObject *parent = nullptr);
     ~TaskSaveChanges();
 
+    int getTotalItemCount() const;
+
 signals:
     void folderRestored(const QString &pathToFolder);
+    void itemBeingProcessed(int itemNumber);
 
     // QThread interface
 protected:
@@ -28,6 +31,8 @@ private:
 
     QHashIterator<QString, TreeItem *> folderItemIterator;
     QHashIterator<QString, TreeItem *> fileItemIterator;
+    int totalItemCount;
+    int currentItemNumber;
 };
 
 #endif // TASKSAVECHANGES_H

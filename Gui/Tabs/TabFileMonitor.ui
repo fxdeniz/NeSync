@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="5,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="5,0,0,1">
    <item>
     <widget class="QTreeView" name="treeView">
      <property name="alternatingRowColors">
@@ -22,6 +22,13 @@
      <attribute name="headerStretchLastSection">
       <bool>false</bool>
      </attribute>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
     </widget>
    </item>
    <item>
@@ -41,6 +48,11 @@
      </item>
      <item>
       <widget class="QLabel" name="labelStatus">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Status Here</string>
        </property>

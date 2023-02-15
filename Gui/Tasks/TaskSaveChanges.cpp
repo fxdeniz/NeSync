@@ -12,6 +12,8 @@ TaskSaveChanges::TaskSaveChanges(const QHash<QString, TreeItem *> folderItemMap,
                                  QObject *parent)
     : QThread{parent}, folderItemIterator(folderItemMap), fileItemIterator(fileItemMap)
 {
+    totalItemCount = folderItemMap.size() + fileItemMap.size();
+    currentItemNumber = 0;
 }
 
 TaskSaveChanges::~TaskSaveChanges()
@@ -33,6 +35,10 @@ void TaskSaveChanges::saveFolderChanges()
     while(folderItemIterator.hasNext())
     {
         folderItemIterator.next();
+
+        ++currentItemNumber;
+        emit itemBeingProcessed(currentItemNumber);
+
         TreeItem *item = folderItemIterator.value();
         QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getUserPath());
         FileSystemEventDb::ItemStatus status = item->getStatus();
@@ -119,6 +125,10 @@ void TaskSaveChanges::saveFileChanges()
     while(fileItemIterator.hasNext())
     {
         fileItemIterator.next();
+
+        ++currentItemNumber;
+        emit itemBeingProcessed(currentItemNumber);
+
         TreeItem *item = fileItemIterator.value();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(fileItemIterator.key());
         QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
@@ -210,4 +220,9 @@ void TaskSaveChanges::saveFileChanges()
             }
         }
     }
+}
+
+int TaskSaveChanges::getTotalItemCount() const
+{
+    return totalItemCount;
 }

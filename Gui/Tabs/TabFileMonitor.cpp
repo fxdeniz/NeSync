@@ -9,6 +9,8 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui(new Ui::TabFileMonitor)
 {
     ui->setupUi(this);
+    ui->progressBar->hide();
+
     itemDelegateAction = new ItemDelegateAction(this);
     itemDelegateDescription = new ItemDelegateDescription(this);
 
@@ -26,12 +28,23 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::saveChanges()
 {
+    ui->textEditDescription->setReadOnly(true);
+    ui->buttonAddDescription->setDisabled(true);
+    ui->buttonDeleteDescription->setDisabled(true);
+
     auto treeModel = (TreeModelFsMonitor *)(ui->treeView->model());
     Q_ASSERT(treeModel);
 
     TaskSaveChanges *task = new TaskSaveChanges(treeModel->getFolderItemMap(),
                                                 treeModel->getFileItemMap(),
                                                 this);
+
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(task->getTotalItemCount());
+    ui->progressBar->show();
+
+    QObject::connect(task, &TaskSaveChanges::itemBeingProcessed,
+                     ui->progressBar, &QProgressBar::setValue);
 
     QObject::connect(task, &TaskSaveChanges::folderRestored,
                      this, &TabFileMonitor::signalFolderAdded);
@@ -56,6 +69,14 @@ void TabFileMonitor::onEventDbUpdated()
     ui->labelStatus->setHidden(false);
     ui->labelStatus->setText(statusText);
 
+    ui->textEditDescription->setDisabled(true);
+    ui->textEditDescription->blockSignals(true);
+    ui->textEditDescription->clear();
+    ui->textEditDescription->blockSignals(false);
+
+    ui->buttonAddDescription->setDisabled(true);
+    ui->buttonDeleteDescription->setDisabled(true);
+
     timer.start();
 }
 
@@ -63,6 +84,11 @@ void TabFileMonitor::displayFileMonitorContent()
 {
     timer.stop();
     ui->labelStatus->setHidden(true);
+    ui->progressBar->hide();
+    ui->textEditDescription->setEnabled(true);
+    ui->textEditDescription->setReadOnly(false);
+    ui->buttonAddDescription->setEnabled(true);
+    ui->buttonDeleteDescription->setEnabled(true);
 
     TreeModelFsMonitor *treeModel = new TreeModelFsMonitor();
     QAbstractItemModel *oldModel = ui->treeView->model();
