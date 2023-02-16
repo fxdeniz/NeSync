@@ -8,6 +8,7 @@
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QThread>
+#include <QJsonArray>
 
 TabFileExplorer::TabFileExplorer(QWidget *parent) :
     QWidget(parent),
@@ -23,12 +24,6 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 
     this->ui->tableViewFileExplorer->horizontalHeader()->setMinimumSectionSize(110);
     this->ui->tableViewFileExplorer->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
-
-    QStringList sampleListData;
-    sampleListData << "item 1" << "item 2" << "item 3" << "item 4" << "item 5";
-
-    listModelFileExplorer = new ListModelFileExplorer(sampleListData, this);
-    ui->listView->setModel(listModelFileExplorer);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::separator);
     fillTableFileExplorerWith(FileStorageManager::separator);
@@ -93,7 +88,7 @@ void TabFileExplorer::fillTableFileExplorerWith(const QString &symbolDirPath)
 {
     auto fsm = FileStorageManager::instance();
     QJsonObject result = fsm->getFolderJsonBySymbolPath(symbolDirPath, true);
-    slotOnDirContentFetched(result);
+    slotOnFolderContentFetched(result);
 }
 
 void TabFileExplorer::createNavigationTask()
@@ -102,11 +97,11 @@ void TabFileExplorer::createNavigationTask()
     navigationTaskThread->setObjectName(navigationTaskThreadName());
     TaskNaviagateFileSystem *task = new TaskNaviagateFileSystem();
 
-    QObject::connect(this, &TabFileExplorer::signalRequestDirContent,
-                     task, &TaskNaviagateFileSystem::slotOnDirContentRequested);
+    QObject::connect(this, &TabFileExplorer::signalRequestFolderContent,
+                     task, &TaskNaviagateFileSystem::slotOnFolderContentRequested);
 
-    QObject::connect(task, &TaskNaviagateFileSystem::signalDirContentFetched,
-                     this, &TabFileExplorer::slotOnDirContentFetched);
+    QObject::connect(task, &TaskNaviagateFileSystem::signalFolderContentFetched,
+                     this, &TabFileExplorer::slotOnFolderContentFetched);
 
     QObject::connect(navigationTaskThread, &QThread::finished,
                      task, &QObject::deleteLater);
@@ -159,7 +154,7 @@ void TabFileExplorer::slotRefreshFileExplorer()
     fillTableFileExplorerWith(ui->lineEditWorkingDir->text());
 }
 
-void TabFileExplorer::slotOnDirContentFetched(QJsonObject result)
+void TabFileExplorer::slotOnFolderContentFetched(QJsonObject result)
 {
     displayInTableViewFileExplorer(result);
 
@@ -197,12 +192,35 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
     emit signalToRouter_ShowDialogTableItemEditor();
 }
 
+void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
+{
+    if(index.isValid()) // If user clicked an item
+    {
+        auto tableModel = (TableModelFileExplorer *)index.model();
+        QString symbolPath = tableModel->symbolPathFromModelIndex(index);
+        TableModelFileExplorer::TableItemType type = tableModel->itemTypeFromModelIndex(index);
+
+        if(type == TableModelFileExplorer::TableItemType::File)
+        {
+            ListModelFileExplorer *listModel = nullptr;
+            if(ui->listView->model() != nullptr)
+                delete ui->listView->model();
+
+            auto fsm = FileStorageManager::instance();
+            QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolPath);
+
+            listModel = new ListModelFileExplorer(fileJson, ui->listView);
+            ui->listView->setModel(listModel);
+        }
+    }
+}
+
 void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &index)
 {
     if(index.isValid()) // If user double clicked an item
     {
         auto model = (TableModelFileExplorer *)index.model();
-        auto symbolPath = model->symbolPathFromModelIndex(index);
+        QString symbolPath = model->symbolPathFromModelIndex(index);
         TableModelFileExplorer::TableItemType type = model->itemTypeFromModelIndex(index);
 
         if(type == TableModelFileExplorer::TableItemType::Folder)
@@ -213,11 +231,10 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
             // Enable back button whenever item is double clicked.
             ui->buttonBack->setEnabled(true);
 
-            emit signalRequestDirContent(symbolPath);
+            emit signalRequestFolderContent(symbolPath);
         }
     }
 }
-
 
 void TabFileExplorer::on_buttonBack_clicked()
 {
@@ -230,10 +247,9 @@ void TabFileExplorer::on_buttonBack_clicked()
             ui->buttonBack->setDisabled(true);
 
         ui->buttonForward->setEnabled(true);
-        emit signalRequestDirContent(navigationHistoryIndices.at(newIndex));
+        emit signalRequestFolderContent(navigationHistoryIndices.at(newIndex));
     }
 }
-
 
 void TabFileExplorer::on_buttonForward_clicked()
 {
@@ -246,7 +262,6 @@ void TabFileExplorer::on_buttonForward_clicked()
             ui->buttonForward->setDisabled(true);
 
         ui->buttonBack->setEnabled(true);
-        emit signalRequestDirContent(navigationHistoryIndices.at(newIndex));
+        emit signalRequestFolderContent(navigationHistoryIndices.at(newIndex));
     }
 }
-

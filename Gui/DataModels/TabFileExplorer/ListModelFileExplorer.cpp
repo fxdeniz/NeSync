@@ -1,30 +1,20 @@
 #include "ListModelFileExplorer.h"
 
+#include "Utility/JsonDtoFormat.h"
+
 #include <QColor>
 
-ListModelFileExplorer::ListModelFileExplorer(QObject *parent) : QAbstractListModel(parent)
+ListModelFileExplorer::ListModelFileExplorer(QJsonObject fileJson, QObject *parent)
+    : QAbstractListModel(parent), fileJson{fileJson}
 {
-}
-
-ListModelFileExplorer::ListModelFileExplorer(const QStringList &itemList, QObject *parent)
-    : QAbstractListModel(parent)
-{
-    this->stringList = itemList;
+    for(int number = 1; number <= fileJson[JsonKeys::File::MaxVersionNumber].toInt(); number++)
+        stringList.append(QString::number(number));
 }
 
 int ListModelFileExplorer::rowCount(const QModelIndex &parent) const
 {
     return stringList.count();
 }
-
-
-/*!
-    Returns an appropriate value for the requested data.
-    If the view requests an invalid index, an invalid variant is returned.
-    Any valid index that corresponds to a string in the list causes that
-    string to be returned.
-*/
-
 
 QVariant ListModelFileExplorer::data(const QModelIndex &index, int role) const
 {
@@ -47,14 +37,6 @@ QVariant ListModelFileExplorer::data(const QModelIndex &index, int role) const
         return QVariant();
 }
 
-
-/*!
-    Returns the appropriate header string depending on the orientation of
-    the header and the section. If anything other than the display role is
-    requested, we return an invalid variant.
-*/
-
-
 QVariant ListModelFileExplorer::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
@@ -66,13 +48,6 @@ QVariant ListModelFileExplorer::headerData(int section, Qt::Orientation orientat
         return QString("Row %1").arg(section);
 }
 
-
-/*!
-    Returns an appropriate value for the item's flags. Valid items are
-    enabled, selectable, and editable.
-*/
-
-
 Qt::ItemFlags ListModelFileExplorer::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -80,19 +55,6 @@ Qt::ItemFlags ListModelFileExplorer::flags(const QModelIndex &index) const
 
     return QAbstractItemModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
 }
-
-
-/*!
-    Changes an item in the string list, but only if the following conditions
-    are met:
-
-* The index supplied is valid.
-        * The index corresponds to an item to be shown in a view.
-            * The role associated with editing text is specified.
-
-    The dataChanged() signal is emitted if the item is changed.
-        */
-
 
 bool ListModelFileExplorer::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -122,12 +84,6 @@ bool ListModelFileExplorer::setData(const QModelIndex &index, const QVariant &va
     return result;
 }
 
-
-/*!
-    Inserts a number of rows into the model at the specified position.
-*/
-
-
 bool ListModelFileExplorer::insertRows(int position, int rows, const QModelIndex &parent)
 {
     beginInsertRows(QModelIndex(), position, position+rows-1);
@@ -139,14 +95,7 @@ bool ListModelFileExplorer::insertRows(int position, int rows, const QModelIndex
 
     endInsertRows();
     return true;
-
 }
-
-
-/*!
-    Removes a number of rows from the model at the specified position.
-*/
-
 
 bool ListModelFileExplorer::removeRows(int position, int rows, const QModelIndex &parent)
 {
@@ -159,5 +108,4 @@ bool ListModelFileExplorer::removeRows(int position, int rows, const QModelIndex
 
     endRemoveRows();
     return true;
-
 }

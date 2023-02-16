@@ -11,10 +11,10 @@ public:
     explicit TaskNaviagateFileSystem(QObject *parent = nullptr);
 
 public slots:
-    void slotOnDirContentRequested(const QString &symbolDirPath);
+    void slotOnFolderContentRequested(const QString &symbolDirPath);
 
 signals:
-    void signalDirContentFetched(QJsonObject data);
+    void signalFolderContentFetched(QJsonObject data);
 };
 
 #endif // TASKNAVIAGATEFILESYSTEM_H

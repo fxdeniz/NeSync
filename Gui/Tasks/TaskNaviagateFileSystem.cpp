@@ -9,9 +9,9 @@ TaskNaviagateFileSystem::TaskNaviagateFileSystem(QObject *parent)
 }
 
 
-void TaskNaviagateFileSystem::slotOnDirContentRequested(const QString &symbolDirPath)
+void TaskNaviagateFileSystem::slotOnFolderContentRequested(const QString &symbolDirPath)
 {
     auto fsm = FileStorageManager::instance();
     QJsonObject result = fsm->getFolderJsonBySymbolPath(symbolDirPath, true);
-    emit signalDirContentFetched(result);
+    emit signalFolderContentFetched(result);
 }

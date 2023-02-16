@@ -5,7 +5,6 @@
 #include <QWidget>
 #include <QJsonObject>
 
-#include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 
 namespace Ui {
 class TabFileExplorer;
@@ -26,12 +25,13 @@ public slots:
 
 signals:
     void signalToRouter_ShowDialogTableItemEditor();
-    void signalRequestDirContent(const QString &directory);
+    void signalRequestFolderContent(const QString &directory);
 
 private slots:
-    void slotOnDirContentFetched(QJsonObject result);
+    void slotOnFolderContentFetched(QJsonObject result);
 
     void on_contextActionTableFileExplorer_Edit_triggered();
+    void on_tableViewFileExplorer_clicked(const QModelIndex &index);
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
@@ -52,7 +52,6 @@ private:
     Ui::TabFileExplorer *ui;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
-    ListModelFileExplorer *listModelFileExplorer;
     QThread *navigationTaskThread;
     QStringList navigationHistoryIndices;
 
