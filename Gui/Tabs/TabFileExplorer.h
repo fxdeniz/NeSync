@@ -25,14 +25,12 @@ public slots:
     void slotRefreshFileExplorer();
 
 signals:
-    void signalToRouter_ShowRelatedFiles();
     void signalToRouter_ShowDialogTableItemEditor();
     void signalRequestDirContent(const QString &directory);
 
 private slots:
     void slotOnDirContentFetched(QJsonObject result);
 
-    void on_contextActionListFileExplorer_ShowRelatedFiles_triggered();
     void on_contextActionTableFileExplorer_Edit_triggered();
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
     void on_buttonBack_clicked();

@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -66,6 +66,30 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabQuery">
+      <attribute name="title">
+       <string>Query Panel</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5" stretch="5,1">
+       <item>
+        <widget class="QTableView" name="tableViewQuery"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+         <item>
+          <widget class="QLabel" name="labelQuery">
+           <property name="text">
+            <string>Query:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="textEditQuery"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -84,7 +108,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonRefresh">
+      <widget class="QPushButton" name="buttonExecute">
        <property name="minimumSize">
         <size>
          <width>120</width>

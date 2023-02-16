@@ -11,6 +11,7 @@
 #include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
 #include "FileStorageSubSystem/ORM/Repository/FileVersionRepository.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
+#include "Utility/JsonDtoFormat.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,10 +36,23 @@ int main(int argc, char *argv[])
 
 //    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-//    auto v2fsm = V2_FileStorageManager::instance();
+//    auto v2fsm = FileStorageManager::instance();
 //    v2fsm->addNewFolder("/test_folder/", "/home/user/Desktop/data/");
+//    v2fsm->addNewFolder("/test_folder/sub_folder/", "");
+//    v2fsm->addNewFolder("/test_folder/sub_folder/leaf/", "");
+//    v2fsm->addNewFile("/test_folder/sub_folder/leaf/", "/home/user/Desktop/data/image_file.png");
 //    v2fsm->addNewFile("/test_folder/","/home/user/Desktop/data/text_file.txt");
 //    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "second version");
+//    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "third version");
+
+//    v2fsm->deleteFolder("/test_folder/");
+
+//    QJsonObject folderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/");
+//    folderJson[JsonKeys::Folder::IsFrozen] = true;
+//    v2fsm->updateFolderEntity(folderJson, true);
+
+
+//    v2fsm->deleteFile("/test_folder/text_file.txt");
 
 //    QJsonObject rootFolderJson = v2fsm->getFolderJsonBySymbolPath("/", true);
 //    QJsonObject childFolderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/", true);

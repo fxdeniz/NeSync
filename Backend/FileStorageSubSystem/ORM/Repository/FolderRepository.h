@@ -16,6 +16,8 @@ public:
     QString findSymbolPathByUserFolderPath(const QString &userFolderPath) const;
     QList<FolderEntity> findActiveFolders() const;
     bool save(FolderEntity &entity, QSqlError *error = nullptr);
+    bool deleteEntity(FolderEntity &entity, QSqlError *error = nullptr);
+    bool setIsFrozenOfChildren(const QString &symbolFolderPath, bool isFrozen, QSqlError *error = nullptr);
 
 private:
     QSqlDatabase database;

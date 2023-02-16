@@ -199,6 +199,122 @@ bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QStr
     return true;
 }
 
+bool FileStorageManager::deleteFolder(const QString &symbolFolderPath)
+{
+    bool result = false;
+    FolderEntity entity = folderRepository->findBySymbolPath(symbolFolderPath);
+
+    if(entity.isExist())
+    {
+        QList<FileEntity> fileList = fileRepository->findAllChildFiles(symbolFolderPath);
+        for(const FileEntity &fileEntity : fileList)
+            deleteFile(fileEntity.symbolFilePath());
+
+        result = folderRepository->deleteEntity(entity);
+    }
+
+    return result;
+}
+
+bool FileStorageManager::deleteFile(const QString &symbolFilePath)
+{
+    bool result = false;
+    FileEntity entity = fileRepository->findBySymbolPath(symbolFilePath, true);
+
+    if(entity.isExist())
+    {
+        QList<FileVersionEntity> fileVersionList = entity.getVersionList();
+        QStringList internalPathList;
+
+        for(const FileVersionEntity &version : fileVersionList)
+            internalPathList.append(getBackupFolderPath() + version.internalFileName);
+
+        result = fileRepository->deleteEntity(entity);
+
+        if(result == true)
+        {
+            for(const QString &filePath : internalPathList)
+                QFile::remove(filePath);
+        }
+    }
+
+    return result;
+}
+
+bool FileStorageManager::updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren)
+{
+    bool isParentFolderPathExist = folderDto.contains(JsonKeys::Folder::ParentFolderPath);
+    bool isSuffixPathExist = folderDto.contains(JsonKeys::Folder::SuffixPath);
+    bool isSymbolFolderPathExist = folderDto.contains(JsonKeys::Folder::SymbolFolderPath);
+    bool isUserFolderPathExist = folderDto.contains(JsonKeys::Folder::UserFolderPath);
+    bool isFrozenExist = folderDto.contains(JsonKeys::Folder::IsFrozen);
+
+    if(!isParentFolderPathExist || !isSuffixPathExist || !isSymbolFolderPathExist || !isUserFolderPathExist || !isFrozenExist)
+        return false;
+
+    bool isParentFolderPathString = folderDto[JsonKeys::Folder::ParentFolderPath].isString();
+    bool isSuffixPathString = folderDto[JsonKeys::Folder::SuffixPath].isString();
+    bool isSymbolFolderPathString = folderDto[JsonKeys::Folder::SymbolFolderPath].isString();
+    bool isUserFolderPathString = folderDto[JsonKeys::Folder::UserFolderPath].isString();
+    bool isFrozenBool = folderDto[JsonKeys::Folder::IsFrozen].isBool();
+
+    if(!isParentFolderPathString || !isSuffixPathString || !isSymbolFolderPathString || !isUserFolderPathString || !isFrozenBool)
+        return false;
+
+    FolderEntity entity = folderRepository->findBySymbolPath(folderDto[JsonKeys::Folder::SymbolFolderPath].toString());
+    entity.parentFolderPath = folderDto[JsonKeys::Folder::ParentFolderPath].toString();
+    entity.suffixPath = folderDto[JsonKeys::Folder::SuffixPath].toString();
+    entity.userFolderPath = folderDto[JsonKeys::Folder::UserFolderPath].toString();
+    entity.isFrozen = folderDto[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(!entity.parentFolderPath.startsWith(separator))
+        entity.parentFolderPath.prepend(separator);
+
+    if(!entity.parentFolderPath.endsWith(separator))
+        entity.parentFolderPath.append(separator);
+
+    if(!entity.suffixPath.endsWith(separator))
+        entity.suffixPath.append(separator);
+
+    bool result = folderRepository->save(entity);
+
+    if(result == true && updateFrozenStatusOfChildren == true)
+    {
+        result = folderRepository->setIsFrozenOfChildren(entity.getPrimaryKey(),
+                                                         folderDto[JsonKeys::Folder::IsFrozen].toBool());
+    }
+
+    return result;
+}
+
+bool FileStorageManager::updateFileEntity(QJsonObject fileDto)
+{
+    bool isFileNameExist = fileDto.contains(JsonKeys::File::FileName);
+    bool isSymbolFilePathExist = fileDto.contains(JsonKeys::File::SymbolFilePath);
+    bool isSymbolFolderPath = fileDto.contains(JsonKeys::File::SymbolFolderPath);
+    bool isFrozenExist = fileDto.contains(JsonKeys::File::IsFrozen);
+
+    if(!isFileNameExist || !isSymbolFilePathExist || !isSymbolFolderPath || !isFrozenExist)
+        return false;
+
+    bool isFileNameString = fileDto[JsonKeys::File::FileName].isString();
+    bool isSymbolFilePathString = fileDto[JsonKeys::File::SymbolFilePath].isString();
+    bool isSymbolFolderPathString = fileDto[JsonKeys::File::SymbolFolderPath].isString();
+    bool isFrozenBool = fileDto[JsonKeys::File::IsFrozen].isBool();
+
+    if(!isFileNameString || !isSymbolFilePathString || !isSymbolFolderPathString || !isFrozenBool)
+        return false;
+
+    FileEntity entity = fileRepository->findBySymbolPath(fileDto[JsonKeys::File::SymbolFilePath].toString());
+    entity.fileName = fileDto[JsonKeys::File::FileName].toString();
+    entity.symbolFolderPath = fileDto[JsonKeys::File::SymbolFolderPath].toString();
+    entity.isFrozen = fileDto[JsonKeys::File::IsFrozen].toBool();
+
+    bool result = fileRepository->save(entity);
+
+    return result;
+}
+
 QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;
@@ -359,6 +475,7 @@ QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity)
     result[JsonKeys::File::IsFrozen] = entity.isFrozen;
     result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
     result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
+    result[JsonKeys::File::MaxVersionNumber] = fileVersionRepository->maxVersionNumber(entity.symbolFilePath());
     result[JsonKeys::File::UserFilePath] = QJsonValue();
     result[JsonKeys::File::VersionList] = QJsonValue();
 
@@ -394,6 +511,7 @@ QJsonObject FileStorageManager::fileVersionEntityToJsonObject(const FileVersionE
     result[JsonKeys::FileVersion::Timestamp] = entity.timestamp.toString(Qt::DateFormat::TextDate);
     result[JsonKeys::FileVersion::Description] = entity.description;
     result[JsonKeys::FileVersion::Hash] = entity.hash;
+    result[JsonKeys::FileVersion::InternalFileName] = entity.internalFileName;
 
     return result;
 }

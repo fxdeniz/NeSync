@@ -11,12 +11,13 @@ public:
     enum ItemStatus
     {
         Invalid = -1,
-        Undefined = 0,
+        Monitored = 0,
         NewAdded = 1,
         Updated = 2,
         Renamed = 3,
         UpdatedAndRenamed = 4,
-        Deleted = 5
+        Deleted = 5,
+        Missing = 6
     };
 
     FileSystemEventDb(const QSqlDatabase &eventDb);
@@ -38,7 +39,14 @@ public:
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
+    QString getNameOfFile(const QString &pathToFile) const;
+    QString getOldNameOfFolder(const QString &pathToFolder) const;
+    QString getOldNameOfFile(const QString &pathToFile) const;
     QStringList getMonitoredFolderPathList() const;
+    QStringList getActiveRootFolderList() const;
+    QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;
+    QStringList getChildFileListOfFolder(const QString &pathToFolder) const;
+    QStringList getEventfulFileListOfFolder(const QString &pathToFolder) const;
     bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 
 private:

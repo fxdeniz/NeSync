@@ -19,6 +19,12 @@ public:
 
 public slots:
     void start();
+    void pauseMonitoring();
+    void continueMonitoring();
+    void addFolderAtRuntime(const QString &pathToFolder);
+
+signals:
+    void signalEventDbUpdated();
 
 private slots:
     void slotOnAddEventDetected(const QString &fileName, const QString &dir);

@@ -25,6 +25,7 @@ namespace JsonKeys
         const inline QString SymbolFilePath = QStringLiteral("symbolFilePath");
         const inline QString UserFilePath = QStringLiteral("userFilePath");
         const inline QString IsFrozen = QStringLiteral("isFrozen");
+        const inline QString MaxVersionNumber = QStringLiteral("maxVersionNumber");
         const inline QString VersionList = QStringLiteral("versionList");
     }
 
@@ -36,6 +37,7 @@ namespace JsonKeys
         const inline QString Timestamp = QStringLiteral("timestamp");
         const inline QString Description = QStringLiteral("description");
         const inline QString Hash = QStringLiteral("hash");
+        const inline QString InternalFileName = QStringLiteral("internalFileName");
     }
 }
 

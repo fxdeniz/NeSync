@@ -17,7 +17,9 @@ public:
     ~DialogDebugFileMonitor();
 
 private slots:
-    void on_buttonRefresh_clicked();
+    void on_buttonExecute_clicked();
+
+    void on_tabWidget_currentChanged(int index);
 
 private:
     Ui::DialogDebugFileMonitor *ui;

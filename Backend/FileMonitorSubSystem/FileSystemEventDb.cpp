@@ -11,7 +11,9 @@
 FileSystemEventDb::FileSystemEventDb(const QSqlDatabase &eventDb)
 {
     database = eventDb;
-    database.open();
+
+    if(!database.isOpen())
+        database.open();
 }
 
 FileSystemEventDb::~FileSystemEventDb()
@@ -339,7 +341,11 @@ bool FileSystemEventDb::setOldNameOfFolder(const QString &pathToFolder, const QS
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
-        query.bindValue(":1", oldName);
+        if(oldName.isEmpty())
+            query.bindValue(":1", QVariant()); // Bind null value
+        else
+            query.bindValue(":1", oldName);
+
         query.bindValue(":2", nativePath);
 
         query.exec();
@@ -365,7 +371,11 @@ bool FileSystemEventDb::setOldNameOfFile(const QString &pathToFile, const QStrin
         QSqlQuery query(database);
         query.prepare(queryTemplate);
 
-        query.bindValue(":1", oldName);
+        if(oldName.isEmpty())
+            query.bindValue(":1", QVariant()); // Bind null value
+        else
+            query.bindValue(":1", oldName);
+
         query.bindValue(":2", nativePath);
 
         query.exec();
@@ -465,6 +475,59 @@ FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFile(const QString &
     return result;
 }
 
+QString FileSystemEventDb::getNameOfFile(const QString &pathToFile) const
+{
+    QString result = "";
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QSqlRecord row = getFileRow(nativePath);
+        result = row.value("file_name").toString();
+    }
+
+    return result;
+}
+
+QString FileSystemEventDb::getOldNameOfFolder(const QString &pathToFolder) const
+{
+    QString result = "";
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QSqlRecord row = getFolderRow(nativePath);
+        result = row.value("old_folder_name").toString();
+    }
+
+    return result;
+}
+
+QString FileSystemEventDb::getOldNameOfFile(const QString &pathToFile) const
+{
+    QString result = "";
+
+    QString nativePath = QDir::toNativeSeparators(pathToFile);
+
+    bool isFileInDb = isFileExist(nativePath);
+
+    if(isFileInDb)
+    {
+        QSqlRecord row = getFileRow(nativePath);
+        result = row.value("old_file_name").toString();
+    }
+
+    return result;
+}
+
 QStringList FileSystemEventDb::getMonitoredFolderPathList() const
 {
     QStringList result;
@@ -479,6 +542,114 @@ QStringList FileSystemEventDb::getMonitoredFolderPathList() const
     {
         QSqlRecord record = query.record();
         QString item = record.value("folder_path").toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getActiveRootFolderList() const
+{
+    QStringList result;
+    QString columnName = "result_column";
+
+    QString queryTemplate = " SELECT f1.folder_path AS %1"
+                            " FROM Folder f1 "
+                            " WHERE f1.parent_folder_path IN ("
+                            "                                   SELECT f2.folder_path "
+                            "                                   FROM Folder f2 "
+                            "                                   WHERE f2.efsw_id IS NULL"
+                            "                                 )"
+                            " AND f1.efsw_id IS NOT NULL;" ;
+
+    queryTemplate = queryTemplate.arg(columnName);
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value(columnName).toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getDirectChildFolderListOfFolder(const QString pathToFolder) const
+{
+    QStringList result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = " SELECT * FROM Folder WHERE parent_folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("folder_path").toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getChildFileListOfFolder(const QString &pathToFolder) const
+{
+    QStringList result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = " SELECT * FROM File WHERE folder_path = :1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("file_path").toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getEventfulFileListOfFolder(const QString &pathToFolder) const
+{
+    QStringList result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QString queryTemplate = " SELECT * FROM File WHERE folder_path = :1 AND status >= 1;" ;
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", nativePath);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value("file_path").toString();
         result.append(item);
     }
 

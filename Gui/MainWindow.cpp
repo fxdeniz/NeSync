@@ -1,11 +1,9 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "Tabs/TabRelatedFiles.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
-#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QStandardPaths>
 #include <QtConcurrent>
@@ -33,9 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
-
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowRelatedFiles,
-                     this, &MainWindow::on_router_ShowRelatedFiles);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
@@ -82,10 +77,6 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         toolBar->addAction(ui->tab2Action_SaveAll);
         toolBar->addAction(ui->tab2Action_SaveSelected);
     }
-    else // If TabRelatedFiles accessed at runtime.
-    {
-        toolBar->addAction(ui->tabRelatedFilesAction_Refresh);
-    }
 }
 
 void MainWindow::allocateSeparators()
@@ -124,7 +115,7 @@ void MainWindow::createFileMonitorThread()
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
 
-    FileMonitoringManager *monitor = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
+    fmm = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
     auto fsm = FileStorageManager::instance();
 
@@ -138,15 +129,18 @@ void MainWindow::createFileMonitorThread()
     for(const QJsonValue &value : activeFiles)
         predictionList << value.toObject()[JsonKeys::File::UserFilePath].toString();
 
-    monitor->setPredictionList(predictionList);
+    fmm->setPredictionList(predictionList);
 
-    monitor->moveToThread(fileMonitorThread);
+    QObject::connect(fmm, &FileMonitoringManager::signalEventDbUpdated,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
     QObject::connect(fileMonitorThread, &QThread::started,
-                     monitor, &FileMonitoringManager::start);
+                     fmm, &FileMonitoringManager::start);
 
     QObject::connect(fileMonitorThread, &QThread::finished,
-                     monitor, &QObject::deleteLater);
+                     fmm, &QObject::deleteLater);
+
+    fmm->moveToThread(fileMonitorThread);
 
     fileMonitorThread->start();
 }
@@ -154,15 +148,6 @@ void MainWindow::createFileMonitorThread()
 QString MainWindow::fileMonitorThreadName() const
 {
     return "File Monitor Thread";
-}
-
-void MainWindow::on_router_ShowRelatedFiles()
-{
-    TabRelatedFiles *tab = new TabRelatedFiles(ui->tabWidget);
-    QTabWidget *tabWidget = ui->tabWidget;
-    tabWidget->addTab(tab, "Related Files");
-
-    QObject::connect(tabWidget->tabBar(), &QTabBar::tabCloseRequested, tabWidget->tabBar(), &QTabBar::removeTab);
 }
 
 void MainWindow::on_router_ShowDialogTableItemEditor()
@@ -184,3 +169,9 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 {
     dialogDebugFileMonitor->show();
 }
+
+void MainWindow::on_tab2Action_SaveAll_triggered()
+{
+    tabFileMonitor->saveChanges(fmm);
+}
+

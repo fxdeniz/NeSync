@@ -57,7 +57,36 @@ QList<FileEntity> FileRepository::findActiveFiles() const
     query.prepare(queryTemplate);
     query.exec();
 
-    if(query.next())
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        FileEntity entity;
+
+        entity.setIsExist(true);
+        entity.setPrimaryKey(record.value("symbol_file_path").toString());
+        entity.fileName = record.value("file_name").toString();
+        entity.symbolFolderPath = record.value("symbol_folder_path").toString();
+        entity.isFrozen = record.value("is_frozen").toBool();
+
+        result.append(entity);
+    }
+
+    return result;
+}
+
+QList<FileEntity> FileRepository::findAllChildFiles(const QString &symbolFolderPath) const
+{
+    QList<FileEntity> result;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " SELECT * FROM FileEntity"
+                            " WHERE symbol_file_path LIKE :1;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", QString("%1%").arg(symbolFolderPath));
+    query.exec();
+
+    while(query.next())
     {
         QSqlRecord record = query.record();
         FileEntity entity;
@@ -113,6 +142,29 @@ bool FileRepository::save(FileEntity &entity, QSqlError *error)
         result = true;
         entity.setIsExist(true);
         entity.setPrimaryKey(entity.symbolFilePath());
+    }
+
+    return result;
+}
+
+bool FileRepository::deleteEntity(FileEntity &entity, QSqlError *error)
+{
+    bool result = false;
+
+    QSqlQuery query(database);
+    QString queryTemplate = "DELETE FROM FileEntity WHERE symbol_file_path = :1;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", entity.getPrimaryKey());
+    query.exec();
+
+    if(error != nullptr)
+        error = new QSqlError(query.lastError());
+
+    if(query.lastError().type() == QSqlError::ErrorType::NoError)
+    {
+        entity.setIsExist(false);
+        result = true;
     }
 
     return result;

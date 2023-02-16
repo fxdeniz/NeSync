@@ -65,18 +65,22 @@ set(PROJECT_SOURCES
         Gui/Tabs/TabFileMonitor.h
         Gui/Tabs/TabFileMonitor.cpp
         Gui/Tabs/TabFileMonitor.ui
+        #
+        Gui/DataModels/TabFileMonitor/TreeItem.h
+        Gui/DataModels/TabFileMonitor/TreeItem.cpp
+        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.h
+        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.cpp
+        Gui/DataModels/TabFileMonitor/ItemDelegateAction.h
+        Gui/DataModels/TabFileMonitor/ItemDelegateAction.cpp
+        Gui/DataModels/TabFileMonitor/ItemDelegateDescription.h
+        Gui/DataModels/TabFileMonitor/ItemDelegateDescription.cpp
+        #
     #
 
     #   DialogDebugFileMonitor
         Gui/Dialogs/DialogDebugFileMonitor.h
         Gui/Dialogs/DialogDebugFileMonitor.cpp
         Gui/Dialogs/DialogDebugFileMonitor.ui
-    #
-
-    # TabReleatedFiles
-        Gui/Tabs/TabRelatedFiles.h
-        Gui/Tabs/TabRelatedFiles.cpp
-        Gui/Tabs/TabRelatedFiles.ui
     #
 
     # Tasks
@@ -86,6 +90,9 @@ set(PROJECT_SOURCES
         # TaskNavigateFileSystem
         Gui/Tasks/TaskNaviagateFileSystem.h
         Gui/Tasks/TaskNaviagateFileSystem.cpp
+        # TaskSaveChanges
+        Gui/Tasks/TaskSaveChanges.h
+        Gui/Tasks/TaskSaveChanges.cpp
     #
 
     main.cpp
