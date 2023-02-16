@@ -26,7 +26,7 @@ TabFileMonitor::~TabFileMonitor()
     delete ui;
 }
 
-void TabFileMonitor::saveChanges()
+void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
 {
     ui->textEditDescription->setReadOnly(true);
     ui->buttonAddDescription->setDisabled(true);
@@ -46,14 +46,17 @@ void TabFileMonitor::saveChanges()
     QObject::connect(task, &TaskSaveChanges::itemBeingProcessed,
                      ui->progressBar, &QProgressBar::setValue);
 
-    QObject::connect(task, &TaskSaveChanges::folderRestored,
-                     this, &TabFileMonitor::signalFolderAdded);
-
     QObject::connect(task, &QThread::started,
-                     this, &TabFileMonitor::signalSavingChangesStarted);
+                     fmm, &FileMonitoringManager::pauseMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(task, &QThread::finished,
-                     this, &TabFileMonitor::signalSavingChangesFinished);
+                     fmm, &FileMonitoringManager::continueMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(task, &TaskSaveChanges::folderRestored,
+                     fmm, &FileMonitoringManager::addFolderAtRuntime,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(task, &QThread::finished,
                      task, &QThread::deleteLater);

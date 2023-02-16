@@ -4,10 +4,11 @@
 #include <QMainWindow>
 
 #include "Tabs/TabFileMonitor.h"
+#include "Tabs/TabFileExplorer.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogFileOrDirEditor.h"
 #include "Dialogs/DialogDebugFileMonitor.h"
-#include "Tabs/TabFileExplorer.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 namespace Ui
 {
@@ -48,6 +49,7 @@ private:
     DialogFileOrDirEditor *dialogTableItemEditor;
     DialogAddNewFolder *dialogAddNewFolder;
     DialogDebugFileMonitor *dialogDebugFileMonitor;
+    FileMonitoringManager *fmm;
     QThread *fileMonitorThread;
 
 };

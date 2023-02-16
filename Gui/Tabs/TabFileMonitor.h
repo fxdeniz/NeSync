@@ -3,6 +3,7 @@
 
 #include "DataModels/TabFileMonitor/ItemDelegateAction.h"
 #include "DataModels/TabFileMonitor/ItemDelegateDescription.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -19,15 +20,10 @@ public:
     explicit TabFileMonitor(QWidget *parent = nullptr);
     ~TabFileMonitor();
 
-    void saveChanges();
+    void saveChanges(FileMonitoringManager *fmm);
 
 public slots:
     void onEventDbUpdated();
-
-signals:
-    void signalSavingChangesStarted();
-    void signalSavingChangesFinished();
-    void signalFolderAdded(const QString &pathToFolder);
 
 private slots:
     void displayFileMonitorContent();

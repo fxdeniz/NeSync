@@ -4,7 +4,6 @@
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
-#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QStandardPaths>
 #include <QtConcurrent>
@@ -116,7 +115,7 @@ void MainWindow::createFileMonitorThread()
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
 
-    FileMonitoringManager *monitoringManager = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
+    fmm = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
 
     auto fsm = FileStorageManager::instance();
 
@@ -130,27 +129,18 @@ void MainWindow::createFileMonitorThread()
     for(const QJsonValue &value : activeFiles)
         predictionList << value.toObject()[JsonKeys::File::UserFilePath].toString();
 
-    monitoringManager->setPredictionList(predictionList);
+    fmm->setPredictionList(predictionList);
 
-    QObject::connect(tabFileMonitor, &TabFileMonitor::signalFolderAdded,
-                     monitoringManager, &FileMonitoringManager::addFolderAtRuntime);
-
-    QObject::connect(tabFileMonitor, &TabFileMonitor::signalSavingChangesStarted,
-                     monitoringManager, &FileMonitoringManager::pauseMonitoring);
-
-    QObject::connect(tabFileMonitor, &TabFileMonitor::signalSavingChangesFinished,
-                     monitoringManager, &FileMonitoringManager::continueMonitoring);
-
-    QObject::connect(monitoringManager, &FileMonitoringManager::signalEventDbUpdated,
+    QObject::connect(fmm, &FileMonitoringManager::signalEventDbUpdated,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
     QObject::connect(fileMonitorThread, &QThread::started,
-                     monitoringManager, &FileMonitoringManager::start);
+                     fmm, &FileMonitoringManager::start);
 
     QObject::connect(fileMonitorThread, &QThread::finished,
-                     monitoringManager, &QObject::deleteLater);
+                     fmm, &QObject::deleteLater);
 
-    monitoringManager->moveToThread(fileMonitorThread);
+    fmm->moveToThread(fileMonitorThread);
 
     fileMonitorThread->start();
 }
@@ -182,6 +172,6 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 
 void MainWindow::on_tab2Action_SaveAll_triggered()
 {
-    tabFileMonitor->saveChanges();
+    tabFileMonitor->saveChanges(fmm);
 }
 
