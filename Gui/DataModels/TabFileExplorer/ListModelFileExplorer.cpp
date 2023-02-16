@@ -11,6 +11,11 @@ ListModelFileExplorer::ListModelFileExplorer(QJsonObject fileJson, QObject *pare
         stringList.append(QString::number(number));
 }
 
+QString ListModelFileExplorer::getFileSymbolPath() const
+{
+    return fileJson[JsonKeys::File::SymbolFilePath].toString();
+}
+
 int ListModelFileExplorer::rowCount(const QModelIndex &parent) const
 {
     return stringList.count();

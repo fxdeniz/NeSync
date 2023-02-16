@@ -33,6 +33,7 @@ private slots:
     void on_contextActionTableFileExplorer_Edit_triggered();
     void on_tableViewFileExplorer_clicked(const QModelIndex &index);
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
+    void on_listView_clicked(const QModelIndex &index);
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
 

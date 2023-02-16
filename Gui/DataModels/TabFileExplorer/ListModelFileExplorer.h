@@ -13,6 +13,8 @@ class ListModelFileExplorer : public QAbstractListModel
 public:
     ListModelFileExplorer(QJsonObject fileJson, QObject *parent = nullptr);
 
+    QString getFileSymbolPath() const;
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

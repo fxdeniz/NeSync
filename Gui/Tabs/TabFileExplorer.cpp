@@ -236,6 +236,22 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
     }
 }
 
+void TabFileExplorer::on_listView_clicked(const QModelIndex &index)
+{
+    if(index.isValid())
+    {
+        auto model = (ListModelFileExplorer *) ui->listView->model();
+        qlonglong versionNumber = model->data(index, Qt::ItemDataRole::DisplayRole).toLongLong();
+        auto fsm = FileStorageManager::instance();
+        QJsonObject fileVersionJson = fsm->getFileVersionJson(model->getFileSymbolPath(), versionNumber);
+
+        QString size = QString::number(fileVersionJson[JsonKeys::FileVersion::Size].toInteger());
+        ui->labelDataSize->setText(size);
+        ui->labelDataDate->setText(fileVersionJson[JsonKeys::FileVersion::Timestamp].toString());
+        ui->textEditDescription->setText(fileVersionJson[JsonKeys::FileVersion::Description].toString());
+    }
+}
+
 void TabFileExplorer::on_buttonBack_clicked()
 {
     if(ui->lineEditWorkingDir->text() != navigationHistoryIndices.first())
