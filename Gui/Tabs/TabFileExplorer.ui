@@ -167,7 +167,7 @@
         </size>
        </property>
        <property name="title">
-        <string>Item Details</string>
+        <string>File Details</string>
        </property>
        <property name="checkable">
         <bool>false</bool>

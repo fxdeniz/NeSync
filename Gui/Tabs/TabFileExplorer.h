@@ -38,6 +38,7 @@ private slots:
     void on_buttonForward_clicked();
 
 private:
+    void clearDescriptionDetails();
     void showContextMenuTableView(const QPoint &argPos);
     void showContextMenuListView(const QPoint &argPos);
     void buildContextMenuTableFileExplorer();

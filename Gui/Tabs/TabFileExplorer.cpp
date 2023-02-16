@@ -21,6 +21,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 
     ui->buttonBack->setDisabled(true);
     ui->buttonForward->setDisabled(true);
+    clearDescriptionDetails();
 
     this->ui->tableViewFileExplorer->horizontalHeader()->setMinimumSectionSize(110);
     this->ui->tableViewFileExplorer->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
@@ -211,6 +212,10 @@ void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
 
             listModel = new ListModelFileExplorer(fileJson, ui->listView);
             ui->listView->setModel(listModel);
+
+            qlonglong latestRow = fileJson[JsonKeys::File::MaxVersionNumber].toInt() - 1;
+            ui->listView->setCurrentIndex(listModel->index(latestRow, 0));
+            on_listView_clicked(listModel->index(latestRow, 0));
         }
     }
 }
@@ -254,6 +259,8 @@ void TabFileExplorer::on_listView_clicked(const QModelIndex &index)
 
 void TabFileExplorer::on_buttonBack_clicked()
 {
+    clearDescriptionDetails();
+
     if(ui->lineEditWorkingDir->text() != navigationHistoryIndices.first())
     {
         auto currentIndex = navigationHistoryIndices.indexOf(ui->lineEditWorkingDir->text());
@@ -269,6 +276,8 @@ void TabFileExplorer::on_buttonBack_clicked()
 
 void TabFileExplorer::on_buttonForward_clicked()
 {
+    clearDescriptionDetails();
+
     if(ui->lineEditWorkingDir->text() != navigationHistoryIndices.last())
     {
         auto currentIndex = navigationHistoryIndices.indexOf(ui->lineEditWorkingDir->text());
@@ -280,4 +289,16 @@ void TabFileExplorer::on_buttonForward_clicked()
         ui->buttonBack->setEnabled(true);
         emit signalRequestFolderContent(navigationHistoryIndices.at(newIndex));
     }
+}
+
+void TabFileExplorer::clearDescriptionDetails()
+{
+    ui->labelDataSize->setText("-");
+    ui->labelDataDate->setText("-");
+    ui->textEditDescription->setText("");
+
+    QAbstractItemModel *listModel = ui->listView->model();
+
+    if(listModel != nullptr)
+        delete listModel;
 }
