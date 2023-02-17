@@ -9,6 +9,11 @@ class TableModelFileExplorer : public QAbstractTableModel
     Q_OBJECT
 
 public:
+    static const inline int ColumnIndexName = 0;
+    static const inline int ColumnIndexSymbolPath = 1;
+    static const inline int ColumnIndexUserPath = 2;
+    static const inline int ColumnIndexItemType = 3;
+
     enum TableItemType
     {
         Invalid,
@@ -20,6 +25,7 @@ public:
     {
         QString name;
         QString symbolPath;
+        QString userPath;
         TableItemType type;
         QIcon icon;
 

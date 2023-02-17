@@ -104,16 +104,20 @@ void TabFileExplorer::displayFolderInTableViewFileExplorer(const QString &symbol
 {
     auto fsm = FileStorageManager::instance();
     QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+    QTableView *tableView = ui->tableViewFileExplorer;
 
-    if(ui->tableViewFileExplorer->model() != nullptr)
-        delete ui->tableViewFileExplorer->model();
+    if(tableView->model() != nullptr)
+        delete tableView->model();
 
     auto tableModel = new TableModelFileExplorer(folderJson, this);
-    ui->tableViewFileExplorer->setModel(tableModel);
+    tableView->setModel(tableModel);
 
     ui->lineEditWorkingDir->setText(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
-    ui->tableViewFileExplorer->viewport()->update();
-    ui->tableViewFileExplorer->resizeColumnsToContents();
+
+    tableView->hideColumn(TableModelFileExplorer::ColumnIndexSymbolPath);
+    tableView->hideColumn(TableModelFileExplorer::ColumnIndexItemType);
+    tableView->viewport()->update();
+    tableView->resizeColumnsToContents();
 }
 
 QString TabFileExplorer::currentSymbolFolderPath() const
@@ -198,6 +202,7 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
             // Enable back button whenever item is double clicked.
             ui->buttonBack->setEnabled(true);
 
+            clearDescriptionDetails();
             displayFolderInTableViewFileExplorer(symbolPath);
         }
     }

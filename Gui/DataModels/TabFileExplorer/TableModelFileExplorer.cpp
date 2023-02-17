@@ -41,7 +41,7 @@ int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 
 int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 3;
+    return parent.isValid() ? 0 : 4;
 }
 
 QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
@@ -58,11 +58,13 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
 
         switch (index.column())
         {
-            case 0:
+            case ColumnIndexName:
                 return item.name;
-            case 1:
+            case ColumnIndexSymbolPath:
                 return item.symbolPath;
-            case 2:
+            case ColumnIndexUserPath:
+                return item.userPath;
+        case ColumnIndexItemType:
                 return item.type;
             default:
                 break;
@@ -94,11 +96,13 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
     {
         switch (section)
         {
-            case 0:
+            case ColumnIndexName:
                 return tr("Name");
-            case 1:
+            case ColumnIndexSymbolPath:
                 return tr("Symbol Path");
-            case 2:
+            case ColumnIndexUserPath:
+                return tr("Located at");
+            case ColumnIndexItemType:
                 return tr("Type");
             default:
                 break;
@@ -195,6 +199,7 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
         TableItem item {
                         child[JsonKeys::Folder::SuffixPath].toString().chopped(1), // Remove / character at end
                         child[JsonKeys::Folder::SymbolFolderPath].toString(),
+                        child[JsonKeys::Folder::UserFolderPath].toString(),
                         TableItemType::Folder,
                         iconProvider.icon(QFileIconProvider::IconType::Folder)
                        };
@@ -211,6 +216,7 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
         TableItem item {
                         child[JsonKeys::File::FileName].toString(),
                         child[JsonKeys::File::SymbolFilePath].toString(),
+                        child[JsonKeys::File::UserFilePath].toString(),
                         TableItemType::File,
                         iconProvider.icon(info)
                        };
