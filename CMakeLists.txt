@@ -87,9 +87,6 @@ set(PROJECT_SOURCES
         # TaskAddNewFolders
         Gui/Tasks/TaskAddNewFolders.h
         Gui/Tasks/TaskAddNewFolders.cpp
-        # TaskNavigateFileSystem
-        Gui/Tasks/TaskNaviagateFileSystem.h
-        Gui/Tasks/TaskNaviagateFileSystem.cpp
         # TaskSaveChanges
         Gui/Tasks/TaskSaveChanges.h
         Gui/Tasks/TaskSaveChanges.cpp

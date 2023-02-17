@@ -162,7 +162,7 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
     flags |= Qt::WindowMaximizeButtonHint;
     dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
-    dialogAddNewFolder->show(tabFileExplorer->currentDir());
+    dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath());
 }
 
 void MainWindow::on_menuAction_DebugFileMonitor_triggered()

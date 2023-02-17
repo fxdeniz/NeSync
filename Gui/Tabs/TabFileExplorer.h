@@ -18,18 +18,15 @@ public:
     explicit TabFileExplorer(QWidget *parent = nullptr);
     virtual ~TabFileExplorer();
 
-    QString currentDir() const;
+    QString currentSymbolFolderPath() const;
 
 public slots:
     void slotRefreshFileExplorer();
 
 signals:
     void signalToRouter_ShowDialogTableItemEditor();
-    void signalRequestFolderContent(const QString &directory);
 
 private slots:
-    void slotOnFolderContentFetched(QJsonObject result);
-
     void on_contextActionTableFileExplorer_Edit_triggered();
     void on_tableViewFileExplorer_clicked(const QModelIndex &index);
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
@@ -43,18 +40,14 @@ private:
     void showContextMenuListView(const QPoint &argPos);
     void buildContextMenuTableFileExplorer();
     void buildContextMenuListFileExplorer();
-    void fillTableFileExplorerWith(const QString &symbolDirPath);
-    void createNavigationTask();
 
     void createNavigationHistoryIndex(const QString &path);
-    QString navigationTaskThreadName() const;
-    void displayInTableViewFileExplorer(QJsonObject result);
+    void displayFolderInTableViewFileExplorer(const QString &symbolFolderPath);
 
 private:
     Ui::TabFileExplorer *ui;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
-    QThread *navigationTaskThread;
     QStringList navigationHistoryIndices;
 
 };

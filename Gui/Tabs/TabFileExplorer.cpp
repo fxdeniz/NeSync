@@ -1,6 +1,5 @@
 #include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 #include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
-#include "Tasks/TaskNaviagateFileSystem.h"
 #include "ui_TabFileExplorer.h"
 
 #include "TabFileExplorer.h"
@@ -27,15 +26,11 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     this->ui->tableViewFileExplorer->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::separator);
-    fillTableFileExplorerWith(FileStorageManager::separator);
-
-    createNavigationTask();
+    displayFolderInTableViewFileExplorer(FileStorageManager::separator);
 }
 
 TabFileExplorer::~TabFileExplorer()
 {
-    navigationTaskThread->quit();
-    navigationTaskThread->wait();
     delete ui;
 }
 
@@ -85,32 +80,6 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
                      this, &TabFileExplorer::showContextMenuListView);
 }
 
-void TabFileExplorer::fillTableFileExplorerWith(const QString &symbolDirPath)
-{
-    auto fsm = FileStorageManager::instance();
-    QJsonObject result = fsm->getFolderJsonBySymbolPath(symbolDirPath, true);
-    slotOnFolderContentFetched(result);
-}
-
-void TabFileExplorer::createNavigationTask()
-{
-    navigationTaskThread = new QThread(this);
-    navigationTaskThread->setObjectName(navigationTaskThreadName());
-    TaskNaviagateFileSystem *task = new TaskNaviagateFileSystem();
-
-    QObject::connect(this, &TabFileExplorer::signalRequestFolderContent,
-                     task, &TaskNaviagateFileSystem::slotOnFolderContentRequested);
-
-    QObject::connect(task, &TaskNaviagateFileSystem::signalFolderContentFetched,
-                     this, &TabFileExplorer::slotOnFolderContentFetched);
-
-    QObject::connect(navigationTaskThread, &QThread::finished,
-                     task, &QObject::deleteLater);
-
-    task->moveToThread(navigationTaskThread);
-    navigationTaskThread->start();
-}
-
 void TabFileExplorer::createNavigationHistoryIndex(const QString &path)
 {
     auto tokenList = path.split(FileStorageManager::separator);
@@ -131,37 +100,30 @@ void TabFileExplorer::createNavigationHistoryIndex(const QString &path)
     }
 }
 
-QString TabFileExplorer::navigationTaskThreadName() const
+void TabFileExplorer::displayFolderInTableViewFileExplorer(const QString &symbolFolderPath)
 {
-    return "Navigation Task Thread";
-}
+    auto fsm = FileStorageManager::instance();
+    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
 
-void TabFileExplorer::displayInTableViewFileExplorer(QJsonObject result)
-{
     if(ui->tableViewFileExplorer->model() != nullptr)
         delete ui->tableViewFileExplorer->model();
 
-    auto tableModel = new TableModelFileExplorer(result, this);
+    auto tableModel = new TableModelFileExplorer(folderJson, this);
     ui->tableViewFileExplorer->setModel(tableModel);
+
+    ui->lineEditWorkingDir->setText(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
+    ui->tableViewFileExplorer->viewport()->update();
+    ui->tableViewFileExplorer->resizeColumnsToContents();
 }
 
-QString TabFileExplorer::currentDir() const
+QString TabFileExplorer::currentSymbolFolderPath() const
 {
     return ui->lineEditWorkingDir->text();
 }
 
 void TabFileExplorer::slotRefreshFileExplorer()
 {
-    fillTableFileExplorerWith(ui->lineEditWorkingDir->text());
-}
-
-void TabFileExplorer::slotOnFolderContentFetched(QJsonObject result)
-{
-    displayInTableViewFileExplorer(result);
-
-    ui->lineEditWorkingDir->setText(result[JsonKeys::Folder::SymbolFolderPath].toString());
-    ui->tableViewFileExplorer->viewport()->update();
-    ui->tableViewFileExplorer->resizeColumnsToContents();
+    displayFolderInTableViewFileExplorer(ui->lineEditWorkingDir->text());
 }
 
 void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
@@ -236,7 +198,7 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
             // Enable back button whenever item is double clicked.
             ui->buttonBack->setEnabled(true);
 
-            emit signalRequestFolderContent(symbolPath);
+            displayFolderInTableViewFileExplorer(symbolPath);
         }
     }
 }
@@ -270,7 +232,7 @@ void TabFileExplorer::on_buttonBack_clicked()
             ui->buttonBack->setDisabled(true);
 
         ui->buttonForward->setEnabled(true);
-        emit signalRequestFolderContent(navigationHistoryIndices.at(newIndex));
+        displayFolderInTableViewFileExplorer(navigationHistoryIndices.at(newIndex));
     }
 }
 
@@ -287,7 +249,7 @@ void TabFileExplorer::on_buttonForward_clicked()
             ui->buttonForward->setDisabled(true);
 
         ui->buttonBack->setEnabled(true);
-        emit signalRequestFolderContent(navigationHistoryIndices.at(newIndex));
+        displayFolderInTableViewFileExplorer(navigationHistoryIndices.at(newIndex));
     }
 }
 
