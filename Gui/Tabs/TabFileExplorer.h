@@ -44,6 +44,8 @@ private:
     void createNavigationHistoryIndex(const QString &path);
     void displayFolderInTableViewFileExplorer(const QString &symbolFolderPath);
 
+    QString fileSizeToString(qulonglong fileSize) const;
+
 private:
     Ui::TabFileExplorer *ui;
     QMenu *contextMenuTableFileExplorer;

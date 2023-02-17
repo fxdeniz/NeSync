@@ -120,6 +120,38 @@ void TabFileExplorer::displayFolderInTableViewFileExplorer(const QString &symbol
     tableView->resizeColumnsToContents();
 }
 
+// https://stackoverflow.com/a/73912542
+// https://stackoverflow.com/a/566085
+// https://stackoverflow.com/questions/565704/how-to-correctly-convert-filesize-in-bytes-into-mega-or-gigabytes
+QString TabFileExplorer::fileSizeToString(qulonglong fileSize) const
+{
+    QString result = "";
+
+    qulonglong tb = Q_UINT64_C(1000 * 1000 * 1000 * 1000);
+    qulonglong gb = Q_UINT64_C(1000 * 1000 * 1000);
+    qulonglong mb = Q_UINT64_C(1000 * 1000);
+    qulonglong kb = Q_UINT64_C(1000);
+
+    double fileSizeDouble = (double) fileSize;
+
+    if(fileSize >= tb)
+        result = QString::number((fileSizeDouble/tb), 'g', 3) + " TB";
+
+    else if(fileSize >= gb)
+        result = QString::number((fileSizeDouble/gb), 'g', 3) + " GB";
+
+    else if(fileSize >= mb)
+        result = QString::number((fileSizeDouble/mb), 'g', 3) + " MB";
+
+    else if(fileSize >= kb)
+        result = QString::number((fileSizeDouble/kb), 'g', 4) + " KB";
+
+    else
+        result = QString::number(fileSize) + " bytes";
+
+    return result;
+}
+
 QString TabFileExplorer::currentSymbolFolderPath() const
 {
     return ui->lineEditWorkingDir->text();
@@ -217,7 +249,7 @@ void TabFileExplorer::on_listView_clicked(const QModelIndex &index)
         auto fsm = FileStorageManager::instance();
         QJsonObject fileVersionJson = fsm->getFileVersionJson(model->getFileSymbolPath(), versionNumber);
 
-        QString size = QString::number(fileVersionJson[JsonKeys::FileVersion::Size].toInteger());
+        QString size = fileSizeToString(fileVersionJson[JsonKeys::FileVersion::Size].toInteger());
         ui->labelDataSize->setText(size);
         ui->labelDataDate->setText(fileVersionJson[JsonKeys::FileVersion::Timestamp].toString());
         ui->textEditDescription->setText(fileVersionJson[JsonKeys::FileVersion::Description].toString());
