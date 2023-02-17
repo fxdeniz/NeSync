@@ -31,8 +31,8 @@ public:
     int getMaxDescriptionNumber() const;
     QStringListModel *getDescriptionNumberListModel() const;
 
-    QHash<QString, TreeItem *> getFolderItemMap() const;
-    QHash<QString, TreeItem *> getFileItemMap() const;
+    QMap<QString, TreeItem *> getFolderItemMap() const;
+    QMap<QString, TreeItem *> getFileItemMap() const;
     int getTotalItemCount() const;
 
     QVariant data(const QModelIndex &index, int role) const override;
@@ -58,8 +58,8 @@ private:
     QMap<int, QString> descriptionMap;
     QStringListModel *descriptionNumberListModel;
 
-    QHash<QString, TreeItem *> folderItemMap;
-    QHash<QString, TreeItem *> fileItemMap;
+    QMap<QString, TreeItem *> folderItemMap;
+    QMap<QString, TreeItem *> fileItemMap;
 
 };
 

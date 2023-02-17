@@ -95,7 +95,7 @@ QStringListModel *TreeModelFsMonitor::getDescriptionNumberListModel() const
     return descriptionNumberListModel;
 }
 
-QHash<QString, TreeItem *> TreeModelFsMonitor::getFileItemMap() const
+QMap<QString, TreeItem *> TreeModelFsMonitor::getFileItemMap() const
 {
     return fileItemMap;
 }
@@ -105,7 +105,7 @@ int TreeModelFsMonitor::getTotalItemCount() const
     return folderItemMap.size() + fileItemMap.size();
 }
 
-QHash<QString, TreeItem *> TreeModelFsMonitor::getFolderItemMap() const
+QMap<QString, TreeItem *> TreeModelFsMonitor::getFolderItemMap() const
 {
     return folderItemMap;
 }
