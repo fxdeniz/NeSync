@@ -23,11 +23,7 @@ public:
 public slots:
     void slotRefreshFileExplorer();
 
-signals:
-    void signalToRouter_ShowDialogTableItemEditor();
-
 private slots:
-    void on_contextActionTableFileExplorer_Edit_triggered();
     void on_tableViewFileExplorer_clicked(const QModelIndex &index);
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
     void on_listView_clicked(const QModelIndex &index);

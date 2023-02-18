@@ -309,11 +309,6 @@
     </layout>
    </item>
   </layout>
-  <action name="contextActionTableFileExplorer_Edit">
-   <property name="text">
-    <string>Edit</string>
-   </property>
-  </action>
   <action name="contextActionTableFileExplorer_Cut">
    <property name="text">
     <string>Cut</string>

@@ -18,7 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
-    dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
@@ -34,9 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
-
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
-                     this, &MainWindow::on_router_ShowDialogTableItemEditor);
 
     createFileMonitorThread();
 }
@@ -151,12 +147,6 @@ void MainWindow::createFileMonitorThread()
 QString MainWindow::fileMonitorThreadName() const
 {
     return "File Monitor Thread";
-}
-
-void MainWindow::on_router_ShowDialogTableItemEditor()
-{
-    dialogTableItemEditor->setModal(true);
-    dialogTableItemEditor->show();
 }
 
 void MainWindow::on_tab1Action_AddNewFolder_triggered()

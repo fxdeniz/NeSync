@@ -40,13 +40,11 @@ void TabFileExplorer::buildContextMenuTableFileExplorer()
     QMenu *ptrMenu = contextMenuTableFileExplorer;
 
     QAction *actionOpenFolderInNewTab = ui->contextActionTableFileExplorer_OpenFolderInNewTab;
-    QAction *actionEdit = ui->contextActionTableFileExplorer_Edit;
     QAction *actionCut = ui->contextActionTableFileExplorer_Cut;
     QAction *actionFreeze = ui->contextActionTableFileExplorer_Freeze;
     QAction *actionDelete = ui->contextActionTableFileExplorer_Delete;
 
     ptrMenu->addAction(actionOpenFolderInNewTab);
-    ptrMenu->addAction(actionEdit);
     ptrMenu->addAction(actionCut);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
@@ -184,11 +182,6 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
         QMenu *ptrMenu = contextMenuListFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
-}
-
-void TabFileExplorer::on_contextActionTableFileExplorer_Edit_triggered()
-{
-    emit signalToRouter_ShowDialogTableItemEditor();
 }
 
 void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
