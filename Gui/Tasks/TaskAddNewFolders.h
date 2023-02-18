@@ -11,7 +11,7 @@ class TaskAddNewFolders : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskAddNewFolders(const QList<DialogAddNewFolder::FolderItem> &_list,
+    explicit TaskAddNewFolders(QList<DialogAddNewFolder::FolderItem> list,
                                QObject *parent = nullptr);
     ~TaskAddNewFolders();
     int fileCount() const;
@@ -22,6 +22,7 @@ protected:
 
 signals:
     void signalGenericFileEvent();
+    void signalFolderAdded(const QString &pathToFolder);
     void signalFileBeingProcessed(const QString &pathToFile);
     void signalFileAddedSuccessfully(const QString &pathToFile);
     void signalFileAddingFailed(const QString &pathToFile);

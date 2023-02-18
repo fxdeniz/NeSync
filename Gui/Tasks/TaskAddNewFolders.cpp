@@ -4,10 +4,10 @@
 
 #include <QDir>
 
-TaskAddNewFolders::TaskAddNewFolders(const QList<DialogAddNewFolder::FolderItem> &_list, QObject *parent)
+TaskAddNewFolders::TaskAddNewFolders(QList<DialogAddNewFolder::FolderItem> list, QObject *parent)
     : QThread{parent}
 {
-    list = _list;
+    this->list = list;
 }
 
 TaskAddNewFolders::~TaskAddNewFolders()
@@ -33,7 +33,8 @@ void TaskAddNewFolders::run()
     // First create folders
     for(const DialogAddNewFolder::FolderItem &item : list)
     {
-        fsm->addNewFolder(item.symbolDir, item.userDir);
+        fsm->addNewFolder(item.symbolFolderPath, item.userFolderPath);
+        emit signalFolderAdded(item.userFolderPath);
 
         // Then add files
         QHashIterator<QString, bool> cursor(item.files);
@@ -44,7 +45,7 @@ void TaskAddNewFolders::run()
             emit signalFileBeingProcessed(cursor.key());
             emit signalGenericFileEvent();
 
-            bool requestResult = fsm->addNewFile(item.symbolDir, cursor.key(), cursor.value());
+            bool requestResult = fsm->addNewFile(item.symbolFolderPath, cursor.key(), cursor.value());
 
             if(requestResult == true)
                 emit signalFileAddedSuccessfully(cursor.key());

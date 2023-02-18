@@ -168,16 +168,23 @@ void FileMonitoringManager::continueMonitoring()
     fileSystemEventListener.blockSignals(false);
 }
 
-void FileMonitoringManager::addFolderAtRuntime(const QString &pathToFolder)
+void FileMonitoringManager::addTargetAtRuntime(const QString &pathToFileOrFolder)
 {
-    QFileInfo info(pathToFolder);
+    QFileInfo info(pathToFileOrFolder);
     if(info.isDir())
-        slotOnAddEventDetected("", pathToFolder);
+        slotOnAddEventDetected("", pathToFileOrFolder);
+    else if(info.isFile())
+        slotOnAddEventDetected(info.fileName(), info.absolutePath());
 }
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
-    QString currentPath = QDir::toNativeSeparators(dir + fileName);
+    QString _dir = dir;
+
+    if(!_dir.endsWith(QDir::separator()))
+        _dir.append(QDir::separator());
+
+    QString currentPath = QDir::toNativeSeparators(_dir + fileName);
     QFileInfo info(currentPath);
     qDebug() << "addEvent = " << currentPath;
     qDebug() << "";
@@ -211,7 +218,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
                     database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::NewAdded);
                 else
                 {
-                    if(fileSystemEventListener.signalsBlocked()) // If restoring folder
+                    if(fileSystemEventListener.signalsBlocked()) // If adding folder at runtime
                         database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Monitored);
                     else
                         database->setStatusOfFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
@@ -233,15 +240,21 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
         if(!isFileFrozen) // Only monitor active (un-frozen) files
         {
-            if(isFilePersists)
-                status = FileSystemEventDb::ItemStatus::Updated;
-            else
+            if(!isFilePersists)
                 status = FileSystemEventDb::ItemStatus::NewAdded;
+            else
+            {
+                if(fileSystemEventListener.signalsBlocked()) // If adding file at runtime
+                    status = FileSystemEventDb::ItemStatus::Monitored;
+                else
+                    status = FileSystemEventDb::ItemStatus::Updated;
+            }
 
             database->addFile(currentPath);
             database->setStatusOfFile(currentPath, status);
 
-            emit signalEventDbUpdated();
+            if(!fileSystemEventListener.signalsBlocked()) // If monitoring paused, do not trigger ui events
+                emit signalEventDbUpdated();
         }
     }
 }

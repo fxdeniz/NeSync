@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
 
+    QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
+
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
                      this, &MainWindow::on_router_ShowDialogTableItemEditor);
 
@@ -162,7 +165,7 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
     flags |= Qt::WindowMaximizeButtonHint;
     dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
-    dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath());
+    dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath(), fmm);
 }
 
 void MainWindow::on_menuAction_DebugFileMonitor_triggered()

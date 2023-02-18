@@ -55,7 +55,7 @@ void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
                      Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(task, &TaskSaveChanges::folderRestored,
-                     fmm, &FileMonitoringManager::addFolderAtRuntime,
+                     fmm, &FileMonitoringManager::addTargetAtRuntime,
                      Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(task, &QThread::finished,

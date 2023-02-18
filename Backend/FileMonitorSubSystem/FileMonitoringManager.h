@@ -21,7 +21,7 @@ public slots:
     void start();
     void pauseMonitoring();
     void continueMonitoring();
-    void addFolderAtRuntime(const QString &pathToFolder);
+    void addTargetAtRuntime(const QString &pathToFileOrFolder);
 
 signals:
     void signalEventDbUpdated();
