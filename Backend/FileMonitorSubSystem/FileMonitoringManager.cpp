@@ -177,6 +177,28 @@ void FileMonitoringManager::addTargetAtRuntime(const QString &pathToFileOrFolder
         slotOnAddEventDetected(info.fileName(), info.absolutePath());
 }
 
+void FileMonitoringManager::stopMonitoringTarget(const QString &pathToFileOrFolder)
+{
+    QFileInfo info(pathToFileOrFolder);
+
+    if(info.isFile())
+        database->deleteFile(pathToFileOrFolder);
+    else if(info.isDir())
+    {
+        bool isFolderMonitored = database->isFolderExist(pathToFileOrFolder);
+
+        if(isFolderMonitored)
+        {
+            QList<efsw::WatchID> result = database->getEfswIDListOfFolderTree(pathToFileOrFolder);
+
+            for(const efsw::WatchID watchId : result)
+                fileWatcher.removeWatch(watchId);
+
+            database->deleteFolder(pathToFileOrFolder);
+        }
+    }
+}
+
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
 {
     QString _dir = dir;

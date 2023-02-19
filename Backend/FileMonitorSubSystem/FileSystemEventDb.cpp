@@ -440,6 +440,37 @@ efsw::WatchID FileSystemEventDb::getEfswIDofFolder(const QString &pathToFolder) 
     return result;
 }
 
+QList<efsw::WatchID> FileSystemEventDb::getEfswIDListOfFolderTree(const QString &pathToRootFolder) const
+{
+    QList<efsw::WatchID> result;
+
+    QString nativePath = QDir::toNativeSeparators(pathToRootFolder);
+
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    bool isFolderInDb = isFolderExist(nativePath);
+
+    if(isFolderInDb)
+    {
+        QString queryTemplate = "SELECT efsw_id FROM Folder WHERE folder_path LIKE :1;" ;
+
+        QSqlQuery query(database);
+        query.prepare(queryTemplate);
+        query.bindValue(":1", QString("%1%").arg(nativePath));
+        query.exec();
+
+        while(query.next())
+        {
+            QSqlRecord record = query.record();
+            efsw::WatchID value = record.value("efsw_id").value<efsw::WatchID>();
+            result.append(value);
+        }
+    }
+
+    return result;
+}
+
 FileSystemEventDb::ItemStatus FileSystemEventDb::getStatusOfFolder(const QString &pathToFolder) const
 {
     FileSystemEventDb::ItemStatus result = FileSystemEventDb::ItemStatus::Invalid;
@@ -604,7 +635,7 @@ QStringList FileSystemEventDb::getDirectChildFolderListOfFolder(const QString pa
     return result;
 }
 
-QStringList FileSystemEventDb::getChildFileListOfFolder(const QString &pathToFolder) const
+QStringList FileSystemEventDb::getDirectChildFileListOfFolder(const QString &pathToFolder) const
 {
     QStringList result;
 

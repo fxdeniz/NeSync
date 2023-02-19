@@ -24,6 +24,9 @@ public:
 public slots:
     void slotRefreshFileExplorer();
 
+signals:
+    void signalActiveItemDeleted(const QString &userPathToFileOrFolder);
+
 private slots:
     void on_tableViewFileExplorer_clicked(const QModelIndex &index);
     void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
@@ -32,6 +35,7 @@ private slots:
     void on_buttonForward_clicked();
 
     void on_contextActionListFileExplorer_EditVersion_triggered();
+    void on_contextActionTableFileExplorer_Delete_triggered();
 
 private:
     void clearDescriptionDetails();

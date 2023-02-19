@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
-    createFileMonitorThread();
+    createFileMonitorThread(tabFileExplorer);
 }
 
 MainWindow::~MainWindow()
@@ -109,7 +109,7 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
-void MainWindow::createFileMonitorThread()
+void MainWindow::createFileMonitorThread(TabFileExplorer *tabFileExplorer)
 {
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
@@ -138,6 +138,9 @@ void MainWindow::createFileMonitorThread()
 
     QObject::connect(fileMonitorThread, &QThread::finished,
                      fmm, &QObject::deleteLater);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalActiveItemDeleted,
+                     fmm, &FileMonitoringManager::stopMonitoringTarget);
 
     fmm->moveToThread(fileMonitorThread);
 

@@ -14,7 +14,16 @@ TableModelFileExplorer::TableModelFileExplorer(QJsonObject result, QObject *pare
     itemList = tableItemListFrom(result);
 }
 
-QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &index) const
+QString TableModelFileExplorer::getNameFromModelIndex(const QModelIndex &index) const
+{
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).name;
+
+    return result;}
+
+QString TableModelFileExplorer::getSymbolPathFromModelIndex(const QModelIndex &index) const
 {
     QString result = "";
 
@@ -24,7 +33,27 @@ QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &inde
     return result;
 }
 
-TableModelFileExplorer::TableItemType TableModelFileExplorer::itemTypeFromModelIndex(const QModelIndex &index) const
+QString TableModelFileExplorer::getUserPathFromModelIndex(const QModelIndex &index) const
+{
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).userPath;
+
+    return result;
+}
+
+bool TableModelFileExplorer::getIsFrozenFromModelIndex(const QModelIndex &index) const
+{
+    bool result = false;
+
+    if(index.isValid())
+        result = itemList.at(index.row()).isFrozen;
+
+    return result;
+}
+
+TableModelFileExplorer::TableItemType TableModelFileExplorer::getItemTypeFromModelIndex(const QModelIndex &index) const
 {
     TableItemType result = TableItemType::Invalid;
 
@@ -41,7 +70,7 @@ int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 
 int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 4;
+    return parent.isValid() ? 0 : 5;
 }
 
 QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
@@ -64,7 +93,12 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
                 return item.symbolPath;
             case ColumnIndexUserPath:
                 return item.userPath;
-        case ColumnIndexItemType:
+            case ColumnIndexIsFrozen:
+                if(item.isFrozen)
+                    return tr("Yes");
+                else
+                    return tr("No");
+            case ColumnIndexItemType:
                 return item.type;
             default:
                 break;
@@ -102,6 +136,8 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
                 return tr("Symbol Path");
             case ColumnIndexUserPath:
                 return tr("Located at");
+            case ColumnIndexIsFrozen:
+                return tr("Frozen");
             case ColumnIndexItemType:
                 return tr("Type");
             default:
@@ -200,6 +236,7 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
                         child[JsonKeys::Folder::SuffixPath].toString().chopped(1), // Remove / character at end
                         child[JsonKeys::Folder::SymbolFolderPath].toString(),
                         child[JsonKeys::Folder::UserFolderPath].toString(),
+                        child[JsonKeys::Folder::IsFrozen].toBool(),
                         TableItemType::Folder,
                         iconProvider.icon(QFileIconProvider::IconType::Folder)
                        };
@@ -217,6 +254,7 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
                         child[JsonKeys::File::FileName].toString(),
                         child[JsonKeys::File::SymbolFilePath].toString(),
                         child[JsonKeys::File::UserFilePath].toString(),
+                        child[JsonKeys::File::IsFrozen].toBool(),
                         TableItemType::File,
                         iconProvider.icon(info)
                        };

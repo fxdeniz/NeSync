@@ -12,7 +12,8 @@ public:
     static const inline int ColumnIndexName = 0;
     static const inline int ColumnIndexSymbolPath = 1;
     static const inline int ColumnIndexUserPath = 2;
-    static const inline int ColumnIndexItemType = 3;
+    static const inline int ColumnIndexIsFrozen = 3;
+    static const inline int ColumnIndexItemType = 4;
 
     enum TableItemType
     {
@@ -26,6 +27,7 @@ public:
         QString name;
         QString symbolPath;
         QString userPath;
+        bool isFrozen;
         TableItemType type;
         QIcon icon;
 
@@ -37,8 +39,12 @@ public:
 
 public:
     TableModelFileExplorer(QJsonObject result, QObject *parent = nullptr);
-    QString symbolPathFromModelIndex(const QModelIndex &index) const;
-    TableItemType itemTypeFromModelIndex(const QModelIndex &index) const;
+
+    QString getNameFromModelIndex(const QModelIndex &index) const;
+    QString getSymbolPathFromModelIndex(const QModelIndex &index) const;
+    QString getUserPathFromModelIndex(const QModelIndex &index) const;
+    bool getIsFrozenFromModelIndex(const QModelIndex &index) const;
+    TableItemType getItemTypeFromModelIndex(const QModelIndex &index) const;
 
     // QAbstractTableModel interface
 public:

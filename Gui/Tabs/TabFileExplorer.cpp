@@ -8,6 +8,7 @@
 
 #include <QThread>
 #include <QJsonArray>
+#include <QMessageBox>
 
 TabFileExplorer::TabFileExplorer(QWidget *parent) :
     QWidget(parent),
@@ -191,8 +192,8 @@ void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
     if(index.isValid()) // If user clicked an item
     {
         auto tableModel = (TableModelFileExplorer *)index.model();
-        QString symbolPath = tableModel->symbolPathFromModelIndex(index);
-        TableModelFileExplorer::TableItemType type = tableModel->itemTypeFromModelIndex(index);
+        QString symbolPath = tableModel->getSymbolPathFromModelIndex(index);
+        TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(index);
 
         if(type == TableModelFileExplorer::TableItemType::File)
         {
@@ -218,8 +219,8 @@ void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &
     if(index.isValid()) // If user double clicked an item
     {
         auto model = (TableModelFileExplorer *)index.model();
-        QString symbolPath = model->symbolPathFromModelIndex(index);
-        TableModelFileExplorer::TableItemType type = model->itemTypeFromModelIndex(index);
+        QString symbolPath = model->getSymbolPathFromModelIndex(index);
+        TableModelFileExplorer::TableItemType type = model->getItemTypeFromModelIndex(index);
 
         if(type == TableModelFileExplorer::TableItemType::Folder)
         {
@@ -309,5 +310,52 @@ void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
 
     dialogEditVersion->setModal(true);
     dialogEditVersion->show(fileSymbolPath, versionNumber);
+}
+
+
+void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
+{
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QModelIndex modelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+
+    TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(modelIndex);
+    QString name = tableModel->getNameFromModelIndex(modelIndex);
+    QString symbolPath = tableModel->getSymbolPathFromModelIndex(modelIndex);
+    QString userPath = tableModel->getUserPathFromModelIndex(modelIndex);
+    bool isFrozen = tableModel->getIsFrozenFromModelIndex(modelIndex);
+
+    QString title = tr("Delete item ?");
+    QString message;
+
+    if(type == TableModelFileExplorer::TableItemType::Folder)
+        message = tr("Deleting folder <b>%1</b> will remove everything inside it including the folder itself");
+    else if(type == TableModelFileExplorer::TableItemType::File)
+        message = tr("Deleting file <b>%1</b> will remove all versions of it");
+
+    message = message.arg(name);
+
+    QMessageBox::StandardButton result = QMessageBox::question(this, title, message);
+
+    if(result == QMessageBox::StandardButton::Yes)
+    {
+        auto fsm = FileStorageManager::instance();
+
+        if(type == TableModelFileExplorer::TableItemType::Folder)
+        {
+            fsm->deleteFolder(symbolPath);
+
+            if(!isFrozen)
+                emit signalActiveItemDeleted(userPath);
+        }
+        else if(type == TableModelFileExplorer::TableItemType::File)
+        {
+            fsm->deleteFile(symbolPath);
+
+            if(!isFrozen)
+                emit signalActiveItemDeleted(userPath);
+        }
+
+        slotRefreshFileExplorer();
+    }
 }
 

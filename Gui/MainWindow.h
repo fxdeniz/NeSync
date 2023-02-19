@@ -38,7 +38,7 @@ private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
-    void createFileMonitorThread();
+    void createFileMonitorThread(TabFileExplorer *tabFileExplorer);
     QString fileMonitorThreadName() const;
 
 private:

@@ -41,6 +41,9 @@ QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
     QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 
     QSqlDatabase result =  QSqlDatabase::cloneDatabase(dbFileMonitor, newConnectionName);
+    result.open();
+    result.exec("PRAGMA foreign_keys = ON;");
+
     return result;
 }
 
