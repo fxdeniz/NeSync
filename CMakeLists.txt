@@ -42,6 +42,12 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogAddNewFolder.cpp
         Gui/Dialogs/DialogAddNewFolder.ui
     #
+
+    # DialogEditVersion
+        Gui/Dialogs/DialogEditVersion.h
+        Gui/Dialogs/DialogEditVersion.cpp
+        Gui/Dialogs/DialogEditVersion.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h

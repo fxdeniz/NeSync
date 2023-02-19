@@ -35,6 +35,7 @@ public:
 
     bool updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren = false);
     bool updateFileEntity(QJsonObject fileDto);
+    bool updateFileVersionEntity(QJsonObject versionDto);
 
     QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
     QJsonObject getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren = false) const;

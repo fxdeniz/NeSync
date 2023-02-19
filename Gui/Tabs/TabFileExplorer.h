@@ -1,10 +1,11 @@
 #ifndef TABFILEEXPLORER_H
 #define TABFILEEXPLORER_H
 
+#include "Dialogs/DialogEditVersion.h"
+
 #include <QMenu>
 #include <QWidget>
 #include <QJsonObject>
-
 
 namespace Ui {
 class TabFileExplorer;
@@ -30,6 +31,8 @@ private slots:
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
 
+    void on_contextActionListFileExplorer_EditVersion_triggered();
+
 private:
     void clearDescriptionDetails();
     void showContextMenuTableView(const QPoint &argPos);
@@ -44,6 +47,7 @@ private:
 
 private:
     Ui::TabFileExplorer *ui;
+    DialogEditVersion *dialogEditVersion;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
     QStringList navigationHistoryIndices;

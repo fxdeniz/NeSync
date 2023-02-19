@@ -15,6 +15,8 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    dialogEditVersion = new DialogEditVersion(this);
+
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
 
@@ -294,3 +296,18 @@ void TabFileExplorer::clearDescriptionDetails()
     if(listModel != nullptr)
         delete listModel;
 }
+
+void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
+{
+    QItemSelectionModel *tableViewSelectionModel = ui->tableViewFileExplorer->selectionModel();
+    QModelIndexList listSymbolPath = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexSymbolPath);
+    auto fileSymbolPath = listSymbolPath.first().data().toString();
+
+    QItemSelectionModel * listViewSelectionModel = ui->listView->selectionModel();
+    QModelIndexList listVersionNumber = listViewSelectionModel->selectedRows(ListModelFileExplorer::ColumnIndexVersionNumber);
+    auto versionNumber = listVersionNumber.first().data().toLongLong();
+
+    dialogEditVersion->setModal(true);
+    dialogEditVersion->show(fileSymbolPath, versionNumber);
+}
+

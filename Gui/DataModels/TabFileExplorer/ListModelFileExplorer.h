@@ -11,6 +11,8 @@ class ListModelFileExplorer : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    static const inline int ColumnIndexVersionNumber = 0;
+
     ListModelFileExplorer(QJsonObject fileJson, QObject *parent = nullptr);
 
     QString getFileSymbolPath() const;

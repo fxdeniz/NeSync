@@ -315,6 +315,31 @@ bool FileStorageManager::updateFileEntity(QJsonObject fileDto)
     return result;
 }
 
+bool FileStorageManager::updateFileVersionEntity(QJsonObject versionDto)
+{
+    bool isSymbolFilePathExist = versionDto.contains(JsonKeys::FileVersion::SymbolFilePath);
+    bool isVersionNumberExist = versionDto.contains(JsonKeys::FileVersion::VersionNumber);
+    bool isDescriptionExist = versionDto.contains(JsonKeys::FileVersion::Description);
+
+    if(!isSymbolFilePathExist || !isVersionNumberExist || !isDescriptionExist)
+        return false;
+
+    bool isSymbolFilePathString = versionDto[JsonKeys::FileVersion::SymbolFilePath].isString();
+    bool isVersionNumberDouble = versionDto[JsonKeys::FileVersion::VersionNumber].isDouble();
+    bool isDescriptionString = versionDto[JsonKeys::FileVersion::Description].isString();
+
+    if(!isSymbolFilePathString || !isVersionNumberDouble || !isDescriptionString)
+        return false;
+
+    FileVersionEntity entity = fileVersionRepository->findVersion(versionDto[JsonKeys::FileVersion::SymbolFilePath].toString(),
+                                                                  versionDto[JsonKeys::FileVersion::VersionNumber].toInteger());
+
+    entity.description = versionDto[JsonKeys::FileVersion::Description].toString();
+    bool result = fileVersionRepository->save(entity);
+
+    return result;
+}
+
 QJsonObject FileStorageManager::getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren) const
 {
     QJsonObject result;
