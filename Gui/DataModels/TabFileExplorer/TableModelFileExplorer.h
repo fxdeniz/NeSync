@@ -29,7 +29,6 @@ public:
         QString userPath;
         bool isFrozen;
         TableItemType type;
-        QIcon icon;
 
         bool operator==(const TableItem &other) const
         {

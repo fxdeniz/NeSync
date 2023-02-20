@@ -445,11 +445,14 @@ QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &ent
     result[JsonKeys::Folder::ParentFolderPath] = entity.parentFolderPath;
     result[JsonKeys::Folder::SuffixPath] = entity.suffixPath;
     result[JsonKeys::Folder::SymbolFolderPath] = entity.symbolFolderPath();
-    result[JsonKeys::Folder::UserFolderPath] = entity.userFolderPath;
     result[JsonKeys::Folder::IsFrozen] = entity.isFrozen;
 
+    result[JsonKeys::Folder::UserFolderPath] = QJsonValue();
     result[JsonKeys::Folder::ChildFolders] = QJsonValue();
     result[JsonKeys::Folder::ChildFiles] = QJsonValue();
+
+    if(!entity.isFrozen)
+        result[JsonKeys::Folder::UserFolderPath] = entity.userFolderPath;
 
     if(!entity.getChildFolders().isEmpty())
     {
@@ -462,8 +465,11 @@ QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &ent
             jsonChildFolder[JsonKeys::Folder::ParentFolderPath] = entityChildFolder.parentFolderPath;
             jsonChildFolder[JsonKeys::Folder::SuffixPath] = entityChildFolder.suffixPath;
             jsonChildFolder[JsonKeys::Folder::SymbolFolderPath] = entityChildFolder.symbolFolderPath();
-            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = entityChildFolder.userFolderPath;
             jsonChildFolder[JsonKeys::Folder::IsFrozen] = entityChildFolder.isFrozen;
+
+            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = QJsonValue();
+            if(!entityChildFolder.isFrozen)
+                jsonChildFolder[JsonKeys::Folder::UserFolderPath] = entityChildFolder.userFolderPath;
 
             jsonChildFolder[JsonKeys::Folder::ChildFolders] = QJsonValue();
             jsonChildFolder[JsonKeys::Folder::ChildFiles] = QJsonValue();
@@ -506,7 +512,7 @@ QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity)
 
     FolderEntity parentEntity = folderRepository->findBySymbolPath(entity.symbolFolderPath);
 
-    if(!parentEntity.userFolderPath.isEmpty())
+    if(!parentEntity.userFolderPath.isEmpty() && !entity.isFrozen)
         result[JsonKeys::File::UserFilePath] = parentEntity.userFolderPath + entity.fileName;
 
     if(!entity.getVersionList().isEmpty())

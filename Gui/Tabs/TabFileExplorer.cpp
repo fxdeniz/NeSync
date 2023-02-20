@@ -170,6 +170,14 @@ void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from table.
     {
+        auto tableModel = (TableModelFileExplorer *) subjectView->model();
+        bool isFrozen = tableModel->getIsFrozenFromModelIndex(index);
+
+        if(isFrozen)
+            ui->contextActionTableFileExplorer_Freeze->setText(tr("Thaw"));
+        else
+            ui->contextActionTableFileExplorer_Freeze->setText(tr("Freeze"));
+
         QMenu *ptrMenu = contextMenuTableFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
@@ -357,5 +365,58 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 
         slotRefreshFileExplorer();
     }
+}
+
+
+void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
+{
+    auto fsm = FileStorageManager::instance();
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QModelIndex modelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+
+    TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(modelIndex);
+    QString symbolPath = tableModel->getSymbolPathFromModelIndex(modelIndex);
+    QString userPath = tableModel->getUserPathFromModelIndex(modelIndex);
+    bool isFrozen = tableModel->getIsFrozenFromModelIndex(modelIndex);
+
+    if(type == TableModelFileExplorer::TableItemType::Folder)
+    {
+        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolPath);
+
+        if(isFrozen)
+            folderJson[JsonKeys::Folder::IsFrozen] = false;
+        else
+        {
+            folderJson[JsonKeys::Folder::UserFolderPath] = "";
+            folderJson[JsonKeys::Folder::IsFrozen] = true;
+        }
+
+        fsm->updateFolderEntity(folderJson, true);
+
+        if(isFrozen)
+            emit signalItemThawed(userPath);
+        else
+            emit signalItemFrozen(userPath);
+    }
+    else if(type == TableModelFileExplorer::TableItemType::File)
+    {
+        QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolPath);
+
+        if(isFrozen)
+            fileJson[JsonKeys::File::IsFrozen] = false;
+        else
+        {
+            fileJson[JsonKeys::File::IsFrozen] = true;
+        }
+
+        fsm->updateFileEntity(fileJson);
+
+        if(isFrozen)
+            emit signalItemThawed(userPath);
+        else
+            emit signalItemFrozen(userPath);
+    }
+
+    slotRefreshFileExplorer();
 }
 

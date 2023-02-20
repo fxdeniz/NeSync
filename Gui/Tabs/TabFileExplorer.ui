@@ -318,6 +318,9 @@
    <property name="text">
     <string>Freeze</string>
    </property>
+   <property name="toolTip">
+    <string>Freeze/Thaw</string>
+   </property>
   </action>
   <action name="contextActionTableFileExplorer_Delete">
    <property name="text">
