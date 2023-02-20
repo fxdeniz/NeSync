@@ -1,6 +1,7 @@
 #ifndef JSONDTOFORMAT_H
 #define JSONDTOFORMAT_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 
 namespace JsonKeys

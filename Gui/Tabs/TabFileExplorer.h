@@ -25,6 +25,8 @@ public slots:
     void slotRefreshFileExplorer();
 
 signals:
+    void signalThawingStarted();
+    void signalThawingFinished();
     void signalActiveItemDeleted(const QString &userPathToFileOrFolder);
     void signalItemFrozen(const QString &userPathToFileOrFolder);
     void signalItemThawed(const QString &userPathToFileOrFolder);
@@ -53,6 +55,10 @@ private:
     QString fileSizeToString(qulonglong fileSize) const;
 
 private:
+    void thawFolderTree(const QString folderName,
+                        const QString &parentSymbolFolderPath,
+                        const QString &targetUserPath);
+
     Ui::TabFileExplorer *ui;
     DialogEditVersion *dialogEditVersion;
     QMenu *contextMenuTableFileExplorer;

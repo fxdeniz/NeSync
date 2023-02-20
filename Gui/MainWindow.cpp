@@ -139,14 +139,24 @@ void MainWindow::createFileMonitorThread(TabFileExplorer *tabFileExplorer)
     QObject::connect(fileMonitorThread, &QThread::finished,
                      fmm, &QObject::deleteLater);
 
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalActiveItemDeleted,
-                     fmm, &FileMonitoringManager::stopMonitoringTarget);
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalThawingStarted,
+                     fmm, &FileMonitoringManager::pauseMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalItemFrozen,
-                     fmm, &FileMonitoringManager::stopMonitoringTarget);
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalThawingFinished,
+                     fmm, &FileMonitoringManager::continueMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalItemThawed,
-                     fmm, &FileMonitoringManager::addTargetAtRuntime);
+                     fmm, &FileMonitoringManager::addTargetAtRuntime,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalItemFrozen,
+                     fmm, &FileMonitoringManager::stopMonitoringTarget,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalActiveItemDeleted,
+                     fmm, &FileMonitoringManager::stopMonitoringTarget);
 
     fmm->moveToThread(fileMonitorThread);
 
