@@ -55,9 +55,9 @@ private:
     QString fileSizeToString(qulonglong fileSize) const;
 
 private:
-    void thawFolderTree(const QString folderName,
-                        const QString &parentSymbolFolderPath,
-                        const QString &targetUserPath);
+    void executeFreezingOrThawingOfFolder(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen);
+    void executeFreezingOrThawingOfFile(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen);
+    void thawFolderTree(const QString folderName, const QString &parentSymbolFolderPath, const QString &targetUserPath);
 
     Ui::TabFileExplorer *ui;
     DialogEditVersion *dialogEditVersion;

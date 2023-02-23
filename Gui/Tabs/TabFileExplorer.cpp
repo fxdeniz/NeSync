@@ -157,81 +157,6 @@ QString TabFileExplorer::fileSizeToString(qulonglong fileSize) const
     return result;
 }
 
-void TabFileExplorer::thawFolderTree(const QString folderName,
-                                     const QString &parentSymbolFolderPath,
-                                     const QString &targetUserPath)
-{
-    QString nativePath = QDir::toNativeSeparators(targetUserPath);
-    if(!nativePath.endsWith(QDir::separator()))
-        nativePath.append(QDir::separator());
-
-    QFutureWatcher<void> futureWatcher;
-    QProgressDialog dialog(this);
-    dialog.setLabelText(tr("Thawing folder <b>%1</b>...").arg(folderName));
-
-    QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
-    QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
-    QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
-    QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
-
-    QFuture<void> future = QtConcurrent::run([=] {
-
-        QString currentUserPath = nativePath;
-        auto fsm = FileStorageManager::instance();
-        QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(parentSymbolFolderPath, true);
-
-        QQueue<QJsonObject> symbolFolders;
-        symbolFolders.enqueue(parentFolderJson);
-
-        while(!symbolFolders.empty())
-        {
-            QJsonObject currentFolder = symbolFolders.dequeue();
-            auto suffixPath = currentFolder[JsonKeys::Folder::SuffixPath].toString().chopped(1);
-            currentUserPath.append(suffixPath).append(QDir::separator());
-
-            QDir currentDir(currentUserPath);
-            bool isCreated = currentDir.mkpath(currentUserPath);
-
-            if(isCreated)
-            {
-                currentFolder[JsonKeys::Folder::UserFolderPath] = currentUserPath;
-                currentFolder[JsonKeys::Folder::IsFrozen] = false;
-                bool isUpdated = fsm->updateFolderEntity(currentFolder, true);
-                if(isUpdated)
-                    emit signalItemThawed(currentUserPath); // Notify about created folder
-
-                QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
-                QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
-
-                for(const QJsonValue &currentChildFile : childFiles)
-                {
-                    QJsonObject fileJson = currentChildFile.toObject();
-                    QJsonObject versionJson = fsm->getFileVersionJson(fileJson[JsonKeys::File::SymbolFilePath].toString(),
-                                                                      fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
-
-                    QString internalFilePath = fsm->getBackupFolderPath();
-                    internalFilePath.append(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
-                    QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
-
-                    bool isCopied = QFile::copy(internalFilePath, userFilePath);
-                    if(isCopied)
-                        emit signalItemThawed(userFilePath); // Notify about copied file
-                }
-
-                for(const QJsonValue &currentChildFolder : childFolders)
-                {
-                    QString childFolderPath = currentChildFolder.toObject()[JsonKeys::Folder::SymbolFolderPath].toString();
-                    symbolFolders.enqueue(fsm->getFolderJsonBySymbolPath(childFolderPath, true));
-                }
-            }
-        }
-    });
-
-    futureWatcher.setFuture(future);
-    dialog.exec();
-    futureWatcher.waitForFinished();
-}
-
 QString TabFileExplorer::currentSymbolFolderPath() const
 {
     return ui->lineEditWorkingDir->text();
@@ -399,7 +324,6 @@ void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
     dialogEditVersion->show(fileSymbolPath, versionNumber);
 }
 
-
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 {
     auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
@@ -446,7 +370,6 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
     }
 }
 
-
 void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
 {
     auto fsm = FileStorageManager::instance();
@@ -460,80 +383,211 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
     bool isFrozen = tableModel->getIsFrozenFromModelIndex(modelIndex);
 
     if(type == TableModelFileExplorer::TableItemType::Folder)
-    {
-        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolPath);
-
-        if(isFrozen)
-        {
-            auto parentSymbolPath = folderJson[JsonKeys::Folder::ParentFolderPath].toString();
-            QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(parentSymbolPath);
-
-            if(parentFolderJson[JsonKeys::Folder::IsFrozen].toBool())
-            {
-                QString title = tr("Parent folder is frozen !");
-                QString message = tr("Can't thaw child folder because parent is frozen. To thaw <b>%1</b>, thaw the parent first.");
-                message = message.arg(name);
-                QMessageBox::information(this, title, message);
-                return;
-            }
-
-            QString title = tr("Select location for thawed folder");
-            QString message = tr("Thawed folder <b>%1</b> and all content of it will be placed to location you'll select now.");
-            message = message.arg(name);
-            QMessageBox::information(this, title, message);
-
-            QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-            QString selection = QFileDialog::getExistingDirectory(this,
-                                                                  tr("Select location for folder to be thawed"),
-                                                                  desktopPath,
-                                                                  QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-            selection = QDir::toNativeSeparators(selection).append(QDir::separator());
-
-            bool isExist = QDir(selection + name).exists();
-            if(isExist)
-            {
-                QString title = tr("Folder exist at location !");
-                QString message = tr("Can't overwrite folder <b>%1</b> in location you selected.");
-                message = message.arg(name);
-                QMessageBox::critical(this, title, message);
-                return;
-            }
-
-            // TODO add checking empty space before extracting folders
-
-            emit signalThawingStarted();
-            thawFolderTree(name, symbolPath, selection);
-            emit signalThawingFinished();
-        }
-        else
-        {
-            folderJson[JsonKeys::Folder::IsFrozen] = true;
-            bool isUpdated = fsm->updateFolderEntity(folderJson, true);
-
-            if(isUpdated)
-                emit signalItemFrozen(userPath);
-        }
-    }
+        executeFreezingOrThawingOfFolder(name, symbolPath, userPath, isFrozen);
     else if(type == TableModelFileExplorer::TableItemType::File)
-    {
-        QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolPath);
-
-        if(isFrozen)
-            fileJson[JsonKeys::File::IsFrozen] = false;
-        else
-        {
-            fileJson[JsonKeys::File::IsFrozen] = true;
-        }
-
-        fsm->updateFileEntity(fileJson);
-
-        if(isFrozen)
-            emit signalItemThawed(userPath);
-        else
-            emit signalItemFrozen(userPath);
-    }
+        executeFreezingOrThawingOfFile(name, symbolPath, userPath, isFrozen);
 
     slotRefreshFileExplorer();
 }
 
+void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen)
+{
+    auto fsm = FileStorageManager::instance();
+    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolPath);
+
+    if(!isFrozen) // If freezing folder
+    {
+        folderJson[JsonKeys::Folder::IsFrozen] = true;
+        bool isUpdated = fsm->updateFolderEntity(folderJson, true);
+
+        if(isUpdated)
+            emit signalItemFrozen(userPath);
+    }
+    else // If thawing folder
+    {
+        auto parentSymbolPath = folderJson[JsonKeys::Folder::ParentFolderPath].toString();
+        QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(parentSymbolPath);
+
+        if(parentFolderJson[JsonKeys::Folder::IsFrozen].toBool())
+        {
+            QString title = tr("Parent folder is frozen !");
+            QString message = tr("Can't thaw child folder because parent is frozen. To thaw <b>%1</b>, thaw the parent first.");
+            message = message.arg(name);
+            QMessageBox::information(this, title, message);
+            return;
+        }
+
+        QString title = tr("Select location for thawed folder");
+        QString message = tr("Thawed folder <b>%1</b> and all content of it will be placed to location you'll select now.");
+        message = message.arg(name);
+        QMessageBox::information(this, title, message);
+
+        QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
+        QString selection = QFileDialog::getExistingDirectory(this,
+                                                              tr("Select location for folder to be thawed"),
+                                                              desktopPath,
+                                                              QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+        selection = QDir::toNativeSeparators(selection).append(QDir::separator());
+
+        bool isExist = QDir(selection + name).exists();
+        if(isExist)
+        {
+            QString title = tr("Folder exist at location !");
+            QString message = tr("Can't overwrite folder <b>%1</b> in location you selected.");
+            message = message.arg(name);
+            QMessageBox::critical(this, title, message);
+            return;
+        }
+
+        // TODO add checking empty space before extracting folders
+
+        emit signalThawingStarted();
+        thawFolderTree(name, symbolPath, selection);
+        emit signalThawingFinished();
+    }
+}
+
+void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen)
+{
+    auto fsm = FileStorageManager::instance();
+    QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolPath);
+    QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString(),
+                                                                  fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
+
+    if(!isFrozen) // If freezing file
+    {
+        fileJson[JsonKeys::File::IsFrozen] = true;
+        bool isUpdated = fsm->updateFileEntity(fileJson);
+        if(isUpdated)
+            emit signalItemFrozen(userPath);
+    }
+    else // If thawing folder
+    {
+        if(parentFolderJson[JsonKeys::Folder::IsFrozen].toBool())
+        {
+            QString title = tr("Parent folder is frozen !");
+            QString message = tr("Can't thaw child file because parent folder is frozen. To thaw <b>%1</b>, thaw the parent folder first.");
+            message = message.arg(name);
+            QMessageBox::information(this, title, message);
+            return;
+        }
+
+        QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
+        QString userFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
+        QString userFilePath = userFolderPath + name;
+        QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+
+        bool isExist = QFile::exists(userFilePath);
+        if(isExist)
+        {
+            QString title = tr("File exist at location !");
+            QString message = tr("Can't overwrite file <b>%1</b> in location you selected.");
+            message = message.arg(name);
+            QMessageBox::critical(this, title, message);
+            return;
+        }
+
+        emit signalThawingStarted();
+        QFutureWatcher<void> futureWatcher;
+        QProgressDialog dialog(this);
+        dialog.setLabelText(tr("Thawing file <b>%1</b>...").arg(name));
+
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+        QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+        QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
+
+        bool isCopied = false;
+
+        QFuture<void> future = QtConcurrent::run([=, &isCopied] {
+            isCopied = QFile::copy(internalFilePath, userFilePath);
+        });
+
+        futureWatcher.setFuture(future);
+        dialog.exec();
+        futureWatcher.waitForFinished();
+
+        if(isCopied)
+        {
+            fileJson[JsonKeys::File::IsFrozen] = false;
+            bool isUpdated = fsm->updateFileEntity(fileJson);
+            if(isUpdated)
+                emit signalItemThawed(userFilePath);
+        }
+        emit signalThawingFinished();
+    }
+}
+
+void TabFileExplorer::thawFolderTree(const QString folderName, const QString &parentSymbolFolderPath, const QString &targetUserPath)
+{
+    QString nativePath = QDir::toNativeSeparators(targetUserPath);
+    if(!nativePath.endsWith(QDir::separator()))
+        nativePath.append(QDir::separator());
+
+    QFutureWatcher<void> futureWatcher;
+    QProgressDialog dialog(this);
+    dialog.setLabelText(tr("Thawing folder <b>%1</b>...").arg(folderName));
+
+    QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+    QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+    QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
+
+    QFuture<void> future = QtConcurrent::run([=] {
+
+        QString currentUserPath = nativePath;
+        auto fsm = FileStorageManager::instance();
+        QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(parentSymbolFolderPath, true);
+
+        QQueue<QJsonObject> symbolFolders;
+        symbolFolders.enqueue(parentFolderJson);
+
+        while(!symbolFolders.empty())
+        {
+            QJsonObject currentFolder = symbolFolders.dequeue();
+            auto suffixPath = currentFolder[JsonKeys::Folder::SuffixPath].toString().chopped(1);
+            currentUserPath.append(suffixPath).append(QDir::separator());
+
+            QDir currentDir(currentUserPath);
+            bool isCreated = currentDir.mkpath(currentUserPath);
+
+            if(isCreated)
+            {
+                currentFolder[JsonKeys::Folder::UserFolderPath] = currentUserPath;
+                currentFolder[JsonKeys::Folder::IsFrozen] = false;
+                bool isUpdated = fsm->updateFolderEntity(currentFolder, true);
+                if(isUpdated)
+                    emit signalItemThawed(currentUserPath); // Notify about created folder
+
+                QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
+                QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
+
+                for(const QJsonValue &currentChildFile : childFiles)
+                {
+                    QJsonObject fileJson = currentChildFile.toObject();
+                    QJsonObject versionJson = fsm->getFileVersionJson(fileJson[JsonKeys::File::SymbolFilePath].toString(),
+                                                                      fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
+
+                    QString internalFilePath = fsm->getBackupFolderPath();
+                    internalFilePath.append(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
+                    QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
+
+                    bool isCopied = QFile::copy(internalFilePath, userFilePath);
+                    if(isCopied)
+                        emit signalItemThawed(userFilePath); // Notify about copied file
+                }
+
+                for(const QJsonValue &currentChildFolder : childFolders)
+                {
+                    QString childFolderPath = currentChildFolder.toObject()[JsonKeys::Folder::SymbolFolderPath].toString();
+                    symbolFolders.enqueue(fsm->getFolderJsonBySymbolPath(childFolderPath, true));
+                }
+            }
+        }
+    });
+
+    futureWatcher.setFuture(future);
+    dialog.exec();
+    futureWatcher.waitForFinished();
+}
