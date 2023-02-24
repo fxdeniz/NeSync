@@ -25,11 +25,10 @@ public slots:
     void slotRefreshFileExplorer();
 
 signals:
-    void signalThawingStarted();
-    void signalThawingFinished();
-    void signalActiveItemDeleted(const QString &userPathToFileOrFolder);
-    void signalItemFrozen(const QString &userPathToFileOrFolder);
-    void signalItemThawed(const QString &userPathToFileOrFolder);
+    void signalStopFileMonitor();
+    void signalStartFileMonitor();
+    void signalStopMonitoringItem(const QString &userPathToFileOrFolder);
+    void signalStartMonitoringItem(const QString &userPathToFileOrFolder);
 
 private slots:
     void on_tableViewFileExplorer_clicked(const QModelIndex &index);
@@ -39,6 +38,7 @@ private slots:
     void on_buttonForward_clicked();
 
     void on_contextActionListFileExplorer_EditVersion_triggered();
+    void on_contextActionListFileExplorer_DeleteVersion_triggered();
     void on_contextActionTableFileExplorer_Delete_triggered();
     void on_contextActionTableFileExplorer_Freeze_triggered();
 

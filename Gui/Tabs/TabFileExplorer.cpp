@@ -71,7 +71,7 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     QAction *actionSchedule = ui->contextActionListFileExplorer_Schedule;
     QAction *actionScheduleAndOpenClipboard = ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
     QAction *actionSetAsCurrentVerion = ui->contextActionListFileExplorer_SetAsCurrentVersion;
-    QAction *actionDelete = ui->contextActionListFileExplorer_Delete;
+    QAction *actionDelete = ui->contextActionListFileExplorer_DeleteVersion;
 
     ptrMenu->addAction(actionPreview);
     ptrMenu->addAction(actionEditVersion);
@@ -324,6 +324,73 @@ void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
     dialogEditVersion->show(fileSymbolPath, versionNumber);
 }
 
+void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
+{
+    auto fsm = FileStorageManager::instance();
+
+    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
+    QString userFilePath = tableModel->getUserPathFromModelIndex(tableModelIndex);
+    QString fileName = tableModel->getNameFromModelIndex(tableModelIndex);
+
+    QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolFilePath);
+
+    if(fileJson[JsonKeys::File::MaxVersionNumber].toInteger() == 1)
+    {
+        QString title = tr("Can't delete single version of the file !");
+        QString message = tr("File <b>%1</b> has only one version, deleting this version means deleting the file. To do that, delete the file.");
+        message = message.arg(fileName);
+        QMessageBox::information(this, title, message);
+        return;
+    }
+
+    qlonglong selectedVersionNumber = ui->listView->selectionModel()->selectedRows().first().data().toLongLong();
+
+    QString title = tr("Delete file version ?");
+    QString message = tr("Do you want to delete version <b>%1</b> of file <b>%2</b>.");
+    message = message.arg(selectedVersionNumber).arg(fileName);
+    QMessageBox::StandardButton result = QMessageBox::question(this, title, message);
+
+    if(result == QMessageBox::StandardButton::Yes)
+    {
+        QFutureWatcher<void> futureWatcher;
+        QProgressDialog dialog(this);
+        dialog.setLabelText(tr("Deleting version <b>%1</b> of file <b>%2</b>...").arg(selectedVersionNumber).arg(fileName));
+
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+        QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+        QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
+
+        emit signalStopFileMonitor();
+
+        QFuture<void> future = QtConcurrent::run([=, &fileJson]{
+            qlonglong recentMaxVersion = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+            fsm->deleteFileVersion(symbolFilePath, selectedVersionNumber);
+
+            if(recentMaxVersion == selectedVersionNumber) // If current version is deleted
+            {
+                fileJson = fsm->getFileJsonBySymbolPath(symbolFilePath);
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
+                QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                QFile::remove(userFilePath);
+                QFile::copy(internalFilePath, userFilePath);
+
+                emit signalStopMonitoringItem(userFilePath);
+                emit signalStartMonitoringItem(userFilePath);
+            }
+        });
+
+        futureWatcher.setFuture(future);
+        dialog.exec();
+        futureWatcher.waitForFinished();
+
+        emit signalStartFileMonitor();
+        slotRefreshFileExplorer();
+    }
+}
+
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 {
     auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
@@ -339,9 +406,9 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
     QString message;
 
     if(type == TableModelFileExplorer::TableItemType::Folder)
-        message = tr("Deleting folder <b>%1</b> will remove everything inside it including the folder itself");
+        message = tr("Deleting folder <b>%1</b> will remove everything inside it including the folder itself.");
     else if(type == TableModelFileExplorer::TableItemType::File)
-        message = tr("Deleting file <b>%1</b> will remove all versions of it");
+        message = tr("Deleting file <b>%1</b> will remove all versions of it.");
 
     message = message.arg(name);
 
@@ -356,14 +423,14 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
             fsm->deleteFolder(symbolPath);
 
             if(!isFrozen)
-                emit signalActiveItemDeleted(userPath);
+                emit signalStopMonitoringItem(userPath);
         }
         else if(type == TableModelFileExplorer::TableItemType::File)
         {
             fsm->deleteFile(symbolPath);
 
             if(!isFrozen)
-                emit signalActiveItemDeleted(userPath);
+                emit signalStopMonitoringItem(userPath);
         }
 
         slotRefreshFileExplorer();
@@ -401,7 +468,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, cons
         bool isUpdated = fsm->updateFolderEntity(folderJson, true);
 
         if(isUpdated)
-            emit signalItemFrozen(userPath);
+            emit signalStopMonitoringItem(userPath);
     }
     else // If thawing folder
     {
@@ -442,9 +509,9 @@ void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, cons
 
         // TODO add checking empty space before extracting folders
 
-        emit signalThawingStarted();
+        emit signalStopFileMonitor();
         thawFolderTree(name, symbolPath, selection);
-        emit signalThawingFinished();
+        emit signalStartFileMonitor();
     }
 }
 
@@ -460,7 +527,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         fileJson[JsonKeys::File::IsFrozen] = true;
         bool isUpdated = fsm->updateFileEntity(fileJson);
         if(isUpdated)
-            emit signalItemFrozen(userPath);
+            emit signalStopMonitoringItem(userPath);
     }
     else // If thawing folder
     {
@@ -488,7 +555,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
             return;
         }
 
-        emit signalThawingStarted();
+        emit signalStopFileMonitor();
         QFutureWatcher<void> futureWatcher;
         QProgressDialog dialog(this);
         dialog.setLabelText(tr("Thawing file <b>%1</b>...").arg(name));
@@ -513,9 +580,9 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
             fileJson[JsonKeys::File::IsFrozen] = false;
             bool isUpdated = fsm->updateFileEntity(fileJson);
             if(isUpdated)
-                emit signalItemThawed(userFilePath);
+                emit signalStartMonitoringItem(userFilePath);
         }
-        emit signalThawingFinished();
+        emit signalStartFileMonitor();
     }
 }
 
@@ -558,7 +625,7 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
                 currentFolder[JsonKeys::Folder::IsFrozen] = false;
                 bool isUpdated = fsm->updateFolderEntity(currentFolder, true);
                 if(isUpdated)
-                    emit signalItemThawed(currentUserPath); // Notify about created folder
+                    emit signalStartMonitoringItem(currentUserPath); // Notify about created folder
 
                 QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
                 QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
@@ -575,7 +642,7 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
 
                     bool isCopied = QFile::copy(internalFilePath, userFilePath);
                     if(isCopied)
-                        emit signalItemThawed(userFilePath); // Notify about copied file
+                        emit signalStartMonitoringItem(userFilePath); // Notify about copied file
                 }
 
                 for(const QJsonValue &currentChildFolder : childFolders)

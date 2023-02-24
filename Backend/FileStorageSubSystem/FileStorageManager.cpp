@@ -241,6 +241,39 @@ bool FileStorageManager::deleteFile(const QString &symbolFilePath)
     return result;
 }
 
+bool FileStorageManager::deleteFileVersion(const QString &symbolFilePath, qlonglong versionNumber)
+{
+    bool result = false;
+    FileVersionEntity entity = fileVersionRepository->findVersion(symbolFilePath, versionNumber);
+
+    if(entity.isExist())
+    {
+        qlonglong maxVersionNumber = fileVersionRepository->maxVersionNumber(symbolFilePath);
+        if(maxVersionNumber <= 1) // Don't delete single version (therefore the entire file)
+            return false;
+
+        result = fileVersionRepository->deleteEntity(entity);
+
+        if(result == true)
+        {
+            QString internalFilePath = getBackupFolderPath() + entity.internalFileName;
+            QFile::remove(internalFilePath);
+
+            FileEntity parentEntity = fileRepository->findBySymbolPath(symbolFilePath, true);
+
+            qlonglong versionNumber = 1;
+            for(FileVersionEntity &currentVersion : parentEntity.getVersionList())
+            {
+                currentVersion.versionNumber = versionNumber;
+                fileVersionRepository->save(currentVersion);
+                ++versionNumber;
+            }
+        }
+    }
+
+    return result;
+}
+
 bool FileStorageManager::updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren)
 {
     bool isParentFolderPathExist = folderDto.contains(JsonKeys::Folder::ParentFolderPath);

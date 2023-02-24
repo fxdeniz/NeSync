@@ -32,6 +32,7 @@ public:
 
     bool deleteFolder(const QString &symbolFolderPath);
     bool deleteFile(const QString &symbolFilePath);
+    bool deleteFileVersion(const QString &symbolFilePath, qlonglong versionNumber);
 
     bool updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren = false);
     bool updateFileEntity(QJsonObject fileDto);

@@ -356,12 +356,12 @@
     <string>Schedule and open clipboard</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_Delete">
+  <action name="contextActionListFileExplorer_DeleteVersion">
    <property name="text">
-    <string>Delete</string>
+    <string>Delete version</string>
    </property>
    <property name="toolTip">
-    <string>Delete</string>
+    <string>Delete selected version</string>
    </property>
   </action>
   <action name="contextActionListFileExplorer_SetAsCurrentVersion">
