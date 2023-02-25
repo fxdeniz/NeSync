@@ -347,6 +347,7 @@ void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
         QFutureWatcher<void> futureWatcher;
         QProgressDialog dialog(this);
         dialog.setLabelText(tr("Deleting version <b>%1</b> of file <b>%2</b>...").arg(selectedVersionNumber).arg(fileName));
+        dialog.setCancelButton(nullptr);
 
         QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
         QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
@@ -407,20 +408,44 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
     if(result == QMessageBox::StandardButton::Yes)
     {
         auto fsm = FileStorageManager::instance();
+        QFutureWatcher<void> futureWatcher;
+        QProgressDialog dialog(this);
+        dialog.setCancelButton(nullptr);
+
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+        QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+        QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
 
         if(type == TableModelFileExplorer::TableItemType::Folder)
         {
-            fsm->deleteFolder(symbolPath);
+            dialog.setLabelText(tr("Deleting folder <b>%1</b>...").arg(name));
 
-            if(!isFrozen)
-                emit signalStopMonitoringItem(userPath);
+            QFuture<void> future = QtConcurrent::run([=]{
+                fsm->deleteFolder(symbolPath);
+
+                if(!isFrozen)
+                    emit signalStopMonitoringItem(userPath);
+            });
+
+            futureWatcher.setFuture(future);
+            dialog.exec();
+            futureWatcher.waitForFinished();
         }
         else if(type == TableModelFileExplorer::TableItemType::File)
         {
-            fsm->deleteFile(symbolPath);
+            dialog.setLabelText(tr("Deleting file <b>%1</b>...").arg(name));
 
-            if(!isFrozen)
-                emit signalStopMonitoringItem(userPath);
+            QFuture<void> future = QtConcurrent::run([=]{
+                fsm->deleteFile(symbolPath);
+
+                if(!isFrozen)
+                    emit signalStopMonitoringItem(userPath);
+            });
+
+            futureWatcher.setFuture(future);
+            dialog.exec();
+            futureWatcher.waitForFinished();
         }
 
         slotRefreshFileExplorer();
