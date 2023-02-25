@@ -309,11 +309,6 @@
     </layout>
    </item>
   </layout>
-  <action name="contextActionTableFileExplorer_Cut">
-   <property name="text">
-    <string>Cut</string>
-   </property>
-  </action>
   <action name="contextActionTableFileExplorer_Freeze">
    <property name="text">
     <string>Freeze</string>
@@ -327,11 +322,6 @@
     <string>Delete</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_Preview">
-   <property name="text">
-    <string>Preview</string>
-   </property>
-  </action>
   <action name="contextActionListFileExplorer_EditVersion">
    <property name="text">
     <string>Edit version</string>
@@ -340,20 +330,12 @@
     <string>Edit version</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_Schedule">
+  <action name="contextActionListFileExplorer_CreateIndependentCopy">
    <property name="text">
-    <string>Schedule for independent copy</string>
+    <string>Create independent copy</string>
    </property>
    <property name="toolTip">
-    <string>Schedule for independent copy</string>
-   </property>
-  </action>
-  <action name="contextActionListFileExplorer_ScheduleAndOpenClipboard">
-   <property name="text">
-    <string>Schedule and open clipboard</string>
-   </property>
-   <property name="toolTip">
-    <string>Schedule and open clipboard</string>
+    <string>Create not tracked copy of this version</string>
    </property>
   </action>
   <action name="contextActionListFileExplorer_DeleteVersion">
@@ -370,22 +352,6 @@
    </property>
    <property name="toolTip">
     <string>Set as current version</string>
-   </property>
-  </action>
-  <action name="contextActionListFileExplorer_ShowRelatedFiles">
-   <property name="text">
-    <string>Show related files</string>
-   </property>
-   <property name="toolTip">
-    <string>Show related files</string>
-   </property>
-  </action>
-  <action name="contextActionTableFileExplorer_OpenFolderInNewTab">
-   <property name="text">
-    <string>Open folder in new tab</string>
-   </property>
-   <property name="toolTip">
-    <string>Open folder in new tab</string>
    </property>
   </action>
  </widget>

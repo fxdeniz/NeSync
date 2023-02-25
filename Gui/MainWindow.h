@@ -32,7 +32,7 @@ private slots:
 private:
     TabFileExplorer *tabFileExplorer;
     TabFileMonitor *tabFileMonitor;
-    QAction *separator1, *separator2, *separator3;
+    QAction *separator1, *separator2;
 
 private:
     void allocateSeparators();

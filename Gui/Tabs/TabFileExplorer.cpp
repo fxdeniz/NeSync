@@ -46,13 +46,9 @@ void TabFileExplorer::buildContextMenuTableFileExplorer()
     contextMenuTableFileExplorer = new QMenu(ui->tableViewFileExplorer);
     QMenu *ptrMenu = contextMenuTableFileExplorer;
 
-    QAction *actionOpenFolderInNewTab = ui->contextActionTableFileExplorer_OpenFolderInNewTab;
-    QAction *actionCut = ui->contextActionTableFileExplorer_Cut;
     QAction *actionFreeze = ui->contextActionTableFileExplorer_Freeze;
     QAction *actionDelete = ui->contextActionTableFileExplorer_Delete;
 
-    ptrMenu->addAction(actionOpenFolderInNewTab);
-    ptrMenu->addAction(actionCut);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
 
@@ -65,19 +61,13 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     contextMenuListFileExplorer = new QMenu(ui->listView);
     QMenu *ptrMenu = contextMenuListFileExplorer;
 
-    QAction *actionPreview = ui->contextActionListFileExplorer_Preview;
     QAction *actionEditVersion = ui->contextActionListFileExplorer_EditVersion;
-    QAction *actionShowRelatedFiles = ui->contextActionListFileExplorer_ShowRelatedFiles;
-    QAction *actionSchedule = ui->contextActionListFileExplorer_Schedule;
-    QAction *actionScheduleAndOpenClipboard = ui->contextActionListFileExplorer_ScheduleAndOpenClipboard;
+    QAction *actionCreateIndependentCopy = ui->contextActionListFileExplorer_CreateIndependentCopy;
     QAction *actionSetAsCurrentVerion = ui->contextActionListFileExplorer_SetAsCurrentVersion;
     QAction *actionDelete = ui->contextActionListFileExplorer_DeleteVersion;
 
-    ptrMenu->addAction(actionPreview);
     ptrMenu->addAction(actionEditVersion);
-    ptrMenu->addAction(actionShowRelatedFiles);
-    ptrMenu->addAction(actionSchedule);
-    ptrMenu->addAction(actionScheduleAndOpenClipboard);
+    ptrMenu->addAction(actionCreateIndependentCopy);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
 

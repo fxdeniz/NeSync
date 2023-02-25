@@ -83,16 +83,6 @@
     <string>Un-Select All</string>
    </property>
   </action>
-  <action name="tab1Action_ViewClipboard">
-   <property name="text">
-    <string>View Clipboard</string>
-   </property>
-  </action>
-  <action name="tab1Action_PasteHere">
-   <property name="text">
-    <string>Paste Here</string>
-   </property>
-  </action>
   <action name="tab1Action_Import">
    <property name="text">
     <string>Import</string>
@@ -124,11 +114,6 @@
   <action name="tab2Action_SaveAll">
    <property name="text">
     <string>Save All</string>
-   </property>
-  </action>
-  <action name="tab2Action_SaveSelected">
-   <property name="text">
-    <string>Save Selected</string>
    </property>
   </action>
   <action name="tab1Action_AddNewFolder">

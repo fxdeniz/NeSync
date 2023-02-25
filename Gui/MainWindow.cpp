@@ -55,7 +55,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     QToolBar *toolBar = ui->toolBar;
     toolBar->clear();
 
-    if(index == 0)
+    if(index == 1)
+        toolBar->addAction(ui->tab2Action_SaveAll);
+    else if(index == 0)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
@@ -64,17 +66,8 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         toolBar->addAction(ui->tab1Action_UnSelectAll);
         toolBar->addAction(separator2);
 
-        toolBar->addAction(ui->tab1Action_PasteHere);
-        toolBar->addAction(ui->tab1Action_ViewClipboard);
-        toolBar->addAction(separator3);
-
         toolBar->addAction(ui->tab1Action_Import);
         toolBar->addAction(ui->tab1Action_Export);
-    }
-    else if(index == 1)
-    {
-        toolBar->addAction(ui->tab2Action_SaveAll);
-        toolBar->addAction(ui->tab2Action_SaveSelected);
     }
 }
 
@@ -85,9 +78,6 @@ void MainWindow::allocateSeparators()
 
     separator2 = new QAction(this);
     separator2->setSeparator(true);
-
-    separator3 = new QAction(this);
-    separator3->setSeparator(true);
 }
 
 void MainWindow::buildTabWidget()
@@ -95,8 +85,8 @@ void MainWindow::buildTabWidget()
     tabFileExplorer = new TabFileExplorer(ui->tabWidget);
     tabFileMonitor = new TabFileMonitor(ui->tabWidget);
 
-    ui->tabWidget->addTab(tabFileExplorer, "File Explorer");
-    ui->tabWidget->addTab(tabFileMonitor, "File Monitor");
+    ui->tabWidget->addTab(tabFileExplorer, tr("File Explorer"));
+    ui->tabWidget->addTab(tabFileMonitor, tr("File Monitor"));
 }
 
 void MainWindow::disableCloseButtonOfPredefinedTabs()
