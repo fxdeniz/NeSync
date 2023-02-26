@@ -21,6 +21,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     ui->setupUi(this);
 
     dialogEditVersion = new DialogEditVersion(this);
+    dialogCreateCopy = new DialogCreateCopy(this);
 
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
@@ -62,12 +63,12 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     QMenu *ptrMenu = contextMenuListFileExplorer;
 
     QAction *actionEditVersion = ui->contextActionListFileExplorer_EditVersion;
-    QAction *actionCreateIndependentCopy = ui->contextActionListFileExplorer_CreateIndependentCopy;
+    QAction *actionCreateCopy = ui->contextActionListFileExplorer_CreateCopy;
     QAction *actionSetAsCurrentVerion = ui->contextActionListFileExplorer_SetAsCurrentVersion;
     QAction *actionDelete = ui->contextActionListFileExplorer_DeleteVersion;
 
     ptrMenu->addAction(actionEditVersion);
-    ptrMenu->addAction(actionCreateIndependentCopy);
+    ptrMenu->addAction(actionCreateCopy);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
 
@@ -382,6 +383,18 @@ void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
     }
 }
 
+void TabFileExplorer::on_contextActionListFileExplorer_CreateCopy_triggered()
+{
+    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
+
+    qlonglong selectedVersionNumber = ui->listView->selectionModel()->selectedRows().first().data().toLongLong();
+
+    dialogCreateCopy->setModal(true);
+    dialogCreateCopy->show(symbolFilePath, selectedVersionNumber);
+}
+
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 {
     auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
@@ -508,7 +521,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, cons
         QString selection = QFileDialog::getExistingDirectory(this,
                                                               tr("Select location for folder to be thawed"),
                                                               desktopPath,
-                                                              QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+                                                              QFileDialog::Option::ShowDirsOnly | QFileDialog::Option::DontResolveSymlinks);
 
         selection = QDir::toNativeSeparators(selection).append(QDir::separator());
 

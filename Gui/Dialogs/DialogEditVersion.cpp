@@ -36,7 +36,7 @@ void DialogEditVersion::show(const QString &fileSymbolPath, qlonglong versionNum
     model->setStringList(versionNumberList);
     ui->comboBox->setModel(model);
     ui->comboBox->setCurrentIndex(versionNumber - 1);
-    ui->labelSymbolPath->setText(fileJson[JsonKeys::File::FileName].toString());
+    ui->labelFileName->setText(fileJson[JsonKeys::File::FileName].toString());
 
     QWidget::show();
 }

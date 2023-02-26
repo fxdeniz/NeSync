@@ -48,6 +48,12 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogEditVersion.cpp
         Gui/Dialogs/DialogEditVersion.ui
     #
+
+    # DialogCreateCopy
+        Gui/Dialogs/DialogCreateCopy.h
+        Gui/Dialogs/DialogCreateCopy.cpp
+        Gui/Dialogs/DialogCreateCopy.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h

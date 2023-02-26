@@ -2,6 +2,7 @@
 #define TABFILEEXPLORER_H
 
 #include "Dialogs/DialogEditVersion.h"
+#include  "Dialogs/DialogCreateCopy.h"
 
 #include <QMenu>
 #include <QWidget>
@@ -37,10 +38,11 @@ private slots:
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
 
-    void on_contextActionListFileExplorer_EditVersion_triggered();
-    void on_contextActionListFileExplorer_DeleteVersion_triggered();
     void on_contextActionTableFileExplorer_Delete_triggered();
     void on_contextActionTableFileExplorer_Freeze_triggered();
+    void on_contextActionListFileExplorer_EditVersion_triggered();
+    void on_contextActionListFileExplorer_DeleteVersion_triggered();
+    void on_contextActionListFileExplorer_CreateCopy_triggered();
 
 private:
     void clearDescriptionDetails();
@@ -61,6 +63,7 @@ private:
 
     Ui::TabFileExplorer *ui;
     DialogEditVersion *dialogEditVersion;
+    DialogCreateCopy *dialogCreateCopy;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
     QStringList navigationHistoryIndices;

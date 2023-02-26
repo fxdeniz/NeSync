@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogEditVersion</class>
- <widget class="QDialog" name="DialogEditVersion">
+ <class>DialogCreateCopy</class>
+ <widget class="QDialog" name="DialogCreateCopy">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>649</width>
-    <height>360</height>
+    <width>640</width>
+    <height>180</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
     <width>640</width>
-    <height>360</height>
+    <height>180</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>180</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -33,7 +45,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
@@ -48,26 +60,46 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelVersion">
        <property name="text">
         <string>Version:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="comboBox"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonSelectLocation">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Select location</string>
+       </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QTextEdit" name="textEdit"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -85,16 +117,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonRestore">
-       <property name="text">
-        <string>Restore</string>
+      <widget class="QPushButton" name="buttonCreateCopy">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonSave">
        <property name="text">
-        <string>Save</string>
+        <string>Create copy</string>
        </property>
       </widget>
      </item>
@@ -112,19 +143,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="labelStatus">
-     <property name="styleSheet">
-      <string notr="true">QLabel
- {
-padding:  5px 5px 5px 0px;
-}</string>
-     </property>
-     <property name="text">
-      <string>Status Here</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

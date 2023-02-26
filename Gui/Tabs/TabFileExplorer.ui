@@ -330,9 +330,9 @@
     <string>Edit version</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_CreateIndependentCopy">
+  <action name="contextActionListFileExplorer_CreateCopy">
    <property name="text">
-    <string>Create independent copy</string>
+    <string>Create copy</string>
    </property>
    <property name="toolTip">
     <string>Create not tracked copy of this version</string>
