@@ -11,6 +11,11 @@ const QString ItemDelegateAction::ITEM_TEXT_RESTORE = tr("Restore");
 const QString ItemDelegateAction::ITEM_TEXT_FREEZE = tr("Freeze");
 const QString ItemDelegateAction::ITEM_TEXT_DELETE = tr("Delete from Db");
 
+const QString ItemDelegateAction::ITEM_TEXT_SAVE_WITH_CHILDREN = tr("Save (with children)");
+const QString ItemDelegateAction::ITEM_TEXT_RESTORE_WITH_CHILDREN = tr("Restore (with children)");
+const QString ItemDelegateAction::ITEM_TEXT_FREEZE_WITH_CHILDREN = tr("Freeze (with children)");
+const QString ItemDelegateAction::ITEM_TEXT_DELETE_WITH_CHILDREN = tr("Delete from Db (with children)");
+
 ItemDelegateAction::ItemDelegateAction(QObject *parent)
     : QStyledItemDelegate(parent)
 {
@@ -32,29 +37,62 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
     if(status == FileSystemEventDb::ItemStatus::NewAdded)
     {
         item->setAction(TreeItem::Action::Save);
-        result->addItem(ITEM_TEXT_SAVE);
+
+        if(item->getType() == TreeItem::ItemType::File)
+            result->addItem(ITEM_TEXT_SAVE);
+        else if(item->getType() == TreeItem::ItemType::Folder)
+            result->addItem(ITEM_TEXT_SAVE_WITH_CHILDREN);
     }
     else if(status == FileSystemEventDb::ItemStatus::Updated ||
             status == FileSystemEventDb::ItemStatus::Renamed ||
             status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
     {
         item->setAction(TreeItem::Action::Save);
-        result->addItem(ITEM_TEXT_SAVE);
-        result->addItem(ITEM_TEXT_RESTORE);
+
+        if(item->getType() == TreeItem::ItemType::File)
+        {
+            result->addItem(ITEM_TEXT_SAVE);
+            result->addItem(ITEM_TEXT_RESTORE);
+        }
+        else if(item->getType() == TreeItem::ItemType::Folder)
+        {
+            result->addItem(ITEM_TEXT_SAVE_WITH_CHILDREN);
+            result->addItem(ITEM_TEXT_RESTORE_WITH_CHILDREN);
+        }
     }
     else if(status == FileSystemEventDb::ItemStatus::Deleted)
     {
         item->setAction(TreeItem::Action::Delete);
-        result->addItem(ITEM_TEXT_DELETE);
-        result->addItem(ITEM_TEXT_RESTORE);
-        result->addItem(ITEM_TEXT_FREEZE);
+
+        if(item->getType() == TreeItem::ItemType::File)
+        {
+            result->addItem(ITEM_TEXT_DELETE);
+            result->addItem(ITEM_TEXT_RESTORE);
+            result->addItem(ITEM_TEXT_FREEZE);
+        }
+        else if(item->getType() == TreeItem::ItemType::Folder)
+        {
+            result->addItem(ITEM_TEXT_DELETE_WITH_CHILDREN);
+            result->addItem(ITEM_TEXT_RESTORE_WITH_CHILDREN);
+            result->addItem(ITEM_TEXT_FREEZE_WITH_CHILDREN);
+        }
     }
     else if(status == FileSystemEventDb::ItemStatus::Missing)
     {
         item->setAction(TreeItem::Action::Restore);
-        result->addItem(ITEM_TEXT_RESTORE);
-        result->addItem(ITEM_TEXT_DELETE);
-        result->addItem(ITEM_TEXT_FREEZE);
+
+        if(item->getType() == TreeItem::ItemType::File)
+        {
+            result->addItem(ITEM_TEXT_RESTORE);
+            result->addItem(ITEM_TEXT_DELETE);
+            result->addItem(ITEM_TEXT_FREEZE);
+        }
+        else if(item->getType() == TreeItem::ItemType::Folder)
+        {
+            result->addItem(ITEM_TEXT_RESTORE_WITH_CHILDREN);
+            result->addItem(ITEM_TEXT_DELETE_WITH_CHILDREN);
+            result->addItem(ITEM_TEXT_FREEZE_WITH_CHILDREN);
+        }
     }
     else
     {
@@ -62,12 +100,13 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
         result = nullptr;
     }
 
-    // Don't add ItemDelegateAction for children of deleted or missing folder
+    // Don't add ItemDelegateAction for children of deleted, missing or new added folder
     if(item->getParentItem() != nullptr &&
        item->getParentItem()->getType() == TreeItem::ItemType::Folder)
     {
         if(item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Deleted ||
-           item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Missing)
+           item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::Missing ||
+           item->getParentItem()->getStatus() == FileSystemEventDb::ItemStatus::NewAdded)
         {
             delete result;
             result = nullptr;
@@ -95,35 +134,35 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
 
 void ItemDelegateAction::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-    QComboBox *cb = qobject_cast<QComboBox *>(editor);
-    Q_ASSERT(cb);
+    QComboBox *comboBox = qobject_cast<QComboBox *>(editor);
+    Q_ASSERT(comboBox);
     // get the index of the text in the combobox that matches the current value of the item
     const QString currentText = index.data(Qt::EditRole).toString();
-    const int cbIndex = cb->findText(currentText);
+    const int cbIndex = comboBox->findText(currentText);
     // if it is valid, adjust the combobox
     if (cbIndex >= 0)
-        cb->setCurrentIndex(cbIndex);
+        comboBox->setCurrentIndex(cbIndex);
 }
 
 void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    QComboBox *cb = qobject_cast<QComboBox *>(editor);
-    Q_ASSERT(cb);
+    QComboBox *comboBox = qobject_cast<QComboBox *>(editor);
+    Q_ASSERT(comboBox);
 
     TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
-
     TreeItem::Action action;
+    QString currentText = comboBox->currentText();
 
-    if(cb->currentText() == ITEM_TEXT_SAVE)
+    if(currentText == ITEM_TEXT_SAVE || currentText == ITEM_TEXT_SAVE_WITH_CHILDREN)
         action = TreeItem::Action::Save;
 
-    else if(cb->currentText() == ITEM_TEXT_RESTORE)
+    else if(currentText == ITEM_TEXT_RESTORE || currentText == ITEM_TEXT_RESTORE_WITH_CHILDREN)
         action = TreeItem::Action::Restore;
 
-    else if(cb->currentText() == ITEM_TEXT_FREEZE)
+    else if(currentText == ITEM_TEXT_FREEZE || currentText == ITEM_TEXT_FREEZE_WITH_CHILDREN)
         action = TreeItem::Action::Freeze;
 
-    else if(cb->currentText() == ITEM_TEXT_DELETE)
+    else if(currentText == ITEM_TEXT_DELETE || currentText == ITEM_TEXT_DELETE_WITH_CHILDREN)
         action = TreeItem::Action::Delete;
 
     else

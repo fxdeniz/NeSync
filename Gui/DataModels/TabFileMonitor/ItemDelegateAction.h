@@ -21,6 +21,10 @@ private:
     static const QString ITEM_TEXT_FREEZE;
     static const QString ITEM_TEXT_DELETE;
 
+    static const QString ITEM_TEXT_SAVE_WITH_CHILDREN;
+    static const QString ITEM_TEXT_RESTORE_WITH_CHILDREN;
+    static const QString ITEM_TEXT_FREEZE_WITH_CHILDREN;
+    static const QString ITEM_TEXT_DELETE_WITH_CHILDREN;
 };
 
 #endif // ITEMDELEGATEACTION_H
