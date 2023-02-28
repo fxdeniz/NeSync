@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>180</height>
+    <height>200</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,12 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="labelFileName">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="font">
       <font>
        <bold>true</bold>
@@ -45,7 +51,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
@@ -72,7 +78,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLineEdit" name="lineEdit">
        <property name="readOnly">
@@ -95,14 +101,14 @@
         </size>
        </property>
        <property name="text">
-        <string>Select location</string>
+        <string>Select folder</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -143,6 +149,22 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelStatus">
+     <property name="styleSheet">
+      <string notr="true">QLabel
+ {
+padding:  5px 5px 5px 0px;
+}</string>
+     </property>
+     <property name="text">
+      <string>Status Here</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
