@@ -64,6 +64,11 @@ bool FileSystemEventDb::isFileExist(const QString &pathToFile) const
 
 bool FileSystemEventDb::addFolder(const QString &pathToFolder)
 {
+    // Workaround for #133
+    database.close();
+    database.open();
+    //
+
     bool result = false;
 
     if(database.transaction())
