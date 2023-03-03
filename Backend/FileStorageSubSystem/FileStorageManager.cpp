@@ -261,13 +261,7 @@ bool FileStorageManager::deleteFileVersion(const QString &symbolFilePath, qlongl
 
             FileEntity parentEntity = fileRepository->findBySymbolPath(symbolFilePath, true);
 
-            qlonglong versionNumber = 1;
-            for(FileVersionEntity &currentVersion : parentEntity.getVersionList())
-            {
-                currentVersion.versionNumber = versionNumber;
-                fileVersionRepository->save(currentVersion);
-                ++versionNumber;
-            }
+            result = sortFileVersionEntities(parentEntity);
         }
     }
 
@@ -352,23 +346,34 @@ bool FileStorageManager::updateFileVersionEntity(QJsonObject versionDto)
 {
     bool isSymbolFilePathExist = versionDto.contains(JsonKeys::FileVersion::SymbolFilePath);
     bool isVersionNumberExist = versionDto.contains(JsonKeys::FileVersion::VersionNumber);
-    bool isDescriptionExist = versionDto.contains(JsonKeys::FileVersion::Description);
 
-    if(!isSymbolFilePathExist || !isVersionNumberExist || !isDescriptionExist)
+    if(!isSymbolFilePathExist || !isVersionNumberExist)
         return false;
 
     bool isSymbolFilePathString = versionDto[JsonKeys::FileVersion::SymbolFilePath].isString();
     bool isVersionNumberDouble = versionDto[JsonKeys::FileVersion::VersionNumber].isDouble();
-    bool isDescriptionString = versionDto[JsonKeys::FileVersion::Description].isString();
 
-    if(!isSymbolFilePathString || !isVersionNumberDouble || !isDescriptionString)
+    if(!isSymbolFilePathString || !isVersionNumberDouble)
         return false;
 
     FileVersionEntity entity = fileVersionRepository->findVersion(versionDto[JsonKeys::FileVersion::SymbolFilePath].toString(),
                                                                   versionDto[JsonKeys::FileVersion::VersionNumber].toInteger());
 
-    entity.description = versionDto[JsonKeys::FileVersion::Description].toString();
+    entity.description = versionDto[JsonKeys::FileVersion::Description].toString(entity.description);
+    entity.versionNumber = versionDto[JsonKeys::FileVersion::NewVersionNumber].toInteger(entity.versionNumber);
     bool result = fileVersionRepository->save(entity);
+
+    return result;
+}
+
+bool FileStorageManager::sortFileVersionsInIncreasingOrder(const QString &symbolFilePath)
+{
+    bool result = false;
+
+    FileEntity parentEntity = fileRepository->findBySymbolPath(symbolFilePath, true);
+
+    if(parentEntity.isExist())
+        result = sortFileVersionEntities(parentEntity);
 
     return result;
 }
@@ -480,9 +485,9 @@ QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &ent
     result[JsonKeys::Folder::SymbolFolderPath] = entity.symbolFolderPath();
     result[JsonKeys::Folder::IsFrozen] = entity.isFrozen;
 
-    result[JsonKeys::Folder::UserFolderPath] = QJsonValue();
-    result[JsonKeys::Folder::ChildFolders] = QJsonValue();
-    result[JsonKeys::Folder::ChildFiles] = QJsonValue();
+    result[JsonKeys::Folder::UserFolderPath] = QJsonValue(QJsonValue::Type::Null);
+    result[JsonKeys::Folder::ChildFolders] = QJsonValue(QJsonValue::Type::Null);
+    result[JsonKeys::Folder::ChildFiles] = QJsonValue(QJsonValue::Type::Null);
 
     if(!entity.isFrozen)
         result[JsonKeys::Folder::UserFolderPath] = entity.userFolderPath;
@@ -500,12 +505,12 @@ QJsonObject FileStorageManager::folderEntityToJsonObject(const FolderEntity &ent
             jsonChildFolder[JsonKeys::Folder::SymbolFolderPath] = entityChildFolder.symbolFolderPath();
             jsonChildFolder[JsonKeys::Folder::IsFrozen] = entityChildFolder.isFrozen;
 
-            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = QJsonValue();
+            jsonChildFolder[JsonKeys::Folder::UserFolderPath] = QJsonValue(QJsonValue::Type::Null);
             if(!entityChildFolder.isFrozen)
                 jsonChildFolder[JsonKeys::Folder::UserFolderPath] = entityChildFolder.userFolderPath;
 
-            jsonChildFolder[JsonKeys::Folder::ChildFolders] = QJsonValue();
-            jsonChildFolder[JsonKeys::Folder::ChildFiles] = QJsonValue();
+            jsonChildFolder[JsonKeys::Folder::ChildFolders] = QJsonValue(QJsonValue::Type::Null);
+            jsonChildFolder[JsonKeys::Folder::ChildFiles] = QJsonValue(QJsonValue::Type::Null);
             jsonArrayChildFolder.append(jsonChildFolder);
         }
 
@@ -533,15 +538,14 @@ QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity)
 {
     QJsonObject result;
 
-
     result[JsonKeys::IsExist] = entity.isExist();
     result[JsonKeys::File::FileName] = entity.fileName;
     result[JsonKeys::File::IsFrozen] = entity.isFrozen;
     result[JsonKeys::File::SymbolFolderPath] = entity.symbolFolderPath;
     result[JsonKeys::File::SymbolFilePath] = entity.symbolFilePath();
     result[JsonKeys::File::MaxVersionNumber] = fileVersionRepository->maxVersionNumber(entity.symbolFilePath());
-    result[JsonKeys::File::UserFilePath] = QJsonValue();
-    result[JsonKeys::File::VersionList] = QJsonValue();
+    result[JsonKeys::File::UserFilePath] = QJsonValue(QJsonValue::Type::Null);
+    result[JsonKeys::File::VersionList] = QJsonValue(QJsonValue::Type::Null);
 
     FolderEntity parentEntity = folderRepository->findBySymbolPath(entity.symbolFolderPath);
 
@@ -576,6 +580,30 @@ QJsonObject FileStorageManager::fileVersionEntityToJsonObject(const FileVersionE
     result[JsonKeys::FileVersion::Description] = entity.description;
     result[JsonKeys::FileVersion::Hash] = entity.hash;
     result[JsonKeys::FileVersion::InternalFileName] = entity.internalFileName;
+
+    result[JsonKeys::FileVersion::NewVersionNumber] = QJsonValue(QJsonValue::Type::Null);
+
+    return result;
+}
+
+bool FileStorageManager::sortFileVersionEntities(const FileEntity &parentEntity)
+{
+    bool result = false;
+
+    if(parentEntity.isExist())
+    {
+        qlonglong versionNumber = 1;
+
+        for(FileVersionEntity &currentVersion : parentEntity.getVersionList())
+        {
+            currentVersion.versionNumber = versionNumber;
+            result = fileVersionRepository->save(currentVersion);
+            ++versionNumber;
+
+            if(result == false)
+                return false;
+        }
+    }
 
     return result;
 }

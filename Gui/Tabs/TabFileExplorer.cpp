@@ -185,6 +185,15 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from list.
     {
+        auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+        QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+        bool isFrozen = tableModel->getIsFrozenFromModelIndex(tableModelIndex);
+
+        if(isFrozen)
+            ui->contextActionListFileExplorer_SetAsCurrentVersion->setEnabled(false);
+        else
+            ui->contextActionListFileExplorer_SetAsCurrentVersion->setEnabled(true);
+
         QMenu *ptrMenu = contextMenuListFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
@@ -385,14 +394,72 @@ void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
 
 void TabFileExplorer::on_contextActionListFileExplorer_CreateCopy_triggered()
 {
-    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
     auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
     QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
-
     qlonglong selectedVersionNumber = ui->listView->selectionModel()->selectedRows().first().data().toLongLong();
 
     dialogCreateCopy->setModal(true);
     dialogCreateCopy->show(symbolFilePath, selectedVersionNumber);
+}
+
+void TabFileExplorer::on_contextActionListFileExplorer_SetAsCurrentVersion_triggered()
+{
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
+    QString userFilePath = tableModel->getUserPathFromModelIndex(tableModelIndex);
+    QString fileName = tableModel->getNameFromModelIndex(tableModelIndex);
+    qlonglong selectedVersionNumber = ui->listView->selectionModel()->selectedRows().first().data().toLongLong();
+
+    QString title = tr("Change current version ?");
+    QString message = tr("Version <b>%1</b> of file <b>%2</b> will be replaced in filesystem"
+                         " and that version will be the monitored file. Would you like to do that ?");
+    message = message.arg(selectedVersionNumber).arg(fileName);
+
+    QMessageBox::StandardButton result = QMessageBox::question(this, title, message);
+
+    if(result == QMessageBox::StandardButton::Yes)
+    {
+        QFutureWatcher<void> futureWatcher;
+        QProgressDialog dialog(this);
+        dialog.setLabelText(tr("Changing current version of file <b>%1</b>...").arg(fileName));
+
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+        QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+        QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+        QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
+
+        emit signalStopFileMonitor();
+        emit signalStopMonitoringItem(userFilePath);
+
+        QFuture<void> future = QtConcurrent::run([=]{
+            QFile::remove(userFilePath);
+
+            auto fsm = FileStorageManager::instance();
+            QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolFilePath);
+            QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, selectedVersionNumber);
+            qlonglong newVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger() + 1;
+            versionJson[JsonKeys::FileVersion::NewVersionNumber] = newVersionNumber;
+
+            fsm->updateFileVersionEntity(versionJson);
+            fsm->sortFileVersionsInIncreasingOrder(symbolFilePath);
+
+            QString internalFilePath = fsm->getBackupFolderPath();
+            internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+
+            QFile::copy(internalFilePath, userFilePath);
+        });
+
+        futureWatcher.setFuture(future);
+        dialog.exec();
+        futureWatcher.waitForFinished();
+
+        emit signalStartMonitoringItem(userFilePath);
+        emit signalStartFileMonitor();
+
+        slotRefreshFileExplorer();
+    }
 }
 
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()

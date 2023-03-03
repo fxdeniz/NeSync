@@ -43,6 +43,7 @@ private slots:
     void on_contextActionListFileExplorer_EditVersion_triggered();
     void on_contextActionListFileExplorer_DeleteVersion_triggered();
     void on_contextActionListFileExplorer_CreateCopy_triggered();
+    void on_contextActionListFileExplorer_SetAsCurrentVersion_triggered();
 
 private:
     void clearDescriptionDetails();
