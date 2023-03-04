@@ -56,7 +56,7 @@ void DatabaseRegistry::createDbFileStorage()
 
     QDir().mkdir(dbPath);
 
-    dbPath += "bb_database.db3";
+    dbPath += "ns_database.db3";
 
 //    dbPath += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 //    dbPath += ".db3";

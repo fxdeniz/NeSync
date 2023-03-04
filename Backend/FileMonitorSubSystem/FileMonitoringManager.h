@@ -11,7 +11,7 @@ class FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent = nullptr);
+    explicit FileMonitoringManager(QObject *parent = nullptr);
     ~FileMonitoringManager();
 
     QStringList getPredictionList() const;

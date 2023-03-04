@@ -1,6 +1,7 @@
 #include "FileMonitoringManager.h"
 
 #include "FileStorageSubSystem/FileStorageManager.h"
+#include "Utility/DatabaseRegistry.h"
 #include "Utility/JsonDtoFormat.h"
 
 #include <QDir>
@@ -9,11 +10,9 @@
 #include <QDirIterator>
 #include <QRandomGenerator>
 
-FileMonitoringManager::FileMonitoringManager(const QSqlDatabase &inMemoryDb, QObject *parent)
+FileMonitoringManager::FileMonitoringManager(QObject *parent)
     : QObject{parent}
 {
-    database = new FileSystemEventDb(inMemoryDb);
-
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalAddEventDetected,
                      this, &FileMonitoringManager::slotOnAddEventDetected);
 
@@ -46,6 +45,8 @@ void FileMonitoringManager::setPredictionList(const QStringList &newPredictionLi
 
 void FileMonitoringManager::start()
 {
+    database = new FileSystemEventDb(DatabaseRegistry::fileSystemEventDatabase());
+
     auto fsm = FileStorageManager::instance();
 
     for(const QString &item : getPredictionList())
