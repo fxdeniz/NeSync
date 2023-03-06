@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
 
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
-                     tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
+                     tabFileExplorer, &TabFileExplorer::refreshFileExplorer);
 
     QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);

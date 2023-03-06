@@ -153,7 +153,7 @@ QString TabFileExplorer::currentSymbolFolderPath() const
     return ui->lineEditWorkingDir->text();
 }
 
-void TabFileExplorer::slotRefreshFileExplorer()
+void TabFileExplorer::refreshFileExplorer()
 {
     displayFolderInTableViewFileExplorer(ui->lineEditWorkingDir->text());
 }
@@ -203,6 +203,8 @@ void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
 {
     if(index.isValid()) // If user clicked an item
     {
+        clearDescriptionDetails();
+
         auto tableModel = (TableModelFileExplorer *)index.model();
         QString symbolPath = tableModel->getSymbolPathFromModelIndex(index);
         TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(index);
@@ -388,7 +390,7 @@ void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
         futureWatcher.waitForFinished();
 
         emit signalStartFileMonitor();
-        slotRefreshFileExplorer();
+        refreshFileExplorer();
     }
 }
 
@@ -458,7 +460,7 @@ void TabFileExplorer::on_contextActionListFileExplorer_SetAsCurrentVersion_trigg
         emit signalStartMonitoringItem(userFilePath);
         emit signalStartFileMonitor();
 
-        slotRefreshFileExplorer();
+        refreshFileExplorer();
     }
 }
 
@@ -528,7 +530,8 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
             futureWatcher.waitForFinished();
         }
 
-        slotRefreshFileExplorer();
+        refreshFileExplorer();
+        clearDescriptionDetails();
     }
 }
 
@@ -549,7 +552,7 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
     else if(type == TableModelFileExplorer::TableItemType::File)
         executeFreezingOrThawingOfFile(name, symbolPath, userPath, isFrozen);
 
-    slotRefreshFileExplorer();
+    refreshFileExplorer();
 }
 
 void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen)

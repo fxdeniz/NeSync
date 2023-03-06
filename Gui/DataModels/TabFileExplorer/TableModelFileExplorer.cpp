@@ -275,7 +275,7 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
     for(const QJsonValue &jsonValue : childFiles)
     {
         QJsonObject child = jsonValue.toObject();
-        QFileInfo info(child[JsonKeys::File::UserFilePath].toString());
+
         TableItem item {
                         child[JsonKeys::File::FileName].toString(),
                         child[JsonKeys::File::SymbolFilePath].toString(),

@@ -23,7 +23,7 @@ public:
     QString currentSymbolFolderPath() const;
 
 public slots:
-    void slotRefreshFileExplorer();
+    void refreshFileExplorer();
 
 signals:
     void signalStopFileMonitor();
