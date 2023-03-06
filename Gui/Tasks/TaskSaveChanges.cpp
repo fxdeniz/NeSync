@@ -7,8 +7,8 @@
 #include <QDir>
 #include <QFile>
 
-TaskSaveChanges::TaskSaveChanges(const QHash<QString, TreeItem *> folderItemMap,
-                                 const QHash<QString, TreeItem *> fileItemMap,
+TaskSaveChanges::TaskSaveChanges(const QMap<QString, TreeItem *> folderItemMap,
+                                 const QMap<QString, TreeItem *> fileItemMap,
                                  QObject *parent)
     : QThread{parent}, folderItemIterator(folderItemMap), fileItemIterator(fileItemMap)
 {

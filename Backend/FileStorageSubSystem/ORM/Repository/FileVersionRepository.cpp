@@ -179,3 +179,28 @@ bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
 
     return result;
 }
+
+bool FileVersionRepository::deleteEntity(FileVersionEntity &entity, QSqlError *error)
+{
+    bool result = false;
+
+    QSqlQuery query(database);
+    QString queryTemplate = " DELETE FROM FileVersionEntity"
+                            " WHERE symbol_file_path = :1 AND version_number = :2;" ;
+
+    query.prepare(queryTemplate);
+    query.bindValue(":1", entity.getPrimaryKey().first);
+    query.bindValue(":2", entity.getPrimaryKey().second);
+    query.exec();
+
+    if(error != nullptr)
+        error = new QSqlError(query.lastError());
+
+    if(query.numRowsAffected() == 1 && query.lastError().type() == QSqlError::ErrorType::NoError)
+    {
+        entity.setIsExist(false);
+        result = true;
+    }
+
+    return result;
+}

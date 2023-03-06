@@ -41,6 +41,9 @@ QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
     QString newConnectionName = QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 
     QSqlDatabase result =  QSqlDatabase::cloneDatabase(dbFileMonitor, newConnectionName);
+    result.open();
+    result.exec("PRAGMA foreign_keys = ON;");
+
     return result;
 }
 
@@ -53,7 +56,7 @@ void DatabaseRegistry::createDbFileStorage()
 
     QDir().mkdir(dbPath);
 
-    dbPath += "bb_database.db3";
+    dbPath += "ns_database.db3";
 
 //    dbPath += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
 //    dbPath += ".db3";

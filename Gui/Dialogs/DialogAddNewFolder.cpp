@@ -43,10 +43,11 @@ DialogAddNewFolder::~DialogAddNewFolder()
     delete ui;
 }
 
-void DialogAddNewFolder::show(const QString &_parentFolderPath)
+void DialogAddNewFolder::show(const QString &parentFolderPath, FileMonitoringManager *fmm)
 {
-    this->parentFolderPath = _parentFolderPath;
-    ui->labelParentFolderPath->setText(_parentFolderPath);
+    this->parentFolderPath = parentFolderPath;
+    this->fmm = fmm;
+    ui->labelParentFolderPath->setText(parentFolderPath);
 
     showStatusInfo(statusTextWaitingForFolder(), ui->labelStatus);
     if(ui->lineEditFolderPath->text().isEmpty())
@@ -125,14 +126,14 @@ QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWi
 {
     QMap<QString, FolderItem> result;
 
-    QString parentSymbolDir =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
-    QDir rootDir = model->rootDirectory();
-    rootDir.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
-    QDirIterator cursor(rootDir, QDirIterator::IteratorFlag::Subdirectories);
+    QString parentSymbolFolder =  ui->labelParentFolderPath->text() + ui->labelFolderName->text();
+    QDir rootFolder = model->rootDirectory();
+    rootFolder.setFilter(QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+    QDirIterator cursor(rootFolder, QDirIterator::IteratorFlag::Subdirectories);
 
     FolderItem firstItem;
-    firstItem.userDir = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
-    firstItem.symbolDir = parentSymbolDir + FileStorageManager::separator;
+    firstItem.userFolderPath = QDir::toNativeSeparators(model->rootPath() + QDir::separator());
+    firstItem.symbolFolderPath = parentSymbolFolder + FileStorageManager::separator;
     result.insert(model->rootPath(), firstItem);
 
     while(cursor.hasNext())
@@ -140,8 +141,8 @@ QMap<QString, DialogAddNewFolder::FolderItem> DialogAddNewFolder::createBufferWi
         FolderItem item;
         QString currentUserDir = cursor.next();
 
-        item.userDir = QDir::toNativeSeparators(currentUserDir + QDir::separator());
-        item.symbolDir = generateSymbolDirFrom(currentUserDir, model->rootPath(), parentSymbolDir);
+        item.userFolderPath = QDir::toNativeSeparators(currentUserDir + QDir::separator());
+        item.symbolFolderPath = generateSymbolFolderPathFrom(currentUserDir, model->rootPath(), parentSymbolFolder);
         result.insert(currentUserDir, item);
     }
     return result;
@@ -161,14 +162,16 @@ void DialogAddNewFolder::addFilesToBuffer(QMap<QString, FolderItem> &buffer)
     }
 }
 
-QString DialogAddNewFolder::generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir)
+QString DialogAddNewFolder::generateSymbolFolderPathFrom(const QString &userFolderPath,
+                                                         const QString &parentUserFolderPath,
+                                                         const QString &parentSymbolFolderPath)
 {
-    QString parentDir = QDir::toNativeSeparators(parentUserDir);
-    QString currentUserDir = QDir::toNativeSeparators(userDir + QDir::separator());
+    QString parentFolder = QDir::toNativeSeparators(parentUserFolderPath);
+    QString currentUserFolder = QDir::toNativeSeparators(userFolderPath + QDir::separator());
 
-    auto suffix = currentUserDir.split(parentDir).last();
+    auto suffix = currentUserFolder.split(parentFolder).last();
     suffix = QDir::toNativeSeparators(suffix);
-    suffix.prepend(parentSymbolDir);
+    suffix.prepend(parentSymbolFolderPath);
     suffix.replace(QDir::separator(), FileStorageManager::separator);
 
     return suffix;
@@ -246,6 +249,22 @@ void DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
 
     QObject::connect(task, &TaskAddNewFolders::signalGenericFileEvent,
                      this, &DialogAddNewFolder::refreshTreeView);
+
+    QObject::connect(task, &TaskAddNewFolders::signalFolderAdded,
+                     fmm, &FileMonitoringManager::addTargetAtRuntime,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(task, &TaskAddNewFolders::signalFileAddedSuccessfully,
+                     fmm, &FileMonitoringManager::addTargetAtRuntime,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(task, &QThread::started,
+                     fmm, &FileMonitoringManager::pauseMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(task, &QThread::finished,
+                     fmm, &FileMonitoringManager::continueMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(task, &TaskAddNewFolders::signalFileBeingProcessed,
                      model, &CustomFileSystemModel::markItemAsPending);

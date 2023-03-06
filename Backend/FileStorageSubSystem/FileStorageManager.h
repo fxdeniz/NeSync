@@ -32,9 +32,13 @@ public:
 
     bool deleteFolder(const QString &symbolFolderPath);
     bool deleteFile(const QString &symbolFilePath);
+    bool deleteFileVersion(const QString &symbolFilePath, qlonglong versionNumber);
 
     bool updateFolderEntity(QJsonObject folderDto, bool updateFrozenStatusOfChildren = false);
     bool updateFileEntity(QJsonObject fileDto);
+    bool updateFileVersionEntity(QJsonObject versionDto);
+
+    bool sortFileVersionsInIncreasingOrder(const QString &symbolFilePath);
 
     QJsonObject getFolderJsonBySymbolPath(const QString &symbolFolderPath, bool includeChildren = false) const;
     QJsonObject getFolderJsonByUserPath(const QString &userFolderPath, bool includeChildren = false) const;
@@ -52,6 +56,7 @@ private:
     QJsonObject folderEntityToJsonObject(const FolderEntity &entity) const;
     QJsonObject fileEntityToJsonObject(const FileEntity &entity) const;
     QJsonObject fileVersionEntityToJsonObject(const FileVersionEntity &entity) const;
+    bool sortFileVersionEntities(const FileEntity &parentEntity);
 
 private:
     QString backupFolderPath;

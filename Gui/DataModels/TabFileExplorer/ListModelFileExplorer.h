@@ -1,6 +1,7 @@
 #ifndef LISTMODELFILEEXPLORER_H
 #define LISTMODELFILEEXPLORER_H
 
+#include <QJsonObject>
 #include <QAbstractListModel>
 
 // code here is adapted from
@@ -10,8 +11,11 @@ class ListModelFileExplorer : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    ListModelFileExplorer(QObject *parent = nullptr);
-    ListModelFileExplorer(const QStringList &itemList, QObject *parent = nullptr);
+    static const inline int ColumnIndexVersionNumber = 0;
+
+    ListModelFileExplorer(QJsonObject fileJson, QObject *parent = nullptr);
+
+    QString getFileSymbolPath() const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -22,6 +26,7 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
 
 private:
+    QJsonObject fileJson;
     QStringList stringList;
     QSet<QPersistentModelIndex> checkedItems;
 };

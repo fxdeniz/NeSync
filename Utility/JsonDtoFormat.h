@@ -1,6 +1,7 @@
 #ifndef JSONDTOFORMAT_H
 #define JSONDTOFORMAT_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 
 namespace JsonKeys
@@ -33,6 +34,7 @@ namespace JsonKeys
     {
         const inline QString SymbolFilePath = QStringLiteral("symbolFilePath");
         const inline QString VersionNumber = QStringLiteral("versionNumber");
+        const inline QString NewVersionNumber = QStringLiteral("newVersionNumber");
         const inline QString Size = QStringLiteral("size");
         const inline QString Timestamp = QStringLiteral("timestamp");
         const inline QString Description = QStringLiteral("description");

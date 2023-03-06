@@ -2,13 +2,12 @@
 #include "ui_MainWindow.h"
 
 #include "Utility/JsonDtoFormat.h"
-#include "Utility/DatabaseRegistry.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
-#include <QStandardPaths>
-#include <QtConcurrent>
-#include <QTabBar>
 #include <QDir>
+#include <QTabBar>
+#include <QMessageBox>
+#include <QStandardPaths>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -18,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
-    dialogTableItemEditor = new DialogFileOrDirEditor(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
@@ -30,12 +28,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
 
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
-                     tabFileExplorer, &TabFileExplorer::slotRefreshFileExplorer);
+                     tabFileExplorer, &TabFileExplorer::refreshFileExplorer);
 
-    QObject::connect(tabFileExplorer, &TabFileExplorer::signalToRouter_ShowDialogTableItemEditor,
-                     this, &MainWindow::on_router_ShowDialogTableItemEditor);
+    QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
-    createFileMonitorThread();
+    createFileMonitorThread(tabFileExplorer);
 }
 
 MainWindow::~MainWindow()
@@ -56,26 +54,15 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     QToolBar *toolBar = ui->toolBar;
     toolBar->clear();
 
-    if(index == 0)
+    if(index == 1)
+        toolBar->addAction(ui->tab2Action_SaveAll);
+    else if(index == 0)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
 
-        toolBar->addAction(ui->tab1Action_SelectAll);
-        toolBar->addAction(ui->tab1Action_UnSelectAll);
-        toolBar->addAction(separator2);
-
-        toolBar->addAction(ui->tab1Action_PasteHere);
-        toolBar->addAction(ui->tab1Action_ViewClipboard);
-        toolBar->addAction(separator3);
-
         toolBar->addAction(ui->tab1Action_Import);
         toolBar->addAction(ui->tab1Action_Export);
-    }
-    else if(index == 1)
-    {
-        toolBar->addAction(ui->tab2Action_SaveAll);
-        toolBar->addAction(ui->tab2Action_SaveSelected);
     }
 }
 
@@ -83,12 +70,6 @@ void MainWindow::allocateSeparators()
 {
     separator1 = new QAction(this);
     separator1->setSeparator(true);
-
-    separator2 = new QAction(this);
-    separator2->setSeparator(true);
-
-    separator3 = new QAction(this);
-    separator3->setSeparator(true);
 }
 
 void MainWindow::buildTabWidget()
@@ -96,8 +77,8 @@ void MainWindow::buildTabWidget()
     tabFileExplorer = new TabFileExplorer(ui->tabWidget);
     tabFileMonitor = new TabFileMonitor(ui->tabWidget);
 
-    ui->tabWidget->addTab(tabFileExplorer, "File Explorer");
-    ui->tabWidget->addTab(tabFileMonitor, "File Monitor");
+    ui->tabWidget->addTab(tabFileExplorer, tr("File Explorer"));
+    ui->tabWidget->addTab(tabFileMonitor, tr("File Monitor"));
 }
 
 void MainWindow::disableCloseButtonOfPredefinedTabs()
@@ -110,12 +91,12 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
-void MainWindow::createFileMonitorThread()
+void MainWindow::createFileMonitorThread(TabFileExplorer *tabFileExplorer)
 {
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
 
-    fmm = new FileMonitoringManager(DatabaseRegistry::fileSystemEventDatabase());
+    fmm = new FileMonitoringManager();
 
     auto fsm = FileStorageManager::instance();
 
@@ -140,6 +121,22 @@ void MainWindow::createFileMonitorThread()
     QObject::connect(fileMonitorThread, &QThread::finished,
                      fmm, &QObject::deleteLater);
 
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalStopFileMonitor,
+                     fmm, &FileMonitoringManager::pauseMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalStartFileMonitor,
+                     fmm, &FileMonitoringManager::continueMonitoring,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalStartMonitoringItem,
+                     fmm, &FileMonitoringManager::addTargetAtRuntime,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalStopMonitoringItem,
+                     fmm, &FileMonitoringManager::stopMonitoringTarget,
+                     Qt::ConnectionType::BlockingQueuedConnection);
+
     fmm->moveToThread(fileMonitorThread);
 
     fileMonitorThread->start();
@@ -150,24 +147,13 @@ QString MainWindow::fileMonitorThreadName() const
     return "File Monitor Thread";
 }
 
-void MainWindow::on_router_ShowDialogTableItemEditor()
-{
-    dialogTableItemEditor->setModal(true);
-    dialogTableItemEditor->show();
-}
-
 void MainWindow::on_tab1Action_AddNewFolder_triggered()
 {
     Qt::WindowFlags flags = dialogAddNewFolder->windowFlags();
     flags |= Qt::WindowMaximizeButtonHint;
     dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
-    dialogAddNewFolder->show(tabFileExplorer->currentDir());
-}
-
-void MainWindow::on_menuAction_DebugFileMonitor_triggered()
-{
-    dialogDebugFileMonitor->show();
+    dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath(), fmm);
 }
 
 void MainWindow::on_tab2Action_SaveAll_triggered()
@@ -175,3 +161,47 @@ void MainWindow::on_tab2Action_SaveAll_triggered()
     tabFileMonitor->saveChanges(fmm);
 }
 
+void MainWindow::on_menuAction_DebugFileMonitor_triggered()
+{
+    dialogDebugFileMonitor->show();
+}
+
+void MainWindow::on_menuAction_AboutApp_triggered()
+{
+    auto fsm = FileStorageManager::instance();
+
+    QString title = tr("About NeSync");
+    QString message = tr("<center><h1>NeSync 1.4.0</h1><center/>"
+                         "<hr>"
+                         "Thanks for using NeSync.<br>"
+                         "This is a <b>early access version</b>, consider this as staging period towards V2.<br>"
+                         "This software does not collect any data and does not connect to the internet. <br>"
+                         ""
+                         "<h3>Developed by</h3>"
+                         "<b>Deniz YILMAZOK</b> | <a href = \"https://www.github.com/fxdeniz\">fxdeniz (GitHub Profile)</a><br>"
+                         ""
+                         "<h3>Thanks to</h3>"
+                         "<dl>"
+                         "<dt>"
+                         "  <b>SpartanJ</b> for efsw library | <a href = \"https://www.github.com/SpartanJ/efsw\">efsw (GitHub Repo)</a>"
+                         "</dt>"
+                         "<dt>"
+                         "  <b>Qt Framework developers</b> | <a href = \"https://www.qt.io\">The Qt Company Website</a>"
+                         "</dt>"
+                         "<dt>"
+                         "  <b>SQLite project team</b> | <a href =\"https://www.sqlite.org\"><a/>SQLite Home Page"
+                         "</dt>"
+                         "</dl>"
+                         "<br>"
+                         "<center>This software released under <a href =\"https://www.gnu.org/licenses/lgpl-3.0.en.html\">LGPL Version 3 (gnu.org)</a> license."
+                         "</center>"
+                         "<br>"
+                         "<b>Backup folder path:</b> %1").arg(fsm->getBackupFolderPath());
+
+    QMessageBox::information(this, title, message);
+}
+
+void MainWindow::on_menuAction_AboutQt_triggered()
+{
+    QApplication::aboutQt();
+}

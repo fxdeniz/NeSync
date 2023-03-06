@@ -2,10 +2,12 @@
 
 #include "Utility/JsonDtoFormat.h"
 
+#include <QDir>
 #include <QColor>
 #include <QPixmap>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QStandardPaths>
 #include <QFileIconProvider>
 
 TableModelFileExplorer::TableModelFileExplorer(QJsonObject result, QObject *parent)
@@ -14,7 +16,16 @@ TableModelFileExplorer::TableModelFileExplorer(QJsonObject result, QObject *pare
     itemList = tableItemListFrom(result);
 }
 
-QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &index) const
+QString TableModelFileExplorer::getNameFromModelIndex(const QModelIndex &index) const
+{
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).name;
+
+    return result;}
+
+QString TableModelFileExplorer::getSymbolPathFromModelIndex(const QModelIndex &index) const
 {
     QString result = "";
 
@@ -24,7 +35,27 @@ QString TableModelFileExplorer::symbolPathFromModelIndex(const QModelIndex &inde
     return result;
 }
 
-TableModelFileExplorer::TableItemType TableModelFileExplorer::itemTypeFromModelIndex(const QModelIndex &index) const
+QString TableModelFileExplorer::getUserPathFromModelIndex(const QModelIndex &index) const
+{
+    QString result = "";
+
+    if(index.isValid())
+        result = itemList.at(index.row()).userPath;
+
+    return result;
+}
+
+bool TableModelFileExplorer::getIsFrozenFromModelIndex(const QModelIndex &index) const
+{
+    bool result = false;
+
+    if(index.isValid())
+        result = itemList.at(index.row()).isFrozen;
+
+    return result;
+}
+
+TableModelFileExplorer::TableItemType TableModelFileExplorer::getItemTypeFromModelIndex(const QModelIndex &index) const
 {
     TableItemType result = TableItemType::Invalid;
 
@@ -41,7 +72,7 @@ int TableModelFileExplorer::rowCount(const QModelIndex &parent) const
 
 int TableModelFileExplorer::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 3;
+    return parent.isValid() ? 0 : 5;
 }
 
 QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
@@ -49,37 +80,70 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= this->itemList.size() || index.row() < 0)
+    if (index.row() >= itemList.size() || index.row() < 0)
         return QVariant();
+
+    const TableItem item = itemList.at(index.row());
 
     if (role == Qt::ItemDataRole::DisplayRole)
     {
-        const auto &item = this->itemList.at(index.row());
-
         switch (index.column())
         {
-            case 0:
+            case ColumnIndexName:
                 return item.name;
-            case 1:
+            case ColumnIndexSymbolPath:
                 return item.symbolPath;
-            case 2:
+            case ColumnIndexUserPath:
+                return item.userPath;
+            case ColumnIndexIsFrozen:
+                if(item.isFrozen)
+                    return tr("Yes");
+                else
+                    return tr("No");
+            case ColumnIndexItemType:
                 return item.type;
             default:
                 break;
         }
     }
-    else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == 0)
+    else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == ColumnIndexName)
     {
-        if(this->checkedItems.contains(index))
+        if(checkedItems.contains(index))
             return Qt::CheckState::Checked;
         else
             return Qt::CheckState::Unchecked;
     }
-    else if(role == Qt::ItemDataRole::DecorationRole && index.column() == 0)
+    else if(role == Qt::ItemDataRole::DecorationRole && index.column() == ColumnIndexName)
     {
-        const auto &item = this->itemList.at(index.row());
+        QFileIconProvider provider;
 
-        return item.icon;
+        if(item.type == TableModelFileExplorer::TableItemType::Folder)
+            return provider.icon(QFileIconProvider::IconType::Folder);
+
+        else if(item.type == TableModelFileExplorer::TableItemType::File)
+        {
+            QString iconFilePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+            iconFilePath = QDir::toNativeSeparators(iconFilePath) + QDir::separator();
+            iconFilePath.append(item.name);
+
+            QFileInfo info(iconFilePath);
+
+            return provider.icon(info);
+        }
+    }
+    else if (role == Qt::ItemDataRole::BackgroundRole)
+    {
+        if(item.isFrozen)
+        {
+            if(index.column() == ColumnIndexIsFrozen)
+                return QColor(Qt::GlobalColor::darkGray);
+
+            return QColor(Qt::GlobalColor::lightGray);
+        }
+    }
+    else if(role == Qt::ItemDataRole::TextAlignmentRole && index.column() == ColumnIndexIsFrozen)
+    {
+        return Qt::AlignmentFlag::AlignCenter;
     }
 
     return QVariant();
@@ -94,11 +158,15 @@ QVariant TableModelFileExplorer::headerData(int section, Qt::Orientation orienta
     {
         switch (section)
         {
-            case 0:
+            case ColumnIndexName:
                 return tr("Name");
-            case 1:
+            case ColumnIndexSymbolPath:
                 return tr("Symbol Path");
-            case 2:
+            case ColumnIndexUserPath:
+                return tr("Located at");
+            case ColumnIndexIsFrozen:
+                return tr("Frozen");
+            case ColumnIndexItemType:
                 return tr("Type");
             default:
                 break;
@@ -186,7 +254,6 @@ bool TableModelFileExplorer::removeRows(int position, int rows, const QModelInde
 QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFrom(QJsonObject parentFolder)
 {
     QList<TableItem> result;
-    QFileIconProvider iconProvider;
     QJsonArray childFolders = parentFolder[JsonKeys::Folder::ChildFolders].toArray();
 
     for(const QJsonValue &jsonValue : childFolders)
@@ -195,8 +262,9 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
         TableItem item {
                         child[JsonKeys::Folder::SuffixPath].toString().chopped(1), // Remove / character at end
                         child[JsonKeys::Folder::SymbolFolderPath].toString(),
+                        child[JsonKeys::Folder::UserFolderPath].toString(),
+                        child[JsonKeys::Folder::IsFrozen].toBool(),
                         TableItemType::Folder,
-                        iconProvider.icon(QFileIconProvider::IconType::Folder)
                        };
 
         result.append(item);
@@ -207,12 +275,13 @@ QList<TableModelFileExplorer::TableItem> TableModelFileExplorer::tableItemListFr
     for(const QJsonValue &jsonValue : childFiles)
     {
         QJsonObject child = jsonValue.toObject();
-        QFileInfo info(child[JsonKeys::File::UserFilePath].toString());
+
         TableItem item {
                         child[JsonKeys::File::FileName].toString(),
                         child[JsonKeys::File::SymbolFilePath].toString(),
+                        child[JsonKeys::File::UserFilePath].toString(),
+                        child[JsonKeys::File::IsFrozen].toBool(),
                         TableItemType::File,
-                        iconProvider.icon(info)
                        };
 
         result.append(item);

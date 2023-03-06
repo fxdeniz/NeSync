@@ -37,6 +37,7 @@ public:
     bool setOldNameOfFile(const QString &pathToFile, const QString &oldName);
     bool setEfswIDofFolder(const QString &pathToFolder, long id);
     efsw::WatchID getEfswIDofFolder(const QString &pathToFolder) const;
+    QList<efsw::WatchID> getEfswIDListOfFolderTree(const QString &pathToRootFolder) const;
     ItemStatus getStatusOfFolder(const QString &pathToFolder) const;
     ItemStatus getStatusOfFile(const QString &pathToFile) const;
     QString getNameOfFile(const QString &pathToFile) const;
@@ -45,7 +46,7 @@ public:
     QStringList getMonitoredFolderPathList() const;
     QStringList getActiveRootFolderList() const;
     QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;
-    QStringList getChildFileListOfFolder(const QString &pathToFolder) const;
+    QStringList getDirectChildFileListOfFolder(const QString &pathToFolder) const;
     QStringList getEventfulFileListOfFolder(const QString &pathToFolder) const;
     bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 

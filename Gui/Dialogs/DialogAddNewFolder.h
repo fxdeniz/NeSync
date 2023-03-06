@@ -1,11 +1,13 @@
 #ifndef DIALOGADDNEWFOLDER_H
 #define DIALOGADDNEWFOLDER_H
 
+#include "BaseDialog.h"
+
+#include "DataModels/DialogAddNewFolder/CustomFileSystemModel.h"
+#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
+
 #include <QDialog>
 #include <QFileSystemModel>
-
-#include "BaseDialog.h"
-#include "DataModels/DialogAddNewFolder/CustomFileSystemModel.h"
 
 namespace Ui {
 class DialogAddNewFolder;
@@ -18,8 +20,8 @@ class DialogAddNewFolder : public QDialog, public BaseDialog
 public:
     typedef struct
     {
-        QString userDir;
-        QString symbolDir;
+        QString userFolderPath;
+        QString symbolFolderPath;
         QHash<QString, bool> files;
 
     } FolderItem;
@@ -28,7 +30,7 @@ public:
     ~DialogAddNewFolder();
 
 public slots:
-    void show(const QString &_parentFolderPath);
+    void show(const QString &parentFolderPath, FileMonitoringManager *fmm);
 
     // QDialog interface
 protected:
@@ -47,7 +49,9 @@ private:
     static qint64 getFolderSize(const QString &pathToFolder);
     QMap<QString, FolderItem> createBufferWithFolderOnly();
     void addFilesToBuffer(QMap<QString, FolderItem> &buffer);
-    QString generateSymbolDirFrom(const QString &userDir, const QString &parentUserDir, const QString &parentSymbolDir);
+    QString generateSymbolFolderPathFrom(const QString &userFolderPath,
+                                         const QString &parentUserFolderPath,
+                                         const QString &parentSymbolFolderPath);
 
     static QString statusTextWaitingForFolder();
     static QString statusTextContentReadyToAdd();
@@ -61,6 +65,7 @@ private:
 private:
     Ui::DialogAddNewFolder *ui;
     CustomFileSystemModel *model;
+    FileMonitoringManager *fmm;
     QString parentFolderPath;
 
 };

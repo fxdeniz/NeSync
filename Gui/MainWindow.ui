@@ -54,45 +54,25 @@
      <x>0</x>
      <y>0</y>
      <width>950</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuSettings">
+   <widget class="QMenu" name="menuDebug">
     <property name="title">
-     <string>Settings</string>
+     <string>Debug</string>
     </property>
+    <addaction name="menuAction_DebugFileMonitor"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
     </property>
-    <addaction name="menuAction_DebugFileMonitor"/>
     <addaction name="menuAction_AboutApp"/>
     <addaction name="menuAction_AboutQt"/>
    </widget>
-   <addaction name="menuSettings"/>
+   <addaction name="menuDebug"/>
    <addaction name="menuAbout"/>
   </widget>
-  <action name="tab1Action_SelectAll">
-   <property name="text">
-    <string>Select All</string>
-   </property>
-  </action>
-  <action name="tab1Action_UnSelectAll">
-   <property name="text">
-    <string>Un-Select All</string>
-   </property>
-  </action>
-  <action name="tab1Action_ViewClipboard">
-   <property name="text">
-    <string>View Clipboard</string>
-   </property>
-  </action>
-  <action name="tab1Action_PasteHere">
-   <property name="text">
-    <string>Paste Here</string>
-   </property>
-  </action>
   <action name="tab1Action_Import">
    <property name="text">
     <string>Import</string>
@@ -124,11 +104,6 @@
   <action name="tab2Action_SaveAll">
    <property name="text">
     <string>Save All</string>
-   </property>
-  </action>
-  <action name="tab2Action_SaveSelected">
-   <property name="text">
-    <string>Save Selected</string>
    </property>
   </action>
   <action name="tab1Action_AddNewFolder">
