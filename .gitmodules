@@ -1,0 +1,6 @@
+[submodule "Dependency/efsw"]
+	path = Dependency/efsw
+	url = https://github.com/SpartanJ/efsw
+[submodule "Dependency/quazip"]
+	path = Dependency/quazip
+	url = https://github.com/stachenov/quazip.git

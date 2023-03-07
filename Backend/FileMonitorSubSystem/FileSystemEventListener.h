@@ -2,8 +2,7 @@
 #define FILESYSTEMEVENTLISTENER
 
 #include <QObject>
-
-#include "Backend/FileMonitorSubSystem/efsw/efsw.hpp"
+#include <efsw/efsw.hpp>
 
 class FileSystemEventListener : public QObject, public efsw::FileWatchListener
 {

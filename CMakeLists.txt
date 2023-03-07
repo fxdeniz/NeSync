@@ -17,13 +17,12 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent Widge
 include_directories(Gui/)
 include_directories(Gui/Tabs/)
 include_directories(Backend/)
+include_directories(Backend/FileStorageSubSystem/)
 include_directories(Backend/FileStorageSubSystem/ORM/)
 include_directories(Backend/FileMonitorSubSystem/)
-include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/)
-include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/Test/)
-include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/platform/)
-include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/platform/posix/)
-include_directories(Backend/FileMonitorSubSystem/Backend/FileMonitorSubSystem/efsw/platform/win/)
+
+add_subdirectory(Dependency/efsw)
+add_subdirectory(Dependency/quazip)
 
 
 set(PROJECT_SOURCES
@@ -83,7 +82,7 @@ set(PROJECT_SOURCES
         #
     #
 
-    #   DialogDebugFileMonitor
+    # DialogDebugFileMonitor
         Gui/Dialogs/DialogDebugFileMonitor.h
         Gui/Dialogs/DialogDebugFileMonitor.cpp
         Gui/Dialogs/DialogDebugFileMonitor.ui
@@ -125,94 +124,16 @@ set(PROJECT_SOURCES
         Backend/FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
     #
 
-    #[[ FileMonitoringSubSystem ]]
-    Backend/FileMonitorSubSystem/FileSystemEventListener.h Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
-    Backend/FileMonitorSubSystem/FileSystemEventDb.h Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
-    Backend/FileMonitorSubSystem/FileMonitoringManager.h Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
-
-    #[[  ]]
-    Backend/FileMonitorSubSystem/efsw/platform/platformimpl.hpp
-
-    Backend/FileMonitorSubSystem/efsw/platform/posix/FileSystemImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/FileSystemImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/MutexImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/MutexImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/SystemImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/SystemImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/ThreadImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/posix/ThreadImpl.hpp
-
-    Backend/FileMonitorSubSystem/efsw/platform/win/FileSystemImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/FileSystemImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/MutexImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/MutexImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/SystemImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/SystemImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/ThreadImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/platform/win/ThreadImpl.hpp
-
-    Backend/FileMonitorSubSystem/efsw/Atomic.hpp
-    Backend/FileMonitorSubSystem/efsw/base.hpp
-    Backend/FileMonitorSubSystem/efsw/Debug.hpp
-    Backend/FileMonitorSubSystem/efsw/Debug.cpp
-    Backend/FileMonitorSubSystem/efsw/DirectorySnapshot.hpp
-    Backend/FileMonitorSubSystem/efsw/DirectorySnapshot.cpp
-    Backend/FileMonitorSubSystem/efsw/DirectorySnapshotDiff.hpp
-    Backend/FileMonitorSubSystem/efsw/DirectorySnapshotDiff.cpp
-    Backend/FileMonitorSubSystem/efsw/DirWatcherGeneric.hpp
-    Backend/FileMonitorSubSystem/efsw/DirWatcherGeneric.cpp
-    Backend/FileMonitorSubSystem/efsw/FileInfo.hpp
-    Backend/FileMonitorSubSystem/efsw/FileInfo.cpp
-    Backend/FileMonitorSubSystem/efsw/FileSystem.hpp
-    Backend/FileMonitorSubSystem/efsw/FileSystem.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcher.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherCWrapper.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherFSEvents.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherFSEvents.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherGeneric.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherGeneric.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherImpl.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherImpl.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherInotify.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherInotify.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherKqueue.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherKqueue.cpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherWin32.hpp
-    Backend/FileMonitorSubSystem/efsw/FileWatcherWin32.cpp
-    Backend/FileMonitorSubSystem/efsw/inotify-nosys.h
-    Backend/FileMonitorSubSystem/efsw/Lock.hpp
-    Backend/FileMonitorSubSystem/efsw/Log.cpp
-    Backend/FileMonitorSubSystem/efsw/Mutex.hpp
-    Backend/FileMonitorSubSystem/efsw/Mutex.cpp
-    Backend/FileMonitorSubSystem/efsw/sophist.h
-    Backend/FileMonitorSubSystem/efsw/String.hpp
-    Backend/FileMonitorSubSystem/efsw/String.cpp
-    Backend/FileMonitorSubSystem/efsw/System.hpp
-    Backend/FileMonitorSubSystem/efsw/System.cpp
-    Backend/FileMonitorSubSystem/efsw/Thread.hpp
-    Backend/FileMonitorSubSystem/efsw/Thread.cpp
-    Backend/FileMonitorSubSystem/efsw/Utf.hpp
-    Backend/FileMonitorSubSystem/efsw/Utf.inl
-    Backend/FileMonitorSubSystem/efsw/Watcher.hpp
-    Backend/FileMonitorSubSystem/efsw/Watcher.cpp
-    Backend/FileMonitorSubSystem/efsw/WatcherFSEvents.hpp
-    Backend/FileMonitorSubSystem/efsw/WatcherFSEvents.cpp
-    Backend/FileMonitorSubSystem/efsw/WatcherGeneric.hpp
-    Backend/FileMonitorSubSystem/efsw/WatcherGeneric.cpp
-    Backend/FileMonitorSubSystem/efsw/WatcherInotify.hpp
-    Backend/FileMonitorSubSystem/efsw/WatcherInotify.cpp
-    Backend/FileMonitorSubSystem/efsw/WatcherKqueue.hpp
-    Backend/FileMonitorSubSystem/efsw/WatcherKqueue.cpp
-    Backend/FileMonitorSubSystem/efsw/WatcherWin32.hpp
-    Backend/FileMonitorSubSystem/efsw/WatcherWin32.cpp
-
-    Backend/FileMonitorSubSystem/efsw/efsw.h
-    Backend/FileMonitorSubSystem/efsw/efsw.hpp
-
-    Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.h
-    Backend/FileMonitorSubSystem/efsw/Test/UpdateListener.cpp
-
+    # FileMonitoringSubSystem
+        Backend/FileMonitorSubSystem/FileSystemEventListener.h
+        Backend/FileMonitorSubSystem/FileSystemEventListener.cpp
+        Backend/FileMonitorSubSystem/FileSystemEventDb.h
+        Backend/FileMonitorSubSystem/FileSystemEventDb.cpp
+        Backend/FileMonitorSubSystem/FileMonitoringManager.h
+        Backend/FileMonitorSubSystem/FileMonitoringManager.cpp
+    #
 )
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(NeSync
@@ -237,7 +158,13 @@ else()
     endif()
 endif()
 
-target_link_libraries(NeSync PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(NeSync PRIVATE Qt${QT_VERSION_MAJOR}::Core
+                             Qt${QT_VERSION_MAJOR}::Sql
+                             Qt${QT_VERSION_MAJOR}::Concurrent
+                             Qt${QT_VERSION_MAJOR}::Widgets
+                             QuaZip::QuaZip
+                             efsw)
+
 
 set_target_properties(NeSync PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
