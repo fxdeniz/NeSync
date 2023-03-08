@@ -466,6 +466,76 @@ void TabFileExplorer::on_contextActionListFileExplorer_SetAsCurrentVersion_trigg
     }
 }
 
+void TabFileExplorer::on_contextActionTableFileExplorer_Export_triggered()
+{
+    QMap<QString, QJsonObject> fileMap;
+    QModelIndexList list = ui->tableViewFileExplorer->selectionModel()->selectedRows();
+    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+
+    for(const QModelIndex &currentIndex : list)
+    {
+        auto fsm = FileStorageManager::instance();
+        QString symbolPath = tableModel->getSymbolPathFromModelIndex(currentIndex);
+        TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(currentIndex);
+
+        if(type == TableModelFileExplorer::TableItemType::File)
+        {
+            QJsonObject fileJson = fsm->getFileJsonBySymbolPath(symbolPath, true);
+            fileMap.insert(symbolPath, fileJson);
+        }
+        else if(type == TableModelFileExplorer::TableItemType::Folder)
+        {
+            QJsonObject parentFolderJson = fsm->getFolderJsonBySymbolPath(symbolPath, true);
+            QQueue<QJsonObject> folders;
+            folders.enqueue(parentFolderJson);
+
+            while(!folders.isEmpty())
+            {
+                QJsonObject currentFolder = folders.dequeue();
+                QString currentFolderPath = currentFolder[JsonKeys::Folder::SymbolFolderPath].toString();
+                QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
+                for(const QJsonValue &currentChildFolder : childFolders)
+                    folders.enqueue(currentChildFolder.toObject());
+
+                currentFolder = fsm->getFolderJsonBySymbolPath(currentFolderPath, true);
+
+                QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
+                for(const QJsonValue &currentChildFile : childFiles)
+                {
+                    QJsonObject childFile = currentChildFile.toObject();
+                    QString currentFileSymbolPath = childFile[JsonKeys::File::SymbolFilePath].toString();
+                    childFile = fsm->getFileJsonBySymbolPath(currentFileSymbolPath, true);
+                    fileMap.insert(currentFileSymbolPath, childFile);
+                }
+            }
+        }
+    }
+
+    QJsonDocument document;
+    QMapIterator<QString, QJsonObject> mapIterator(fileMap);
+
+    QString filePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
+    filePath.append(QDir::separator());
+    filePath = QDir::toNativeSeparators(filePath);
+    filePath += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
+    filePath += ".json";
+
+    QFile file(filePath);
+    file.open(QFile::OpenModeFlag::WriteOnly);
+    QTextStream stream(&file);
+    stream.setEncoding(QStringConverter::Encoding::Utf8);
+
+    while(mapIterator.hasNext())
+    {
+        mapIterator.next();
+        stream << "";
+        //stream << "file " << mapIterator.key() << " has: ";
+        document.setObject(mapIterator.value());
+        stream << document.toJson();
+        stream << "";
+    }
+}
+
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 {
     auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();

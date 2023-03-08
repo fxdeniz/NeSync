@@ -38,6 +38,7 @@ private slots:
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
 
+    void on_contextActionTableFileExplorer_Export_triggered();
     void on_contextActionTableFileExplorer_Delete_triggered();
     void on_contextActionTableFileExplorer_Freeze_triggered();
     void on_contextActionListFileExplorer_EditVersion_triggered();
