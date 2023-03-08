@@ -159,9 +159,9 @@ else()
 endif()
 
 target_link_libraries(NeSync PRIVATE Qt${QT_VERSION_MAJOR}::Core
-                             Qt${QT_VERSION_MAJOR}::Sql
-                             Qt${QT_VERSION_MAJOR}::Concurrent
-                             Qt${QT_VERSION_MAJOR}::Widgets
+                             PRIVATE Qt${QT_VERSION_MAJOR}::Sql
+                             PRIVATE Qt${QT_VERSION_MAJOR}::Concurrent
+                             PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
                              QuaZip::QuaZip
                              efsw)
 

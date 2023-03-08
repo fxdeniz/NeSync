@@ -60,9 +60,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
-
         toolBar->addAction(ui->tab1Action_Import);
-        toolBar->addAction(ui->tab1Action_Export);
     }
 }
 

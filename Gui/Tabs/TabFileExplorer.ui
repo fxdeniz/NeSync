@@ -309,6 +309,14 @@
     </layout>
    </item>
   </layout>
+    <action name="contextActionTableFileExplorer_Export">
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="toolTip">
+    <string>Export selected item(s) as zip file</string>
+   </property>
+  </action>
   <action name="contextActionTableFileExplorer_Freeze">
    <property name="text">
     <string>Freeze</string>

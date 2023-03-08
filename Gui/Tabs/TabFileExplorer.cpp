@@ -47,9 +47,11 @@ void TabFileExplorer::buildContextMenuTableFileExplorer()
     contextMenuTableFileExplorer = new QMenu(ui->tableViewFileExplorer);
     QMenu *ptrMenu = contextMenuTableFileExplorer;
 
+    QAction *actionExport = ui->contextActionTableFileExplorer_Export;
     QAction *actionFreeze = ui->contextActionTableFileExplorer_Freeze;
     QAction *actionDelete = ui->contextActionTableFileExplorer_Delete;
 
+    ptrMenu->addAction(actionExport);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
 

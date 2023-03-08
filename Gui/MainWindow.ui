@@ -78,11 +78,6 @@
     <string>Import</string>
    </property>
   </action>
-  <action name="tab1Action_Export">
-   <property name="text">
-    <string>Export</string>
-   </property>
-  </action>
   <action name="menuAction_AboutApp">
    <property name="text">
     <string>About App</string>

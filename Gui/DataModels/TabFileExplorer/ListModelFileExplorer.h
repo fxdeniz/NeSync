@@ -28,7 +28,6 @@ public:
 private:
     QJsonObject fileJson;
     QStringList stringList;
-    QSet<QPersistentModelIndex> checkedItems;
 };
 
 #endif // LISTMODELFILEEXPLORER_H

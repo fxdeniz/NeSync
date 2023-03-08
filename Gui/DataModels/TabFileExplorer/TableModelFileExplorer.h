@@ -61,7 +61,6 @@ private:
 
 private:
     QList<TableItem> itemList;
-    QSet<QPersistentModelIndex> checkedItems;
 
 };
 

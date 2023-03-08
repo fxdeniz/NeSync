@@ -31,13 +31,6 @@ QVariant ListModelFileExplorer::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole)
         return stringList.at(index.row());
-    else if(role == Qt::ItemDataRole::CheckStateRole)
-    {
-        if(this->checkedItems.contains(index))
-            return Qt::CheckState::Checked;
-        else
-            return Qt::CheckState::Unchecked;
-    }
     else
         return QVariant();
 }
@@ -58,7 +51,7 @@ Qt::ItemFlags ListModelFileExplorer::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    return QAbstractItemModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
+    return QAbstractItemModel::flags(index) | Qt::ItemFlag::ItemIsEditable;
 }
 
 bool ListModelFileExplorer::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -70,16 +63,6 @@ bool ListModelFileExplorer::setData(const QModelIndex &index, const QVariant &va
         if(role == Qt::ItemDataRole::EditRole)
         {
             stringList.replace(index.row(), value.toString());
-
-            emit dataChanged(index, index);
-            result = true;
-        }
-        else if(role == Qt::ItemDataRole::CheckStateRole)
-        {
-            if(value == Qt::CheckState::Checked)
-                this->checkedItems.insert(index);
-            else
-                this->checkedItems.remove(index);
 
             emit dataChanged(index, index);
             result = true;
