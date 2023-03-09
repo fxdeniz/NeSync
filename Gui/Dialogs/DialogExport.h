@@ -15,13 +15,16 @@ public:
     explicit DialogExport(QWidget *parent = nullptr);
     ~DialogExport();
 
-    void show();
+    void show(QList<QString> itemList);
 
 private slots:
     void on_buttonSelectLocation_clicked();
 
+    void on_buttonExport_clicked();
+
 private:
     Ui::DialogExport *ui;
+    QList<QString> itemList;
 };
 
 #endif // DIALOGEXPORT_H
