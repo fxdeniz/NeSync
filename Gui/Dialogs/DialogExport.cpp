@@ -3,9 +3,13 @@
 #include "Utility/JsonDtoFormat.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+
 #include <QQueue>
 #include <QFileDialog>
 #include <QJsonObject>
+#include <QtConcurrent>
 #include <QJsonDocument>
 #include <QStandardPaths>
 
@@ -26,6 +30,7 @@ void DialogExport::show(QList<QString> itemList)
     this->itemList = itemList;
     ui->lineEdit->clear();
     ui->buttonExport->setDisabled(true);
+    ui->progressBar->setValue(0);
     QWidget::show();
 }
 
@@ -49,7 +54,8 @@ void DialogExport::on_buttonSelectLocation_clicked()
 
 void DialogExport::on_buttonExport_clicked()
 {
-    QMap<QString, QJsonObject> fileMap;
+    QJsonArray fileJsonArray;
+    qlonglong totalFileCount = 0;
     auto fsm = FileStorageManager::instance();
 
     for(const QString &currentSymbolPath : itemList)
@@ -58,7 +64,8 @@ void DialogExport::on_buttonExport_clicked()
 
         if(currentJson[JsonKeys::IsExist].toBool())
         {
-            fileMap.insert(currentSymbolPath, currentJson);
+            fileJsonArray.append(currentJson);
+            ++totalFileCount;
             continue;
         }
 
@@ -82,37 +89,45 @@ void DialogExport::on_buttonExport_clicked()
                 QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
                 for(const QJsonValue &currentChildFile : childFiles)
                 {
-                    QJsonObject childFile = currentChildFile.toObject();
-                    QString currentFileSymbolPath = childFile[JsonKeys::File::SymbolFilePath].toString();
-                    childFile = fsm->getFileJsonBySymbolPath(currentFileSymbolPath, true);
-                    fileMap.insert(currentFileSymbolPath, childFile);
+                    QJsonObject childFileJson = currentChildFile.toObject();
+                    QString currentFileSymbolPath = childFileJson[JsonKeys::File::SymbolFilePath].toString();
+                    childFileJson = fsm->getFileJsonBySymbolPath(currentFileSymbolPath, true);
+                    fileJsonArray.append(childFileJson);
+                    ++totalFileCount;
                 }
             }
         }
     }
 
-    QJsonDocument document;
-    QMapIterator<QString, QJsonObject> mapIterator(fileMap);
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(totalFileCount);
 
-    QString filePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    filePath.append(QDir::separator());
-    filePath = QDir::toNativeSeparators(filePath);
-    filePath += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-    filePath += ".json";
+    QuaZip archive(ui->lineEdit->text());
+    archive.open(QuaZip::Mode::mdCreate);
 
-    QFile file(filePath);
-    file.open(QFile::OpenModeFlag::WriteOnly);
-    QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Encoding::Utf8);
+    QuaZipFile importJsonFile(&archive);
+    importJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("import.json"));
 
-    while(mapIterator.hasNext())
+    QJsonDocument document(fileJsonArray);
+    importJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+
+    for(const QJsonValue &currentFileJson : qAsConst(fileJsonArray))
     {
-        mapIterator.next();
-        stream << "";
-        //stream << "file " << mapIterator.key() << " has: ";
-        document.setObject(mapIterator.value());
-        stream << document.toJson();
-        stream << "";
+        QJsonObject fileJson = currentFileJson.toObject();
+        QJsonArray versionJsonArray = fileJson[JsonKeys::File::VersionList].toArray();
+
+        for(const QJsonValue &currentFileVersion : qAsConst(versionJsonArray))
+        {
+            QJsonObject versionJson = currentFileVersion.toObject();
+            QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+            QString internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+
+            QuaZipNewInfo info(internalFileName, internalFilePath);
+            QuaZipFile fileInZip(&archive);
+            fileInZip.open(QFile::OpenModeFlag::WriteOnly, info);
+        }
+
+        ui->progressBar->setValue(ui->progressBar->value() + 1);
     }
 }
 
