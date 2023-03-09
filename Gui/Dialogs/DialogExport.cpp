@@ -18,6 +18,19 @@ DialogExport::DialogExport(QWidget *parent) :
     ui(new Ui::DialogExport)
 {
     ui->setupUi(this);
+
+    QObject::connect(this, &DialogExport::signalZipProgressUpdated,
+                     ui->progressBar, &QProgressBar::setValue);
+
+    QObject::connect(this, &DialogExport::signalZipCreationStarted, this, [=] (int minimum, int maximum) {
+        ui->progressBar->setMinimum(minimum);
+        ui->progressBar->setMaximum(maximum);
+    });
+
+    QObject::connect(this, &DialogExport::signalZippingFinished, this, [=]{
+        ui->buttonExport->setEnabled(true);
+        ui->buttonSelectLocation->setEnabled(true);
+    });
 }
 
 DialogExport::~DialogExport()
@@ -54,80 +67,94 @@ void DialogExport::on_buttonSelectLocation_clicked()
 
 void DialogExport::on_buttonExport_clicked()
 {
-    QJsonArray fileJsonArray;
-    qlonglong totalFileCount = 0;
-    auto fsm = FileStorageManager::instance();
+    ui->buttonExport->setDisabled(true);
+    ui->buttonSelectLocation->setDisabled(true);
 
-    for(const QString &currentSymbolPath : itemList)
-    {
-        QJsonObject currentJson = fsm->getFileJsonBySymbolPath(currentSymbolPath, true);
+    QFuture<void> future = QtConcurrent::run([=]{
+        QJsonArray fileJsonArray;
+        qlonglong totalFileCount = 0;
+        auto fsm = FileStorageManager::instance();
 
-        if(currentJson[JsonKeys::IsExist].toBool())
+        for(const QString &currentSymbolPath : itemList)
         {
-            fileJsonArray.append(currentJson);
-            ++totalFileCount;
-            continue;
-        }
+            QJsonObject currentJson = fsm->getFileJsonBySymbolPath(currentSymbolPath, true);
 
-        currentJson = fsm->getFolderJsonBySymbolPath(currentSymbolPath, true);
-
-        if(currentJson[JsonKeys::IsExist].toBool())
-        {
-            QQueue<QJsonObject> folders;
-            folders.enqueue(currentJson);
-
-            while(!folders.isEmpty())
+            if(currentJson[JsonKeys::IsExist].toBool())
             {
-                QJsonObject currentFolder = folders.dequeue();
-                QString currentFolderPath = currentFolder[JsonKeys::Folder::SymbolFolderPath].toString();
-                QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
-                for(const QJsonValue &currentChildFolder : childFolders)
-                    folders.enqueue(currentChildFolder.toObject());
+                fileJsonArray.append(currentJson);
+                totalFileCount += currentJson[JsonKeys::File::VersionList].toArray().size();
+                continue;
+            }
 
-                currentFolder = fsm->getFolderJsonBySymbolPath(currentFolderPath, true);
+            currentJson = fsm->getFolderJsonBySymbolPath(currentSymbolPath, true);
 
-                QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
-                for(const QJsonValue &currentChildFile : childFiles)
+            if(currentJson[JsonKeys::IsExist].toBool())
+            {
+                QQueue<QJsonObject> folders;
+                folders.enqueue(currentJson);
+
+                while(!folders.isEmpty())
                 {
-                    QJsonObject childFileJson = currentChildFile.toObject();
-                    QString currentFileSymbolPath = childFileJson[JsonKeys::File::SymbolFilePath].toString();
-                    childFileJson = fsm->getFileJsonBySymbolPath(currentFileSymbolPath, true);
-                    fileJsonArray.append(childFileJson);
-                    ++totalFileCount;
+                    QJsonObject currentFolder = folders.dequeue();
+                    QString currentFolderPath = currentFolder[JsonKeys::Folder::SymbolFolderPath].toString();
+                    QJsonArray childFolders = currentFolder[JsonKeys::Folder::ChildFolders].toArray();
+                    for(const QJsonValue &currentChildFolder : childFolders)
+                        folders.enqueue(currentChildFolder.toObject());
+
+                    currentFolder = fsm->getFolderJsonBySymbolPath(currentFolderPath, true);
+
+                    QJsonArray childFiles = currentFolder[JsonKeys::Folder::ChildFiles].toArray();
+                    for(const QJsonValue &currentChildFile : childFiles)
+                    {
+                        QJsonObject childFileJson = currentChildFile.toObject();
+                        QString currentFileSymbolPath = childFileJson[JsonKeys::File::SymbolFilePath].toString();
+                        childFileJson = fsm->getFileJsonBySymbolPath(currentFileSymbolPath, true);
+                        fileJsonArray.append(childFileJson);
+                        totalFileCount += childFileJson[JsonKeys::File::VersionList].toArray().size();
+                    }
                 }
             }
         }
-    }
 
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(totalFileCount);
+        emit signalZipCreationStarted(0, totalFileCount);
 
-    QuaZip archive(ui->lineEdit->text());
-    archive.open(QuaZip::Mode::mdCreate);
+        QuaZip archive(ui->lineEdit->text());
+        archive.open(QuaZip::Mode::mdCreate);
 
-    QuaZipFile importJsonFile(&archive);
-    importJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("import.json"));
+        QuaZipFile importJsonFile(&archive);
+        importJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("import.json"));
 
-    QJsonDocument document(fileJsonArray);
-    importJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+        QJsonDocument document(fileJsonArray);
+        importJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
 
-    for(const QJsonValue &currentFileJson : qAsConst(fileJsonArray))
-    {
-        QJsonObject fileJson = currentFileJson.toObject();
-        QJsonArray versionJsonArray = fileJson[JsonKeys::File::VersionList].toArray();
-
-        for(const QJsonValue &currentFileVersion : qAsConst(versionJsonArray))
+        int zipProgressValue = 0;
+        for(const QJsonValue &currentFileJson : qAsConst(fileJsonArray))
         {
-            QJsonObject versionJson = currentFileVersion.toObject();
-            QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
-            QString internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+            QJsonObject fileJson = currentFileJson.toObject();
+            QJsonArray versionJsonArray = fileJson[JsonKeys::File::VersionList].toArray();
 
-            QuaZipNewInfo info(internalFileName, internalFilePath);
-            QuaZipFile fileInZip(&archive);
-            fileInZip.open(QFile::OpenModeFlag::WriteOnly, info);
+            for(const QJsonValue &currentFileVersion : qAsConst(versionJsonArray))
+            {
+                QJsonObject versionJson = currentFileVersion.toObject();
+                QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                QString internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+
+                QFile rawFile(internalFilePath);
+                rawFile.open(QFile::OpenModeFlag::ReadOnly);
+
+                QuaZipNewInfo info(internalFileName, internalFilePath);
+                QuaZipFile fileInZip(&archive);
+                fileInZip.open(QFile::OpenModeFlag::WriteOnly, info);
+
+                while(!rawFile.atEnd())
+                    fileInZip.write(rawFile.read(104857600)); // Read up to 100mb in every iteration.
+
+                ++zipProgressValue;
+                emit signalZipProgressUpdated(zipProgressValue);
+            }
         }
 
-        ui->progressBar->setValue(ui->progressBar->value() + 1);
-    }
+        emit signalZippingFinished();
+    });
 }
 
