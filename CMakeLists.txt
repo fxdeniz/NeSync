@@ -53,6 +53,12 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogCreateCopy.cpp
         Gui/Dialogs/DialogCreateCopy.ui
     #
+
+    # DialogExport
+        Gui/Dialogs/DialogExport.h
+        Gui/Dialogs/DialogExport.cpp
+        Gui/Dialogs/DialogExport.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h

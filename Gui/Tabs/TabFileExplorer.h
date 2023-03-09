@@ -2,7 +2,8 @@
 #define TABFILEEXPLORER_H
 
 #include "Dialogs/DialogEditVersion.h"
-#include  "Dialogs/DialogCreateCopy.h"
+#include "Dialogs/DialogCreateCopy.h"
+#include "Dialogs/DialogExport.h"
 
 #include <QMenu>
 #include <QWidget>
@@ -66,6 +67,7 @@ private:
     Ui::TabFileExplorer *ui;
     DialogEditVersion *dialogEditVersion;
     DialogCreateCopy *dialogCreateCopy;
+    DialogExport *dialogExport;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
     QStringList navigationHistoryIndices;

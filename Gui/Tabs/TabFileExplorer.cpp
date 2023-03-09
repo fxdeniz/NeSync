@@ -22,6 +22,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 
     dialogEditVersion = new DialogEditVersion(this);
     dialogCreateCopy = new DialogCreateCopy(this);
+    dialogExport = new DialogExport(this);
 
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
@@ -534,6 +535,9 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Export_triggered()
         stream << document.toJson();
         stream << "";
     }
+
+    dialogExport->setModal(true);
+    dialogExport->show();
 }
 
 void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
