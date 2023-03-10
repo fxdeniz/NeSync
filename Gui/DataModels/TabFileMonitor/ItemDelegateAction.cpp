@@ -1,6 +1,6 @@
 #include "ItemDelegateAction.h"
 
-#include "TreeModelFsMonitor.h"
+#include "TreeModelFileMonitor.h"
 #include "TreeItem.h"
 
 #include <QQueue>
@@ -122,8 +122,8 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             result->clearFocus();
         });
 
-        auto treeModel = (TreeModelFsMonitor *) index.model();
-        QObject::connect(treeModel, &TreeModelFsMonitor::signalDisableItemDelegates,
+        auto treeModel = (TreeModelFileMonitor *) index.model();
+        QObject::connect(treeModel, &TreeModelFileMonitor::signalDisableItemDelegates,
                          result, [=]{
             result->setDisabled(true);
         });

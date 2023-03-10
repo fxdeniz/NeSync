@@ -3,6 +3,7 @@
 
 #include "Tabs/TabFileMonitor.h"
 #include "Tabs/TabFileExplorer.h"
+#include "Dialogs/DialogImport.h"
 #include "Dialogs/DialogAddNewFolder.h"
 #include "Dialogs/DialogDebugFileMonitor.h"
 #include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
@@ -27,6 +28,7 @@ public:
 private slots:
     void on_tabWidget_currentChanged(int index);
     void on_tab1Action_AddNewFolder_triggered();
+    void on_tab1Action_Import_triggered();
     void on_tab2Action_SaveAll_triggered();
     void on_menuAction_DebugFileMonitor_triggered();
     void on_menuAction_AboutApp_triggered();
@@ -47,6 +49,7 @@ private:
 private:
     Ui::MainWindow *ui;
     DialogAddNewFolder *dialogAddNewFolder;
+    DialogImport *dialogImport;
     DialogDebugFileMonitor *dialogDebugFileMonitor;
     FileMonitoringManager *fmm;
     QThread *fileMonitorThread;

@@ -59,6 +59,12 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogExport.cpp
         Gui/Dialogs/DialogExport.ui
     #
+
+    # DialogImport
+        Gui/Dialogs/DialogImport.h
+        Gui/Dialogs/DialogImport.cpp
+        Gui/Dialogs/DialogImport.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h
@@ -79,8 +85,8 @@ set(PROJECT_SOURCES
         #
         Gui/DataModels/TabFileMonitor/TreeItem.h
         Gui/DataModels/TabFileMonitor/TreeItem.cpp
-        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.h
-        Gui/DataModels/TabFileMonitor/TreeModelFsMonitor.cpp
+        Gui/DataModels/TabFileMonitor/TreeModelFileMonitor.h
+        Gui/DataModels/TabFileMonitor/TreeModelFileMonitor.cpp
         Gui/DataModels/TabFileMonitor/ItemDelegateAction.h
         Gui/DataModels/TabFileMonitor/ItemDelegateAction.cpp
         Gui/DataModels/TabFileMonitor/ItemDelegateDescription.h

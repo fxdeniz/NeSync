@@ -2,7 +2,7 @@
 
 #include "TreeItem.h"
 
-#include "TreeModelFsMonitor.h"
+#include "TreeModelFileMonitor.h"
 
 #include <QComboBox>
 #include <QStringListModel>
@@ -34,7 +34,7 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
         {
             result = new QComboBox(parent);
 
-            TreeModelFsMonitor *treeModel = (TreeModelFsMonitor *) index.model();
+            TreeModelFileMonitor *treeModel = (TreeModelFileMonitor *) index.model();
             Q_ASSERT(treeModel);
 
             result->setModel(treeModel->getDescriptionNumberListModel());
@@ -48,7 +48,7 @@ QWidget *ItemDelegateDescription::createEditor(QWidget *parent, const QStyleOpti
                 result->clearFocus();
             });
 
-            QObject::connect(treeModel, &TreeModelFsMonitor::signalDisableItemDelegates,
+            QObject::connect(treeModel, &TreeModelFileMonitor::signalDisableItemDelegates,
                              result, [=]{
                     result->setDisabled(true);
                     if(result->currentText().isEmpty())
@@ -109,7 +109,7 @@ void ItemDelegateDescription::setModelData(QWidget *editor, QAbstractItemModel *
     QString currentText = comboBox->currentText();
     if(!currentText.isEmpty())
     {
-        const TreeModelFsMonitor *treeModel = qobject_cast<const TreeModelFsMonitor *>(index.model());
+        const TreeModelFileMonitor *treeModel = qobject_cast<const TreeModelFileMonitor *>(index.model());
 
         int number = currentText.toInt();
         item->setDescription(treeModel->getDescription(number));

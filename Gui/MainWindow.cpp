@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
+    dialogImport = new DialogImport(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
@@ -152,6 +153,15 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
     dialogAddNewFolder->setWindowFlags(flags);
     dialogAddNewFolder->setModal(true);
     dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath(), fmm);
+}
+
+void MainWindow::on_tab1Action_Import_triggered()
+{
+    Qt::WindowFlags flags = dialogImport->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    dialogImport->setWindowFlags(flags);
+    dialogImport->setModal(true);
+    dialogImport->show();
 }
 
 void MainWindow::on_tab2Action_SaveAll_triggered()
