@@ -10,8 +10,8 @@ class TaskSaveChanges : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskSaveChanges(const QMap<QString, TreeItem *> folderItemMap,
-                             const QMap<QString, TreeItem *> fileItemMap,
+    explicit TaskSaveChanges(const QMap<QString, TreeModelFileMonitor::TreeItem *> folderItemMap,
+                             const QMap<QString, TreeModelFileMonitor::TreeItem *> fileItemMap,
                              QObject *parent = nullptr);
     ~TaskSaveChanges();
 
@@ -29,8 +29,8 @@ private:
     void saveFolderChanges();
     void saveFileChanges();
 
-    QMapIterator<QString, TreeItem *> folderItemIterator;
-    QMapIterator<QString, TreeItem *> fileItemIterator;
+    QMapIterator<QString, TreeModelFileMonitor::TreeItem *> folderItemIterator;
+    QMapIterator<QString, TreeModelFileMonitor::TreeItem *> fileItemIterator;
     int totalItemCount;
     int currentItemNumber;
 };

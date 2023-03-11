@@ -8,7 +8,12 @@
 #include <QStringListModel>
 #include <QAbstractItemModel>
 
-class TreeModelFileMonitor : public QAbstractItemModel
+namespace TreeModelFileMonitor
+{
+    class Model;
+}
+
+class TreeModelFileMonitor::Model : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -18,8 +23,8 @@ public:
     static const inline int ColumnIndexAction = 2;
     static const inline int ColumnIndexDescription = 3;
 
-    explicit TreeModelFileMonitor(QObject *parent = nullptr);
-    ~TreeModelFileMonitor();
+    explicit Model(QObject *parent = nullptr);
+    ~Model();
 
     void disableComboBoxes();
 

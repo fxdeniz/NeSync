@@ -1,5 +1,7 @@
 #include "TreeItem.h"
 
+using namespace TreeModelFileMonitor;
+
 TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
 {
     setType(ItemType::Undefined);

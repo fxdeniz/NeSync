@@ -6,6 +6,8 @@
 #include <QQueue>
 #include <QComboBox>
 
+using namespace TreeModelFileMonitor;
+
 const QString ItemDelegateAction::ITEM_TEXT_SAVE = tr("Save");
 const QString ItemDelegateAction::ITEM_TEXT_RESTORE = tr("Restore");
 const QString ItemDelegateAction::ITEM_TEXT_FREEZE = tr("Freeze");
@@ -122,8 +124,8 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             result->clearFocus();
         });
 
-        auto treeModel = (TreeModelFileMonitor *) index.model();
-        QObject::connect(treeModel, &TreeModelFileMonitor::signalDisableItemDelegates,
+        auto treeModel = (Model *) index.model();
+        QObject::connect(treeModel, &Model::signalDisableItemDelegates,
                          result, [=]{
             result->setDisabled(true);
         });

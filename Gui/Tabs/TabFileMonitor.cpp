@@ -11,8 +11,8 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui->setupUi(this);
     ui->progressBar->hide();
 
-    itemDelegateAction = new ItemDelegateAction(this);
-    itemDelegateDescription = new ItemDelegateDescription(this);
+    itemDelegateAction = new TreeModelFileMonitor::ItemDelegateAction(this);
+    itemDelegateDescription = new TreeModelFileMonitor::ItemDelegateDescription(this);
 
     timer.setInterval(2000);
     timer.stop();
@@ -32,7 +32,7 @@ void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
     ui->buttonAddDescription->setDisabled(true);
     ui->buttonDeleteDescription->setDisabled(true);
 
-    auto treeModel = (TreeModelFileMonitor *)(ui->treeView->model());
+    auto treeModel = (TreeModelFileMonitor::Model *)(ui->treeView->model());
     Q_ASSERT(treeModel);
 
     TaskSaveChanges *task = new TaskSaveChanges(treeModel->getFolderItemMap(),
@@ -93,7 +93,7 @@ void TabFileMonitor::displayFileMonitorContent()
     ui->buttonAddDescription->setEnabled(true);
     ui->buttonDeleteDescription->setEnabled(true);
 
-    TreeModelFileMonitor *treeModel = new TreeModelFileMonitor();
+    TreeModelFileMonitor::Model *treeModel = new TreeModelFileMonitor::Model();
     QAbstractItemModel *oldModel = ui->treeView->model();
 
     if(oldModel != nullptr)
@@ -104,12 +104,12 @@ void TabFileMonitor::displayFileMonitorContent()
 
     QHeaderView *header = ui->treeView->header();
     header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    header->setSectionResizeMode(TreeModelFileMonitor::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
+    header->setSectionResizeMode(TreeModelFileMonitor::Model::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
     header->setMinimumSectionSize(130);
-    ui->treeView->setColumnWidth(TreeModelFileMonitor::ColumnIndexUserPath, 500);
+    ui->treeView->setColumnWidth(TreeModelFileMonitor::Model::ColumnIndexUserPath, 500);
 
-    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::ColumnIndexAction, itemDelegateAction);
-    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::ColumnIndexDescription, itemDelegateDescription);
+    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::Model::ColumnIndexAction, itemDelegateAction);
+    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::Model::ColumnIndexDescription, itemDelegateDescription);
 
     ui->treeView->expandAll();
 
@@ -119,8 +119,8 @@ void TabFileMonitor::displayFileMonitorContent()
 
     for(const QModelIndex &current : selectedIndices)
     {
-        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::ColumnIndexAction));
-        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::ColumnIndexDescription));
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::Model::ColumnIndexAction));
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::Model::ColumnIndexDescription));
     }
 
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
@@ -134,7 +134,7 @@ void TabFileMonitor::on_buttonAddDescription_clicked()
 
     textEdit->clear();
 
-    auto model = (TreeModelFileMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     model->appendDescription();
 
     int number = model->getMaxDescriptionNumber();
@@ -154,7 +154,7 @@ void TabFileMonitor::on_buttonDeleteDescription_clicked()
 
     textEdit->clear();
 
-    auto model = (TreeModelFileMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = comboBox->currentText().toInt();
     int previousIndex = comboBox->currentIndex();
     model->deleteDescription(number);
@@ -177,7 +177,7 @@ void TabFileMonitor::on_buttonDeleteDescription_clicked()
 
 void TabFileMonitor::on_textEditDescription_textChanged()
 {
-    auto model = (TreeModelFileMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     model->updateDescription(number, ui->textEditDescription->toPlainText());
 }
@@ -190,7 +190,7 @@ void TabFileMonitor::on_comboBoxDescriptionNumber_activated(int index)
     textEdit->blockSignals(true); // Disable updating descriptionMap in TreeModel
 
     textEdit->clear();
-    auto model = (TreeModelFileMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     textEdit->setText(model->getDescription(number));
 

@@ -6,8 +6,9 @@
 #include <QStack>
 #include <QFileIconProvider>
 
-TreeModelFileMonitor::TreeModelFileMonitor(QObject *parent)
-    : QAbstractItemModel(parent)
+using namespace TreeModelFileMonitor;
+
+Model::Model(QObject *parent) : QAbstractItemModel(parent)
 {
     treeRoot = new TreeItem();
     fsEventDb = new FileSystemEventDb(DatabaseRegistry::fileSystemEventDatabase());
@@ -15,18 +16,18 @@ TreeModelFileMonitor::TreeModelFileMonitor(QObject *parent)
     setupModelData();
 }
 
-TreeModelFileMonitor::~TreeModelFileMonitor()
+Model::~Model()
 {
     delete treeRoot;
     delete fsEventDb;
 }
 
-void TreeModelFileMonitor::disableComboBoxes()
+void Model::disableComboBoxes()
 {
     emit signalDisableItemDelegates();
 }
 
-void TreeModelFileMonitor::appendDescription()
+void Model::appendDescription()
 {
     if(descriptionMap.isEmpty())
     {
@@ -44,7 +45,7 @@ void TreeModelFileMonitor::appendDescription()
     }
 }
 
-void TreeModelFileMonitor::updateDescription(int number, const QString &data)
+void Model::updateDescription(int number, const QString &data)
 {
     bool isContains = descriptionMap.contains(number);
 
@@ -52,7 +53,7 @@ void TreeModelFileMonitor::updateDescription(int number, const QString &data)
         descriptionMap.insert(number, data);
 }
 
-void TreeModelFileMonitor::deleteDescription(int number)
+void Model::deleteDescription(int number)
 {
     if(!descriptionMap.isEmpty())
     {
@@ -63,12 +64,12 @@ void TreeModelFileMonitor::deleteDescription(int number)
     }
 }
 
-bool TreeModelFileMonitor::isDescriptionExist(int number) const
+bool Model::isDescriptionExist(int number) const
 {
     return descriptionMap.contains(number);
 }
 
-QString TreeModelFileMonitor::getDescription(int number) const
+QString Model::getDescription(int number) const
 {
     QString result;
 
@@ -80,7 +81,7 @@ QString TreeModelFileMonitor::getDescription(int number) const
     return result;
 }
 
-int TreeModelFileMonitor::getMaxDescriptionNumber() const
+int Model::getMaxDescriptionNumber() const
 {
     int result = -1;
 
@@ -90,34 +91,34 @@ int TreeModelFileMonitor::getMaxDescriptionNumber() const
     return result;
 }
 
-QStringListModel *TreeModelFileMonitor::getDescriptionNumberListModel() const
+QStringListModel *Model::getDescriptionNumberListModel() const
 {
     return descriptionNumberListModel;
 }
 
-QMap<QString, TreeItem *> TreeModelFileMonitor::getFileItemMap() const
+QMap<QString, TreeItem *> Model::getFileItemMap() const
 {
     return fileItemMap;
 }
 
-int TreeModelFileMonitor::getTotalItemCount() const
+int Model::getTotalItemCount() const
 {
     return folderItemMap.size() + fileItemMap.size();
 }
 
-QMap<QString, TreeItem *> TreeModelFileMonitor::getFolderItemMap() const
+QMap<QString, TreeItem *> Model::getFolderItemMap() const
 {
     return folderItemMap;
 }
 
-int TreeModelFileMonitor::columnCount(const QModelIndex &parent) const
+int Model::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
     return treeRoot->columnCount();
 }
 
-QVariant TreeModelFileMonitor::data(const QModelIndex &index, int role) const
+QVariant Model::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -167,7 +168,7 @@ QVariant TreeModelFileMonitor::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags TreeModelFileMonitor::flags(const QModelIndex &index) const
+Qt::ItemFlags Model::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -175,7 +176,7 @@ Qt::ItemFlags TreeModelFileMonitor::flags(const QModelIndex &index) const
     return QAbstractItemModel::flags(index);
 }
 
-QVariant TreeModelFileMonitor::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -200,7 +201,7 @@ QVariant TreeModelFileMonitor::headerData(int section, Qt::Orientation orientati
     return QVariant();
 }
 
-QModelIndex TreeModelFileMonitor::index(int row, int column, const QModelIndex &parent) const
+QModelIndex Model::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -218,7 +219,7 @@ QModelIndex TreeModelFileMonitor::index(int row, int column, const QModelIndex &
     return QModelIndex();
 }
 
-QModelIndex TreeModelFileMonitor::parent(const QModelIndex &index) const
+QModelIndex Model::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
@@ -232,7 +233,7 @@ QModelIndex TreeModelFileMonitor::parent(const QModelIndex &index) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int TreeModelFileMonitor::rowCount(const QModelIndex &parent) const
+int Model::rowCount(const QModelIndex &parent) const
 {
     TreeItem *parentItem;
     if (parent.column() > 0)
@@ -246,7 +247,7 @@ int TreeModelFileMonitor::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
-void TreeModelFileMonitor::setupModelData()
+void Model::setupModelData()
 {
     QStringList rootFolders = fsEventDb->getActiveRootFolderList();
 
@@ -288,7 +289,7 @@ void TreeModelFileMonitor::setupModelData()
     }
 }
 
-TreeItem *TreeModelFileMonitor::createTreeItem(const QString &pathToFileOrFolder, TreeItem::ItemType type, TreeItem *root) const
+TreeItem *Model::createTreeItem(const QString &pathToFileOrFolder, TreeItem::ItemType type, TreeItem *root) const
 {
     TreeItem *result = new TreeItem(root);
     result->setUserPath(pathToFileOrFolder);
@@ -306,7 +307,7 @@ TreeItem *TreeModelFileMonitor::createTreeItem(const QString &pathToFileOrFolder
     return result;
 }
 
-QString TreeModelFileMonitor::itemStatusToString(FileSystemEventDb::ItemStatus status) const
+QString Model::itemStatusToString(FileSystemEventDb::ItemStatus status) const
 {
     QString result;
 

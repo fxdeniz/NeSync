@@ -4,7 +4,12 @@
 
 #include <QStyledItemDelegate>
 
-class ItemDelegateAction : public QStyledItemDelegate
+namespace TreeModelFileMonitor
+{
+    class ItemDelegateAction;
+}
+
+class TreeModelFileMonitor::ItemDelegateAction : public QStyledItemDelegate
 {
     Q_OBJECT
 public:

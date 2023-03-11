@@ -6,7 +6,12 @@
 #include <QList>
 #include <QVariant>
 
-class TreeItem
+namespace TreeModelFileMonitor
+{
+    class TreeItem;
+}
+
+class TreeModelFileMonitor::TreeItem
 {
 public:
 

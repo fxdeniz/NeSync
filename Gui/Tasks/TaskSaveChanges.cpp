@@ -7,8 +7,8 @@
 #include <QDir>
 #include <QFile>
 
-TaskSaveChanges::TaskSaveChanges(const QMap<QString, TreeItem *> folderItemMap,
-                                 const QMap<QString, TreeItem *> fileItemMap,
+TaskSaveChanges::TaskSaveChanges(const QMap<QString, TreeModelFileMonitor::TreeItem *> folderItemMap,
+                                 const QMap<QString, TreeModelFileMonitor::TreeItem *> fileItemMap,
                                  QObject *parent)
     : QThread{parent}, folderItemIterator(folderItemMap), fileItemIterator(fileItemMap)
 {
@@ -39,27 +39,27 @@ void TaskSaveChanges::saveFolderChanges()
         ++currentItemNumber;
         emit itemBeingProcessed(currentItemNumber);
 
-        TreeItem *item = folderItemIterator.value();
+        TreeModelFileMonitor::TreeItem *item = folderItemIterator.value();
         QJsonObject folderJson = fsm->getFolderJsonByUserPath(item->getUserPath());
         FileSystemEventDb::ItemStatus status = item->getStatus();
-        TreeItem::Action action = item->getAction();
+        TreeModelFileMonitor::TreeItem::Action action = item->getAction();
         QDir dir(item->getUserPath());
 
         if(folderJson[JsonKeys::IsExist].toBool()) // If folder info exist in db
         {
-            if(action == TreeItem::Action::Restore) // Restore deleted folders
+            if(action == TreeModelFileMonitor::TreeItem::Action::Restore) // Restore deleted folders
             {
                 bool isCreated = dir.mkpath(item->getUserPath());
                 if(isCreated)
                     emit folderRestored(item->getUserPath());
             }
-            else if(action == TreeItem::Action::Delete) // Remove deleted folders from db
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Delete) // Remove deleted folders from db
             {
                 bool isRemoved = fsm->deleteFolder(folderJson[JsonKeys::Folder::SymbolFolderPath].toString());
                 if(isRemoved)
                     fsEventDb.deleteFolder(item->getUserPath());
             }
-            else if(action ==  TreeItem::Action::Freeze) // Freeze deleted folders
+            else if(action ==  TreeModelFileMonitor::TreeItem::Action::Freeze) // Freeze deleted folders
             {
                 folderJson[JsonKeys::Folder::IsFrozen] = true;
                 bool isUpdated = fsm->updateFolderEntity(folderJson, true);
@@ -72,7 +72,7 @@ void TaskSaveChanges::saveFolderChanges()
             QJsonObject parentFolderJson = fsm->getFolderJsonByUserPath(item->getParentItem()->getUserPath());
             QString symbolFolderPath = parentFolderJson[JsonKeys::Folder::SymbolFolderPath].toString();
 
-            if(action == TreeItem::Action::Save)
+            if(action == TreeModelFileMonitor::TreeItem::Action::Save)
             {
                 if(status == FileSystemEventDb::ItemStatus::NewAdded) // Save newly added folders
                 {
@@ -99,7 +99,7 @@ void TaskSaveChanges::saveFolderChanges()
                     }
                 }
             }
-            else if(action == TreeItem::Action::Restore) // Restore renamed folders
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Restore) // Restore renamed folders
             {
                 QString oldFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
                 oldFolderPath += fsEventDb.getOldNameOfFolder(item->getUserPath());
@@ -129,34 +129,34 @@ void TaskSaveChanges::saveFileChanges()
         ++currentItemNumber;
         emit itemBeingProcessed(currentItemNumber);
 
-        TreeItem *item = fileItemIterator.value();
+        TreeModelFileMonitor::TreeItem *item = fileItemIterator.value();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(fileItemIterator.key());
         QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
         FileSystemEventDb::ItemStatus status = item->getStatus();
-        TreeItem::Action action = item->getAction();
+        TreeModelFileMonitor::TreeItem::Action action = item->getAction();
 
         if(fileJson[JsonKeys::IsExist].toBool()) // If file info exist in db
         {
-            if(action == TreeItem::Action::Delete)
+            if(action == TreeModelFileMonitor::TreeItem::Action::Delete)
             {
                 bool isDeleted = fsm->deleteFile(symbolFilePath);
                 if(isDeleted)
                     fsEventDb.deleteFile(item->getUserPath());
             }
-            else if(action == TreeItem::Action::Save) // Saves FileSystemEventDb::ItemStatus::Updated files
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Save) // Saves FileSystemEventDb::ItemStatus::Updated files
             {
                 bool isAppended = fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
                 if(isAppended)
                     fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
             }
-            else if(action == TreeItem::Action::Freeze) // Freezes FileSystemEventDb::ItemStatus::Deleted files
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Freeze) // Freezes FileSystemEventDb::ItemStatus::Deleted files
             {
                 fileJson[JsonKeys::File::IsFrozen] = true;
                 bool isUpdated = fsm->updateFileEntity(fileJson);
                 if(isUpdated)
                     fsEventDb.deleteFile(item->getUserPath());
             }
-            else if(action == TreeItem::Action::Restore)
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Restore)
             {
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
@@ -176,7 +176,7 @@ void TaskSaveChanges::saveFileChanges()
             fileJson = fsm->getFileJsonByUserPath(userPathToOldFile);
             symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
 
-            if(action == TreeItem::Action::Restore) // Restores FileSystemEventDb::ItemStatus::Renamed and UpdatedAndRenamed files
+            if(action == TreeModelFileMonitor::TreeItem::Action::Restore) // Restores FileSystemEventDb::ItemStatus::Renamed and UpdatedAndRenamed files
             {
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
@@ -189,7 +189,7 @@ void TaskSaveChanges::saveFileChanges()
                 if(isCopied)
                     fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
             }
-            else if(action == TreeItem::Action::Save)
+            else if(action == TreeModelFileMonitor::TreeItem::Action::Save)
             {
                 if(status == FileSystemEventDb::ItemStatus::NewAdded)
                 {

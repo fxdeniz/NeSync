@@ -3,7 +3,12 @@
 
 #include <QStyledItemDelegate>
 
-class ItemDelegateDescription : public QStyledItemDelegate
+namespace TreeModelFileMonitor
+{
+    class ItemDelegateDescription;
+}
+
+class TreeModelFileMonitor::ItemDelegateDescription : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
