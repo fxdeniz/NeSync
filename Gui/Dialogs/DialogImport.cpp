@@ -1,5 +1,6 @@
 #include "DialogImport.h"
 #include "ui_DialogImport.h"
+#include "DataModels/DialogImport/TreeModelDialogImport.h"
 
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
@@ -12,6 +13,7 @@ DialogImport::DialogImport(QWidget *parent) :
     ui(new Ui::DialogImport)
 {
     ui->setupUi(this);
+    itemDelegateAction = new TreeModelDialogImport::ItemDelegateAction(this);
 }
 
 DialogImport::~DialogImport()
@@ -80,6 +82,27 @@ void DialogImport::on_buttonSelectFile_clicked()
 
     showStatusSuccess(statusTextFileReadyToImport(), ui->labelStatus);
     ui->buttonImport->setEnabled(true);
+
+    if(ui->treeView->model() != nullptr)
+        delete ui->treeView->model();
+
+    ui->treeView->setModel(new TreeModelDialogImport::Model(document.array(), ui->treeView));
+
+    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    ui->treeView->header()->setSectionResizeMode(TreeModelDialogImport::Model::ColumnIndexSymbolPath, QHeaderView::ResizeMode::Interactive);
+    ui->treeView->header()->setMinimumSectionSize(200);
+    ui->treeView->setColumnWidth(TreeModelDialogImport::Model::ColumnIndexSymbolPath, 500);
+
+    ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ContiguousSelection);
+    ui->treeView->setItemDelegateForColumn(TreeModelDialogImport::Model::ColumnIndexAction, itemDelegateAction);
+    ui->treeView->expandAll();
+    ui->treeView->selectAll();
+
+    QItemSelectionModel *selectionModel = ui->treeView->selectionModel();
+    for(const QModelIndex &index : selectionModel->selectedRows(TreeModelDialogImport::Model::ColumnIndexAction))
+        ui->treeView->openPersistentEditor(index);
+
+    ui->treeView->clearSelection();
 }
 
 QString DialogImport::statusTextWaitingForFile()

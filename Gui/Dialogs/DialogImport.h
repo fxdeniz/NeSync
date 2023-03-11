@@ -2,6 +2,7 @@
 #define DIALOGIMPORT_H
 
 #include "BaseDialog.h"
+#include "DataModels/DialogImport/ItemDelegateAction.h"
 
 #include <QDialog>
 
@@ -30,6 +31,7 @@ private:
     static QString statusTextFileReadyToImport();
 
     Ui::DialogImport *ui;
+    TreeModelDialogImport::ItemDelegateAction *itemDelegateAction;
 };
 
 #endif // DIALOGIMPORT_H

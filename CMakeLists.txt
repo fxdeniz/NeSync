@@ -34,12 +34,12 @@ set(PROJECT_SOURCES
     #
 
     # DialogAddNewFolder
-        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.h
-        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.cpp
-        #
         Gui/Dialogs/DialogAddNewFolder.h
         Gui/Dialogs/DialogAddNewFolder.cpp
         Gui/Dialogs/DialogAddNewFolder.ui
+        #
+        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.h
+        Gui/DataModels/DialogAddNewFolder/CustomFileSystemModel.cpp
     #
 
     # DialogEditVersion
@@ -64,6 +64,15 @@ set(PROJECT_SOURCES
         Gui/Dialogs/DialogImport.h
         Gui/Dialogs/DialogImport.cpp
         Gui/Dialogs/DialogImport.ui
+        #
+        Gui/DataModels/DialogImport/TreeItem.h
+        Gui/DataModels/DialogImport/TreeItem.cpp
+        #
+        Gui/DataModels/DialogImport/TreeModelDialogImport.h
+        Gui/DataModels/DialogImport/TreeModelDialogImport.cpp
+        #
+        Gui/DataModels/DialogImport/ItemDelegateAction.h
+        Gui/DataModels/DialogImport/ItemDelegateAction.cpp
     #
 	
     # TabFileExplorer

@@ -25,6 +25,12 @@
          </property>
          <item>
           <widget class="QPushButton" name="buttonBack">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
            <property name="maximumSize">
             <size>
              <width>50</width>
@@ -41,7 +47,7 @@
            <property name="minimumSize">
             <size>
              <width>50</width>
-             <height>0</height>
+             <height>30</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -59,6 +65,12 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEditWorkingDir">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="font">
           <font>
            <bold>true</bold>
@@ -309,7 +321,7 @@
     </layout>
    </item>
   </layout>
-    <action name="contextActionTableFileExplorer_Export">
+  <action name="contextActionTableFileExplorer_Export">
    <property name="text">
     <string>Export</string>
    </property>

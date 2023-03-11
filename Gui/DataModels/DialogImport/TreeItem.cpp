@@ -1,13 +1,15 @@
 #include "TreeItem.h"
 
-using namespace TreeModelFileMonitor;
+using namespace TreeModelDialogImport;
 
-TreeItem::TreeItem(TreeItem *parent)
+TreeItem::TreeItem(TreeItem *parentItem)
 {
-    setParentItem(parent);
+    setParentItem(parentItem);
+    setName("");
+    setSymbolFolderPath("");
     setType(ItemType::Undefined);
-    setAction(TreeItem::Action::NotSelected);
-    setDescription("");
+    setAction(Action::NotSelected);
+    setStatus(Status::NotSet);
 }
 
 TreeItem::~TreeItem()
@@ -25,25 +27,24 @@ void TreeItem::setParentItem(TreeItem *newParentItem)
     parentItem = newParentItem;
 }
 
-void TreeItem::setUserPath(const QString &newUserPath)
+QString TreeItem::getSymbolFolderPath() const
 {
-    userPath = newUserPath;
+    return symbolFolderPath;
 }
 
-
-QString TreeItem::getUserPath() const
+void TreeItem::setSymbolFolderPath(const QString &newSymbolFolderPath)
 {
-    return userPath;
+    symbolFolderPath = newSymbolFolderPath;
 }
 
-FileSystemEventDb::ItemStatus TreeItem::getStatus() const
+QString TreeItem::getName() const
 {
-    return status;
+    return name;
 }
 
-void TreeItem::setStatus(FileSystemEventDb::ItemStatus newStatus)
+void TreeItem::setName(const QString &newName)
 {
-    status = newStatus;
+    name = newName;
 }
 
 TreeItem::ItemType TreeItem::getType() const
@@ -66,14 +67,14 @@ void TreeItem::setAction(Action newAction)
     action = newAction;
 }
 
-QString TreeItem::getDescription() const
+TreeItem::Status TreeItem::getStatus() const
 {
-    return description;
+    return status;
 }
 
-void TreeItem::setDescription(const QString &newDescription)
+void TreeItem::setStatus(Status newStatus)
 {
-    description = newDescription;
+    status = newStatus;
 }
 
 void TreeItem::appendChild(TreeItem *item)
