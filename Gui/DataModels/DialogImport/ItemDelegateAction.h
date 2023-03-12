@@ -6,6 +6,8 @@ namespace TreeModelDialogImport
     class ItemDelegateAction;
 }
 
+#include "TreeItem.h"
+
 #include <QStyledItemDelegate>
 
 class TreeModelDialogImport::ItemDelegateAction : public QStyledItemDelegate
@@ -16,8 +18,10 @@ public:
     ~ItemDelegateAction();
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    void setEditorData(QWidget *editor, const QModelIndex &index) const override;
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+
+signals:
+    void refreshChildComboBoxes(TreeItem *parent) const;
 
 private:
     static const QString ITEM_TEXT_IMPORT;

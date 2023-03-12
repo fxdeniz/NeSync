@@ -35,7 +35,7 @@ public:
         NotSelected = 0,
         Import = 1,
         Overwrite = 2,
-        FollowChildren = 3,
+        ChooseEachChildren = 3,
         DoNotImport = 4
     };
 

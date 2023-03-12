@@ -46,7 +46,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
             case ColumnIndexSymbolPath:
                 return tr("Symbol Path");
             case ColumnIndexStatus:
-                return tr("Folder Status");
+                return tr("Status");
             case ColumnIndexAction:
                 return tr("Action");
             default:
@@ -157,6 +157,15 @@ QVariant Model::data(const QModelIndex &index, int role) const
             }
         }
     }
+    else if (role == Qt::ItemDataRole::BackgroundRole && index.column() == ColumnIndexSymbolPath)
+    {
+        if(item->getStatus() == TreeItem::Status::NewFile)
+            return QColor::fromString("#b8e994");
+        else if(item->getStatus() == TreeItem::Status::NewFolder)
+            return QColor::fromString("#78e08f");
+    }
+    else if(role == Qt::ItemDataRole::TextAlignmentRole && index.column() == ColumnIndexStatus)
+        return Qt::AlignmentFlag::AlignCenter;
 
     return QVariant();
 }

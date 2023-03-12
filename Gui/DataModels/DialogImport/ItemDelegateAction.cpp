@@ -1,5 +1,5 @@
 #include "ItemDelegateAction.h"
-#include "TreeItem.h"
+
 
 #include <QComboBox>
 
@@ -27,17 +27,9 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
 
     if(item->getType() == TreeItem::ItemType::Folder)
     {
-        if(item->getStatus() == TreeItem::Status::NewFolder)
-        {
-            item->setAction(TreeItem::Action::Import);
-            result->addItem(ITEM_TEXT_IMPORT);
-        }
-        else if(item->getStatus() == TreeItem::Status::ExistingFolder)
-        {
-            item->setAction(TreeItem::Action::FollowChildren);
-            result->addItem(ITEM_TEXT_CHOOSE_EACH_CHILDREN);
-        }
+        item->setAction(TreeItem::Action::ChooseEachChildren);
 
+        result->addItem(ITEM_TEXT_CHOOSE_EACH_CHILDREN);
         result->addItem(ITEM_TEXT_DO_NOT_IMPORT);
     }
     else if(item->getType() == TreeItem::ItemType::File)
@@ -69,14 +61,36 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             Q_UNUSED(item);
             result->clearFocus();
         });
+
+        QObject::connect(this, &ItemDelegateAction::refreshChildComboBoxes, this, [=](TreeItem *parent){
+            if(item->getParentItem() != parent)
+                return;
+
+            QString currentText = "";
+
+            if(item->getParentItem()->getAction() == TreeItem::Action::DoNotImport)
+            {
+                currentText = ITEM_TEXT_DO_NOT_IMPORT;
+                result->setDisabled(true);
+            }
+            else if(item->getParentItem()->getAction() == TreeItem::Action::ChooseEachChildren)
+            {
+                if(item->getParentItem()->getStatus() == TreeItem::Status::ExistingFolder)
+                    currentText = ITEM_TEXT_OVERWRITE;
+                else if(item->getParentItem()->getStatus() == TreeItem::Status::NewFolder)
+                    currentText = ITEM_TEXT_IMPORT;
+
+                result->setEnabled(true);
+            }
+
+            const int cbIndex = result->findText(currentText);
+            // if it is valid, adjust the combobox
+            if (cbIndex >= 0)
+                result->setCurrentIndex(cbIndex);
+        });
     }
 
     return result;
-}
-
-void ItemDelegateAction::setEditorData(QWidget *editor, const QModelIndex &index) const
-{
-
 }
 
 void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
@@ -87,4 +101,30 @@ void ItemDelegateAction::setModelData(QWidget *editor, QAbstractItemModel *model
     TreeItem *item = static_cast<TreeItem *>(index.internalPointer());
     TreeItem::Action action;
     QString currentText = comboBox->currentText();
+
+    if(currentText == ITEM_TEXT_IMPORT)
+        item->setAction(TreeItem::Action::Import);
+
+    else if(currentText == ITEM_TEXT_OVERWRITE)
+        item->setAction(TreeItem::Action::Overwrite);
+
+    else if(currentText == ITEM_TEXT_CHOOSE_EACH_CHILDREN)
+        item->setAction(TreeItem::Action::ChooseEachChildren);
+
+    else if(currentText == ITEM_TEXT_DO_NOT_IMPORT)
+        item->setAction(TreeItem::Action::DoNotImport);
+
+    if(item->getType() == TreeItem::ItemType::Folder)
+    {
+        if(currentText == ITEM_TEXT_DO_NOT_IMPORT)
+        {
+            for(int index = 0; index < item->childCount(); index ++)
+            {
+                TreeItem *child = item->child(index);
+                child->setAction(TreeItem::DoNotImport);
+            }
+        }
+
+        emit refreshChildComboBoxes(item);
+    }
 }

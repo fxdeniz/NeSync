@@ -86,7 +86,8 @@ void DialogImport::on_buttonSelectFile_clicked()
     if(ui->treeView->model() != nullptr)
         delete ui->treeView->model();
 
-    ui->treeView->setModel(new TreeModelDialogImport::Model(document.array(), ui->treeView));
+    auto treeModel = new TreeModelDialogImport::Model(document.array(), ui->treeView);
+    ui->treeView->setModel(treeModel);
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(TreeModelDialogImport::Model::ColumnIndexSymbolPath, QHeaderView::ResizeMode::Interactive);
