@@ -82,8 +82,9 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             }
         });
 
+        // This lambda disables or enables children when do not import selected/de-selected in parent folder
         QObject::connect(this, &ItemDelegateAction::refreshChildComboBoxes, this, [=](TreeItem *parent){
-            if(item->getParentItem() != parent)
+            if(item->getParentItem() != parent) // Only run for children of the parent
                 return;
 
             QString currentText = "";

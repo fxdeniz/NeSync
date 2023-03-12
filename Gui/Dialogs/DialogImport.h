@@ -20,6 +20,9 @@ public:
 
     void show();
 
+signals:
+    void signalFileImportStarted(const QString &userFilePath);
+
 private slots:
     void on_buttonSelectFile_clicked();
     void on_buttonImport_clicked();

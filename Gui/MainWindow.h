@@ -43,7 +43,8 @@ private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
-    void createFileMonitorThread(TabFileExplorer *tabFileExplorer);
+    void createFileMonitorThread(const DialogImport * const dialogImport,
+                                 const TabFileExplorer * const tabFileExplorer);
     QString fileMonitorThreadName() const;
 
 private:
