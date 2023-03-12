@@ -1,5 +1,5 @@
 #include "ItemDelegateAction.h"
-
+#include "TreeModelDialogImport.h"
 
 #include <QComboBox>
 
@@ -24,6 +24,7 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
 {
     QComboBox *result = new QComboBox(parent);
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+    auto treeModel = (Model *) index.model();
 
     if(item->getType() == TreeItem::ItemType::Folder)
     {
@@ -60,6 +61,25 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
                          this, [=](const QString &item){
             Q_UNUSED(item);
             result->clearFocus();
+        });
+
+        QObject::connect(treeModel, &Model::signalDisableItemDelegates,
+                         result, [=]{
+            result->setDisabled(true);
+
+            if(item->getType() == TreeItem::ItemType::Folder)
+            {
+                // NOTE: this loop may ruin performance, improve this in future
+                for(int index = 0; index < item->childCount(); index++)
+                {
+                    if(item->child(index)->getAction() != TreeItem::Action::DoNotImport)
+                        return;
+                }
+
+                item->setAction(TreeItem::Action::DoNotImport);
+                int cbIndex = result->findText(ITEM_TEXT_DO_NOT_IMPORT);
+                result->setCurrentIndex(cbIndex);
+            }
         });
 
         QObject::connect(this, &ItemDelegateAction::refreshChildComboBoxes, this, [=](TreeItem *parent){

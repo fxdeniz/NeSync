@@ -123,6 +123,12 @@ void DialogImport::on_buttonSelectFile_clicked()
     }
 }
 
+void DialogImport::on_buttonImport_clicked()
+{
+    auto treeModel = (TreeModelDialogImport::Model *) ui->treeView->model();
+    treeModel->signalDisableItemDelegates();
+}
+
 QString DialogImport::statusTextWaitingForFile()
 {
     return tr("Please select a zip file");

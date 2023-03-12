@@ -22,6 +22,7 @@ public:
 
 private slots:
     void on_buttonSelectFile_clicked();
+    void on_buttonImport_clicked();
 
 private:
     static QString statusTextWaitingForFile();

@@ -624,7 +624,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, cons
             return;
         }
 
-        // TODO add checking empty space before extracting folders
+        // TODO: add checking empty space before extracting folders
 
         emit signalStopFileMonitor();
         thawFolderTree(name, symbolPath, selection);

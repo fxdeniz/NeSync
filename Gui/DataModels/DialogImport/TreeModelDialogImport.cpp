@@ -36,9 +36,19 @@ Model::Model(QJsonArray array, QObject *parent) : QAbstractItemModel(parent)
     }
 }
 
+Model::~Model()
+{
+    delete treeRoot;
+}
+
 QMap<QString, TreeItem *> Model::getFolderItemMap() const
 {
     return folderItemMap;
+}
+
+void Model::disableComboBoxes()
+{
+    emit signalDisableItemDelegates();
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
