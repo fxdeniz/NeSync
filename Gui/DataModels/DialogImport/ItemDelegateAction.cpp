@@ -75,9 +75,9 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             }
             else if(item->getParentItem()->getAction() == TreeItem::Action::ChooseEachChildren)
             {
-                if(item->getParentItem()->getStatus() == TreeItem::Status::ExistingFolder)
+                if(item->getStatus() == TreeItem::Status::ExistingFile)
                     currentText = ITEM_TEXT_OVERWRITE;
-                else if(item->getParentItem()->getStatus() == TreeItem::Status::NewFolder)
+                else if(item->getStatus() == TreeItem::Status::NewFile)
                     currentText = ITEM_TEXT_IMPORT;
 
                 result->setEnabled(true);

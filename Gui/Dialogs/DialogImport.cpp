@@ -104,6 +104,23 @@ void DialogImport::on_buttonSelectFile_clicked()
         ui->treeView->openPersistentEditor(index);
 
     ui->treeView->clearSelection();
+
+    QMapIterator<QString, TreeModelDialogImport::TreeItem *> mapIterator(treeModel->getFolderItemMap());
+
+    while(mapIterator.hasNext())
+    {
+        mapIterator.next();
+
+        TreeModelDialogImport::TreeItem *item = mapIterator.value();
+        qDebug() << "folder " << item->getSymbolFolderPath();
+        for(int index = 0; index < item->childCount(); index++)
+        {
+            TreeModelDialogImport::TreeItem *childItem = item->child(index);
+            qDebug() << "\t" << childItem->getSymbolFolderPath() << "" << childItem->getName();
+            qDebug() << "\t\t" << childItem->getFileJson();
+        }
+        qDebug() << "";
+    }
 }
 
 QString DialogImport::statusTextWaitingForFile()

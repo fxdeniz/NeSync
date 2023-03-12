@@ -77,6 +77,16 @@ void TreeItem::setStatus(Status newStatus)
     status = newStatus;
 }
 
+QJsonObject TreeItem::getFileJson() const
+{
+    return fileJson;
+}
+
+void TreeItem::setFileJson(const QJsonObject &newFileJson)
+{
+    fileJson = newFileJson;
+}
+
 void TreeItem::appendChild(TreeItem *item)
 {
     childItems.append(item);

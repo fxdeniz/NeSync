@@ -21,8 +21,9 @@ public:
     static const inline int ColumnIndexStatus = 1;
     static const inline int ColumnIndexAction = 2;
 
-
     explicit Model(QJsonArray array, QObject *parent = nullptr);
+
+    QMap<QString, TreeItem *> getFolderItemMap() const;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -36,6 +37,7 @@ private:
     TreeItem *createTreeItemFile(QJsonObject fileJson, TreeItem *parentItem) const;
 
     TreeItem *treeRoot;
+    QMap<QString, TreeItem *> folderItemMap;
 };
 
 #endif // TREEMODELDIALOGIMPORT_H

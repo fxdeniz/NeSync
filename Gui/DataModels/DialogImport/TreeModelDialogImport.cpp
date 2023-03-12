@@ -11,27 +11,34 @@ Model::Model(QJsonArray array, QObject *parent) : QAbstractItemModel(parent)
 {
     treeRoot = new TreeItem();
 
-    QMultiMap<QString, TreeItem *> folderMap;
+    QMultiMap<QString, TreeItem *> multiFolderMap;
 
     for(const QJsonValue &currentValue : array)
     {
         QJsonObject fileJson = currentValue.toObject();
         TreeItem *item = createTreeItemFile(fileJson, nullptr);
 
-        folderMap.insert(fileJson[JsonKeys::File::SymbolFolderPath].toString(), item);
+        multiFolderMap.insert(fileJson[JsonKeys::File::SymbolFolderPath].toString(), item);
     }
 
-    for(const QString &symbolFolderPath : folderMap.uniqueKeys())
+    for(const QString &symbolFolderPath : multiFolderMap.uniqueKeys())
     {
         TreeItem *currentFolder = createTreeItemFolder(symbolFolderPath, treeRoot);
         treeRoot->appendChild(currentFolder);
 
-        for(TreeItem *item : folderMap.values(symbolFolderPath))
+        for(TreeItem *item : multiFolderMap.values(symbolFolderPath))
         {
             item->setParentItem(currentFolder);
             currentFolder->appendChild(item);
         }
+
+        folderItemMap.insert(symbolFolderPath,currentFolder);
     }
+}
+
+QMap<QString, TreeItem *> Model::getFolderItemMap() const
+{
+    return folderItemMap;
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
@@ -157,12 +164,14 @@ QVariant Model::data(const QModelIndex &index, int role) const
             }
         }
     }
-    else if (role == Qt::ItemDataRole::BackgroundRole && index.column() == ColumnIndexSymbolPath)
+    else if (role == Qt::ItemDataRole::BackgroundRole)
     {
         if(item->getStatus() == TreeItem::Status::NewFile)
             return QColor::fromString("#b8e994");
         else if(item->getStatus() == TreeItem::Status::NewFolder)
             return QColor::fromString("#78e08f");
+        else if(item->getStatus() == TreeItem::Status::ExistingFolder)
+            return QColor::fromString("#82ccdd");
     }
     else if(role == Qt::ItemDataRole::TextAlignmentRole && index.column() == ColumnIndexStatus)
         return Qt::AlignmentFlag::AlignCenter;
@@ -192,6 +201,7 @@ TreeItem *Model::createTreeItemFile(QJsonObject fileJson, TreeItem *parentItem) 
     result->setName(fileJson[JsonKeys::File::FileName].toString());
     result->setSymbolFolderPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
     result->setType(TreeItem::ItemType::File);
+    result->setFileJson(fileJson);
 
     QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
 
