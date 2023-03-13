@@ -50,11 +50,11 @@ void DialogAddNewFolder::show(const QString &parentFolderPath, FileMonitoringMan
     ui->labelParentFolderPath->setText(parentFolderPath);
 
     showStatusInfo(statusTextWaitingForFolder(), ui->labelStatus);
-    if(ui->lineEditFolderPath->text().isEmpty())
+    if(ui->lineEdit->text().isEmpty())
         ui->labelFolderName->setText(tr("New Folder Name"));
 
-    ui->lineEditFolderPath->setFocus();
-    ui->lineEditFolderPath->selectedText();
+    ui->lineEdit->setFocus();
+    ui->lineEdit->selectedText();
 
     QWidget::show();
 }
@@ -74,23 +74,24 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
     if(dialog.exec())
     {
         auto fsm = FileStorageManager::instance();
+        QString selectedFolderPath = QDir::toNativeSeparators(dialog.selectedFiles().at(0)).append(QDir::separator());
 
         QStorageInfo storageInfo(fsm->getBackupFolderPath());
-        qint64 folderSize = getFolderSize(dialog.selectedFiles().at(0));
+        qint64 folderSize = getFolderSize(selectedFolderPath);
         qint64 availableSize = storageInfo.bytesFree();
 
         if(folderSize > availableSize)
         {
-            showStatusWarning(statusTextNoFreeSpace(dialog.selectedFiles().at(0)), ui->labelStatus);
+            showStatusWarning(statusTextNoFreeSpace(selectedFolderPath), ui->labelStatus);
             return;
         }
 
-        QJsonObject folderJson = fsm->getFolderJsonByUserPath(dialog.selectedFiles().at(0));
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(selectedFolderPath);
         bool isFolderExistByUserPath = folderJson[JsonKeys::IsExist].toBool();
 
         if(isFolderExistByUserPath)
         {
-            this->showStatusWarning(statusTextFolderExist(dialog.selectedFiles().at(0)), ui->labelStatus);
+            this->showStatusWarning(statusTextFolderExist(selectedFolderPath), ui->labelStatus);
             return;
         }
 
@@ -106,11 +107,11 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
             }
         });
 
-        ui->lineEditFolderPath->setText(dialog.selectedFiles().at(0));
-        QModelIndex rootIndex = model->setRootPath(ui->lineEditFolderPath->text());        
+        ui->lineEdit->setText(selectedFolderPath);
+        QModelIndex rootIndex = model->setRootPath(ui->lineEdit->text());
         ui->treeView->setRootIndex(rootIndex);
 
-        QDir selectedUserDir(ui->lineEditFolderPath->text());
+        QDir selectedUserDir(ui->lineEdit->text());
         ui->labelFolderName->setText(selectedUserDir.dirName());
     }
 }
@@ -292,7 +293,7 @@ void DialogAddNewFolder::on_buttonClearResults_clicked()
     ui->labelFolderName->setText("New Folder Name");
     ui->progressBar->setValue(0);
     ui->progressBar->hide();
-    ui->lineEditFolderPath->clear();
+    ui->lineEdit->clear();
     ui->buttonSelectFolder->setEnabled(true);
     ui->buttonSelectFolder->show();
     ui->buttonAddFilesToDb->show();
