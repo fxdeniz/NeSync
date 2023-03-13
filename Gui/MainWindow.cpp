@@ -121,7 +121,7 @@ void MainWindow::createFileMonitorThread(const DialogImport * const dialogImport
     QObject::connect(fileMonitorThread, &QThread::finished,
                      fmm, &QObject::deleteLater);
 
-    QObject::connect(dialogImport, &DialogImport::signalFileImportStarted,
+    QObject::connect(dialogImport, &DialogImport::signalFileImportStartedForActiveFile,
                      fmm, &FileMonitoringManager::stopMonitoringTarget,
                      Qt::ConnectionType::BlockingQueuedConnection);
 

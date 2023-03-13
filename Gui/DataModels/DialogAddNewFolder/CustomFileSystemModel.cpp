@@ -143,5 +143,4 @@ void CustomFileSystemModel::markItem(const QString &pathToFile, ItemStatus statu
     statusOfFiles.insert(pathToFile, status);
     QModelIndex index = this->index(pathToFile, ColumnIndex::Status);
     emit dataChanged(index, index);
-    emit layoutChanged();
 }

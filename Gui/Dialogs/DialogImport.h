@@ -21,7 +21,10 @@ public:
     void show();
 
 signals:
-    void signalFileImportStarted(const QString &userFilePath);
+    void signalFileImportStartedForActiveFile(const QString &userFilePath);
+    void signalFileImportStarted(const QString &symbolFilePath);
+    void signalFileImported(const QString &symbolFilePath);
+    void signalFileImportFailed(const QString &symbolFilePath);
 
 private slots:
     void on_buttonSelectFile_clicked();

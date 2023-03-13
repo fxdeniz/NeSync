@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QVariant>
+#include <QModelIndex>
 #include <QJsonObject>
 
 namespace TreeModelDialogImport
@@ -13,7 +14,7 @@ namespace TreeModelDialogImport
 class TreeModelDialogImport::TreeItem
 {
 public:
-    static const inline int ColumnCount = 3;
+    static const inline int ColumnCount = 4;
 
     enum ItemType
     {
@@ -40,6 +41,14 @@ public:
         DoNotImport = 4
     };
 
+    enum Result
+    {
+        Waiting = 0,
+        Pending = 1,
+        Successful = 2,
+        Failed = 3
+    };
+
     explicit TreeItem(TreeItem *parentItem = nullptr);
     ~TreeItem();
 
@@ -61,8 +70,14 @@ public:
     Status getStatus() const;
     void setStatus(Status newStatus);
 
+    Result getResult() const;
+    void setResult(Result newResult);
+
     QJsonObject getFileJson() const;
     void setFileJson(const QJsonObject &newFileJson);
+
+    QModelIndex getModelIndex() const;
+    void setModelIndex(const QModelIndex &newModelIndex);
 
     void appendChild(TreeItem *child);
 
@@ -77,7 +92,9 @@ private:
     ItemType type;
     Action action;
     Status status;
+    Result result;
     QJsonObject fileJson;
+    QModelIndex modelIndex;
     QList<TreeItem *> childItems;
     TreeItem *parentItem;
 };

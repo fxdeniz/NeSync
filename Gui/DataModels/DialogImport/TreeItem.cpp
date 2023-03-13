@@ -10,6 +10,7 @@ TreeItem::TreeItem(TreeItem *parentItem)
     setType(ItemType::Undefined);
     setAction(Action::NotSelected);
     setStatus(Status::NotSet);
+    setResult(Result::Waiting);
 }
 
 TreeItem::~TreeItem()
@@ -82,9 +83,29 @@ QJsonObject TreeItem::getFileJson() const
     return fileJson;
 }
 
+TreeItem::Result TreeItem::getResult() const
+{
+    return result;
+}
+
+void TreeItem::setResult(Result newResult)
+{
+    result = newResult;
+}
+
 void TreeItem::setFileJson(const QJsonObject &newFileJson)
 {
     fileJson = newFileJson;
+}
+
+QModelIndex TreeItem::getModelIndex() const
+{
+    return modelIndex;
+}
+
+void TreeItem::setModelIndex(const QModelIndex &newModelIndex)
+{
+    modelIndex = newModelIndex;
 }
 
 void TreeItem::appendChild(TreeItem *item)

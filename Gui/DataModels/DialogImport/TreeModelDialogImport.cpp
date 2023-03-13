@@ -18,6 +18,7 @@ Model::Model(QJsonArray array, QObject *parent) : QAbstractItemModel(parent)
         QJsonObject fileJson = currentValue.toObject();
         TreeItem *item = createTreeItemFile(fileJson, nullptr);
 
+        symbolFileMap.insert(fileJson[JsonKeys::File::SymbolFilePath].toString(), item);
         multiFolderMap.insert(fileJson[JsonKeys::File::SymbolFolderPath].toString(), item);
     }
 
@@ -51,6 +52,21 @@ void Model::disableComboBoxes()
     emit signalDisableItemDelegates();
 }
 
+void Model::markFileAsPending(const QString &symbolFilePath)
+{
+    markFile(symbolFilePath, TreeItem::Result::Pending);
+}
+
+void Model::markFileAsSuccessful(const QString &symbolFilePath)
+{
+    markFile(symbolFilePath, TreeItem::Result::Successful);
+}
+
+void Model::markFileAsFailed(const QString &symbolFilePath)
+{
+    markFile(symbolFilePath, TreeItem::Result::Failed);
+}
+
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
@@ -66,6 +82,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
                 return tr("Status");
             case ColumnIndexAction:
                 return tr("Action");
+            case ColumnIndexResult:
+                return tr("Result");
             default:
                 break;
         }
@@ -87,7 +105,12 @@ QModelIndex Model::index(int row, int column, const QModelIndex &parent) const
 
     TreeItem *childItem = parentItem->child(row);
     if (childItem)
-        return createIndex(row, column, childItem);
+    {
+        QModelIndex result = createIndex(row, column, childItem);
+        childItem->setModelIndex(result);
+        return result;
+    }
+
     return QModelIndex();
 }
 
@@ -173,8 +196,20 @@ QVariant Model::data(const QModelIndex &index, int role) const
                     return tr("Existing Folder");
             }
         }
+        else if(index.column() == ColumnIndexResult && item->getType() == TreeItem::ItemType::File)
+        {
+            TreeItem::Result result = item->getResult();
+            if(result == TreeItem::Result::Waiting)
+                return tr("Waiting");
+            else if(result == TreeItem::Result::Pending)
+                return tr("Pending");
+            else if(result == TreeItem::Result::Successful)
+                return tr("Successful");
+            else if(result == TreeItem::Result::Failed)
+                return tr("Failed");
+        }
     }
-    else if (role == Qt::ItemDataRole::BackgroundRole)
+    else if (role == Qt::ItemDataRole::BackgroundRole && index.column() != ColumnIndexResult)
     {
         if(item->getStatus() == TreeItem::Status::NewFile)
             return QColor::fromString("#b8e994");
@@ -183,8 +218,11 @@ QVariant Model::data(const QModelIndex &index, int role) const
         else if(item->getStatus() == TreeItem::Status::ExistingFolder)
             return QColor::fromString("#82ccdd");
     }
-    else if(role == Qt::ItemDataRole::TextAlignmentRole && index.column() == ColumnIndexStatus)
-        return Qt::AlignmentFlag::AlignCenter;
+    else if(role == Qt::ItemDataRole::TextAlignmentRole)
+    {
+        if(index.column() == ColumnIndexStatus || index.column() == ColumnIndexResult)
+            return Qt::AlignmentFlag::AlignCenter;
+    }
 
     return QVariant();
 }
@@ -223,4 +261,14 @@ TreeItem *Model::createTreeItemFile(QJsonObject fileJson, TreeItem *parentItem) 
         result->setStatus(TreeItem::Status::NewFile);
 
     return result;
+}
+
+void Model::markFile(const QString &symbolFilePath, TreeItem::Result result)
+{
+    if(!symbolFileMap.contains(symbolFilePath))
+        return;
+
+    TreeItem *item = symbolFileMap.value(symbolFilePath);
+    item->setResult(result);
+    emit dataChanged(item->getModelIndex(), item->getModelIndex());
 }
