@@ -198,6 +198,9 @@ QVariant Model::data(const QModelIndex &index, int role) const
         }
         else if(index.column() == ColumnIndexResult && item->getType() == TreeItem::ItemType::File)
         {
+            if(item->getAction() == TreeItem::Action::DoNotImport)
+                return tr("Canceled");
+
             TreeItem::Result result = item->getResult();
             if(result == TreeItem::Result::Waiting)
                 return tr("Waiting");

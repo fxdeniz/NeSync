@@ -158,56 +158,58 @@ void DialogImport::on_buttonImport_clicked()
             {
                 bool addingFirstVersion = true;
                 TreeModelDialogImport::TreeItem *childFileItem = folderItem->child(index);
-                if(childFileItem->getAction() == TreeModelDialogImport::TreeItem::Action::Import ||
-                   childFileItem->getAction() == TreeModelDialogImport::TreeItem::Action::Overwrite)
+                if(childFileItem->getAction() != TreeModelDialogImport::TreeItem::Action::Import &&
+                   childFileItem->getAction() != TreeModelDialogImport::TreeItem::Action::Overwrite)
                 {
-                    QString symbolFilePath = childFileItem->getFileJson()[JsonKeys::File::SymbolFilePath].toString();
-                    QJsonObject previousFile = fsm->getFileJsonBySymbolPath(symbolFilePath);
-                    fsm->deleteFile(symbolFilePath);
+                    continue;
+                }
 
-                    if(previousFile[JsonKeys::IsExist].toBool() && !previousFile[JsonKeys::File::IsFrozen].toBool())
-                        emit signalFileImportStartedForActiveFile(previousFile[JsonKeys::File::UserFilePath].toString());
+                QString symbolFilePath = childFileItem->getFileJson()[JsonKeys::File::SymbolFilePath].toString();
+                QJsonObject previousFile = fsm->getFileJsonBySymbolPath(symbolFilePath);
+                fsm->deleteFile(symbolFilePath);
 
-                    emit signalFileImportStarted(symbolFilePath);
+                if(previousFile[JsonKeys::IsExist].toBool() && !previousFile[JsonKeys::File::IsFrozen].toBool())
+                    emit signalFileImportStartedForActiveFile(previousFile[JsonKeys::File::UserFilePath].toString());
 
-                    QJsonArray versionList = childFileItem->getFileJson()[JsonKeys::File::VersionList].toArray();
-                    for(const QJsonValue &currentValue : versionList)
+                emit signalFileImportStarted(symbolFilePath);
+
+                QJsonArray versionList = childFileItem->getFileJson()[JsonKeys::File::VersionList].toArray();
+                for(const QJsonValue &currentValue : versionList)
+                {
+                    QJsonObject versionJson = currentValue.toObject();
+                    archive.setCurrentFile(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
+
+                    QuaZipFile fileInZip(&archive);
+                    fileInZip.open(QFile::OpenModeFlag::ReadOnly);
+                    QTemporaryFile tempFile;
+                    tempFile.open();
+
+                    while(!fileInZip.atEnd())
                     {
-                        QJsonObject versionJson = currentValue.toObject();
-                        archive.setCurrentFile(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
-
-                        QuaZipFile fileInZip(&archive);
-                        fileInZip.open(QFile::OpenModeFlag::ReadOnly);
-                        QTemporaryFile tempFile;
-                        tempFile.open();
-
-                        while(!fileInZip.atEnd())
-                        {
-                            tempFile.write(fileInZip.read(104857600)); // Read up to 100mb.
-                            tempFile.flush();
-                        }
-
-                        bool isAdded = false;
-                        QString description = versionJson[JsonKeys::FileVersion::Description].toString();
-
-                        if(!addingFirstVersion)
-                            isAdded = fsm->appendVersion(symbolFilePath, tempFile.fileName(), description);
-                        else
-                        {
-                            isAdded = fsm->addNewFile(childFileItem->getFileJson()[JsonKeys::File::SymbolFolderPath].toString(),
-                                                      tempFile.fileName(),
-                                                      true,
-                                                      childFileItem->getName(),
-                                                      description);
-                        }
-
-                        addingFirstVersion = false;
-
-                        if(isAdded)
-                            emit signalFileImported(symbolFilePath);
-                        else
-                            emit signalFileImportFailed(symbolFilePath);
+                        tempFile.write(fileInZip.read(104857600)); // Read up to 100mb.
+                        tempFile.flush();
                     }
+
+                    bool isAdded = false;
+                    QString description = versionJson[JsonKeys::FileVersion::Description].toString();
+
+                    if(!addingFirstVersion)
+                        isAdded = fsm->appendVersion(symbolFilePath, tempFile.fileName(), description);
+                    else
+                    {
+                        isAdded = fsm->addNewFile(childFileItem->getFileJson()[JsonKeys::File::SymbolFolderPath].toString(),
+                                                  tempFile.fileName(),
+                                                  true,
+                                                  childFileItem->getName(),
+                                                  description);
+                    }
+
+                    addingFirstVersion = false;
+
+                    if(isAdded)
+                        emit signalFileImported(symbolFilePath);
+                    else
+                        emit signalFileImportFailed(symbolFilePath);
                 }
             }
         }

@@ -97,9 +97,15 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             else if(item->getParentItem()->getAction() == TreeItem::Action::ChooseEachChildren)
             {
                 if(item->getStatus() == TreeItem::Status::ExistingFile)
+                {
                     currentText = ITEM_TEXT_OVERWRITE;
+                    item->setAction(TreeItem::Action::Overwrite);
+                }
                 else if(item->getStatus() == TreeItem::Status::NewFile)
+                {
                     currentText = ITEM_TEXT_IMPORT;
+                    item->setAction(TreeItem::Action::Import);
+                }
 
                 result->setEnabled(true);
             }
