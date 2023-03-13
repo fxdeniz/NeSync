@@ -25,6 +25,7 @@ public:
     explicit Model(QJsonArray array, QObject *parent = nullptr);
     ~Model();
 
+    int getTotalFileCount() const;
     QMap<QString, TreeItem *> getFolderItemMap() const;
     void disableComboBoxes();
     void markFileAsPending(const QString &symbolFilePath);

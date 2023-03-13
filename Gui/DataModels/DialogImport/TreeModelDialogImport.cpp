@@ -42,6 +42,16 @@ Model::~Model()
     delete treeRoot;
 }
 
+int Model::getTotalFileCount() const
+{
+    int result = 0;
+
+    for(int index = 0; index < treeRoot->childCount(); index++)
+        result += treeRoot->child(index)->childCount();
+
+    return result;
+}
+
 QMap<QString, TreeItem *> Model::getFolderItemMap() const
 {
     return folderItemMap;
@@ -49,6 +59,7 @@ QMap<QString, TreeItem *> Model::getFolderItemMap() const
 
 void Model::disableComboBoxes()
 {
+    emit layoutChanged(); // Allow comboxes to expand when result column is updated
     emit signalDisableItemDelegates();
 }
 
@@ -212,14 +223,23 @@ QVariant Model::data(const QModelIndex &index, int role) const
                 return tr("Failed");
         }
     }
-    else if (role == Qt::ItemDataRole::BackgroundRole && index.column() != ColumnIndexResult)
+    else if (role == Qt::ItemDataRole::BackgroundRole)
     {
-        if(item->getStatus() == TreeItem::Status::NewFile)
-            return QColor::fromString("#b8e994");
-        else if(item->getStatus() == TreeItem::Status::NewFolder)
-            return QColor::fromString("#78e08f");
-        else if(item->getStatus() == TreeItem::Status::ExistingFolder)
-            return QColor::fromString("#82ccdd");
+        if(index.column() == ColumnIndexResult)
+        {
+            if( item->getResult() == TreeItem::Result::Pending)
+                return QColor::fromString("#ffbe76");
+        }
+        else
+        {
+            if(item->getStatus() == TreeItem::Status::NewFile &&
+               item->getParentItem()->getStatus() == TreeItem::Status::ExistingFolder)
+                return QColor::fromString("#b8e994");
+            else if(item->getStatus() == TreeItem::Status::NewFolder)
+                return QColor::fromString("#78e08f");
+            else if(item->getStatus() == TreeItem::Status::ExistingFolder)
+                return QColor::fromString("#82ccdd");
+        }
     }
     else if(role == Qt::ItemDataRole::TextAlignmentRole)
     {

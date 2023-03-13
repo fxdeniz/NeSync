@@ -3,8 +3,8 @@
 
 #include <QList>
 #include <QVariant>
-#include <QModelIndex>
 #include <QJsonObject>
+#include <QPersistentModelIndex>
 
 namespace TreeModelDialogImport
 {
@@ -94,7 +94,7 @@ private:
     Status status;
     Result result;
     QJsonObject fileJson;
-    QModelIndex modelIndex;
+    QPersistentModelIndex modelIndex;
     QList<TreeItem *> childItems;
     TreeItem *parentItem;
 };

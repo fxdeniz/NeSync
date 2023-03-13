@@ -287,25 +287,6 @@ void DialogAddNewFolder::on_buttonAddFilesToDb_clicked()
     task->start();
 }
 
-void DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)
-{
-    if(isAllRequestSuccessful)
-        this->showStatusSuccess("<b>All folder</b> content added successfully", ui->labelStatus);
-    else
-        this->showStatusError("Not all files added successfully, check the results for details", ui->labelStatus);
-
-    ui->buttonAddFilesToDb->hide();
-    ui->buttonClearResults->show();
-}
-
-void DialogAddNewFolder::refreshTreeView()
-{
-    ui->treeView->viewport()->update();
-    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
-    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
-    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
-}
-
 void DialogAddNewFolder::on_buttonClearResults_clicked()
 {
     ui->labelFolderName->setText("New Folder Name");
@@ -324,6 +305,25 @@ void DialogAddNewFolder::on_buttonClearResults_clicked()
     ui->treeView->setModel(ptr);
     delete model;
     model = ptr;
+}
+
+void DialogAddNewFolder::slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful)
+{
+    if(isAllRequestSuccessful)
+        this->showStatusSuccess("<b>All folder</b> content added successfully", ui->labelStatus);
+    else
+        this->showStatusError("Not all files added successfully, check the results for details", ui->labelStatus);
+
+    ui->buttonAddFilesToDb->hide();
+    ui->buttonClearResults->show();
+}
+
+void DialogAddNewFolder::refreshTreeView()
+{
+    ui->treeView->viewport()->update();
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Name);
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Frozen);
+    ui->treeView->resizeColumnToContents(CustomFileSystemModel::ColumnIndex::Status);
 }
 
 qint64 DialogAddNewFolder::getFolderSize(const QString &pathToFolder)

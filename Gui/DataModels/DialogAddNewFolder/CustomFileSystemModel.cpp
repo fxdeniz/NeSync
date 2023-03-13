@@ -65,6 +65,16 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const
             return itemStatusToString(statusCode);
         }
     }
+    else if (role == Qt::ItemDataRole::BackgroundRole)
+    {
+        if(index.column() == ColumnIndex::Status)
+        {
+            ItemStatus statusCode = statusOfFiles.value(filePath(index));
+            if(statusCode == ItemStatus::Pending)
+                return QColor::fromString("#ffbe76");
+
+        }
+    }
     else if(role == Qt::TextAlignmentRole)
     {
         if(column == ColumnIndex::Frozen || column == ColumnIndex::Status)

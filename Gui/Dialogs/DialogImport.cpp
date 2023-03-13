@@ -21,22 +21,29 @@ DialogImport::DialogImport(QWidget *parent) :
     ui->setupUi(this);
     itemDelegateAction = new TreeModelDialogImport::ItemDelegateAction(this);
 
+    QObject::connect(this, &DialogImport::signalProgressUpdate,
+                     ui->progressBar, &QProgressBar::setValue);
+
     QObject::connect(this, &DialogImport::signalFileImportStarted, this, [=](const QString &symbolFilePath){
         auto treeModel = (TreeModelDialogImport::Model *) ui->treeView->model();
         treeModel->markFileAsPending(symbolFilePath);
-        ui->treeView->update();
     });
 
     QObject::connect(this, &DialogImport::signalFileImported, this, [=](const QString &symbolFilePath){
         auto treeModel = (TreeModelDialogImport::Model *) ui->treeView->model();
         treeModel->markFileAsSuccessful(symbolFilePath);
-        ui->treeView->update();
     });
 
     QObject::connect(this, &DialogImport::signalFileImportFailed, this, [=](const QString &symbolFilePath){
         auto treeModel = (TreeModelDialogImport::Model *) ui->treeView->model();
         treeModel->markFileAsFailed(symbolFilePath);
-        ui->treeView->update();
+    });
+
+    QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, this, [=]{
+        if(allFilesImportedSuccessfully)
+            showStatusSuccess(statusTextFileImportFinishedWithoutError(), ui->labelStatus);
+        else
+            showStatusError(statusTextFileImportFinishedWithError(), ui->labelStatus);
     });
 }
 
@@ -47,9 +54,14 @@ DialogImport::~DialogImport()
 
 void DialogImport::show()
 {
-    showStatusInfo(statusTextWaitingForFile(), ui->labelStatus);
+    if(ui->treeView->model() != nullptr)
+        delete ui->treeView->model();
+
+    showStatusInfo(statusTextWaitingForZipFile(), ui->labelStatus);
     ui->lineEdit->clear();
     ui->buttonImport->setDisabled(true);
+    ui->progressBar->setHidden(true);
+    allFilesImportedSuccessfully = true;
     QWidget::show();
 }
 
@@ -106,7 +118,7 @@ void DialogImport::on_buttonSelectFile_clicked()
 
     // TODO: add json schema validation
 
-    showStatusSuccess(statusTextFileReadyToImport(), ui->labelStatus);
+    showStatusSuccess(statusTextZipFileReadyToImport(), ui->labelStatus);
     ui->buttonImport->setEnabled(true);
 
     if(ui->treeView->model() != nullptr)
@@ -120,6 +132,7 @@ void DialogImport::on_buttonSelectFile_clicked()
                                                  QHeaderView::ResizeMode::Interactive);
     ui->treeView->header()->setMinimumSectionSize(200);
     ui->treeView->setColumnWidth(TreeModelDialogImport::Model::ColumnIndexSymbolPath, 500);
+    ui->treeView->hideColumn(TreeModelDialogImport::Model::ColumnIndexResult);
 
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::ContiguousSelection);
     ui->treeView->setItemDelegateForColumn(TreeModelDialogImport::Model::ColumnIndexAction, itemDelegateAction);
@@ -137,12 +150,19 @@ void DialogImport::on_buttonImport_clicked()
 {
     auto treeModel = (TreeModelDialogImport::Model *) ui->treeView->model();
     treeModel->disableComboBoxes();
+    ui->buttonSelectFile->setDisabled(true);
+    ui->progressBar->setVisible(true);
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(treeModel->getTotalFileCount());
+    ui->treeView->showColumn(TreeModelDialogImport::Model::ColumnIndexResult);
+    showStatusInfo(statusTextFilesBeingImported(), ui->labelStatus);
 
     QFuture<void> future = QtConcurrent::run([=]{
         QMapIterator<QString, TreeModelDialogImport::TreeItem *> mapIterator(treeModel->getFolderItemMap());
         auto fsm = FileStorageManager::instance();
         QuaZip archive(ui->lineEdit->text());
         archive.open(QuaZip::Mode::mdUnzip);
+        int progressValue = 0;
 
         while(mapIterator.hasNext())
         {
@@ -150,12 +170,18 @@ void DialogImport::on_buttonImport_clicked()
 
             TreeModelDialogImport::TreeItem *folderItem = mapIterator.value();
             if(folderItem->getAction() == TreeModelDialogImport::TreeItem::DoNotImport)
+            {
+                progressValue += folderItem->childCount();
+                emit signalProgressUpdate(progressValue);
                 continue;
+            }
 
             fsm->addNewFolder(mapIterator.key(), "");
 
             for(int index = 0; index < folderItem->childCount(); index++)
             {
+                emit signalProgressUpdate(++progressValue);
+
                 bool addingFirstVersion = true;
                 TreeModelDialogImport::TreeItem *childFileItem = folderItem->child(index);
                 if(childFileItem->getAction() != TreeModelDialogImport::TreeItem::Action::Import &&
@@ -209,18 +235,22 @@ void DialogImport::on_buttonImport_clicked()
                     if(isAdded)
                         emit signalFileImported(symbolFilePath);
                     else
+                    {
                         emit signalFileImportFailed(symbolFilePath);
+                        allFilesImportedSuccessfully = false;
+                    }
                 }
             }
         }
     });
 
+    futureWatcher.setFuture(future);
     ui->buttonImport->setEnabled(false);
 }
 
-QString DialogImport::statusTextWaitingForFile()
+QString DialogImport::statusTextWaitingForZipFile()
 {
-    return tr("Please select a zip file");
+    return tr("Please select a <b>zip file</b>");
 }
 
 QString DialogImport::statusTextCanNotOpenFile(const QString &fileNameArg)
@@ -238,7 +268,22 @@ QString DialogImport::statusTextImportJsonFileCorrupt()
     return tr("<b>import.json</b> is corrupt");
 }
 
-QString DialogImport::statusTextFileReadyToImport()
+QString DialogImport::statusTextZipFileReadyToImport()
 {
-    return tr("File is ready to import");
+    return tr("<b>Zip file</b> is ready to import. (<b>NOTE:</b> All files you import will be imported as frozen)");
+}
+
+QString DialogImport::statusTextFilesBeingImported()
+{
+    return tr("Files being imported in background...");
+}
+
+QString DialogImport::statusTextFileImportFinishedWithoutError()
+{
+    return tr("<b>All files</b> added successfully");
+}
+
+QString DialogImport::statusTextFileImportFinishedWithError()
+{
+    return tr("Not all files added successfully, check the results for details");
 }
