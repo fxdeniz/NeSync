@@ -69,6 +69,12 @@ void DialogImport::show()
     QWidget::show();
 }
 
+void DialogImport::closeEvent(QCloseEvent *event)
+{
+    emit accepted();
+    QDialog::closeEvent(event);
+}
+
 void DialogImport::on_buttonSelectFile_clicked()
 {
     QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);

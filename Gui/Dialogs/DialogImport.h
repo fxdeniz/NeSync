@@ -28,6 +28,10 @@ signals:
     void signalFileImported(const QString &symbolFilePath);
     void signalFileImportFailed(const QString &symbolFilePath);
 
+    // QDialog interface
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
     void on_buttonSelectFile_clicked();
     void on_buttonImport_clicked();
