@@ -40,6 +40,9 @@ DialogImport::DialogImport(QWidget *parent) :
     });
 
     QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, this, [=]{
+        ui->buttonImport->hide();
+        ui->buttonClearResults->show();
+
         if(allFilesImportedSuccessfully)
             showStatusSuccess(statusTextFileImportFinishedWithoutError(), ui->labelStatus);
         else
@@ -60,7 +63,8 @@ void DialogImport::show()
     showStatusInfo(statusTextWaitingForZipFile(), ui->labelStatus);
     ui->lineEdit->clear();
     ui->buttonImport->setDisabled(true);
-    ui->progressBar->setHidden(true);
+    ui->buttonClearResults->hide();
+    ui->progressBar->hide();
     allFilesImportedSuccessfully = true;
     QWidget::show();
 }
@@ -246,6 +250,20 @@ void DialogImport::on_buttonImport_clicked()
 
     futureWatcher.setFuture(future);
     ui->buttonImport->setEnabled(false);
+}
+
+void DialogImport::on_buttonClearResults_clicked()
+{
+    if(ui->treeView->model() != nullptr)
+        delete ui->treeView->model();
+
+    ui->lineEdit->clear();
+    ui->buttonClearResults->hide();
+    ui->buttonImport->show();
+    ui->buttonSelectFile->setEnabled(true);
+    ui->progressBar->hide();
+
+    showStatusInfo(statusTextWaitingForZipFile(), ui->labelStatus);
 }
 
 QString DialogImport::statusTextWaitingForZipFile()

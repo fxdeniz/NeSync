@@ -176,7 +176,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Clear and Add new files</string>
+        <string>Clear and Add new folder</string>
        </property>
       </widget>
      </item>

@@ -31,6 +31,7 @@ signals:
 private slots:
     void on_buttonSelectFile_clicked();
     void on_buttonImport_clicked();
+    void on_buttonClearResults_clicked();
 
 private:
     static QString statusTextWaitingForZipFile();
