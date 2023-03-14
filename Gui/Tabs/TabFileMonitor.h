@@ -25,6 +25,9 @@ public:
 public slots:
     void onEventDbUpdated();
 
+signals:
+    void signalEnableSaveAllButton(bool flag);
+
 private slots:
     void displayFileMonitorContent();
 

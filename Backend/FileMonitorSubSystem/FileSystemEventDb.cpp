@@ -692,6 +692,48 @@ QStringList FileSystemEventDb::getEventfulFileListOfFolder(const QString &pathTo
     return result;
 }
 
+bool FileSystemEventDb::isContainAnyFolderEvent() const
+{
+    bool result = false;
+
+    QString columnName = "result_column";
+    QString queryTemplate = "SELECT COUNT(*) AS %1 FROM Folder WHERE status != :1;" ;
+    queryTemplate = queryTemplate.arg(columnName);
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", ItemStatus::Monitored);
+    query.exec();
+    query.next();
+
+    int count = query.record().value(columnName).toInt();
+    if(count >= 1)
+        result = true;
+
+    return result;
+}
+
+bool FileSystemEventDb::isContainAnyFileEvent() const
+{
+    bool result = false;
+
+    QString columnName = "result_column";
+    QString queryTemplate = "SELECT COUNT(*) AS %1 FROM File WHERE status != :1;" ;
+    queryTemplate = queryTemplate.arg(columnName);
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", ItemStatus::Monitored);
+    query.exec();
+    query.next();
+
+    int count = query.record().value(columnName).toInt();
+    if(count >= 1)
+        result = true;
+
+    return result;
+}
+
 bool FileSystemEventDb::addMonitoringError(const QString &location, const QString &during, qlonglong error)
 {
     bool result = false;

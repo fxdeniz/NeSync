@@ -1,8 +1,9 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
 
-#include "DataModels/TabFileMonitor/TreeModelFileMonitor.h"
 #include "Tasks/TaskSaveChanges.h"
+#include "Utility/DatabaseRegistry.h"
+#include "DataModels/TabFileMonitor/TreeModelFileMonitor.h"
 
 TabFileMonitor::TabFileMonitor(QWidget *parent) :
     QWidget(parent),
@@ -28,6 +29,8 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
 {
+    emit signalEnableSaveAllButton(false);
+
     ui->textEditDescription->setReadOnly(true);
     ui->buttonAddDescription->setDisabled(true);
     ui->buttonDeleteDescription->setDisabled(true);
@@ -68,6 +71,8 @@ void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
 
 void TabFileMonitor::onEventDbUpdated()
 {
+    emit signalEnableSaveAllButton(false);
+
     QString statusText = "Analyzing detected changes...";
     ui->labelStatus->setHidden(false);
     ui->labelStatus->setText(statusText);
@@ -86,6 +91,12 @@ void TabFileMonitor::onEventDbUpdated()
 void TabFileMonitor::displayFileMonitorContent()
 {
     timer.stop();
+
+    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
+
+    if(fsEventDb.isContainAnyFolderEvent() || fsEventDb.isContainAnyFileEvent())
+        emit signalEnableSaveAllButton(true);
+
     ui->labelStatus->setHidden(true);
     ui->progressBar->hide();
     ui->textEditDescription->setEnabled(true);
