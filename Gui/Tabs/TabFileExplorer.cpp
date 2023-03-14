@@ -550,6 +550,13 @@ void TabFileExplorer::on_contextActionTableView_Delete_triggered()
             futureWatcher.setFuture(future);
             dialog.exec();
             futureWatcher.waitForFinished();
+
+            int deletedPathIndex = navigationHistoryIndices.indexOf(symbolPath);
+            if(deletedPathIndex != -1) // If path exist in navigation history
+            {
+                navigationHistoryIndices = navigationHistoryIndices.mid(0, deletedPathIndex);
+                ui->buttonForward->setDisabled(true);
+            }
         }
         else if(type == TableModelFileExplorer::TableItemType::File)
         {

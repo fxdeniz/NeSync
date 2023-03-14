@@ -62,7 +62,9 @@ void DialogImport::show()
 
     showStatusInfo(statusTextWaitingForZipFile(), ui->labelStatus);
     ui->lineEdit->clear();
+    ui->buttonSelectFile->setEnabled(true);
     ui->buttonImport->setDisabled(true);
+    ui->buttonImport->show();
     ui->buttonClearResults->hide();
     ui->progressBar->hide();
     allFilesImportedSuccessfully = true;
