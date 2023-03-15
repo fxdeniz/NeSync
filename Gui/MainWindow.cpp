@@ -190,7 +190,7 @@ void MainWindow::on_menuAction_AboutApp_triggered()
     auto fsm = FileStorageManager::instance();
 
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.4.0</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.5.0</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
                          "This is a <b>early access version</b>, consider this as staging period towards V2.<br>"
@@ -205,14 +205,21 @@ void MainWindow::on_menuAction_AboutApp_triggered()
                          "  <b>SpartanJ</b> for efsw library | <a href = \"https://www.github.com/SpartanJ/efsw\">efsw (GitHub Repo)</a>"
                          "</dt>"
                          "<dt>"
+                         "  <b>stachenov</b> for QuaZip library | <a href = \"https://github.com/stachenov/quazip\">QuaZip (GitHub Repo)</a>"
+                         "</dt>"
+                         "<dt>"
                          "  <b>Qt Framework developers</b> | <a href = \"https://www.qt.io\">The Qt Company Website</a>"
                          "</dt>"
                          "<dt>"
-                         "  <b>SQLite project team</b> | <a href =\"https://www.sqlite.org\"><a/>SQLite Home Page"
+                         "  <b>SQLite project team</b> | <a href = \"https://www.sqlite.org\"><a/>SQLite Home Page"
                          "</dt>"
                          "</dl>"
                          "<br>"
-                         "<center>This software released under <a href =\"https://www.gnu.org/licenses/lgpl-3.0.en.html\">LGPL Version 3 (gnu.org)</a> license."
+                         "<center>"
+                         "NeSync is a Free and open-source software (FOSS)."
+                         "</center>"
+                         "<center>"
+                         "This software released under <a href =\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GPL Version 3 (gnu.org)</a> license."
                          "</center>"
                          "<br>"
                          "<b>Backup folder path:</b> %1").arg(fsm->getBackupFolderPath());

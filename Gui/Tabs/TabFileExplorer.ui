@@ -38,7 +38,7 @@
             </size>
            </property>
            <property name="text">
-            <string>&lt;-</string>
+            <string>🡰</string>
            </property>
           </widget>
          </item>
@@ -57,7 +57,7 @@
             </size>
            </property>
            <property name="text">
-            <string>-&gt;</string>
+            <string>🡲</string>
            </property>
           </widget>
          </item>

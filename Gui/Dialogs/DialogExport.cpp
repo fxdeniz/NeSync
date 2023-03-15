@@ -25,11 +25,28 @@ DialogExport::DialogExport(QWidget *parent) :
     QObject::connect(this, &DialogExport::signalZipCreationStarted, this, [=] (int minimum, int maximum) {
         ui->progressBar->setMinimum(minimum);
         ui->progressBar->setMaximum(maximum);
+        ui->labelFileStatus->clear();
+        ui->labelFilePath->clear();
     });
 
-    QObject::connect(this, &DialogExport::signalZippingFinished, this, [=]{
-        ui->buttonExport->setEnabled(true);
-        ui->buttonSelectLocation->setEnabled(true);
+    QObject::connect(this, &DialogExport::signalAddingFileToZip, this, [=](const QString &symbolFilePath){
+        ui->labelFileStatus->setText(tr("Adding file:"));
+        ui->labelFilePath->setText("<b>" + symbolFilePath + "</b>");
+    });
+
+    QObject::connect(this, &DialogExport::signalZippingFinished, this, [=](bool finishedSuccessfully){
+        if(finishedSuccessfully)
+        {
+            ui->buttonSelectLocation->setEnabled(true);
+            ui->labelFileStatus->clear();
+            ui->labelFilePath->clear();
+            showStatusSuccess(statusTextZippingFinishedWithoutError(), ui->labelStatus);
+        }
+        else
+        {
+            showStatusError(statusTextZippingFinishedWithError(), ui->labelStatus);
+            ui->labelFileStatus->setText(tr("Stopped at:"));
+        }
     });
 }
 
@@ -42,8 +59,12 @@ void DialogExport::show(QList<QString> itemList)
 {
     this->itemList = itemList;
     ui->lineEdit->clear();
+    ui->buttonSelectLocation->setEnabled(true);
     ui->buttonExport->setDisabled(true);
     ui->progressBar->setValue(0);
+    ui->labelFileStatus->clear();
+    ui->labelFilePath->clear();
+    showStatusInfo(statusTextSelectLocation(), ui->labelStatus);
     QWidget::show();
 }
 
@@ -62,6 +83,7 @@ void DialogExport::on_buttonSelectLocation_clicked()
 
     ui->lineEdit->setText(filePath);
     ui->buttonExport->setEnabled(true);
+    showStatusSuccess(statusTextZipFileReadyToCreate(), ui->labelStatus);
 }
 
 
@@ -69,6 +91,8 @@ void DialogExport::on_buttonExport_clicked()
 {
     ui->buttonExport->setDisabled(true);
     ui->buttonSelectLocation->setDisabled(true);
+    showStatusInfo(statusTextZippingInProgress(), ui->labelStatus);
+    ui->progressBar->setValue(0);
 
     QFuture<void> future = QtConcurrent::run([=]{
         QJsonArray fileJsonArray;
@@ -132,6 +156,7 @@ void DialogExport::on_buttonExport_clicked()
         {
             QJsonObject fileJson = currentFileJson.toObject();
             QJsonArray versionJsonArray = fileJson[JsonKeys::File::VersionList].toArray();
+            emit signalAddingFileToZip(fileJson[JsonKeys::File::SymbolFilePath].toString());
 
             for(const QJsonValue &currentFileVersion : qAsConst(versionJsonArray))
             {
@@ -140,21 +165,60 @@ void DialogExport::on_buttonExport_clicked()
                 QString internalFilePath = fsm->getBackupFolderPath() + internalFileName;
 
                 QFile rawFile(internalFilePath);
-                rawFile.open(QFile::OpenModeFlag::ReadOnly);
+                bool isReadable = rawFile.open(QFile::OpenModeFlag::ReadOnly);
+
+                if(!isReadable)
+                {
+                    emit signalZippingFinished(false);
+                    return;
+                }
 
                 QuaZipNewInfo info(internalFileName, internalFilePath);
                 QuaZipFile fileInZip(&archive);
                 fileInZip.open(QFile::OpenModeFlag::WriteOnly, info);
 
                 while(!rawFile.atEnd())
-                    fileInZip.write(rawFile.read(104857600)); // Read up to 100mb in every iteration.
+                {
+                    // Write up to 100mb in every iteration.
+                    qlonglong bytesWritten = fileInZip.write(rawFile.read(104857600));
+                    if(bytesWritten == -1)
+                    {
+                        emit signalZippingFinished(false);
+                        return;
+                    }
+                }
 
                 ++zipProgressValue;
                 emit signalZipProgressUpdated(zipProgressValue);
             }
         }
 
-        emit signalZippingFinished();
+        emit signalZippingFinished(true);
     });
+}
+
+QString DialogExport::statusTextSelectLocation()
+{
+    return tr("Please select location for zip file where it will be created");
+}
+
+QString DialogExport::statusTextZipFileReadyToCreate()
+{
+    return tr("Zip file is ready to create");
+}
+
+QString DialogExport::statusTextZippingInProgress()
+{
+    return tr("Your files are being compressed in the background...");
+}
+
+QString DialogExport::statusTextZippingFinishedWithoutError()
+{
+    return tr("Zip file created successfully");
+}
+
+QString DialogExport::statusTextZippingFinishedWithError()
+{
+    return tr("Zip file creation canceled due to error");
 }
 
