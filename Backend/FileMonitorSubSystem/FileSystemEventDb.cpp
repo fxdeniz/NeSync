@@ -64,64 +64,49 @@ bool FileSystemEventDb::isFileExist(const QString &pathToFile) const
 
 bool FileSystemEventDb::addFolder(const QString &pathToFolder)
 {
-    // Workaround for #133
-    database.close();
-    database.open();
-    //
+    QString nativePath = QDir::toNativeSeparators(pathToFolder);
 
-    bool result = false;
+    if(nativePath.endsWith(QDir::separator()))
+        nativePath.chop(1);
 
-    if(database.transaction())
+    QString queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path, event_timestamp) VALUES(:1, :2, :3);" ;
+    QStringList folderNames = nativePath.split(QDir::separator());
+    QString parentFolderPath = "";
+
+    for(const QString &folder : folderNames)
     {
-        QString nativePath = QDir::toNativeSeparators(pathToFolder);
+        // Start constructing from root path
+        QString currentSubFolderPath = folder + QDir::separator();
+        QString currentFolderPath = parentFolderPath + currentSubFolderPath;
 
-        if(nativePath.endsWith(QDir::separator()))
-            nativePath.chop(1);
+        bool isInsertingRootPath = currentFolderPath == QDir::toNativeSeparators(QDir::rootPath());
 
-        QString queryTemplate = "INSERT INTO Folder(folder_path, parent_folder_path, event_timestamp) VALUES(:1, :2, :3);" ;
-        QStringList folderNames = nativePath.split(QDir::separator());
-        QString parentFolderPath = "";
+        bool isAlreadyInDb = isFolderExist(currentFolderPath);
 
-        for(const QString &folder : folderNames)
+        if(!isAlreadyInDb) // If root path not in db
         {
-            // Start constructing from root path
-            QString currentSubFolderPath = folder + QDir::separator();
-            QString currentFolderPath = parentFolderPath + currentSubFolderPath;
+            QSqlQuery query(database);
+            query.prepare(queryTemplate);
 
-            bool isInsertingRootPath = currentFolderPath == QDir::separator();
+            query.bindValue(":1", currentFolderPath);
+            query.bindValue(":3", QDateTime::currentDateTime());
 
-            bool isAlreadyInDb = isFolderExist(currentFolderPath);
+            if(isInsertingRootPath)
+                query.bindValue(":2", QVariant()); // Bind null value.
+            else
+                query.bindValue(":2", parentFolderPath);
 
-            if(!isAlreadyInDb) // If root path not in db
-            {
-                QSqlQuery query(database);
-                query.prepare(queryTemplate);
+            query.exec();
 
-                query.bindValue(":1", currentFolderPath);
-                query.bindValue(":3", QDateTime::currentDateTime());
-
-                if(isInsertingRootPath)
-                    query.bindValue(":2", QVariant()); // Bind null value.
-                else
-                    query.bindValue(":2", parentFolderPath);
-
-                query.exec();
-
-                if(query.lastError().type() != QSqlError::ErrorType::NoError)
-                {
-                    database.rollback();
-                    return false;
-                }
-            }
-
-            // Set last inserted path as root path
-            parentFolderPath += currentSubFolderPath;
+            if(query.lastError().type() != QSqlError::ErrorType::NoError)
+                return false;
         }
 
-        result = database.commit();
+        // Set last inserted path as root path
+        parentFolderPath += currentSubFolderPath;
     }
 
-    return result;
+    return true;
 }
 
 bool FileSystemEventDb::addFile(const QString &pathToFile)
