@@ -31,6 +31,7 @@ signals:
     void signalStartFileMonitor();
     void signalStopMonitoringItem(const QString &userPathToFileOrFolder);
     void signalStartMonitoringItem(const QString &userPathToFileOrFolder);
+    void signalRefreshFileMonitor();
 
 private slots:
     void on_tableView_clicked(const QModelIndex &index);

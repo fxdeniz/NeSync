@@ -576,6 +576,7 @@ void TabFileExplorer::on_contextActionTableView_Delete_triggered()
 
         refreshFileExplorer();
         clearDescriptionDetails();
+        emit signalRefreshFileMonitor();
     }
 }
 
@@ -597,6 +598,7 @@ void TabFileExplorer::on_contextActionTableView_Freeze_triggered()
         executeFreezingOrThawingOfFile(name, symbolPath, userPath, isFrozen);
 
     refreshFileExplorer();
+    emit signalRefreshFileMonitor();
 }
 
 void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen)

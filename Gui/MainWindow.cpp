@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalRefreshFileMonitor,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
+
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
