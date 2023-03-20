@@ -343,6 +343,9 @@ void TabFileExplorer::on_contextActionListView_EditVersion_triggered()
     QModelIndexList listVersionNumber = listViewSelectionModel->selectedRows(ListModelFileExplorer::ColumnIndexVersionNumber);
     auto versionNumber = listVersionNumber.first().data().toLongLong();
 
+    Qt::WindowFlags flags = dialogEditVersion->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    dialogEditVersion->setWindowFlags(flags);
     dialogEditVersion->setModal(true);
     dialogEditVersion->show(fileSymbolPath, versionNumber);
 }

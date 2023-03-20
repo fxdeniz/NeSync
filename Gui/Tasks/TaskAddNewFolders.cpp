@@ -45,7 +45,9 @@ void TaskAddNewFolders::run()
             emit signalFileBeingProcessed(cursor.key());
             emit signalGenericFileEvent();
 
-            bool requestResult = fsm->addNewFile(item.symbolFolderPath, cursor.key(), cursor.value());
+            QString description = "Initial version of <b>%1</b>";
+            description = description.arg(QFileInfo(cursor.key()).fileName());
+            bool requestResult = fsm->addNewFile(item.symbolFolderPath, cursor.key(), cursor.value(), "", description);
 
             if(requestResult == true)
                 emit signalFileAddedSuccessfully(cursor.key());

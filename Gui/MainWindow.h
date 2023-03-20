@@ -40,6 +40,7 @@ private:
     QAction *separator1;
 
 private:
+    void showLiabilityWarningInStatusBar();
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();

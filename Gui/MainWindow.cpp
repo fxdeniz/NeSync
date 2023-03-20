@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
     createFileMonitorThread(dialogImport, tabFileExplorer);
+
+    showLiabilityWarningInStatusBar();
 }
 
 MainWindow::~MainWindow()
@@ -193,10 +195,10 @@ void MainWindow::on_menuAction_AboutApp_triggered()
     auto fsm = FileStorageManager::instance();
 
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.5.0</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.5.0 [Pre-Alpha]</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
-                         "This is a <b>early access version</b>, consider this as staging period towards V2.<br>"
+                         "This is a <b>pre-alpha version</b>, <b>DO NOT USE</b> for critical things.<br>"
                          "This software does not collect any data and does not connect to the internet. <br>"
                          ""
                          "<h3>Developed by</h3>"
@@ -242,4 +244,18 @@ void MainWindow::on_menuAction_AboutApp_triggered()
 void MainWindow::on_menuAction_AboutQt_triggered()
 {
     QApplication::aboutQt();
+}
+
+void MainWindow::showLiabilityWarningInStatusBar()
+{
+    QPalette palette(QPalette::ColorRole::WindowText, "#e84118");
+
+    QLabel *label = new QLabel(this);
+
+    label->setStyleSheet("QLabel { padding:  5px 5px 5px 0px; }");
+    label->setPalette(palette);
+    label->setAutoFillBackground(true);
+    label->setText(tr("This is a <b>pre-alpha version</b> which means <b>USE AT YOUR OWN RISK</b>. --- <b>[Version 1.5.0]</b>"));
+
+    ui->statusbar->insertWidget(0, label);
 }
