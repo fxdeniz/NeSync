@@ -17,6 +17,12 @@ NeSync is __Free and open-source software (FOSS)__ and source code licensed unde
 __WARNING: NeSync is currently in pre-alpha stage and it's not complete yet.__
 
 
+## Features
+* Fully multi-threaded architecture
+* Small memory footprint
+* Designed for modern OSes (Minimum required OS: Windows 10 1809  or Linux kernel 5.4)
+* Complete privacy (no internet connection at all)
+
 ## Outline
 
 * Few important note
