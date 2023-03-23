@@ -1,14 +1,20 @@
-#ifndef TREEITEM_H
-#define TREEITEM_H
+#ifndef FILME_MONITOR_TREEITEM_H
+#define FILME_MONITOR_TREEITEM_H
 
 #include <Backend/FileMonitorSubSystem/FileSystemEventDb.h>
 
 #include <QList>
 #include <QVariant>
 
-class TreeItem
+namespace TreeModelFileMonitor
+{
+    class TreeItem;
+}
+
+class TreeModelFileMonitor::TreeItem
 {
 public:
+    static const inline int ColumnCount = 4;
 
     enum ItemType
     {
@@ -64,4 +70,4 @@ private:
     TreeItem *parentItem;
 };
 
-#endif // TREEITEM_H
+#endif // FILME_MONITOR_TREEITEM_H

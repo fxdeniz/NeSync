@@ -1,7 +1,10 @@
 #include "TreeItem.h"
 
-TreeItem::TreeItem(TreeItem *parent) : parentItem(parent)
+using namespace TreeModelFileMonitor;
+
+TreeItem::TreeItem(TreeItem *parent)
 {
+    setParentItem(parent);
     setType(ItemType::Undefined);
     setAction(TreeItem::Action::NotSelected);
     setDescription("");
@@ -92,9 +95,8 @@ int TreeItem::childCount() const
 
 int TreeItem::columnCount() const
 {
-    return 4;
+    return ColumnCount;
 }
-
 
 int TreeItem::row() const
 {

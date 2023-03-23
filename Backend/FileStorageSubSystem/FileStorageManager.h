@@ -24,6 +24,7 @@ public:
     bool addNewFile(const QString &symbolFolderPath,
                     const QString &pathToFile,
                     bool isFrozen = false,
+                    const QString newFileName = "",
                     const QString &description = "");
 
     bool appendVersion(const QString &symbolFilePath,

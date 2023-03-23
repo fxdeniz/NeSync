@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>NeSync [Pre-Alpha]</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -76,11 +76,6 @@
   <action name="tab1Action_Import">
    <property name="text">
     <string>Import</string>
-   </property>
-  </action>
-  <action name="tab1Action_Export">
-   <property name="text">
-    <string>Export</string>
    </property>
   </action>
   <action name="menuAction_AboutApp">

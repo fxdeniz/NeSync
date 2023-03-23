@@ -1,84 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogEditVersion</class>
- <widget class="QDialog" name="DialogEditVersion">
+ <class>DialogImport</class>
+ <widget class="QDialog" name="DialogImport">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>649</width>
+    <width>640</width>
     <height>360</height>
    </rect>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>640</width>
-    <height>360</height>
-   </size>
-  </property>
   <property name="windowTitle">
-   <string>Version Editor</string>
+   <string>Zip Importer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="labelFileName">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>File Name</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>0</width>
+         <height>30</height>
         </size>
        </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Version:</string>
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QPushButton" name="buttonSelectFile">
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>150</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="text">
+        <string>Select zip file to import</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEdit"/>
+    <widget class="QTreeView" name="treeView">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -91,33 +85,33 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonRestore">
+      <widget class="QPushButton" name="buttonImport">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>200</width>
          <height>30</height>
         </size>
        </property>
        <property name="text">
-        <string>Restore</string>
+        <string>Import</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonSave">
+      <widget class="QPushButton" name="buttonClearResults">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>200</width>
          <height>30</height>
         </size>
        </property>
        <property name="text">
-        <string>Save</string>
+        <string>Clear and Import new zip file</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

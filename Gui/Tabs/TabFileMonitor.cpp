@@ -1,8 +1,9 @@
 #include "TabFileMonitor.h"
 #include "ui_TabFileMonitor.h"
 
-#include "DataModels/TabFileMonitor/TreeModelFsMonitor.h"
 #include "Tasks/TaskSaveChanges.h"
+#include "Utility/DatabaseRegistry.h"
+#include "DataModels/TabFileMonitor/TreeModelFileMonitor.h"
 
 TabFileMonitor::TabFileMonitor(QWidget *parent) :
     QWidget(parent),
@@ -11,8 +12,8 @@ TabFileMonitor::TabFileMonitor(QWidget *parent) :
     ui->setupUi(this);
     ui->progressBar->hide();
 
-    itemDelegateAction = new ItemDelegateAction(this);
-    itemDelegateDescription = new ItemDelegateDescription(this);
+    itemDelegateAction = new TreeModelFileMonitor::ItemDelegateAction(this);
+    itemDelegateDescription = new TreeModelFileMonitor::ItemDelegateDescription(this);
 
     timer.setInterval(2000);
     timer.stop();
@@ -28,11 +29,13 @@ TabFileMonitor::~TabFileMonitor()
 
 void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
 {
+    emit signalEnableSaveAllButton(false);
+
     ui->textEditDescription->setReadOnly(true);
     ui->buttonAddDescription->setDisabled(true);
     ui->buttonDeleteDescription->setDisabled(true);
 
-    auto treeModel = (TreeModelFsMonitor *)(ui->treeView->model());
+    auto treeModel = (TreeModelFileMonitor::Model *)(ui->treeView->model());
     Q_ASSERT(treeModel);
 
     TaskSaveChanges *task = new TaskSaveChanges(treeModel->getFolderItemMap(),
@@ -68,6 +71,8 @@ void TabFileMonitor::saveChanges(FileMonitoringManager *fmm)
 
 void TabFileMonitor::onEventDbUpdated()
 {
+    emit signalEnableSaveAllButton(false);
+
     QString statusText = "Analyzing detected changes...";
     ui->labelStatus->setHidden(false);
     ui->labelStatus->setText(statusText);
@@ -86,6 +91,12 @@ void TabFileMonitor::onEventDbUpdated()
 void TabFileMonitor::displayFileMonitorContent()
 {
     timer.stop();
+
+    FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
+
+    if(fsEventDb.isContainAnyFolderEvent() || fsEventDb.isContainAnyFileEvent())
+        emit signalEnableSaveAllButton(true);
+
     ui->labelStatus->setHidden(true);
     ui->progressBar->hide();
     ui->textEditDescription->setEnabled(true);
@@ -93,7 +104,7 @@ void TabFileMonitor::displayFileMonitorContent()
     ui->buttonAddDescription->setEnabled(true);
     ui->buttonDeleteDescription->setEnabled(true);
 
-    TreeModelFsMonitor *treeModel = new TreeModelFsMonitor();
+    TreeModelFileMonitor::Model *treeModel = new TreeModelFileMonitor::Model();
     QAbstractItemModel *oldModel = ui->treeView->model();
 
     if(oldModel != nullptr)
@@ -104,12 +115,12 @@ void TabFileMonitor::displayFileMonitorContent()
 
     QHeaderView *header = ui->treeView->header();
     header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-    header->setSectionResizeMode(TreeModelFsMonitor::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
+    header->setSectionResizeMode(TreeModelFileMonitor::Model::ColumnIndexUserPath, QHeaderView::ResizeMode::Interactive);
     header->setMinimumSectionSize(130);
-    ui->treeView->setColumnWidth(TreeModelFsMonitor::ColumnIndexUserPath, 500);
+    ui->treeView->setColumnWidth(TreeModelFileMonitor::Model::ColumnIndexUserPath, 500);
 
-    ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexAction, itemDelegateAction);
-    ui->treeView->setItemDelegateForColumn(TreeModelFsMonitor::ColumnIndexDescription, itemDelegateDescription);
+    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::Model::ColumnIndexAction, itemDelegateAction);
+    ui->treeView->setItemDelegateForColumn(TreeModelFileMonitor::Model::ColumnIndexDescription, itemDelegateDescription);
 
     ui->treeView->expandAll();
 
@@ -119,8 +130,8 @@ void TabFileMonitor::displayFileMonitorContent()
 
     for(const QModelIndex &current : selectedIndices)
     {
-        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFsMonitor::ColumnIndexAction));
-        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFsMonitor::ColumnIndexDescription));
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::Model::ColumnIndexAction));
+        ui->treeView->openPersistentEditor(current.siblingAtColumn(TreeModelFileMonitor::Model::ColumnIndexDescription));
     }
 
     ui->treeView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
@@ -134,7 +145,7 @@ void TabFileMonitor::on_buttonAddDescription_clicked()
 
     textEdit->clear();
 
-    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     model->appendDescription();
 
     int number = model->getMaxDescriptionNumber();
@@ -154,7 +165,7 @@ void TabFileMonitor::on_buttonDeleteDescription_clicked()
 
     textEdit->clear();
 
-    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = comboBox->currentText().toInt();
     int previousIndex = comboBox->currentIndex();
     model->deleteDescription(number);
@@ -177,7 +188,7 @@ void TabFileMonitor::on_buttonDeleteDescription_clicked()
 
 void TabFileMonitor::on_textEditDescription_textChanged()
 {
-    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     model->updateDescription(number, ui->textEditDescription->toPlainText());
 }
@@ -190,7 +201,7 @@ void TabFileMonitor::on_comboBoxDescriptionNumber_activated(int index)
     textEdit->blockSignals(true); // Disable updating descriptionMap in TreeModel
 
     textEdit->clear();
-    auto model = (TreeModelFsMonitor *) ui->treeView->model();
+    auto model = (TreeModelFileMonitor::Model *) ui->treeView->model();
     int number = ui->comboBoxDescriptionNumber->currentText().toInt();
     textEdit->setText(model->getDescription(number));
 

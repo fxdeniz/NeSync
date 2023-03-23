@@ -1,65 +1,41 @@
-#include <QStandardPaths>
 #include <QApplication>
-#include <QDebug>
-#include <QJsonArray>
+#include <QMessageBox>
+#include <QSettings>
 
 #include "Gui/MainWindow.h"
-#include "Backend/FileMonitorSubSystem/FileMonitoringManager.h"
-#include "Backend/FileMonitorSubSystem/FileSystemEventDb.h"
-#include "Utility/DatabaseRegistry.h"
-#include "FileStorageSubSystem/ORM/Repository/FolderRepository.h"
-#include "FileStorageSubSystem/ORM/Repository/FileRepository.h"
-#include "FileStorageSubSystem/ORM/Repository/FileVersionRepository.h"
-#include "FileStorageSubSystem/FileStorageManager.h"
-#include "Utility/JsonDtoFormat.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    //FileStorageManager storageManager(app.applicationDirPath() + "/backup", "C:/Users/AppData/Local");
 
-//    auto testFolderPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-//    testFolderPath += "/test/";
+    QString settingsFilePath = QDir::toNativeSeparators(app.applicationDirPath()) + QDir::separator() + "settings.ini";
+    QSettings settings(settingsFilePath, QSettings::Format::IniFormat);
+    QString settingKey = "disclaimer_accepted";
 
-//    QStringList predictionList;
-//    predictionList << testFolderPath;
-//    predictionList << "not_exist";
+    if(settings.value(settingKey).toString() != "true") // Value can't read or not accepted
+    {
+        QString title = QObject::tr("Disclaimer !");
+        QString message = QObject::tr("You're about the use Pre-Alpha version of <b>NeSync</b>."
+                                      "<br><br>"
+                                      "Pre-Alpha version means, this software <b>IS NOT complete yet</b> and contains bugs."
+                                      "<br>"
+                                      "Developer of this software <b>DOES NOT recommed</b> you to use this software for critical things."
+                                      "<br><br>"
+                                      "By pressing <b>Yes</b> you accept all the risks associated with using in-complete software."
+                                      " Such as data loss, system crashes and security breaches."
+                                      "<br><br>"
+                                      "Do you accept the accept the risks ?");
 
-//    FileMonitoringManagerIntegrationTest fmmITest(predictionList);
+        QMessageBox::StandardButton result = QMessageBox::question(nullptr, title, message);
+
+        if(result != QMessageBox::StandardButton::Yes)
+            return 0;
+    }
+
+    settings.setValue(settingKey, true);
 
     MainWindow w;
     w.show();
-
-//    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-//    tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
-//    QDir(tempPath).mkdir("backup_2");
-
-//    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
-
-//    auto v2fsm = FileStorageManager::instance();
-//    v2fsm->addNewFolder("/test_folder/", "/home/user/Desktop/data/");
-//    v2fsm->addNewFolder("/test_folder/sub_folder/", "");
-//    v2fsm->addNewFolder("/test_folder/sub_folder/leaf/", "");
-//    v2fsm->addNewFile("/test_folder/sub_folder/leaf/", "/home/user/Desktop/data/image_file.png");
-//    v2fsm->addNewFile("/test_folder/","/home/user/Desktop/data/text_file.txt");
-//    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "second version");
-//    v2fsm->appendVersion("/test_folder/text_file.txt", "/home/user/Desktop/data/text_file.txt", "third version");
-
-//    v2fsm->deleteFolder("/test_folder/");
-
-//    QJsonObject folderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/");
-//    folderJson[JsonKeys::Folder::IsFrozen] = true;
-//    v2fsm->updateFolderEntity(folderJson, true);
-
-
-//    v2fsm->deleteFile("/test_folder/text_file.txt");
-
-//    QJsonObject rootFolderJson = v2fsm->getFolderJsonBySymbolPath("/", true);
-//    QJsonObject childFolderJson = v2fsm->getFolderJsonBySymbolPath("/test_folder/", true);
-//    QJsonObject fileJson = v2fsm->getFileJsonBySymbolPath("/test_folder/text_file.txt", true);
-//    QJsonObject versionJson = v2fsm->getFileVersionJson("/test_folder/text_file.txt", 2);
-//    QJsonObject fileJsonByUserPath = v2fsm->getFileJsonByUserPath("/home/user/Desktop/data/text_file.txt", true);
-//    qDebug() << V2_FileStorageManager::instance()->getActiveFolderList();
 
     return app.exec();
 }

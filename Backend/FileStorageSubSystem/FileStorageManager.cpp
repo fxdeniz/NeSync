@@ -53,7 +53,7 @@ bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QSt
     QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
     QString _userFolderPath = QDir::toNativeSeparators(userFolderPath);
 
-    bool isUserFolderExist = QDir(userFolderPath).exists();
+    bool isUserFolderExist = QDir(_userFolderPath).exists(); // Returns true on empty _userFolderPath
     if(!isUserFolderExist)
         return false;
 
@@ -90,8 +90,11 @@ bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QSt
             {
                 entity.parentFolderPath = parentSymbolFolderPath;
                 entity.suffixPath = suffixPath;
-                entity.isFrozen = false;
                 entity.userFolderPath = "";
+                entity.isFrozen = true;
+
+                if(isUserFolderExist && !_userFolderPath.isEmpty())
+                    entity.isFrozen = false;
 
                 if(currentSymbolFolder == _symbolFolderPath)
                     entity.userFolderPath = _userFolderPath;
@@ -106,7 +109,11 @@ bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QSt
     return result;
 }
 
-bool FileStorageManager::addNewFile(const QString &symbolFolderPath, const QString &pathToFile, bool isFrozen, const QString &description)
+bool FileStorageManager::addNewFile(const QString &symbolFolderPath,
+                                    const QString &pathToFile,
+                                    bool isFrozen,
+                                    const QString newFileName,
+                                    const QString &description)
 {
     QString _symbolFolderPath = QDir::fromNativeSeparators(symbolFolderPath);
     QFileInfo info(pathToFile);
@@ -120,18 +127,22 @@ bool FileStorageManager::addNewFile(const QString &symbolFolderPath, const QStri
     if(!_symbolFolderPath.endsWith(separator))
         _symbolFolderPath.append(separator);
 
+    QString _fileName = info.fileName();
+    if(!newFileName.isEmpty())
+        _fileName = newFileName;
+
     FolderEntity folderEntity = folderRepository->findBySymbolPath(_symbolFolderPath);
 
     if(!folderEntity.isExist()) // Symbol folder does not exist
         return false;
 
-    QString symbolFilePath = folderEntity.symbolFolderPath() + info.fileName();
+    QString symbolFilePath = folderEntity.symbolFolderPath() + _fileName;
     FileEntity fileEntity = fileRepository->findBySymbolPath(symbolFilePath);
 
     if(fileEntity.isExist()) // Symbol folder is already exist
         return false;
 
-    fileEntity.fileName = info.fileName();
+    fileEntity.fileName = _fileName;
     fileEntity.symbolFolderPath = folderEntity.symbolFolderPath();
     fileEntity.isFrozen = isFrozen;
 

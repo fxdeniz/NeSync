@@ -96,7 +96,6 @@ void DialogCreateCopy::on_buttonSelectLocation_clicked()
             showStatusWarning(message, ui->labelStatus);
         }
 
-        resize(width(), maximumHeight());
         ui->lineEdit->setText(selection);
         ui->buttonCreateCopy->setEnabled(true);
     }
@@ -141,7 +140,5 @@ void DialogCreateCopy::on_buttonCreateCopy_clicked()
         showStatusSuccess(tr("Copy generated successfully"), ui->labelStatus);
     else
         showStatusError(tr("Couldn't generate copy, see error log"), ui->labelStatus);
-
-    resize(width(), minimumHeight());
 }
 

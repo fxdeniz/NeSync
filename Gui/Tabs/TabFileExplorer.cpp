@@ -22,6 +22,7 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
 
     dialogEditVersion = new DialogEditVersion(this);
     dialogCreateCopy = new DialogCreateCopy(this);
+    dialogExport = new DialogExport(this);
 
     buildContextMenuTableFileExplorer();
     buildContextMenuListFileExplorer();
@@ -30,8 +31,8 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     ui->buttonForward->setDisabled(true);
     clearDescriptionDetails();
 
-    this->ui->tableViewFileExplorer->horizontalHeader()->setMinimumSectionSize(110);
-    this->ui->tableViewFileExplorer->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    this->ui->tableView->horizontalHeader()->setMinimumSectionSize(110);
+    this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
 
     ui->lineEditWorkingDir->setText(FileStorageManager::separator);
     displayFolderInTableViewFileExplorer(FileStorageManager::separator);
@@ -44,16 +45,18 @@ TabFileExplorer::~TabFileExplorer()
 
 void TabFileExplorer::buildContextMenuTableFileExplorer()
 {
-    contextMenuTableFileExplorer = new QMenu(ui->tableViewFileExplorer);
+    contextMenuTableFileExplorer = new QMenu(ui->tableView);
     QMenu *ptrMenu = contextMenuTableFileExplorer;
 
-    QAction *actionFreeze = ui->contextActionTableFileExplorer_Freeze;
-    QAction *actionDelete = ui->contextActionTableFileExplorer_Delete;
+    QAction *actionExport = ui->contextActionTableView_Export;
+    QAction *actionFreeze = ui->contextActionTableView_Freeze;
+    QAction *actionDelete = ui->contextActionTableView_Delete;
 
+    ptrMenu->addAction(actionExport);
     ptrMenu->addAction(actionFreeze);
     ptrMenu->addAction(actionDelete);
 
-    QObject::connect(ui->tableViewFileExplorer, &QTableView::customContextMenuRequested,
+    QObject::connect(ui->tableView, &QTableView::customContextMenuRequested,
                      this, &TabFileExplorer::showContextMenuTableView);
 }
 
@@ -62,10 +65,10 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     contextMenuListFileExplorer = new QMenu(ui->listView);
     QMenu *ptrMenu = contextMenuListFileExplorer;
 
-    QAction *actionEditVersion = ui->contextActionListFileExplorer_EditVersion;
-    QAction *actionCreateCopy = ui->contextActionListFileExplorer_CreateCopy;
-    QAction *actionSetAsCurrentVerion = ui->contextActionListFileExplorer_SetAsCurrentVersion;
-    QAction *actionDelete = ui->contextActionListFileExplorer_DeleteVersion;
+    QAction *actionEditVersion = ui->contextActionListView_EditVersion;
+    QAction *actionCreateCopy = ui->contextActionListView_CreateCopy;
+    QAction *actionSetAsCurrentVerion = ui->contextActionListView_SetAsCurrentVersion;
+    QAction *actionDelete = ui->contextActionListView_DeleteVersion;
 
     ptrMenu->addAction(actionEditVersion);
     ptrMenu->addAction(actionCreateCopy);
@@ -100,7 +103,7 @@ void TabFileExplorer::displayFolderInTableViewFileExplorer(const QString &symbol
 {
     auto fsm = FileStorageManager::instance();
     QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
-    QTableView *tableView = ui->tableViewFileExplorer;
+    QTableView *tableView = ui->tableView;
 
     if(tableView->model() != nullptr)
         delete tableView->model();
@@ -160,20 +163,38 @@ void TabFileExplorer::refreshFileExplorer()
 
 void TabFileExplorer::showContextMenuTableView(const QPoint &argPos)
 {
-    QAbstractItemView *subjectView = ui->tableViewFileExplorer;
+    QAbstractItemView *subjectView = ui->tableView;
     QModelIndex index = subjectView->indexAt(argPos);
 
     if(index.isValid()) // If user selected an item from table.
     {
-        auto tableModel = (TableModelFileExplorer *) subjectView->model();
-        bool isFrozen = tableModel->getIsFrozenFromModelIndex(index);
-
-        if(isFrozen)
-            ui->contextActionTableFileExplorer_Freeze->setText(tr("Thaw"));
-        else
-            ui->contextActionTableFileExplorer_Freeze->setText(tr("Freeze"));
-
         QMenu *ptrMenu = contextMenuTableFileExplorer;
+        int selectedItemCount = ui->tableView->selectionModel()->selectedRows().size();
+
+        if(selectedItemCount == 1)
+        {
+            ptrMenu->addAction(ui->contextActionTableView_Delete);
+            ptrMenu->addAction(ui->contextActionTableView_Freeze);
+            ptrMenu->removeAction(ui->contextActionTableView_Export); // To preserve order re-insert
+            ptrMenu->addAction(ui->contextActionTableView_Export);
+
+            auto tableModel = (TableModelFileExplorer *) subjectView->model();
+            bool isFrozen = tableModel->getIsFrozenFromModelIndex(index);
+
+            if(isFrozen)
+                ui->contextActionTableView_Freeze->setText(tr("Thaw"));
+            else
+                ui->contextActionTableView_Freeze->setText(tr("Freeze"));
+
+            ui->contextActionTableView_Export->setText(tr("Export"));
+        }
+        else
+        {
+            ptrMenu->removeAction(ui->contextActionTableView_Delete);
+            ptrMenu->removeAction(ui->contextActionTableView_Freeze);
+            ui->contextActionTableView_Export->setText(tr("Export %1 items").arg(selectedItemCount));
+        }
+
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
@@ -185,21 +206,21 @@ void TabFileExplorer::showContextMenuListView(const QPoint &argPos)
 
     if(index.isValid()) // If user selected an item from list.
     {
-        auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
-        QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+        auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+        QModelIndex tableModelIndex = ui->tableView->selectionModel()->selectedRows().first();
         bool isFrozen = tableModel->getIsFrozenFromModelIndex(tableModelIndex);
 
         if(isFrozen)
-            ui->contextActionListFileExplorer_SetAsCurrentVersion->setEnabled(false);
+            ui->contextActionListView_SetAsCurrentVersion->setEnabled(false);
         else
-            ui->contextActionListFileExplorer_SetAsCurrentVersion->setEnabled(true);
+            ui->contextActionListView_SetAsCurrentVersion->setEnabled(true);
 
         QMenu *ptrMenu = contextMenuListFileExplorer;
         ptrMenu->popup(subjectView->viewport()->mapToGlobal(argPos));
     }
 }
 
-void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
+void TabFileExplorer::on_tableView_clicked(const QModelIndex &index)
 {
     if(index.isValid()) // If user clicked an item
     {
@@ -228,7 +249,7 @@ void TabFileExplorer::on_tableViewFileExplorer_clicked(const QModelIndex &index)
     }
 }
 
-void TabFileExplorer::on_tableViewFileExplorer_doubleClicked(const QModelIndex &index)
+void TabFileExplorer::on_tableView_doubleClicked(const QModelIndex &index)
 {
     if(index.isValid()) // If user double clicked an item
     {
@@ -312,9 +333,9 @@ void TabFileExplorer::clearDescriptionDetails()
         delete listModel;
 }
 
-void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
+void TabFileExplorer::on_contextActionListView_EditVersion_triggered()
 {
-    QItemSelectionModel *tableViewSelectionModel = ui->tableViewFileExplorer->selectionModel();
+    QItemSelectionModel *tableViewSelectionModel = ui->tableView->selectionModel();
     QModelIndexList listSymbolPath = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexSymbolPath);
     auto fileSymbolPath = listSymbolPath.first().data().toString();
 
@@ -322,16 +343,19 @@ void TabFileExplorer::on_contextActionListFileExplorer_EditVersion_triggered()
     QModelIndexList listVersionNumber = listViewSelectionModel->selectedRows(ListModelFileExplorer::ColumnIndexVersionNumber);
     auto versionNumber = listVersionNumber.first().data().toLongLong();
 
+    Qt::WindowFlags flags = dialogEditVersion->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    dialogEditVersion->setWindowFlags(flags);
     dialogEditVersion->setModal(true);
     dialogEditVersion->show(fileSymbolPath, versionNumber);
 }
 
-void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
+void TabFileExplorer::on_contextActionListView_DeleteVersion_triggered()
 {
     auto fsm = FileStorageManager::instance();
 
-    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
-    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
+    QModelIndex tableModelIndex = ui->tableView->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
     QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
     QString userFilePath = tableModel->getUserPathFromModelIndex(tableModelIndex);
     QString fileName = tableModel->getNameFromModelIndex(tableModelIndex);
@@ -394,10 +418,10 @@ void TabFileExplorer::on_contextActionListFileExplorer_DeleteVersion_triggered()
     }
 }
 
-void TabFileExplorer::on_contextActionListFileExplorer_CreateCopy_triggered()
+void TabFileExplorer::on_contextActionListView_CreateCopy_triggered()
 {
-    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
-    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+    QModelIndex tableModelIndex = ui->tableView->selectionModel()->selectedRows().first();
     QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
     qlonglong selectedVersionNumber = ui->listView->selectionModel()->selectedRows().first().data().toLongLong();
 
@@ -405,10 +429,10 @@ void TabFileExplorer::on_contextActionListFileExplorer_CreateCopy_triggered()
     dialogCreateCopy->show(symbolFilePath, selectedVersionNumber);
 }
 
-void TabFileExplorer::on_contextActionListFileExplorer_SetAsCurrentVersion_triggered()
+void TabFileExplorer::on_contextActionListView_SetAsCurrentVersion_triggered()
 {
-    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
-    QModelIndex tableModelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+    QModelIndex tableModelIndex = ui->tableView->selectionModel()->selectedRows().first();
     QString symbolFilePath = tableModel->getSymbolPathFromModelIndex(tableModelIndex);
     QString userFilePath = tableModel->getUserPathFromModelIndex(tableModelIndex);
     QString fileName = tableModel->getNameFromModelIndex(tableModelIndex);
@@ -464,10 +488,26 @@ void TabFileExplorer::on_contextActionListFileExplorer_SetAsCurrentVersion_trigg
     }
 }
 
-void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
+void TabFileExplorer::on_contextActionTableView_Export_triggered()
 {
-    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
-    QModelIndex modelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    QList<QString> selectedItemList;
+    QModelIndexList list = ui->tableView->selectionModel()->selectedRows();
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+
+    for(const QModelIndex &currentIndex : list)
+    {
+        QString symbolPath = tableModel->getSymbolPathFromModelIndex(currentIndex);
+        selectedItemList.append(symbolPath);
+    }
+
+    dialogExport->setModal(true);
+    dialogExport->show(selectedItemList);
+}
+
+void TabFileExplorer::on_contextActionTableView_Delete_triggered()
+{
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+    QModelIndex modelIndex = ui->tableView->selectionModel()->selectedRows().first();
 
     TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(modelIndex);
     QString name = tableModel->getNameFromModelIndex(modelIndex);
@@ -513,6 +553,13 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
             futureWatcher.setFuture(future);
             dialog.exec();
             futureWatcher.waitForFinished();
+
+            int deletedPathIndex = navigationHistoryIndices.indexOf(symbolPath);
+            if(deletedPathIndex != -1) // If path exist in navigation history
+            {
+                navigationHistoryIndices = navigationHistoryIndices.mid(0, deletedPathIndex);
+                ui->buttonForward->setDisabled(true);
+            }
         }
         else if(type == TableModelFileExplorer::TableItemType::File)
         {
@@ -532,14 +579,15 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Delete_triggered()
 
         refreshFileExplorer();
         clearDescriptionDetails();
+        emit signalRefreshFileMonitor();
     }
 }
 
-void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
+void TabFileExplorer::on_contextActionTableView_Freeze_triggered()
 {
     auto fsm = FileStorageManager::instance();
-    auto tableModel = (TableModelFileExplorer *) ui->tableViewFileExplorer->model();
-    QModelIndex modelIndex = ui->tableViewFileExplorer->selectionModel()->selectedRows().first();
+    auto tableModel = (TableModelFileExplorer *) ui->tableView->model();
+    QModelIndex modelIndex = ui->tableView->selectionModel()->selectedRows().first();
 
     TableModelFileExplorer::TableItemType type = tableModel->getItemTypeFromModelIndex(modelIndex);
     QString name = tableModel->getNameFromModelIndex(modelIndex);
@@ -553,6 +601,7 @@ void TabFileExplorer::on_contextActionTableFileExplorer_Freeze_triggered()
         executeFreezingOrThawingOfFile(name, symbolPath, userPath, isFrozen);
 
     refreshFileExplorer();
+    emit signalRefreshFileMonitor();
 }
 
 void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, const QString &symbolPath, const QString &userPath, bool isFrozen)
@@ -605,7 +654,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFolder(const QString &name, cons
             return;
         }
 
-        // TODO add checking empty space before extracting folders
+        // TODO: add checking empty space before extracting folders
 
         emit signalStopFileMonitor();
         thawFolderTree(name, symbolPath, selection);

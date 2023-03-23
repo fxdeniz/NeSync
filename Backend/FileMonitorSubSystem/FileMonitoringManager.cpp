@@ -382,6 +382,14 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
             emit signalEventDbUpdated();
         }
+        else if(isOldFileMonitored && isNewFileMonitored) // Delete temp file (Issue #81).
+        {
+            bool isFilePersists = fsm->getFileJsonByUserPath(currentNewPath)[JsonKeys::IsExist].toBool();
+            if(isFilePersists)
+                database->deleteFile(currentOldPath);
+
+            emit signalEventDbUpdated();
+        }
     }
     else if(info.isDir())
     {

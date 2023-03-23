@@ -25,6 +25,9 @@ public:
 public slots:
     void onEventDbUpdated();
 
+signals:
+    void signalEnableSaveAllButton(bool flag);
+
 private slots:
     void displayFileMonitorContent();
 
@@ -35,8 +38,8 @@ private slots:
 
 private:
     Ui::TabFileMonitor *ui;
-    ItemDelegateAction *itemDelegateAction;
-    ItemDelegateDescription *itemDelegateDescription;
+    TreeModelFileMonitor::ItemDelegateAction *itemDelegateAction;
+    TreeModelFileMonitor::ItemDelegateDescription *itemDelegateDescription;
     QTimer timer;
 };
 

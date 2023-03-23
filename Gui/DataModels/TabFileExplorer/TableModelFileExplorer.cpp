@@ -106,13 +106,6 @@ QVariant TableModelFileExplorer::data(const QModelIndex &index, int role) const
                 break;
         }
     }
-    else if(role == Qt::ItemDataRole::CheckStateRole && index.column() == ColumnIndexName)
-    {
-        if(checkedItems.contains(index))
-            return Qt::CheckState::Checked;
-        else
-            return Qt::CheckState::Unchecked;
-    }
     else if(role == Qt::ItemDataRole::DecorationRole && index.column() == ColumnIndexName)
     {
         QFileIconProvider provider;
@@ -181,7 +174,7 @@ Qt::ItemFlags TableModelFileExplorer::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable | Qt::ItemFlag::ItemIsUserCheckable;
+    return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable;
 }
 
 bool TableModelFileExplorer::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -210,16 +203,6 @@ bool TableModelFileExplorer::setData(const QModelIndex &index, const QVariant &v
             this->itemList.replace(row, item);
             emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
 
-            return true;
-        }
-        else if(role == Qt::ItemDataRole::CheckStateRole)
-        {
-            if(value == Qt::CheckState::Checked)
-                this->checkedItems.insert(index);
-            else
-                this->checkedItems.remove(index);
-
-            emit dataChanged(index, index);
             return true;
         }
     }

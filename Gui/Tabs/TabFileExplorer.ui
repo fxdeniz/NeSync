@@ -25,6 +25,12 @@
          </property>
          <item>
           <widget class="QPushButton" name="buttonBack">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
            <property name="maximumSize">
             <size>
              <width>50</width>
@@ -32,7 +38,7 @@
             </size>
            </property>
            <property name="text">
-            <string>&lt;-</string>
+            <string>🡰</string>
            </property>
           </widget>
          </item>
@@ -41,7 +47,7 @@
            <property name="minimumSize">
             <size>
              <width>50</width>
-             <height>0</height>
+             <height>30</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -51,7 +57,7 @@
             </size>
            </property>
            <property name="text">
-            <string>-&gt;</string>
+            <string>🡲</string>
            </property>
           </widget>
          </item>
@@ -59,6 +65,12 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEditWorkingDir">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="font">
           <font>
            <bold>true</bold>
@@ -90,7 +102,7 @@
      <item row="1" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QTableView" name="tableViewFileExplorer">
+        <widget class="QTableView" name="tableView">
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>
@@ -309,7 +321,15 @@
     </layout>
    </item>
   </layout>
-  <action name="contextActionTableFileExplorer_Freeze">
+  <action name="contextActionTableView_Export">
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="toolTip">
+    <string>Export selected item(s) as zip file</string>
+   </property>
+  </action>
+  <action name="contextActionTableView_Freeze">
    <property name="text">
     <string>Freeze</string>
    </property>
@@ -317,12 +337,12 @@
     <string>Freeze/Thaw</string>
    </property>
   </action>
-  <action name="contextActionTableFileExplorer_Delete">
+  <action name="contextActionTableView_Delete">
    <property name="text">
     <string>Delete</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_EditVersion">
+  <action name="contextActionListView_EditVersion">
    <property name="text">
     <string>Edit version</string>
    </property>
@@ -330,7 +350,7 @@
     <string>Edit version</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_CreateCopy">
+  <action name="contextActionListView_CreateCopy">
    <property name="text">
     <string>Create copy</string>
    </property>
@@ -338,7 +358,7 @@
     <string>Create not tracked copy of this version</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_DeleteVersion">
+  <action name="contextActionListView_DeleteVersion">
    <property name="text">
     <string>Delete version</string>
    </property>
@@ -346,7 +366,7 @@
     <string>Delete selected version</string>
    </property>
   </action>
-  <action name="contextActionListFileExplorer_SetAsCurrentVersion">
+  <action name="contextActionListView_SetAsCurrentVersion">
    <property name="text">
     <string>Set as current version</string>
    </property>

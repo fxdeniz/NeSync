@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Folder Adder</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -94,7 +94,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="lineEditFolderPath">
+      <widget class="QLineEdit" name="lineEdit">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -176,7 +176,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Clear and Add new files</string>
+        <string>Clear and Add new folder</string>
        </property>
       </widget>
      </item>

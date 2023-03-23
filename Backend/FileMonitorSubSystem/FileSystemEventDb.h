@@ -48,6 +48,8 @@ public:
     QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;
     QStringList getDirectChildFileListOfFolder(const QString &pathToFolder) const;
     QStringList getEventfulFileListOfFolder(const QString &pathToFolder) const;
+    bool isContainAnyFolderEvent() const;
+    bool isContainAnyFileEvent() const;
     bool addMonitoringError(const QString &location, const QString &during, qlonglong error);
 
 private:

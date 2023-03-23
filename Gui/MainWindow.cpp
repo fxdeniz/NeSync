@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
+    dialogImport = new DialogImport(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
@@ -27,13 +28,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tabWidget->setCurrentIndex(0);
 
+    QObject::connect(dialogImport, &QDialog::accepted,
+                     tabFileExplorer, &TabFileExplorer::refreshFileExplorer);
+
     QObject::connect(dialogAddNewFolder, &QDialog::accepted,
                      tabFileExplorer, &TabFileExplorer::refreshFileExplorer);
 
     QObject::connect(dialogAddNewFolder, &DialogAddNewFolder::accepted,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
-    createFileMonitorThread(tabFileExplorer);
+    QObject::connect(tabFileExplorer, &TabFileExplorer::signalRefreshFileMonitor,
+                     tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
+
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
+                     ui->tab2Action_SaveAll, &QAction::setEnabled);
+
+    createFileMonitorThread(dialogImport, tabFileExplorer);
+
+    showLiabilityWarningInStatusBar();
 }
 
 MainWindow::~MainWindow()
@@ -60,9 +72,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
-
         toolBar->addAction(ui->tab1Action_Import);
-        toolBar->addAction(ui->tab1Action_Export);
     }
 }
 
@@ -91,7 +101,8 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
-void MainWindow::createFileMonitorThread(TabFileExplorer *tabFileExplorer)
+void MainWindow::createFileMonitorThread(const DialogImport * const dialogImport,
+                                         const TabFileExplorer * const tabFileExplorer)
 {
     fileMonitorThread = new QThread(this);
     fileMonitorThread->setObjectName(fileMonitorThreadName());
@@ -120,6 +131,10 @@ void MainWindow::createFileMonitorThread(TabFileExplorer *tabFileExplorer)
 
     QObject::connect(fileMonitorThread, &QThread::finished,
                      fmm, &QObject::deleteLater);
+
+    QObject::connect(dialogImport, &DialogImport::signalFileImportStartedForActiveFile,
+                     fmm, &FileMonitoringManager::stopMonitoringTarget,
+                     Qt::ConnectionType::BlockingQueuedConnection);
 
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalStopFileMonitor,
                      fmm, &FileMonitoringManager::pauseMonitoring,
@@ -156,6 +171,15 @@ void MainWindow::on_tab1Action_AddNewFolder_triggered()
     dialogAddNewFolder->show(tabFileExplorer->currentSymbolFolderPath(), fmm);
 }
 
+void MainWindow::on_tab1Action_Import_triggered()
+{
+    Qt::WindowFlags flags = dialogImport->windowFlags();
+    flags |= Qt::WindowMaximizeButtonHint;
+    dialogImport->setWindowFlags(flags);
+    dialogImport->setModal(true);
+    dialogImport->show();
+}
+
 void MainWindow::on_tab2Action_SaveAll_triggered()
 {
     tabFileMonitor->saveChanges(fmm);
@@ -171,10 +195,10 @@ void MainWindow::on_menuAction_AboutApp_triggered()
     auto fsm = FileStorageManager::instance();
 
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.4.0</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.5.0 [Pre-Alpha]</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
-                         "This is a <b>early access version</b>, consider this as staging period towards V2.<br>"
+                         "This is a <b>pre-alpha version</b>, <b>DO NOT USE</b> for critical things.<br>"
                          "This software does not collect any data and does not connect to the internet. <br>"
                          ""
                          "<h3>Developed by</h3>"
@@ -186,14 +210,36 @@ void MainWindow::on_menuAction_AboutApp_triggered()
                          "  <b>SpartanJ</b> for efsw library | <a href = \"https://www.github.com/SpartanJ/efsw\">efsw (GitHub Repo)</a>"
                          "</dt>"
                          "<dt>"
+                         "  <b>stachenov</b> for QuaZip library | <a href = \"https://github.com/stachenov/quazip\">QuaZip (GitHub Repo)</a>"
+                         "</dt>"
+                         "<dt>"
                          "  <b>Qt Framework developers</b> | <a href = \"https://www.qt.io\">The Qt Company Website</a>"
                          "</dt>"
                          "<dt>"
-                         "  <b>SQLite project team</b> | <a href =\"https://www.sqlite.org\"><a/>SQLite Home Page"
+                         "  <b>SQLite project team</b> | <a href = \"https://www.sqlite.org\"><a/>SQLite Home Page"
+                         "</dt>"
+                         "<dt>"
+                         "  <b>Jean-loup Gailly</b> & <b>Mark Adler</b> for zlib library | <a href = \"https://zlib.net\">zlib Home Site</a>"
+                         "</dt>"
+                         "<dt>"
+                         " <b>Julian Seward</b> for bzip2 library | <a href = \"https://sourceware.org/bzip2\">bzip2 Home</a>"
                          "</dt>"
                          "</dl>"
                          "<br>"
-                         "<center>This software released under <a href =\"https://www.gnu.org/licenses/lgpl-3.0.en.html\">LGPL Version 3 (gnu.org)</a> license."
+                         "<center>"
+                         "NeSync is a Free and open-source software (FOSS)."
+                         "</center>"
+                         ""
+                         "<center>"
+                         "This software distributed under <a href =\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GPL Version 3 (gnu.org)</a> license."
+                         "</center>"
+                         ""
+                         "<center>"
+                         "Source code is also <b>open to the public</b> under the GPL Version 3 license."
+                         "</center>"
+                         ""
+                         "<center>"
+                         "Source code is available in this <a href=\"https://github.com/fxdeniz/NeSync\">GitHub Repo</a>."
                          "</center>"
                          "<br>"
                          "<b>Backup folder path:</b> %1").arg(fsm->getBackupFolderPath());
@@ -204,4 +250,18 @@ void MainWindow::on_menuAction_AboutApp_triggered()
 void MainWindow::on_menuAction_AboutQt_triggered()
 {
     QApplication::aboutQt();
+}
+
+void MainWindow::showLiabilityWarningInStatusBar()
+{
+    QPalette palette(QPalette::ColorRole::WindowText, "#e84118");
+
+    QLabel *label = new QLabel(this);
+
+    label->setStyleSheet("QLabel { padding:  5px 5px 5px 0px; }");
+    label->setPalette(palette);
+    label->setAutoFillBackground(true);
+    label->setText(tr("This is a <b>pre-alpha version</b> which means <b>USE AT YOUR OWN RISK</b>. --- <b>[Version 1.5.0]</b>"));
+
+    ui->statusbar->insertWidget(0, label);
 }

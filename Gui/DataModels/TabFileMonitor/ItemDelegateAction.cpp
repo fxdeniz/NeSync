@@ -1,10 +1,12 @@
 #include "ItemDelegateAction.h"
 
-#include "TreeModelFsMonitor.h"
+#include "TreeModelFileMonitor.h"
 #include "TreeItem.h"
 
 #include <QQueue>
 #include <QComboBox>
+
+using namespace TreeModelFileMonitor;
 
 const QString ItemDelegateAction::ITEM_TEXT_SAVE = tr("Save");
 const QString ItemDelegateAction::ITEM_TEXT_RESTORE = tr("Restore");
@@ -122,8 +124,8 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             result->clearFocus();
         });
 
-        auto treeModel = (TreeModelFsMonitor *) index.model();
-        QObject::connect(treeModel, &TreeModelFsMonitor::signalDisableItemDelegates,
+        auto treeModel = (Model *) index.model();
+        QObject::connect(treeModel, &Model::signalDisableItemDelegates,
                          result, [=]{
             result->setDisabled(true);
         });

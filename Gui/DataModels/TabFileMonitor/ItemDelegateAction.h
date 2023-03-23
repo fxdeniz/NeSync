@@ -1,10 +1,15 @@
-#ifndef ITEMDELEGATEACTION_H
-#define ITEMDELEGATEACTION_H
+#ifndef FILE_MONITOR_ITEMDELEGATEACTION_H
+#define FILE_MONITOR_ITEMDELEGATEACTION_H
 
 
 #include <QStyledItemDelegate>
 
-class ItemDelegateAction : public QStyledItemDelegate
+namespace TreeModelFileMonitor
+{
+    class ItemDelegateAction;
+}
+
+class TreeModelFileMonitor::ItemDelegateAction : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
@@ -27,4 +32,4 @@ private:
     static const QString ITEM_TEXT_DELETE_WITH_CHILDREN;
 };
 
-#endif // ITEMDELEGATEACTION_H
+#endif // FILE_MONITOR_ITEMDELEGATEACTION_H

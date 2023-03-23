@@ -2,7 +2,8 @@
 #define TABFILEEXPLORER_H
 
 #include "Dialogs/DialogEditVersion.h"
-#include  "Dialogs/DialogCreateCopy.h"
+#include "Dialogs/DialogCreateCopy.h"
+#include "Dialogs/DialogExport.h"
 
 #include <QMenu>
 #include <QWidget>
@@ -30,20 +31,22 @@ signals:
     void signalStartFileMonitor();
     void signalStopMonitoringItem(const QString &userPathToFileOrFolder);
     void signalStartMonitoringItem(const QString &userPathToFileOrFolder);
+    void signalRefreshFileMonitor();
 
 private slots:
-    void on_tableViewFileExplorer_clicked(const QModelIndex &index);
-    void on_tableViewFileExplorer_doubleClicked(const QModelIndex &index);
+    void on_tableView_clicked(const QModelIndex &index);
+    void on_tableView_doubleClicked(const QModelIndex &index);
     void on_listView_clicked(const QModelIndex &index);
     void on_buttonBack_clicked();
     void on_buttonForward_clicked();
 
-    void on_contextActionTableFileExplorer_Delete_triggered();
-    void on_contextActionTableFileExplorer_Freeze_triggered();
-    void on_contextActionListFileExplorer_EditVersion_triggered();
-    void on_contextActionListFileExplorer_DeleteVersion_triggered();
-    void on_contextActionListFileExplorer_CreateCopy_triggered();
-    void on_contextActionListFileExplorer_SetAsCurrentVersion_triggered();
+    void on_contextActionTableView_Export_triggered();
+    void on_contextActionTableView_Delete_triggered();
+    void on_contextActionTableView_Freeze_triggered();
+    void on_contextActionListView_EditVersion_triggered();
+    void on_contextActionListView_DeleteVersion_triggered();
+    void on_contextActionListView_CreateCopy_triggered();
+    void on_contextActionListView_SetAsCurrentVersion_triggered();
 
 private:
     void clearDescriptionDetails();
@@ -65,6 +68,7 @@ private:
     Ui::TabFileExplorer *ui;
     DialogEditVersion *dialogEditVersion;
     DialogCreateCopy *dialogCreateCopy;
+    DialogExport *dialogExport;
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
     QStringList navigationHistoryIndices;

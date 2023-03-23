@@ -40,10 +40,9 @@ private slots:
     void on_buttonSelectFolder_clicked();
     void on_treeView_doubleClicked(const QModelIndex &index);
     void on_buttonAddFilesToDb_clicked();
+    void on_buttonClearResults_clicked();
     void slotOnTaskAddNewFoldersFinished(bool isAllRequestSuccessful);
     void refreshTreeView();
-
-    void on_buttonClearResults_clicked();
 
 private:
     static qint64 getFolderSize(const QString &pathToFolder);
