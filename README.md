@@ -27,11 +27,12 @@ __WARNING: NeSync is currently in pre-alpha stage and it's not complete yet.__
 
 * [Few important notes](#few-important-notes)
 * [Building](#building)
-* Contributing
+* [Contributing](#contributing)
 * Future plans
 * [Thanks to](#thanks-to)
 
 ## Few important notes
+
 1. Your files are stored in folder called __backup_2__ in your temp directory.
 
 2. You will see different project names in the git history such as `XdBackup` and `BoldBackup`.<br>
@@ -85,6 +86,30 @@ __WARNING: NeSync is currently in pre-alpha stage and it's not complete yet.__
        
     5. Then compile using Qt Creator.
 
+## Contributing
+
+I use [camel case](https://en.wikipedia.org/wiki/Camel_case) notation where only class initals are capitalized.<br>
+And [Allman style](https://en.wikipedia.org/wiki/Indentation_style#Allman_style) indentation with tab equal to 4 spaces.
+    
+Example:
+```
+    class ExampleClass
+    {
+        void doSomething()
+        {
+            if(x == y)
+                doOtherThing();
+            else
+            {
+                doLongConditionalItem1();
+                doLongConditionalItem2();                    
+            }
+        }
+    };
+```
+    
+1. Create an issue.
+2. Make a pull request linked to a created issue.
 
 ## Thanks to
 
