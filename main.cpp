@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
                                       "<br>"
                                       "Developer of this software <b>DOES NOT recommed</b> you to use this software for critical things."
                                       "<br><br>"
-                                      "By pressing <b>Yes</b> you accept all the risks associated with using in-complete software. Such as data loss or system crashes."
+                                      "By pressing <b>Yes</b> you accept all the risks associated with using in-complete software."
+                                      " Such as data loss, system crashes and security breaches."
                                       "<br><br>"
                                       "Do you accept the accept the risks ?");
 
