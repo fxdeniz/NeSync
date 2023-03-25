@@ -43,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalRefreshFileMonitor,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalFileMonitorRefreshed,
+                     this, &MainWindow::onNotificationRequested);
+
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
@@ -86,11 +89,31 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
-void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
+void MainWindow::onTrayIconClicked(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::ActivationReason::Context)
         return;
 
+    show();
+}
+
+void MainWindow::onNotificationRequested()
+{
+    if(isVisible())
+        qApp->beep();
+    else
+    {
+        QString title = tr("Activity detected on your folders !");
+        QString message = tr("Click here to display file monitor.");
+
+        trayIcon->showMessage(title, message);
+        return;
+    }
+}
+
+void MainWindow::onTrayIconMessageClicked()
+{
+    ui->tabWidget->setCurrentIndex(TabIndexMonitor);
     show();
 }
 
@@ -99,9 +122,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     QToolBar *toolBar = ui->toolBar;
     toolBar->clear();
 
-    if(index == 1)
+    if(index == TabIndexMonitor)
         toolBar->addAction(ui->tab2Action_SaveAll);
-    else if(index == 0)
+    else if(index == TabIndexExplorer)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
         toolBar->addAction(separator1);
@@ -127,11 +150,11 @@ void MainWindow::buildTabWidget()
 void MainWindow::disableCloseButtonOfPredefinedTabs()
 {
     QTabBar *tabBar = ui->tabWidget->tabBar();
-    tabBar->tabButton(0, QTabBar::ButtonPosition::RightSide)->deleteLater();
-    tabBar->setTabButton(0, QTabBar::ButtonPosition::RightSide, nullptr);
+    tabBar->tabButton(TabIndexExplorer, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(TabIndexExplorer, QTabBar::ButtonPosition::RightSide, nullptr);
 
-    tabBar->tabButton(1, QTabBar::ButtonPosition::RightSide)->deleteLater();
-    tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
+    tabBar->tabButton(TabIndexMonitor, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(TabIndexMonitor, QTabBar::ButtonPosition::RightSide, nullptr);
 }
 
 void MainWindow::createTrayIcon()
@@ -156,7 +179,8 @@ void MainWindow::createTrayIcon()
     trayIconMenu->addAction(quitAction);
 
     trayIcon = new QSystemTrayIcon(this);
-    QObject::connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::trayIconClicked);
+    QObject::connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onTrayIconClicked);
+    QObject::connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &MainWindow::onTrayIconMessageClicked);
     trayIcon->setContextMenu(trayIconMenu);
 
     QIcon icon(":/Resources/test_icon.png");

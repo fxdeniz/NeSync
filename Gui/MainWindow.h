@@ -22,6 +22,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    static const inline int TabIndexExplorer = 0;
+    static const inline int TabIndexMonitor = 1;
+
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QString guiThreadName() const;
@@ -30,7 +33,9 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void trayIconClicked(QSystemTrayIcon::ActivationReason reason);
+    void onTrayIconClicked(QSystemTrayIcon::ActivationReason reason);
+    void onNotificationRequested();
+    void onTrayIconMessageClicked();
     void on_tabWidget_currentChanged(int index);
     void on_tab1Action_AddNewFolder_triggered();
     void on_tab1Action_Import_triggered();
