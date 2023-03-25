@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
     }
 
     settings.setValue(settingKey, true);
+    QApplication::setQuitOnLastWindowClosed(false);
 
     MainWindow w;
     w.show();

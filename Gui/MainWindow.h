@@ -10,6 +10,7 @@
 
 #include <QThread>
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 namespace Ui
 {
@@ -25,7 +26,11 @@ public:
     ~MainWindow();
     QString guiThreadName() const;
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
+    void trayIconClicked(QSystemTrayIcon::ActivationReason reason);
     void on_tabWidget_currentChanged(int index);
     void on_tab1Action_AddNewFolder_triggered();
     void on_tab1Action_Import_triggered();
@@ -44,12 +49,21 @@ private:
     void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
+    void createTrayIcon();
     void createFileMonitorThread(const DialogImport * const dialogImport,
                                  const TabFileExplorer * const tabFileExplorer);
     QString fileMonitorThreadName() const;
 
 private:
     Ui::MainWindow *ui;
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+
+    QAction *minimizeAction;
+    QAction *maximizeAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+
     DialogAddNewFolder *dialogAddNewFolder;
     DialogImport *dialogImport;
     DialogDebugFileMonitor *dialogDebugFileMonitor;

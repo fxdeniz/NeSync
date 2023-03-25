@@ -6,6 +6,8 @@
 
 #include <QDir>
 #include <QTabBar>
+#include <QSettings>
+#include <QCloseEvent>
 #include <QMessageBox>
 #include <QStandardPaths>
 
@@ -23,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     allocateSeparators();
     buildTabWidget();
+    createTrayIcon();
     disableCloseButtonOfPredefinedTabs();
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 
@@ -59,6 +62,36 @@ MainWindow::~MainWindow()
 QString MainWindow::guiThreadName() const
 {
     return "GUI Thread";
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (!event->spontaneous() || !isVisible())
+        return;
+
+    QString settingsFilePath = QDir::toNativeSeparators(qApp->applicationDirPath()) + QDir::separator() + "settings.ini";
+    QSettings settings(settingsFilePath, QSettings::Format::IniFormat);
+    QString settingKey = "tray_icon_informed";
+
+    if (trayIcon->isVisible() && settings.value(settingKey).toString() != "true")
+    {
+        settings.setValue(settingKey, true);
+
+        QMessageBox::information(this, tr("Running in the background"),
+                                 tr("NeSync windows will be minimized to system tray.<br>"
+                                    "However, your folders still be monitored in the background.<br>"
+                                    "To terminate the NeSync, choose <b>Quit</b> in the context menu of the system tray entry."));
+        hide();
+        event->ignore();
+    }
+}
+
+void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
+{
+    if(reason == QSystemTrayIcon::ActivationReason::Context)
+        return;
+
+    show();
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -99,6 +132,37 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 
     tabBar->tabButton(1, QTabBar::ButtonPosition::RightSide)->deleteLater();
     tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
+}
+
+void MainWindow::createTrayIcon()
+{
+    minimizeAction = new QAction(tr("Mi&nimize"), this);
+    QObject::connect(minimizeAction, &QAction::triggered, this, &QWidget::hide);
+
+    maximizeAction = new QAction(tr("Ma&ximize"), this);
+    QObject::connect(maximizeAction, &QAction::triggered, this, &QWidget::showMaximized);
+
+    restoreAction = new QAction(tr("&Restore"), this);
+    QObject::connect(restoreAction, &QAction::triggered, this, &QWidget::showNormal);
+
+    quitAction = new QAction(tr("&Quit"), this);
+    QObject::connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(minimizeAction);
+    trayIconMenu->addAction(maximizeAction);
+    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+
+    trayIcon = new QSystemTrayIcon(this);
+    QObject::connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::trayIconClicked);
+    trayIcon->setContextMenu(trayIconMenu);
+
+    QIcon icon(":/Resources/test_icon.png");
+    trayIcon->setIcon(icon);
+
+    trayIcon->show();
 }
 
 void MainWindow::createFileMonitorThread(const DialogImport * const dialogImport,
