@@ -123,6 +123,8 @@ set(PROJECT_SOURCES
 
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
+    Utility/AppConfig.h
+    Utility/AppConfig.cpp
     Utility/JsonDtoFormat.h
 
     Backend/FileStorageSubSystem/FileStorageManager.h
