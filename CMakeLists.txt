@@ -74,6 +74,12 @@ set(PROJECT_SOURCES
         Gui/DataModels/DialogImport/ItemDelegateAction.h
         Gui/DataModels/DialogImport/ItemDelegateAction.cpp
     #
+
+    # DialogSettings
+        Gui/Dialogs/DialogSettings.h
+        Gui/Dialogs/DialogSettings.cpp
+        Gui/Dialogs/DialogSettings.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h

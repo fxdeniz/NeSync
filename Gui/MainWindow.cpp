@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
+    dialogSettings = new DialogSettings(this);
     dialogImport = new DialogImport(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
@@ -263,6 +264,12 @@ void MainWindow::on_tab1Action_Import_triggered()
 void MainWindow::on_tab2Action_SaveAll_triggered()
 {
     tabFileMonitor->saveChanges(fmm);
+}
+
+void MainWindow::on_menuAction_Settings_triggered()
+{
+    dialogSettings->setModal(true);
+    dialogSettings->show();
 }
 
 void MainWindow::on_menuAction_DebugFileMonitor_triggered()
