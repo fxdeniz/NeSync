@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
@@ -72,13 +73,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (!event->spontaneous() || !isVisible())
         return;
 
-    QString settingsFilePath = QDir::toNativeSeparators(qApp->applicationDirPath()) + QDir::separator() + "settings.ini";
-    QSettings settings(settingsFilePath, QSettings::Format::IniFormat);
-    QString settingKey = "tray_icon_informed";
+    AppConfig config;
 
-    if (trayIcon->isVisible() && settings.value(settingKey).toString() != "true")
+    if (trayIcon->isVisible() && !config.isTrayIconInformed())
     {
-        settings.setValue(settingKey, true);
+        config.setTrayIconInformed(true);
 
         QMessageBox::information(this, tr("Running in the background"),
                                  tr("NeSync windows will be minimized to system tray.<br>"

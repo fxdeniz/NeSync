@@ -3,16 +3,15 @@
 #include <QSettings>
 
 #include "Gui/MainWindow.h"
+#include "Utility/AppConfig.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QString settingsFilePath = QDir::toNativeSeparators(app.applicationDirPath()) + QDir::separator() + "settings.ini";
-    QSettings settings(settingsFilePath, QSettings::Format::IniFormat);
-    QString settingKey = "disclaimer_accepted";
+    AppConfig config;
 
-    if(settings.value(settingKey).toString() != "true") // Value can't read or not accepted
+    if(!config.isDisclaimerAccepted())
     {
         QString title = QObject::tr("Disclaimer !");
         QString message = QObject::tr("You're about the use Pre-Alpha version of <b>NeSync</b>."
@@ -32,7 +31,7 @@ int main(int argc, char *argv[])
             return 0;
     }
 
-    settings.setValue(settingKey, true);
+    config.setDisclaimerAccepted(true);
     QApplication::setQuitOnLastWindowClosed(false);
 
     MainWindow w;
