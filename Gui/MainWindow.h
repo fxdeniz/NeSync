@@ -64,11 +64,6 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
 
-    QAction *minimizeAction;
-    QAction *maximizeAction;
-    QAction *restoreAction;
-    QAction *quitAction;
-
     DialogAddNewFolder *dialogAddNewFolder;
     DialogImport *dialogImport;
     DialogDebugFileMonitor *dialogDebugFileMonitor;

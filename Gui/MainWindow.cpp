@@ -159,22 +159,14 @@ void MainWindow::disableCloseButtonOfPredefinedTabs()
 
 void MainWindow::createTrayIcon()
 {
-    minimizeAction = new QAction(tr("Mi&nimize"), this);
-    QObject::connect(minimizeAction, &QAction::triggered, this, &QWidget::hide);
+    QAction *showAction = new QAction(tr("&Show"), this);
+    QObject::connect(showAction, &QAction::triggered, this, &QWidget::showNormal);
 
-    maximizeAction = new QAction(tr("Ma&ximize"), this);
-    QObject::connect(maximizeAction, &QAction::triggered, this, &QWidget::showMaximized);
-
-    restoreAction = new QAction(tr("&Restore"), this);
-    QObject::connect(restoreAction, &QAction::triggered, this, &QWidget::showNormal);
-
-    quitAction = new QAction(tr("&Quit"), this);
+    QAction *quitAction = new QAction(tr("&Quit"), this);
     QObject::connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 
     trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(minimizeAction);
-    trayIconMenu->addAction(maximizeAction);
-    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addAction(showAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
 
@@ -187,6 +179,7 @@ void MainWindow::createTrayIcon()
     trayIcon->setIcon(icon);
 
     trayIcon->show();
+    trayIcon->setToolTip("NeSync");
 }
 
 void MainWindow::createFileMonitorThread(const DialogImport * const dialogImport,
