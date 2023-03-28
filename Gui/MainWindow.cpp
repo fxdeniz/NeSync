@@ -50,9 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
-    createFileMonitorThread(dialogImport, tabFileExplorer);
-
     showLiabilityWarningInStatusBar();
+    createFileMonitorThread(dialogImport, tabFileExplorer);
 }
 
 MainWindow::~MainWindow()

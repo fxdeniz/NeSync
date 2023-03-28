@@ -16,14 +16,14 @@ public:
     bool isTrayIconInformed() const;
     void setTrayIconInformed(bool newTrayIconInformed);
 
-    bool isBackupFolderPathValid() const;
-    QString getBackupFolderPath() const;
-    void setBackupFolderPath(const QString &newBackupFolderPath);
+    bool isStorageFolderPathValid() const;
+    QString getStorageFolderPath() const;
+    void setStorageFolderPath(const QString &newStorageFolderPath);
 
 private:
     static const inline QString KeyDisclaimerAccepted = "disclaimer_accepted";
     static const inline QString KeyTrayIconInformed = "tray_icon_informed";
-    static const inline QString KeyBackupFolderPath = "backup_folder_path";
+    static const inline QString KeyStorageFolderPath = "storage_folder_path";
 
     static QReadWriteLock lock;
 

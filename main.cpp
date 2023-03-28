@@ -1,9 +1,12 @@
-#include <QApplication>
-#include <QMessageBox>
 #include <QSettings>
+#include <QMessageBox>
+#include <QApplication>
+#include <QStandardPaths>
 
 #include "Gui/MainWindow.h"
 #include "Utility/AppConfig.h"
+
+void showStorageLocationMessage();
 
 int main(int argc, char *argv[])
 {
@@ -32,10 +35,36 @@ int main(int argc, char *argv[])
     }
 
     config.setDisclaimerAccepted(true);
+
+    if(!config.isStorageFolderPathValid())
+        showStorageLocationMessage();
+
     QApplication::setQuitOnLastWindowClosed(false);
 
     MainWindow w;
     w.show();
 
     return app.exec();
+}
+
+void showStorageLocationMessage()
+{
+    QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
+    storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
+    storagePath += "nesync_";
+    storagePath += QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces).mid(0, 8);
+    storagePath += QDir::separator();
+
+    QDir().mkpath(storagePath);
+    AppConfig().setStorageFolderPath(storagePath);
+
+    QString title = QObject::tr("Auto generated storage folder !");
+
+    QString message = QObject::tr("NeSync uses file database which stores your files behind the scenes.<br>"
+                                  "This may require a lot of storage space (depending on size of your files).<br>"
+                                  "<b>Auto</b> generated storage folder is at:<br>"
+                                  "<center><b>%1</b></center><br>"
+                                  "If you want, you can change storage folder location from settings.").arg(storagePath);
+
+    QMessageBox::information(nullptr, title, message);
 }

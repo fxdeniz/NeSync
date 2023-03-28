@@ -55,11 +55,11 @@ void AppConfig::setTrayIconInformed(bool newTrayIconInformed)
     settings->setValue(KeyTrayIconInformed, newTrayIconInformed);
 }
 
-bool AppConfig::isBackupFolderPathValid() const
+bool AppConfig::isStorageFolderPathValid() const
 {
     QReadLocker readLocker(&lock);
 
-    QString readValue = settings->value(KeyBackupFolderPath).toString();
+    QString readValue = settings->value(KeyStorageFolderPath).toString();
 
     if(readValue.isNull() || readValue.isEmpty())
         return false;
@@ -70,11 +70,11 @@ bool AppConfig::isBackupFolderPathValid() const
     return true;
 }
 
-QString AppConfig::getBackupFolderPath() const
+QString AppConfig::getStorageFolderPath() const
 {
     QReadLocker readLocker(&lock);
 
-    QString readValue = settings->value(KeyBackupFolderPath).toString();
+    QString readValue = settings->value(KeyStorageFolderPath).toString();
     readValue = QDir::toNativeSeparators(readValue);
 
     if(!readValue.endsWith(QDir::separator()))
@@ -83,14 +83,14 @@ QString AppConfig::getBackupFolderPath() const
     return readValue;
 }
 
-void AppConfig::setBackupFolderPath(const QString &newBackupFolderPath)
+void AppConfig::setStorageFolderPath(const QString &newStorageFolderPath)
 {
     QWriteLocker writeLocker(&lock);
 
-    QString value = QDir::toNativeSeparators(newBackupFolderPath);
+    QString value = QDir::toNativeSeparators(newStorageFolderPath);
 
     if(!value.endsWith(QDir::separator()))
         value.append(QDir::separator());
 
-    settings->setValue(KeyBackupFolderPath, value);
+    settings->setValue(KeyStorageFolderPath, value);
 }
