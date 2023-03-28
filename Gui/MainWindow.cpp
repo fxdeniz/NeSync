@@ -25,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
-    allocateSeparators();
     buildTabWidget();
     createTrayIcon();
     disableCloseButtonOfPredefinedTabs();
@@ -120,6 +119,13 @@ void MainWindow::onTrayIconMessageClicked()
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     QToolBar *toolBar = ui->toolBar;
+
+    for(const QAction *action : toolBar->actions())
+    {
+        if(action->isSeparator())
+            delete action;
+    }
+
     toolBar->clear();
 
     if(index == TabIndexMonitor)
@@ -127,15 +133,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     else if(index == TabIndexExplorer)
     {
         toolBar->addAction(ui->tab1Action_AddNewFolder);
-        toolBar->addAction(separator1);
+        toolBar->addSeparator();
         toolBar->addAction(ui->tab1Action_Import);
     }
-}
-
-void MainWindow::allocateSeparators()
-{
-    separator1 = new QAction(this);
-    separator1->setSeparator(true);
 }
 
 void MainWindow::buildTabWidget()

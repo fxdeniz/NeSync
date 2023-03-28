@@ -49,11 +49,9 @@ private slots:
 private:
     TabFileExplorer *tabFileExplorer;
     TabFileMonitor *tabFileMonitor;
-    QAction *separator1;
 
 private:
     void showLiabilityWarningInStatusBar();
-    void allocateSeparators();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
     void createTrayIcon();
