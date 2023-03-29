@@ -125,7 +125,7 @@ void DialogCreateCopy::on_buttonCreateCopy_clicked()
         auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileVersionJson(currentFileSymbolPath, ui->comboBox->currentText().toInt());
 
-        QString internalFilePath = fsm->getBackupFolderPath();
+        QString internalFilePath = fsm->getStorageFolderPath();
         internalFilePath += fileJson[JsonKeys::FileVersion::InternalFileName].toString();
 
         QFile::remove(userFilePath);

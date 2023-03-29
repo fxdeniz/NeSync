@@ -278,8 +278,6 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 
 void MainWindow::on_menuAction_AboutApp_triggered()
 {
-    auto fsm = FileStorageManager::instance();
-
     QString title = tr("About NeSync");
     QString message = tr("<center><h1>NeSync 1.5.0 [Pre-Alpha]</h1><center/>"
                          "<hr>"
@@ -327,8 +325,7 @@ void MainWindow::on_menuAction_AboutApp_triggered()
                          "<center>"
                          "Source code is available in this <a href=\"https://github.com/fxdeniz/NeSync\">GitHub Repo</a>."
                          "</center>"
-                         "<br>"
-                         "<b>Backup folder path:</b> %1").arg(fsm->getBackupFolderPath());
+                        );
 
     QMessageBox::information(this, title, message);
 }

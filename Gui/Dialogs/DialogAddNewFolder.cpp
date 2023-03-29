@@ -76,7 +76,7 @@ void DialogAddNewFolder::on_buttonSelectFolder_clicked()
         auto fsm = FileStorageManager::instance();
         QString selectedFolderPath = QDir::toNativeSeparators(dialog.selectedFiles().at(0)).append(QDir::separator());
 
-        QStorageInfo storageInfo(fsm->getBackupFolderPath());
+        QStorageInfo storageInfo(fsm->getStorageFolderPath());
         qint64 folderSize = getFolderSize(selectedFolderPath);
         qint64 availableSize = storageInfo.bytesFree();
 

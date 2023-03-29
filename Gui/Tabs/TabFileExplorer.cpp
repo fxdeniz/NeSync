@@ -400,7 +400,7 @@ void TabFileExplorer::on_contextActionListView_DeleteVersion_triggered()
             {
                 fileJson = fsm->getFileJsonBySymbolPath(symbolFilePath);
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
-                QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                QString internalFilePath = fsm->getStorageFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
                 QFile::remove(userFilePath);
                 QFile::copy(internalFilePath, userFilePath);
 
@@ -471,7 +471,7 @@ void TabFileExplorer::on_contextActionListView_SetAsCurrentVersion_triggered()
             fsm->updateFileVersionEntity(versionJson);
             fsm->sortFileVersionsInIncreasingOrder(symbolFilePath);
 
-            QString internalFilePath = fsm->getBackupFolderPath();
+            QString internalFilePath = fsm->getStorageFolderPath();
             internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
             QFile::copy(internalFilePath, userFilePath);
@@ -690,7 +690,7 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
         QString userFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
         QString userFilePath = userFolderPath + name;
-        QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+        QString internalFilePath = fsm->getStorageFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
         bool isExist = QFile::exists(userFilePath);
         if(isExist)
@@ -783,7 +783,7 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
                     QJsonObject versionJson = fsm->getFileVersionJson(fileJson[JsonKeys::File::SymbolFilePath].toString(),
                                                                       fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
 
-                    QString internalFilePath = fsm->getBackupFolderPath();
+                    QString internalFilePath = fsm->getStorageFolderPath();
                     internalFilePath.append(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
                     QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
 

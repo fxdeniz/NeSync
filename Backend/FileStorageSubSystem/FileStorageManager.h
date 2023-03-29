@@ -49,8 +49,8 @@ public:
     QJsonArray getActiveFolderList() const;
     QJsonArray getActiveFileList() const;
 
-    QString getBackupFolderPath() const;
-    void setBackupFolderPath(const QString &newBackupFolderPath);
+    QString getStorageFolderPath() const;
+    void setStorageFolderPath(const QString &newStorageFolderPath);
 
 private:
     QString generateRandomFileName();
@@ -60,7 +60,7 @@ private:
     bool sortFileVersionEntities(const FileEntity &parentEntity);
 
 private:
-    QString backupFolderPath;
+    QString storageFolderPath;
     QSqlDatabase database;
     FolderRepository *folderRepository;
     FileRepository *fileRepository;
