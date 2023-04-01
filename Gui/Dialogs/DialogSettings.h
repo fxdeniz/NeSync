@@ -17,6 +17,13 @@ public:
     explicit DialogSettings(QWidget *parent = nullptr);
     ~DialogSettings();
 
+    void show();
+
+private slots:
+    void on_buttonSelectStorageFolder_clicked();
+
+    void on_buttonSave_clicked();
+
 private:
     Ui::DialogSettings *ui;
 };
