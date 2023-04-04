@@ -696,10 +696,15 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         if(isExist)
         {
             QString title = tr("File exist at location !");
-            QString message = tr("Can't overwrite file <b>%1</b> in location you selected.");
-            message = message.arg(name);
-            QMessageBox::critical(this, title, message);
-            return;
+            QString message = tr("Thawing <b>%1</b> will overwrite already existing file at:<br>"
+                                 "<center><b>%2</b></center><br>"
+                                 "Would you like the replace the file ?");
+            message = message.arg(name, userFilePath);
+
+            QMessageBox::StandardButton result = QMessageBox::question(this, title, message);
+
+            if(result != QMessageBox::StandardButton::Yes)
+                return;
         }
 
         emit signalStopFileMonitor();
@@ -715,6 +720,9 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         bool isCopied = false;
 
         QFuture<void> future = QtConcurrent::run([=, &isCopied] {
+            if(isExist)
+                QFile::remove(userFilePath);
+
             isCopied = QFile::copy(internalFilePath, userFilePath);
         });
 
