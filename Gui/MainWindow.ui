@@ -57,6 +57,12 @@
      <height>21</height>
     </rect>
    </property>
+    <widget class="QMenu" name="menuManage">
+    <property name="title">
+     <string>Manage</string>
+    </property>
+    <addaction name="menuAction_Settings"/>
+   </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
      <string>Debug</string>
@@ -70,12 +76,36 @@
     <addaction name="menuAction_AboutApp"/>
     <addaction name="menuAction_AboutQt"/>
    </widget>
+   <addaction name="menuManage"/>
    <addaction name="menuDebug"/>
    <addaction name="menuAbout"/>
   </widget>
+  <action name="tab1Action_AddNewFolder">
+   <property name="text">
+    <string>Add New Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Add New Folder</string>
+   </property>
+  </action>
   <action name="tab1Action_Import">
    <property name="text">
     <string>Import</string>
+   </property>
+  </action>
+  <action name="tab2Action_SaveAll">
+   <property name="text">
+    <string>Save All</string>
+   </property>
+  </action>
+  <action name="menuAction_Settings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="menuAction_DebugFileMonitor">
+   <property name="text">
+    <string>Debug File Monitor</string>
    </property>
   </action>
   <action name="menuAction_AboutApp">
@@ -86,32 +116,6 @@
   <action name="menuAction_AboutQt">
    <property name="text">
     <string>About Qt</string>
-   </property>
-  </action>
-  <action name="tabRelatedFilesAction_Refresh">
-   <property name="text">
-    <string>Refresh</string>
-   </property>
-   <property name="toolTip">
-    <string>Refresh</string>
-   </property>
-  </action>
-  <action name="tab2Action_SaveAll">
-   <property name="text">
-    <string>Save All</string>
-   </property>
-  </action>
-  <action name="tab1Action_AddNewFolder">
-   <property name="text">
-    <string>Add New Folder</string>
-   </property>
-   <property name="toolTip">
-    <string>Add New Folder</string>
-   </property>
-  </action>
-  <action name="menuAction_DebugFileMonitor">
-   <property name="text">
-    <string>Debug File Monitor</string>
    </property>
   </action>
  </widget>

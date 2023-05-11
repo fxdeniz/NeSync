@@ -161,7 +161,7 @@ void TaskSaveChanges::saveFileChanges()
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
                 QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
-                auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+                auto internalFilePath = fsm->getStorageFolderPath() + internalFileName;
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
                 QFile::remove(item->getUserPath()); // If restored file exist remove it
@@ -181,7 +181,7 @@ void TaskSaveChanges::saveFileChanges()
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
                 QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
-                auto internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+                auto internalFilePath = fsm->getStorageFolderPath() + internalFileName;
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
                 QFile::remove(item->getUserPath());

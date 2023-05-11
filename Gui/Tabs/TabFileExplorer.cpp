@@ -400,7 +400,7 @@ void TabFileExplorer::on_contextActionListView_DeleteVersion_triggered()
             {
                 fileJson = fsm->getFileJsonBySymbolPath(symbolFilePath);
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
-                QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+                QString internalFilePath = fsm->getStorageFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
                 QFile::remove(userFilePath);
                 QFile::copy(internalFilePath, userFilePath);
 
@@ -471,7 +471,7 @@ void TabFileExplorer::on_contextActionListView_SetAsCurrentVersion_triggered()
             fsm->updateFileVersionEntity(versionJson);
             fsm->sortFileVersionsInIncreasingOrder(symbolFilePath);
 
-            QString internalFilePath = fsm->getBackupFolderPath();
+            QString internalFilePath = fsm->getStorageFolderPath();
             internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
             QFile::copy(internalFilePath, userFilePath);
@@ -690,16 +690,21 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
         QString userFolderPath = parentFolderJson[JsonKeys::Folder::UserFolderPath].toString();
         QString userFilePath = userFolderPath + name;
-        QString internalFilePath = fsm->getBackupFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+        QString internalFilePath = fsm->getStorageFolderPath() + versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
         bool isExist = QFile::exists(userFilePath);
         if(isExist)
         {
             QString title = tr("File exist at location !");
-            QString message = tr("Can't overwrite file <b>%1</b> in location you selected.");
-            message = message.arg(name);
-            QMessageBox::critical(this, title, message);
-            return;
+            QString message = tr("Thawing <b>%1</b> will overwrite already existing file at:<br>"
+                                 "<center><b>%2</b></center><br>"
+                                 "Would you like the replace the file ?");
+            message = message.arg(name, userFilePath);
+
+            QMessageBox::StandardButton result = QMessageBox::question(this, title, message);
+
+            if(result != QMessageBox::StandardButton::Yes)
+                return;
         }
 
         emit signalStopFileMonitor();
@@ -715,6 +720,9 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         bool isCopied = false;
 
         QFuture<void> future = QtConcurrent::run([=, &isCopied] {
+            if(isExist)
+                QFile::remove(userFilePath);
+
             isCopied = QFile::copy(internalFilePath, userFilePath);
         });
 
@@ -783,7 +791,7 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
                     QJsonObject versionJson = fsm->getFileVersionJson(fileJson[JsonKeys::File::SymbolFilePath].toString(),
                                                                       fileJson[JsonKeys::File::MaxVersionNumber].toInteger());
 
-                    QString internalFilePath = fsm->getBackupFolderPath();
+                    QString internalFilePath = fsm->getStorageFolderPath();
                     internalFilePath.append(versionJson[JsonKeys::FileVersion::InternalFileName].toString());
                     QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
 

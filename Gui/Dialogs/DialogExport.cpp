@@ -162,7 +162,7 @@ void DialogExport::on_buttonExport_clicked()
             {
                 QJsonObject versionJson = currentFileVersion.toObject();
                 QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
-                QString internalFilePath = fsm->getBackupFolderPath() + internalFileName;
+                QString internalFilePath = fsm->getStorageFolderPath() + internalFileName;
 
                 QFile rawFile(internalFilePath);
                 bool isReadable = rawFile.open(QFile::OpenModeFlag::ReadOnly);

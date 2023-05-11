@@ -1,11 +1,11 @@
 #include "DatabaseRegistry.h"
 
+#include "Utility/AppConfig.h"
+
 #include <QDir>
 #include <QUuid>
 #include <QSqlQuery>
 #include <QSqlError>
-#include <QStandardPaths>
-#include <QRandomGenerator64>
 
 QSqlDatabase DatabaseRegistry::dbFileStorage;
 QSqlDatabase DatabaseRegistry::dbFileMonitor;
@@ -49,19 +49,13 @@ QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
 
 void DatabaseRegistry::createDbFileStorage()
 {
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    dbPath += QDir::separator();
-    dbPath += "backup_2";
-    dbPath += QDir::separator();
+    AppConfig config;
+
+    QString dbPath = config.getStorageFolderPath();
 
     QDir().mkdir(dbPath);
 
     dbPath += "ns_database.db3";
-
-//    dbPath += QUuid::createUuid().toString(QUuid::StringFormat::Id128);
-//    dbPath += ".db3";
-
-    dbPath = QDir::toNativeSeparators(dbPath);
 
     bool isExist = QFile(dbPath).exists();
 
@@ -123,13 +117,6 @@ void DatabaseRegistry::createDbFileStorage()
 
 void DatabaseRegistry::createDbFileMonitor()
 {
-    QRandomGenerator *generator = QRandomGenerator::system();
-    //QRandomGenerator *generator = new QRandomGenerator();
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::DesktopLocation);
-    dbPath += QDir::separator();
-    dbPath += QString::number(generator->generate()) + ".db3";
-    dbPath = QDir::toNativeSeparators(dbPath);
-
     dbFileMonitor = QSqlDatabase::addDatabase("QSQLITE", "file_system_event_db");
     dbFileMonitor.setConnectOptions("QSQLITE_OPEN_URI;QSQLITE_ENABLE_SHARED_CACHE");
 
@@ -138,8 +125,6 @@ void DatabaseRegistry::createDbFileMonitor()
     connectionString = connectionString.arg(randomDbFileName);
 
     dbFileMonitor.setDatabaseName(connectionString);
-    //dbFileMonitor.setDatabaseName(dbPath);
-    //database.setDatabaseName(":memory:");
 
     dbFileMonitor.open();
     dbFileMonitor.exec("PRAGMA foreign_keys = ON;");

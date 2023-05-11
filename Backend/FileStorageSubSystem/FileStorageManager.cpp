@@ -1,5 +1,6 @@
 #include "FileStorageManager.h"
 
+#include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 
@@ -11,7 +12,7 @@
 
 FileStorageManager::FileStorageManager(const QSqlDatabase &db, const QString &backupFolderPath)
 {
-    setBackupFolderPath(backupFolderPath);
+    setStorageFolderPath(backupFolderPath);
     database = db;
 
     if(!database.isOpen())
@@ -24,14 +25,10 @@ FileStorageManager::FileStorageManager(const QSqlDatabase &db, const QString &ba
 
 QSharedPointer<FileStorageManager> FileStorageManager::instance()
 {
-    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::TempLocation);
-    tempPath = QDir::toNativeSeparators(tempPath) + QDir::separator();
-    QString folderName = "backup_2";
-    QDir(tempPath).mkdir(folderName);
-
+    AppConfig config;
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    auto *rawPtr = new FileStorageManager(storageDb, tempPath + folderName);
+    auto *rawPtr = new FileStorageManager(storageDb, config.getStorageFolderPath());
     auto result = QSharedPointer<FileStorageManager>(rawPtr);
 
     return result;
@@ -176,7 +173,7 @@ bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QStr
 
     QFile file(pathToFile);
     QString internalFileName = generateRandomFileName();
-    QString generatedFilePath = getBackupFolderPath() + internalFileName;
+    QString generatedFilePath = getStorageFolderPath() + internalFileName;
     bool isCopied = file.copy(generatedFilePath);
 
     if(!isCopied)
@@ -238,7 +235,7 @@ bool FileStorageManager::deleteFile(const QString &symbolFilePath)
         QStringList internalPathList;
 
         for(const FileVersionEntity &version : fileVersionList)
-            internalPathList.append(getBackupFolderPath() + version.internalFileName);
+            internalPathList.append(getStorageFolderPath() + version.internalFileName);
 
         result = fileRepository->deleteEntity(entity);
 
@@ -267,7 +264,7 @@ bool FileStorageManager::deleteFileVersion(const QString &symbolFilePath, qlongl
 
         if(result == true)
         {
-            QString internalFilePath = getBackupFolderPath() + entity.internalFileName;
+            QString internalFilePath = getStorageFolderPath() + entity.internalFileName;
             QFile::remove(internalFilePath);
 
             FileEntity parentEntity = fileRepository->findBySymbolPath(symbolFilePath, true);
@@ -467,17 +464,17 @@ QJsonArray FileStorageManager::getActiveFileList() const
     return result;
 }
 
-QString FileStorageManager::getBackupFolderPath() const
+QString FileStorageManager::getStorageFolderPath() const
 {
-    return backupFolderPath;
+    return storageFolderPath;
 }
 
-void FileStorageManager::setBackupFolderPath(const QString &newBackupFolderPath)
+void FileStorageManager::setStorageFolderPath(const QString &newStorageFolderPath)
 {
-    backupFolderPath = QDir::toNativeSeparators(newBackupFolderPath);
+    storageFolderPath = QDir::toNativeSeparators(newStorageFolderPath);
 
-    if(!backupFolderPath.endsWith(QDir::separator()))
-        backupFolderPath.append(QDir::separator());
+    if(!storageFolderPath.endsWith(QDir::separator()))
+        storageFolderPath.append(QDir::separator());
 }
 
 QString FileStorageManager::generateRandomFileName()

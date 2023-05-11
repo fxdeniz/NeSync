@@ -27,6 +27,7 @@ public slots:
 
 signals:
     void signalEnableSaveAllButton(bool flag);
+    void signalFileMonitorRefreshed();
 
 private slots:
     void displayFileMonitorContent();

@@ -95,7 +95,10 @@ void TabFileMonitor::displayFileMonitorContent()
     FileSystemEventDb fsEventDb(DatabaseRegistry::fileSystemEventDatabase());
 
     if(fsEventDb.isContainAnyFolderEvent() || fsEventDb.isContainAnyFileEvent())
+    {
         emit signalEnableSaveAllButton(true);
+        emit signalFileMonitorRefreshed();
+    }
 
     ui->labelStatus->setHidden(true);
     ui->progressBar->hide();

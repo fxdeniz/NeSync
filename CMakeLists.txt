@@ -74,6 +74,12 @@ set(PROJECT_SOURCES
         Gui/DataModels/DialogImport/ItemDelegateAction.h
         Gui/DataModels/DialogImport/ItemDelegateAction.cpp
     #
+
+    # DialogSettings
+        Gui/Dialogs/DialogSettings.h
+        Gui/Dialogs/DialogSettings.cpp
+        Gui/Dialogs/DialogSettings.ui
+    #
 	
     # TabFileExplorer
         Gui/Tabs/TabFileExplorer.h
@@ -119,9 +125,12 @@ set(PROJECT_SOURCES
     #
 
     main.cpp
+    resources.qrc
 
     Utility/DatabaseRegistry.h
     Utility/DatabaseRegistry.cpp
+    Utility/AppConfig.h
+    Utility/AppConfig.cpp
     Utility/JsonDtoFormat.h
 
     Backend/FileStorageSubSystem/FileStorageManager.h

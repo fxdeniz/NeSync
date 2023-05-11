@@ -1,11 +1,14 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "Backend/FileStorageSubSystem/FileStorageManager.h"
 
 #include <QDir>
 #include <QTabBar>
+#include <QSettings>
+#include <QCloseEvent>
 #include <QMessageBox>
 #include <QStandardPaths>
 
@@ -17,12 +20,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QThread::currentThread()->setObjectName(guiThreadName());
 
+    dialogSettings = new DialogSettings(this);
     dialogImport = new DialogImport(this);
     dialogAddNewFolder = new DialogAddNewFolder(this);
     dialogDebugFileMonitor = new DialogDebugFileMonitor(this);
 
-    allocateSeparators();
     buildTabWidget();
+    createTrayIcon();
     disableCloseButtonOfPredefinedTabs();
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 
@@ -40,12 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileExplorer, &TabFileExplorer::signalRefreshFileMonitor,
                      tabFileMonitor, &TabFileMonitor::onEventDbUpdated);
 
+    QObject::connect(tabFileMonitor, &TabFileMonitor::signalFileMonitorRefreshed,
+                     this, &MainWindow::onNotificationRequested);
+
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
     createFileMonitorThread(dialogImport, tabFileExplorer);
-
-    showLiabilityWarningInStatusBar();
 }
 
 MainWindow::~MainWindow()
@@ -61,25 +66,74 @@ QString MainWindow::guiThreadName() const
     return "GUI Thread";
 }
 
-void MainWindow::on_tabWidget_currentChanged(int index)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QToolBar *toolBar = ui->toolBar;
-    toolBar->clear();
+    if (!event->spontaneous() || !isVisible())
+        return;
 
-    if(index == 1)
-        toolBar->addAction(ui->tab2Action_SaveAll);
-    else if(index == 0)
+    AppConfig config;
+
+    if (trayIcon->isVisible() && !config.isTrayIconInformed())
     {
-        toolBar->addAction(ui->tab1Action_AddNewFolder);
-        toolBar->addAction(separator1);
-        toolBar->addAction(ui->tab1Action_Import);
+        config.setTrayIconInformed(true);
+
+        QMessageBox::information(this, tr("Running in the background"),
+                                 tr("NeSync windows will be minimized to system tray.<br>"
+                                    "However, your folders still be monitored in the background.<br>"
+                                    "To terminate the NeSync, choose <b>Quit</b> in the context menu of the system tray entry."));
+        hide();
+        event->ignore();
     }
 }
 
-void MainWindow::allocateSeparators()
+void MainWindow::onTrayIconClicked(QSystemTrayIcon::ActivationReason reason)
 {
-    separator1 = new QAction(this);
-    separator1->setSeparator(true);
+    if(reason == QSystemTrayIcon::ActivationReason::Context)
+        return;
+
+    show();
+}
+
+void MainWindow::onNotificationRequested()
+{
+    if(isVisible())
+        qApp->beep();
+    else
+    {
+        QString title = tr("Activity detected on your folders !");
+        QString message = tr("Click here to display file monitor.");
+
+        trayIcon->showMessage(title, message);
+        return;
+    }
+}
+
+void MainWindow::onTrayIconMessageClicked()
+{
+    ui->tabWidget->setCurrentIndex(TabIndexMonitor);
+    show();
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    QToolBar *toolBar = ui->toolBar;
+
+    for(const QAction *action : toolBar->actions())
+    {
+        if(action->isSeparator())
+            delete action;
+    }
+
+    toolBar->clear();
+
+    if(index == TabIndexMonitor)
+        toolBar->addAction(ui->tab2Action_SaveAll);
+    else if(index == TabIndexExplorer)
+    {
+        toolBar->addAction(ui->tab1Action_AddNewFolder);
+        toolBar->addSeparator();
+        toolBar->addAction(ui->tab1Action_Import);
+    }
 }
 
 void MainWindow::buildTabWidget()
@@ -94,11 +148,36 @@ void MainWindow::buildTabWidget()
 void MainWindow::disableCloseButtonOfPredefinedTabs()
 {
     QTabBar *tabBar = ui->tabWidget->tabBar();
-    tabBar->tabButton(0, QTabBar::ButtonPosition::RightSide)->deleteLater();
-    tabBar->setTabButton(0, QTabBar::ButtonPosition::RightSide, nullptr);
+    tabBar->tabButton(TabIndexExplorer, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(TabIndexExplorer, QTabBar::ButtonPosition::RightSide, nullptr);
 
-    tabBar->tabButton(1, QTabBar::ButtonPosition::RightSide)->deleteLater();
-    tabBar->setTabButton(1, QTabBar::ButtonPosition::RightSide, nullptr);
+    tabBar->tabButton(TabIndexMonitor, QTabBar::ButtonPosition::RightSide)->deleteLater();
+    tabBar->setTabButton(TabIndexMonitor, QTabBar::ButtonPosition::RightSide, nullptr);
+}
+
+void MainWindow::createTrayIcon()
+{
+    QAction *showAction = new QAction(tr("&Show"), this);
+    QObject::connect(showAction, &QAction::triggered, this, &QWidget::showNormal);
+
+    QAction *quitAction = new QAction(tr("&Quit"), this);
+    QObject::connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(showAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+
+    trayIcon = new QSystemTrayIcon(this);
+    QObject::connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onTrayIconClicked);
+    QObject::connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &MainWindow::onTrayIconMessageClicked);
+    trayIcon->setContextMenu(trayIconMenu);
+
+    QIcon icon(":/Resources/test_icon.png");
+    trayIcon->setIcon(icon);
+
+    trayIcon->show();
+    trayIcon->setToolTip("NeSync");
 }
 
 void MainWindow::createFileMonitorThread(const DialogImport * const dialogImport,
@@ -185,6 +264,12 @@ void MainWindow::on_tab2Action_SaveAll_triggered()
     tabFileMonitor->saveChanges(fmm);
 }
 
+void MainWindow::on_menuAction_Settings_triggered()
+{
+    dialogSettings->setModal(true);
+    dialogSettings->show();
+}
+
 void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 {
     dialogDebugFileMonitor->show();
@@ -192,10 +277,8 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 
 void MainWindow::on_menuAction_AboutApp_triggered()
 {
-    auto fsm = FileStorageManager::instance();
-
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.5.0 [Pre-Alpha]</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.6.0 [Pre-Alpha]</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
                          "This is a <b>pre-alpha version</b>, <b>DO NOT USE</b> for critical things.<br>"
@@ -241,8 +324,7 @@ void MainWindow::on_menuAction_AboutApp_triggered()
                          "<center>"
                          "Source code is available in this <a href=\"https://github.com/fxdeniz/NeSync\">GitHub Repo</a>."
                          "</center>"
-                         "<br>"
-                         "<b>Backup folder path:</b> %1").arg(fsm->getBackupFolderPath());
+                        );
 
     QMessageBox::information(this, title, message);
 }
@@ -250,18 +332,4 @@ void MainWindow::on_menuAction_AboutApp_triggered()
 void MainWindow::on_menuAction_AboutQt_triggered()
 {
     QApplication::aboutQt();
-}
-
-void MainWindow::showLiabilityWarningInStatusBar()
-{
-    QPalette palette(QPalette::ColorRole::WindowText, "#e84118");
-
-    QLabel *label = new QLabel(this);
-
-    label->setStyleSheet("QLabel { padding:  5px 5px 5px 0px; }");
-    label->setPalette(palette);
-    label->setAutoFillBackground(true);
-    label->setText(tr("This is a <b>pre-alpha version</b> which means <b>USE AT YOUR OWN RISK</b>. --- <b>[Version 1.5.0]</b>"));
-
-    ui->statusbar->insertWidget(0, label);
 }
