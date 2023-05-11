@@ -19,6 +19,15 @@ __WARNING: NeSync is currently in pre-alpha stage and it's not complete yet.__
 Executables are available in the [Releases](https://github.com/fxdeniz/NeSync/releases) page.
 
 
+## Screenshots
+### Folder Monitor
+![monitor](https://github.com/fxdeniz/NeSync/assets/104620840/022d9798-bc30-4ace-8796-0f71d70f4936)
+### File Explorer
+![mainwindow](https://github.com/fxdeniz/NeSync/assets/104620840/3780549f-3a4b-474b-8696-a0214b7dfb4b)
+### Backup Import Screen
+![import](https://github.com/fxdeniz/NeSync/assets/104620840/06664327-5bb1-41ac-ac1c-6fe1a8526d38)
+
+
 ## Features
 * Fully multi-threaded architecture
 * Small memory footprint
