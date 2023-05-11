@@ -51,7 +51,6 @@ private:
     TabFileMonitor *tabFileMonitor;
 
 private:
-    void showLiabilityWarningInStatusBar();
     void buildTabWidget();
     void disableCloseButtonOfPredefinedTabs();
     void createTrayIcon();

@@ -50,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(tabFileMonitor, &TabFileMonitor::signalEnableSaveAllButton,
                      ui->tab2Action_SaveAll, &QAction::setEnabled);
 
-    showLiabilityWarningInStatusBar();
     createFileMonitorThread(dialogImport, tabFileExplorer);
 }
 
@@ -333,18 +332,4 @@ void MainWindow::on_menuAction_AboutApp_triggered()
 void MainWindow::on_menuAction_AboutQt_triggered()
 {
     QApplication::aboutQt();
-}
-
-void MainWindow::showLiabilityWarningInStatusBar()
-{
-    QPalette palette(QPalette::ColorRole::WindowText, "#e84118");
-
-    QLabel *label = new QLabel(this);
-
-    label->setStyleSheet("QLabel { padding:  5px 5px 5px 0px; }");
-    label->setPalette(palette);
-    label->setAutoFillBackground(true);
-    label->setText(tr("This is a <b>pre-alpha version</b> which means <b>USE AT YOUR OWN RISK</b>. --- <b>[Version 1.5.0]</b>"));
-
-    ui->statusbar->insertWidget(0, label);
 }
