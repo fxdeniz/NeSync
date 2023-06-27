@@ -164,11 +164,16 @@ set(PROJECT_SOURCES
     #
 )
 
+if (WIN32)
+    enable_language("RC")
+    set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/Resources/res_win.rc")
+endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(NeSync
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        ${app_icon_resource_windows}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET NeSync APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

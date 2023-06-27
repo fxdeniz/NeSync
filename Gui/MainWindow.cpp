@@ -173,7 +173,7 @@ void MainWindow::createTrayIcon()
     QObject::connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &MainWindow::onTrayIconMessageClicked);
     trayIcon->setContextMenu(trayIconMenu);
 
-    QIcon icon(":/Resources/test_icon.png");
+    QIcon icon(":/Resources/tray_icon.png");
     trayIcon->setIcon(icon);
 
     trayIcon->show();
