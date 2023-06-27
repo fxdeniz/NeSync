@@ -315,10 +315,8 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
         QJsonObject originalFileJson = fsm->getFileJsonByUserPath(originalPath);
 
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
         bool isOriginalFilePersists = originalFileJson[JsonKeys::IsExist].toBool();
-        bool isOriginalFileFrozen = originalFileJson[JsonKeys::File::IsFrozen].toBool();
 
         if(isOriginalFilePersists)
         {
@@ -338,8 +336,7 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
         else
             database->deleteFile(currentPath);
 
-        if((isFilePersists && !isFileFrozen) || (isOriginalFilePersists && !isOriginalFileFrozen))
-            emit signalEventDbUpdated();
+        emit signalEventDbUpdated();
     }
 }
 
@@ -355,17 +352,27 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     {
         FileSystemEventDb::ItemStatus status = database->getStatusOfFile(currentPath);
 
-        if(status != FileSystemEventDb::ItemStatus::NewAdded) // Do not count update events on new added file
+        if(status == FileSystemEventDb::ItemStatus::NewAdded)
+            emit signalEventDbUpdated();
+        else
         {
-            QString oldFileName = database->getOldNameOfFile(currentPath);
+            auto fsm = FileStorageManager::instance();
 
-            if(oldFileName.isEmpty())
-                database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
-            else
-                database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
+            QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+
+            bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+            bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+            if(isFilePersists && !isFileFrozen)
+            {
+                if(status == FileSystemEventDb::ItemStatus::Renamed)
+                    database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
+                else
+                    database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
+
+                emit signalEventDbUpdated();
+            }
         }
-
-        emit signalEventDbUpdated();
     }
 }
 
@@ -405,7 +412,7 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
     else if(info.isFile() && !info.isHidden())
     {
         QString originalFileName = database->getOldNameOfFile(currentOldPath);
-
+        FileSystemEventDb::ItemStatus statusOfOldFile = database->getStatusOfFile(currentOldPath);
         QJsonObject newFileJson = fsm->getFileJsonByUserPath(currentNewPath);
 
         bool isNewFilePersists = newFileJson[JsonKeys::IsExist].toBool();
@@ -417,9 +424,6 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         {
             if(isNewFilePersists && !isNewFileFrozen)
             {
-                qDebug() << "1) executing for old file = " << currentOldPath;
-                qDebug() << "1) executing for new file = " << currentNewPath;
-
                 database->deleteFile(currentOldPath);
                 database->deleteFile(currentNewPath);
                 database->addFile(currentNewPath);
@@ -432,16 +436,16 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         }
         else
         {
-            qDebug() << "2) executing for old file = " << currentOldPath;
-            qDebug() << "2) executing for new file = " << currentNewPath;
-
             if(originalFileName.isEmpty())
                 database->setOldNameOfFile(currentOldPath, oldFileName);
 
-            if(oldFileStatus == FileSystemEventDb::Updated || oldFileStatus == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-                database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
-            else
-                database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+            if(statusOfOldFile != FileSystemEventDb::ItemStatus::NewAdded) // Keep new added files as new added.
+            {
+                if(oldFileStatus == FileSystemEventDb::Updated || oldFileStatus == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+                    database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
+                else
+                    database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+            }
 
             database->setNameOfFile(currentOldPath, fileName);
 
