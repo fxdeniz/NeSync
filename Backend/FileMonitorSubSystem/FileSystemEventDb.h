@@ -2,7 +2,6 @@
 #define FILESYSTEMEVENTDB_H
 
 #include "efsw/efsw.hpp"
-#include "qdatetime.h"
 #include <QSqlDatabase>
 
 class FileSystemEventDb
