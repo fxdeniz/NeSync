@@ -254,24 +254,26 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
-        auto status = FileSystemEventDb::ItemStatus::Monitored;
+        FileSystemEventDb::ItemStatus status = FileSystemEventDb::ItemStatus::Invalid;
 
         auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
         bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
-        if(!isFileFrozen) // Only monitor active (un-frozen) files
+        if(!isFilePersists)
         {
-            if(!isFilePersists)
-                status = FileSystemEventDb::ItemStatus::NewAdded;
+            status = FileSystemEventDb::ItemStatus::NewAdded;
+            database->addFile(currentPath);
+            database->setStatusOfFile(currentPath, status);
+            emit signalEventDbUpdated();
+        }
+        else if(isFilePersists & !isFileFrozen)
+        {
+            if(fileSystemEventListener.signalsBlocked()) // If adding file at runtime
+                status = FileSystemEventDb::ItemStatus::Monitored;
             else
-            {
-                if(fileSystemEventListener.signalsBlocked()) // If adding file at runtime
-                    status = FileSystemEventDb::ItemStatus::Monitored;
-                else
-                    status = FileSystemEventDb::ItemStatus::Updated;
-            }
+                status = FileSystemEventDb::ItemStatus::Updated;
 
             database->addFile(currentPath);
             database->setStatusOfFile(currentPath, status);
@@ -433,6 +435,11 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
                 emit signalEventDbUpdated();
             }
+        }
+        else if(isNewFilePersists && isNewFileFrozen)
+        {
+            database->deleteFile(currentOldPath);
+            database->deleteFile(currentNewPath);
         }
         else
         {
