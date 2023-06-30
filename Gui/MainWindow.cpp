@@ -173,7 +173,7 @@ void MainWindow::createTrayIcon()
     QObject::connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &MainWindow::onTrayIconMessageClicked);
     trayIcon->setContextMenu(trayIconMenu);
 
-    QIcon icon(":/Resources/test_icon.png");
+    QIcon icon(":/Resources/tray_icon.png");
     trayIcon->setIcon(icon);
 
     trayIcon->show();
@@ -278,14 +278,14 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 void MainWindow::on_menuAction_AboutApp_triggered()
 {
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.6.0 [Pre-Alpha]</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.7.0 [Pre-Alpha]</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
                          "This is a <b>pre-alpha version</b>, <b>DO NOT USE</b> for critical things.<br>"
                          "This software does not collect any data and does not connect to the internet. <br>"
                          ""
                          "<h3>Developed by</h3>"
-                         "<b>Deniz YILMAZOK</b> | <a href = \"https://www.github.com/fxdeniz\">fxdeniz (GitHub Profile)</a><br>"
+                         "<b>Deniz Yilmazok</b> | <a href = \"https://www.github.com/fxdeniz\">fxdeniz (GitHub Profile)</a><br>"
                          ""
                          "<h3>Thanks to</h3>"
                          "<dl>"
@@ -306,6 +306,12 @@ void MainWindow::on_menuAction_AboutApp_triggered()
                          "</dt>"
                          "<dt>"
                          " <b>Julian Seward</b> for bzip2 library | <a href = \"https://sourceware.org/bzip2\">bzip2 Home</a>"
+                         "</dt>"
+                         "<dt>"
+                         "  <b>juicy_fish</b> for application icon | <a href = \"https://www.freepik.com/icon/version-control_5815495\">freepik.com</a>"
+                         "</dt>"
+                         "<dt>"
+                         "  <b>NSIS Community</b> for Windows installer | <a href = \"https://nsis.sourceforge.io\">NSIS Wiki</a>"
                          "</dt>"
                          "</dl>"
                          "<br>"

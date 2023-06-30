@@ -1,4 +1,6 @@
-# NeSync
+
+# NeSync ![128px_version-control_5815495](https://github.com/fxdeniz/NeSync/assets/104620840/02a32910-d2c3-433b-adad-9e0a6ea6c86c)
+
 
 _Pronounced as_ __Any Sync__.
 
@@ -143,3 +145,5 @@ For the near future I'm planning to add these features:
 * __SQLite project team__ for SQLite | [SQLite Home Page](https://www.sqlite.org)
 * __Jean-loup Gailly__ & __Mark Adler__ for zlib library | [zlib Home Site](https://zlib.net)
 * __Julian Seward__ for bzip2 library | [bzip2 Home](https://sourceware.org/bzip2)
+* __juicy_fish__ for application icon | [freepik.com](https://www.freepik.com/icon/version-control_5815495)
+* __NSIS Community__ for Windows installer | [NSIS Wiki](https://nsis.sourceforge.io)
