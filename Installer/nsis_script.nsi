@@ -168,6 +168,7 @@ SectionEnd
 
 Section Uninstall
 ${INSTALL_TYPE}
+ExecWait "TaskKill /IM ${MAIN_APP_EXE} /F"
 SetDetailsView show
 Delete "$INSTDIR\libbz2-1.dll"
 Delete "$INSTDIR\libefsw.dll"
