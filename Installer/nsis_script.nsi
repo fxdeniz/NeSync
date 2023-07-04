@@ -12,7 +12,7 @@ Unicode True
 !define COMP_NAME "Deniz Yilmazok"
 !define WEB_SITE "github.com/fxdeniz/NeSync"
 !define VERSION "1.7.0.0"
-!define COPYRIGHT "2023, GPLv3"
+!define COPYRIGHT "2023 - Deniz Yilmazok, GPLv3"
 !define DESCRIPTION "NeSync Installer"
 !define INSTALLER_NAME "${BIN_SOURCE_DIR}\nesync_${VERSION}_win64_setup.exe"
 !define MAIN_APP_EXE "NeSync.exe"
