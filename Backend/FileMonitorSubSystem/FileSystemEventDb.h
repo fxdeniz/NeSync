@@ -14,9 +14,8 @@ public:
         NewAdded = 1,
         Updated = 2,
         Renamed = 3,
-        UpdatedAndRenamed = 4,
-        Deleted = 5,
-        Missing = 6
+        Deleted = 4,
+        Missing = 5
     };
 
     FileSystemEventDb(const QSqlDatabase &eventDb);

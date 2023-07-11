@@ -198,16 +198,8 @@ void TaskSaveChanges::saveFileChanges()
                     if(isAdded)
                         fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
                 }
-                else if(status == FileSystemEventDb::ItemStatus::Renamed ||
-                        status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+                else if(status == FileSystemEventDb::ItemStatus::Renamed)
                 {
-                    if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-                    {
-                        bool isAppended = fsm->appendVersion(symbolFilePath, item->getUserPath(), item->getDescription());
-                        if(!isAppended)
-                            break;
-                    }
-
                     // Rename file
                     fileJson[JsonKeys::File::FileName] = fsEventDb.getNameOfFile(item->getUserPath());
                     bool isUpdated = fsm->updateFileEntity(fileJson);
