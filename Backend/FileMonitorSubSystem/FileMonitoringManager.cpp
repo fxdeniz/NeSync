@@ -354,7 +354,8 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     {
         FileSystemEventDb::ItemStatus status = database->getStatusOfFile(currentPath);
 
-        if(status == FileSystemEventDb::ItemStatus::NewAdded)
+        // Do not count updates for new added and renamed files.
+        if(status == FileSystemEventDb::ItemStatus::NewAdded || status == FileSystemEventDb::ItemStatus::Renamed)
             emit signalEventDbUpdated();
         else
         {
@@ -367,11 +368,7 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
             if(isFilePersists && !isFileFrozen)
             {
-                if(status == FileSystemEventDb::ItemStatus::Renamed)
-                    database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
-                else
-                    database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
-
+                database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
                 emit signalEventDbUpdated();
             }
         }
@@ -420,26 +417,35 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         bool isNewFilePersists = newFileJson[JsonKeys::IsExist].toBool();
         bool isNewFileFrozen = newFileJson[JsonKeys::File::IsFrozen].toBool();
 
-        FileSystemEventDb::ItemStatus oldFileStatus = database->getStatusOfFile(currentOldPath);
+        bool isOldFileMonitored = database->isFileExist(currentOldPath);
+        bool isNewFileMonitored = database->isFileExist(currentNewPath);
 
         if(isNewFilePersists && !isNewFileFrozen)
         {
-            if(isNewFilePersists && !isNewFileFrozen)
-            {
-                database->deleteFile(currentOldPath);
-                database->deleteFile(currentNewPath);
-                database->addFile(currentNewPath);
+            database->deleteFile(currentOldPath);
+            database->deleteFile(currentNewPath);
+            database->addFile(currentNewPath);
 
-                database->setOldNameOfFile(currentNewPath, originalFileName);
-                database->setStatusOfFile(currentNewPath, FileSystemEventDb::ItemStatus::Updated);
+            database->setOldNameOfFile(currentNewPath, originalFileName);
+            database->setStatusOfFile(currentNewPath, FileSystemEventDb::ItemStatus::Updated);
 
-                emit signalEventDbUpdated();
-            }
+            emit signalEventDbUpdated();
         }
         else if(isNewFilePersists && isNewFileFrozen)
         {
             database->deleteFile(currentOldPath);
             database->deleteFile(currentNewPath);
+        }
+        else if(isOldFileMonitored && isNewFileMonitored && statusOfOldFile == FileSystemEventDb::ItemStatus::NewAdded)
+        {
+            database->deleteFile(currentOldPath);
+            database->deleteFile(currentNewPath);
+            database->addFile(currentNewPath);
+
+            database->setOldNameOfFile(currentNewPath, originalFileName);
+            database->setStatusOfFile(currentNewPath, FileSystemEventDb::ItemStatus::NewAdded);
+
+            emit signalEventDbUpdated();
         }
         else
         {
@@ -447,12 +453,7 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
                 database->setOldNameOfFile(currentOldPath, oldFileName);
 
             if(statusOfOldFile != FileSystemEventDb::ItemStatus::NewAdded) // Keep new added files as new added.
-            {
-                if(oldFileStatus == FileSystemEventDb::Updated || oldFileStatus == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-                    database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::UpdatedAndRenamed);
-                else
-                    database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
-            }
+                database->setStatusOfFile(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
 
             database->setNameOfFile(currentOldPath, fileName);
 

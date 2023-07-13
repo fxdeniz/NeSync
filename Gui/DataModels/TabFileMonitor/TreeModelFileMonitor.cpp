@@ -317,8 +317,6 @@ QString Model::itemStatusToString(FileSystemEventDb::ItemStatus status) const
         result = "Updated";
     else if(status == FileSystemEventDb::ItemStatus::Renamed)
         result = "Renamed";
-    else if(status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
-        result = "Updated & Renamed";
     else if(status == FileSystemEventDb::ItemStatus::Deleted)
         result = "Deleted";
     else if(status == FileSystemEventDb::ItemStatus::Missing)

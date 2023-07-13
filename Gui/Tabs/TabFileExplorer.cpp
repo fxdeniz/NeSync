@@ -1,6 +1,6 @@
-#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
-#include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
 #include "ui_TabFileExplorer.h"
+#include "DataModels/TabFileExplorer/ListModelFileExplorer.h"
+#include "DataModels/TabFileExplorer/TableModelFileExplorer.h"
 
 #include "TabFileExplorer.h"
 #include "Utility/JsonDtoFormat.h"
@@ -8,6 +8,7 @@
 
 #include <QQueue>
 #include <QThread>
+#include <QMouseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QtConcurrent>
@@ -31,8 +32,9 @@ TabFileExplorer::TabFileExplorer(QWidget *parent) :
     ui->buttonForward->setDisabled(true);
     clearDescriptionDetails();
 
-    this->ui->tableView->horizontalHeader()->setMinimumSectionSize(110);
-    this->ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    ui->tableView->horizontalHeader()->setMinimumSectionSize(110);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    ui->tableView->viewport()->installEventFilter(this); // uses TabFileExplorer::eventFilter();
 
     ui->lineEditWorkingDir->setText(FileStorageManager::separator);
     displayFolderInTableViewFileExplorer(FileStorageManager::separator);
@@ -154,6 +156,26 @@ QString TabFileExplorer::fileSizeToString(qulonglong fileSize) const
 QString TabFileExplorer::currentSymbolFolderPath() const
 {
     return ui->lineEditWorkingDir->text();
+}
+
+bool TabFileExplorer::eventFilter(QObject *watched, QEvent *event)
+{
+    QTableView *tableView = ui->tableView;
+    QListView *listView = ui->listView;
+
+    if (watched == tableView->viewport() && event->type() == QEvent::Type::MouseButtonPress)
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        QModelIndex clickedIndex = tableView->indexAt(mouseEvent->pos());
+
+        if (!clickedIndex.isValid()) // When user clicked on empty area of the table view.
+        {
+            if(listView->model() != nullptr)
+                delete listView->model();
+        }
+    }
+
+    return QWidget::eventFilter(watched, event);
 }
 
 void TabFileExplorer::refreshFileExplorer()

@@ -46,8 +46,7 @@ QWidget *ItemDelegateAction::createEditor(QWidget *parent, const QStyleOptionVie
             result->addItem(ITEM_TEXT_SAVE_WITH_CHILDREN);
     }
     else if(status == FileSystemEventDb::ItemStatus::Updated ||
-            status == FileSystemEventDb::ItemStatus::Renamed ||
-            status == FileSystemEventDb::ItemStatus::UpdatedAndRenamed)
+            status == FileSystemEventDb::ItemStatus::Renamed)
     {
         item->setAction(TreeItem::Action::Save);
 

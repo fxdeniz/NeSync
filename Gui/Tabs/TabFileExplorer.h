@@ -23,6 +23,10 @@ public:
 
     QString currentSymbolFolderPath() const;
 
+    // QObject interface
+public:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 public slots:
     void refreshFileExplorer();
 
@@ -72,7 +76,6 @@ private:
     QMenu *contextMenuTableFileExplorer;
     QMenu *contextMenuListFileExplorer;
     QStringList navigationHistoryIndices;
-
 };
 
 #endif // TABFILEEXPLORER_H
