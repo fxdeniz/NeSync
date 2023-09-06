@@ -42,7 +42,8 @@ public:
     QString getOldNameOfFolder(const QString &pathToFolder) const;
     QString getOldNameOfFile(const QString &pathToFile) const;
     QStringList getMonitoredFolderPathList() const;
-    QStringList getActiveRootFolderList() const;
+    QStringList getMonitoredRootFolderList() const;
+    QStringList getMissingRootFolderList() const;
     QStringList getDirectChildFolderListOfFolder(const QString pathToFolder) const;
     QStringList getDirectChildFileListOfFolder(const QString &pathToFolder) const;
     QStringList getEventfulFileListOfFolder(const QString &pathToFolder) const;

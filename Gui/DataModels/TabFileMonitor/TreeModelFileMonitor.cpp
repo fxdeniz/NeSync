@@ -249,7 +249,8 @@ int Model::rowCount(const QModelIndex &parent) const
 
 void Model::setupModelData()
 {
-    QStringList rootFolders = fsEventDb->getActiveRootFolderList();
+    QStringList rootFolders = fsEventDb->getMonitoredRootFolderList();
+    rootFolders.append(fsEventDb->getMissingRootFolderList());
 
     for(const QString &currentRootFolderPath : rootFolders)
     {

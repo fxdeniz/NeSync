@@ -569,7 +569,7 @@ QStringList FileSystemEventDb::getMonitoredFolderPathList() const
     return result;
 }
 
-QStringList FileSystemEventDb::getActiveRootFolderList() const
+QStringList FileSystemEventDb::getMonitoredRootFolderList() const
 {
     QStringList result;
     QString columnName = "result_column";
@@ -587,6 +587,39 @@ QStringList FileSystemEventDb::getActiveRootFolderList() const
 
     QSqlQuery query(database);
     query.prepare(queryTemplate);
+    query.exec();
+
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        QString item = record.value(columnName).toString();
+        result.append(item);
+    }
+
+    return result;
+}
+
+QStringList FileSystemEventDb::getMissingRootFolderList() const
+{
+    QStringList result;
+    QString columnName = "result_column";
+
+    QString queryTemplate = " SELECT f1.folder_path AS %1"
+                            " FROM Folder f1 "
+                            " WHERE f1.parent_folder_path IN ("
+                            "                                   SELECT f2.folder_path "
+                            "                                   FROM Folder f2 "
+                            "                                   WHERE f2.efsw_id IS NULL AND f2.status = :1"
+                            "                                 )"
+                            " AND f1.efsw_id IS NULL"
+                            " AND f1.status = :2 ;" ;
+
+    queryTemplate = queryTemplate.arg(columnName);
+
+    QSqlQuery query(database);
+    query.prepare(queryTemplate);
+    query.bindValue(":1", FileSystemEventDb::ItemStatus::Monitored);
+    query.bindValue(":2", FileSystemEventDb::ItemStatus::Missing);
     query.exec();
 
     while(query.next())
