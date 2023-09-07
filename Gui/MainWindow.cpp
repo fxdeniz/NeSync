@@ -278,7 +278,7 @@ void MainWindow::on_menuAction_DebugFileMonitor_triggered()
 void MainWindow::on_menuAction_AboutApp_triggered()
 {
     QString title = tr("About NeSync");
-    QString message = tr("<center><h1>NeSync 1.8.0 [Pre-Alpha]</h1><center/>"
+    QString message = tr("<center><h1>NeSync 1.8.1 [Pre-Alpha]</h1><center/>"
                          "<hr>"
                          "Thanks for using NeSync.<br>"
                          "This is a <b>pre-alpha version</b>, <b>DO NOT USE</b> for critical things.<br>"
