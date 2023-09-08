@@ -4,9 +4,11 @@
 #include "Utility/JsonDtoFormat.h"
 #include "Utility/DatabaseRegistry.h"
 
+#include <xxhash.h>
 #include <QDir>
 #include <QUuid>
 #include <QJsonArray>
+#include <QElapsedTimer>
 #include <QStandardPaths>
 #include <QCryptographicHash>
 
@@ -184,10 +186,36 @@ bool FileStorageManager::appendVersion(const QString &symbolFilePath, const QStr
     if(!isOpen)
         return false;
 
-    QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
-    hasher.addData(&file);
-    QString fileHash = QString(hasher.result().toHex());
+    QByteArray buffer = file.readAll();
 
+    QElapsedTimer timerXX;
+    timerXX.start();
+
+    XXH3_state_t* const state = XXH3_createState();
+    XXH64_hash_t const seed = 0;
+    XXH3_128bits_reset_withSeed(state, seed);
+
+    XXH3_64bits_update(state, buffer, buffer.size());
+
+    XXH128_hash_t const hash = XXH3_128bits_digest(state);
+    QString fileHash = QString::number(hash.high64, 16) + QString::number(hash.low64, 16);
+
+    qDebug() << "XXH128 for " << fileEntity.fileName << " calculated in " << timerXX.elapsed();
+    qDebug() << "\t and result = " << fileHash;
+
+    timerXX.invalidate();
+    XXH3_freeState(state);
+
+    QElapsedTimer timerMd4;
+    timerMd4.start();
+
+    QCryptographicHash hasher(QCryptographicHash::Algorithm::Md5);
+    hasher.addData(buffer);
+
+    qDebug() << "MD5 for " << fileEntity.fileName << " calculated in " << timerMd4.elapsed();
+    qDebug() << "\t and result = " << QString(hasher.result().toHex());
+
+    timerMd4.invalidate();
     file.close();
 
     FileVersionEntity versionEntity;

@@ -4,3 +4,6 @@
 [submodule "Dependency/quazip"]
 	path = Dependency/quazip
 	url = https://github.com/stachenov/quazip.git
+[submodule "Dependency/xxhash"]
+	path = Dependency/xxhash
+	url = https://github.com/Cyan4973/xxHash.git

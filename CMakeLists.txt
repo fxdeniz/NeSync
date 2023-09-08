@@ -23,6 +23,7 @@ include_directories(Backend/FileMonitorSubSystem/)
 
 add_subdirectory(Dependency/efsw)
 add_subdirectory(Dependency/quazip)
+add_subdirectory(Dependency/xxhash/cmake_unofficial)
 
 
 set(PROJECT_SOURCES
@@ -198,6 +199,7 @@ target_link_libraries(NeSync PRIVATE Qt${QT_VERSION_MAJOR}::Core
                              PRIVATE Qt${QT_VERSION_MAJOR}::Concurrent
                              PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
                              QuaZip::QuaZip
+                             xxHash::xxhash
                              efsw)
 
 
