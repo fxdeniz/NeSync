@@ -16,7 +16,7 @@ public:
     qlonglong versionNumber;
     QString internalFileName;
     qlonglong size;
-    QDateTime timestamp;
+    QDateTime lastModifiedTimestamp;
     QString description;
     QString hash;
 

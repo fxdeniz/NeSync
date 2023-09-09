@@ -39,7 +39,7 @@ FileVersionEntity FileVersionRepository::findVersion(const QString &symbolFilePa
         result.setPrimaryKey(result.symbolFilePath, result.versionNumber);
         result.internalFileName = record.value("internal_file_name").toString();
         result.size = record.value("size").toLongLong();
-        result.timestamp = record.value("timestamp").toDateTime();
+        result.lastModifiedTimestamp = record.value("last_modified_timestamp").toDateTime();
         result.description = record.value("description").toString();
         result.hash = record.value("hash").toString();
     }
@@ -69,7 +69,7 @@ QList<FileVersionEntity> FileVersionRepository::findAllVersions(const QString &s
         entity.setPrimaryKey(entity.symbolFilePath, entity.versionNumber);
         entity.internalFileName = record.value("internal_file_name").toString();
         entity.size = record.value("size").toLongLong();
-        entity.timestamp = record.value("timestamp").toDateTime();
+        entity.lastModifiedTimestamp = record.value("last_modified_timestamp").toDateTime();
         entity.description = record.value("description").toString();
         entity.hash = record.value("hash").toString();
 
@@ -131,7 +131,7 @@ bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
                         "                                version_number,"
                         "                                internal_file_name,"
                         "                                size,"
-                        "                                timestamp,"
+                        "                                last_modified_timestamp,"
                         "                                description,"
                         "                                hash)"
                         " VALUES (:1, :2, :3, :4, :5, :6, :7);" ;
@@ -144,8 +144,8 @@ bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
     query.bindValue(":3", entity.internalFileName);
     query.bindValue(":4", entity.size);
 
-    if(entity.timestamp.isValid())
-        query.bindValue(":5", entity.timestamp);
+    if(entity.lastModifiedTimestamp.isValid())
+        query.bindValue(":5", entity.lastModifiedTimestamp);
     else
         query.bindValue(":5", QDateTime::currentDateTime());
 
