@@ -584,7 +584,7 @@ QJsonObject FileStorageManager::fileVersionEntityToJsonObject(const FileVersionE
     result[JsonKeys::FileVersion::SymbolFilePath] = entity.symbolFilePath;
     result[JsonKeys::FileVersion::VersionNumber] = entity.versionNumber;
     result[JsonKeys::FileVersion::Size] = entity.size;
-    result[JsonKeys::FileVersion::Timestamp] = entity.lastModifiedTimestamp.toString(Qt::DateFormat::TextDate);
+    result[JsonKeys::FileVersion::LastModifiedTimestamp] = entity.lastModifiedTimestamp.toString(Qt::DateFormat::ISODateWithMs);
     result[JsonKeys::FileVersion::Description] = entity.description;
     result[JsonKeys::FileVersion::Hash] = entity.hash;
     result[JsonKeys::FileVersion::InternalFileName] = entity.internalFileName;

@@ -36,7 +36,7 @@ namespace JsonKeys
         const inline QString VersionNumber = QStringLiteral("versionNumber");
         const inline QString NewVersionNumber = QStringLiteral("newVersionNumber");
         const inline QString Size = QStringLiteral("size");
-        const inline QString Timestamp = QStringLiteral("timestamp");
+        const inline QString LastModifiedTimestamp = QStringLiteral("lastModifiedTimestamp");
         const inline QString Description = QStringLiteral("description");
         const inline QString Hash = QStringLiteral("hash");
         const inline QString InternalFileName = QStringLiteral("internalFileName");
