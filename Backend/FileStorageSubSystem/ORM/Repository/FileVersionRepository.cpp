@@ -120,7 +120,7 @@ bool FileVersionRepository::save(FileVersionEntity &entity, QSqlError *error)
                         "     version_number = :2,"
                         "     internal_file_name = :3,"
                         "     size = :4,"
-                        "     timestamp = :5,"
+                        "     last_modified_timestamp = :5,"
                         "     description = :6,"
                         "     hash = :7 "
                         " WHERE symbol_file_path = :8 AND version_number = :9;" ;

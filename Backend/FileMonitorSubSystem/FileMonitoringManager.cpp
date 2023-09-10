@@ -88,6 +88,7 @@ void FileMonitoringManager::start()
                 QDateTime currentTimestamp = info.lastModified();
 
                 bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
+
                 if(isFileTouched)
                     database->setStatusOfFile(item, FileSystemEventDb::Updated);
             }

@@ -161,12 +161,19 @@ void TaskSaveChanges::saveFileChanges()
                 qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
                 QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
                 QString internalFileName = versionJson[JsonKeys::FileVersion::InternalFileName].toString();
-                auto internalFilePath = fsm->getStorageFolderPath() + internalFileName;
+                QString internalFilePath = fsm->getStorageFolderPath() + internalFileName;
                 QString userFilePath = fileJson[JsonKeys::File::UserFilePath].toString();
 
                 QFile::remove(item->getUserPath()); // If restored file exist remove it
                 bool isCopied = QFile::copy(internalFilePath, userFilePath);
-                if(isCopied)
+
+                QFile file(userFilePath);
+                file.open(QFile::OpenModeFlag::Append);
+                QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+                QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+                bool isTimestampSet = file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
+
+                if(isCopied && isTimestampSet)
                     fsEventDb.setStatusOfFile(item->getUserPath(), FileSystemEventDb::ItemStatus::Monitored);
             }
         }
