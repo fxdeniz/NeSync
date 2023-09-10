@@ -833,7 +833,13 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
                     QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
 
                     bool isCopied = QFile::copy(internalFilePath, userFilePath);
-                    if(isCopied)
+                    QFile file(userFilePath);
+                    file.open(QFile::OpenModeFlag::Append);
+                    QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+                    QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+                    bool isTimestampSet = file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
+
+                    if(isCopied && isTimestampSet)
                         emit signalStartMonitoringItem(userFilePath); // Notify about copied file
                 }
 
