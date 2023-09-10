@@ -76,7 +76,21 @@ void FileMonitoringManager::start()
             }
 
             if(info.isFile()) // Add files in any case
+            {
                 database->addFile(item);
+                QJsonObject fileJson = fsm->getFileJsonByUserPath(item);
+                QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+                qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+                QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+                QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+                QDateTime currentTimestamp = info.lastModified();
+
+                bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
+                if(isFileTouched)
+                    database->setStatusOfFile(item, FileSystemEventDb::Updated);
+            }
         }
         else
         {

@@ -304,7 +304,9 @@ void TabFileExplorer::on_listView_clicked(const QModelIndex &index)
 
         QString size = fileSizeToString(fileVersionJson[JsonKeys::FileVersion::Size].toInteger());
         ui->labelDataSize->setText(size);
-        ui->labelDataDate->setText(fileVersionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString());
+        QString strDateTime = fileVersionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+        QDateTime dateTime = QDateTime::fromString(strDateTime, Qt::DateFormat::ISODateWithMs);
+        ui->labelDataDate->setText(dateTime.toString(Qt::DateFormat::TextDate));
         ui->textEditDescription->setText(fileVersionJson[JsonKeys::FileVersion::Description].toString());
     }
 }
