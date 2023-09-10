@@ -747,19 +747,27 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
 
         bool isCopied = false;
+        bool isTimestampSet = false;
 
-        QFuture<void> future = QtConcurrent::run([=, &isCopied] {
+        QFuture<void> future = QtConcurrent::run([=, &isCopied, &isTimestampSet] {
             if(isExist)
                 QFile::remove(userFilePath);
 
             isCopied = QFile::copy(internalFilePath, userFilePath);
+
+            QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+            QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+
+            QFile file(userFilePath);
+            file.open(QFile::OpenModeFlag::Append);
+            isTimestampSet = file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
         });
 
         futureWatcher.setFuture(future);
         dialog.exec();
         futureWatcher.waitForFinished();
 
-        if(isCopied)
+        if(isCopied & isTimestampSet)
         {
             fileJson[JsonKeys::File::IsFrozen] = false;
             bool isUpdated = fsm->updateFileEntity(fileJson);
