@@ -499,6 +499,11 @@ void TabFileExplorer::on_contextActionListView_SetAsCurrentVersion_triggered()
             internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
             QFile::copy(internalFilePath, userFilePath);
+            QFile file(userFilePath);
+            file.open(QFile::OpenModeFlag::Append);
+            QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+            QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+            file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
         });
 
         futureWatcher.setFuture(future);
