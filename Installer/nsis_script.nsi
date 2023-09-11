@@ -46,7 +46,7 @@ OutFile "${INSTALLER_NAME}"
 BrandingText "${APP_NAME} - ${VERSION}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
-InstallDir "$PROGRAMFILES64\NeSync"
+InstallDir "$APPDATA\NeSync"
 
 ######################################################################
 
