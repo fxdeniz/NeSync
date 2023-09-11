@@ -3,8 +3,8 @@
 IDI_ICON1               ICON    "app_icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,8,1,0
- PRODUCTVERSION 1,8,1,0
+ FILEVERSION 1,9,0,0
+ PRODUCTVERSION 1,9,0,0
  FILEFLAGS 0x0L
  FILEFLAGSMASK 0x3fL
  FILEOS 0x00040004L
@@ -17,12 +17,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Deniz Yilmazok (github.com/fxdeniz)"
             VALUE "FileDescription", "NeSync - Local file sync & backups"
-            VALUE "FileVersion", "1.8.1.0"
+            VALUE "FileVersion", "1.9.0.0"
             VALUE "LegalCopyright", "2023 - Deniz Yilmazok, GPLv3"
             VALUE "InternalName", "NeSync"
             VALUE "OriginalFilename", "NeSync.exe"
             VALUE "ProductName", "NeSync"
-            VALUE "ProductVersion", "1.8.1.0"
+            VALUE "ProductVersion", "1.9.0.0"
         END
     END
     BLOCK "VarFileInfo"
