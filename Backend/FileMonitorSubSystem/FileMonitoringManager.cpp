@@ -76,7 +76,22 @@ void FileMonitoringManager::start()
             }
 
             if(info.isFile()) // Add files in any case
+            {
                 database->addFile(item);
+                QJsonObject fileJson = fsm->getFileJsonByUserPath(item);
+                QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+                qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+                QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+                QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+                QDateTime currentTimestamp = info.lastModified();
+
+                bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
+
+                if(isFileTouched)
+                    database->setStatusOfFile(item, FileSystemEventDb::Updated);
+            }
         }
         else
         {
@@ -362,11 +377,19 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
             auto fsm = FileStorageManager::instance();
 
             QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+            QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+            qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+
+            QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+            QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+            QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+            QDateTime currentTimestamp = QFileInfo(currentPath).lastModified();
 
             bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
             bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+            bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
 
-            if(isFilePersists && !isFileFrozen)
+            if(isFilePersists && !isFileFrozen && isFileTouched)
             {
                 database->setStatusOfFile(currentPath, FileSystemEventDb::ItemStatus::Updated);
                 emit signalEventDbUpdated();

@@ -100,7 +100,7 @@ void DatabaseRegistry::createDbFileStorage()
         queryCreateTableFileVersionEntity += " version_number INTEGER NOT NULL CHECK (version_number >= 1),";
         queryCreateTableFileVersionEntity += " internal_file_name TEXT NOT NULL UNIQUE CHECK (internal_file_name != \"\"),";
         queryCreateTableFileVersionEntity += " size INTEGER NOT NULL DEFAULT 0 CHECK(size >= 0),";
-        queryCreateTableFileVersionEntity += " timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,";
+        queryCreateTableFileVersionEntity += " last_modified_timestamp TEXT NOT NULL,";
         queryCreateTableFileVersionEntity += " description TEXT DEFAULT NULL CHECK (description != \"\"),";
         queryCreateTableFileVersionEntity += " hash TEXT DEFAULT NULL CHECK (hash != \"\"),";
         queryCreateTableFileVersionEntity += " FOREIGN KEY (symbol_file_path) REFERENCES FileEntity (symbol_file_path)";

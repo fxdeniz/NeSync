@@ -304,7 +304,9 @@ void TabFileExplorer::on_listView_clicked(const QModelIndex &index)
 
         QString size = fileSizeToString(fileVersionJson[JsonKeys::FileVersion::Size].toInteger());
         ui->labelDataSize->setText(size);
-        ui->labelDataDate->setText(fileVersionJson[JsonKeys::FileVersion::Timestamp].toString());
+        QString strDateTime = fileVersionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+        QDateTime dateTime = QDateTime::fromString(strDateTime, Qt::DateFormat::ISODateWithMs);
+        ui->labelDataDate->setText(dateTime.toString(Qt::DateFormat::TextDate));
         ui->textEditDescription->setText(fileVersionJson[JsonKeys::FileVersion::Description].toString());
     }
 }
@@ -497,6 +499,11 @@ void TabFileExplorer::on_contextActionListView_SetAsCurrentVersion_triggered()
             internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
             QFile::copy(internalFilePath, userFilePath);
+            QFile file(userFilePath);
+            file.open(QFile::OpenModeFlag::Append);
+            QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+            QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+            file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
         });
 
         futureWatcher.setFuture(future);
@@ -740,19 +747,27 @@ void TabFileExplorer::executeFreezingOrThawingOfFile(const QString &name, const 
         QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
 
         bool isCopied = false;
+        bool isTimestampSet = false;
 
-        QFuture<void> future = QtConcurrent::run([=, &isCopied] {
+        QFuture<void> future = QtConcurrent::run([=, &isCopied, &isTimestampSet] {
             if(isExist)
                 QFile::remove(userFilePath);
 
             isCopied = QFile::copy(internalFilePath, userFilePath);
+
+            QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+            QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+
+            QFile file(userFilePath);
+            file.open(QFile::OpenModeFlag::Append);
+            isTimestampSet = file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
         });
 
         futureWatcher.setFuture(future);
         dialog.exec();
         futureWatcher.waitForFinished();
 
-        if(isCopied)
+        if(isCopied & isTimestampSet)
         {
             fileJson[JsonKeys::File::IsFrozen] = false;
             bool isUpdated = fsm->updateFileEntity(fileJson);
@@ -818,7 +833,13 @@ void TabFileExplorer::thawFolderTree(const QString folderName, const QString &pa
                     QString userFilePath = currentUserPath + fileJson[JsonKeys::File::FileName].toString();
 
                     bool isCopied = QFile::copy(internalFilePath, userFilePath);
-                    if(isCopied)
+                    QFile file(userFilePath);
+                    file.open(QFile::OpenModeFlag::Append);
+                    QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+                    QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+                    bool isTimestampSet = file.setFileTime(lastModifiedTimestamp, QFileDevice::FileTime::FileModificationTime);
+
+                    if(isCopied && isTimestampSet)
                         emit signalStartMonitoringItem(userFilePath); // Notify about copied file
                 }
 
