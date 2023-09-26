@@ -69,13 +69,13 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     QMenu *ptrMenu = contextMenuListFileExplorer;
 
     QAction *actionPreivew = ui->contextActionListView_Preview;
-    QAction *actionEditVersion = ui->contextActionListView_EditVersion;
+    QAction *actionEditDescription = ui->contextActionListView_EditDescription;
     QAction *actionCreateCopy = ui->contextActionListView_CreateCopy;
     QAction *actionSetAsCurrentVerion = ui->contextActionListView_SetAsCurrentVersion;
     QAction *actionDelete = ui->contextActionListView_DeleteVersion;
 
     ptrMenu->addAction(actionPreivew);
-    ptrMenu->addAction(actionEditVersion);
+    ptrMenu->addAction(actionEditDescription);
     ptrMenu->addAction(actionCreateCopy);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
@@ -439,7 +439,7 @@ void TabFileExplorer::on_contextActionListView_Preview_triggered()
     }
 }
 
-void TabFileExplorer::on_contextActionListView_EditVersion_triggered()
+void TabFileExplorer::on_contextActionListView_EditDescription_triggered()
 {
     QItemSelectionModel *tableViewSelectionModel = ui->tableView->selectionModel();
     QModelIndexList listSymbolPath = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexSymbolPath);
