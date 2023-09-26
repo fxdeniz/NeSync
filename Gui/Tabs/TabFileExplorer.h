@@ -47,6 +47,7 @@ private slots:
     void on_contextActionTableView_Export_triggered();
     void on_contextActionTableView_Delete_triggered();
     void on_contextActionTableView_Freeze_triggered();
+    void on_contextActionListView_Preview_triggered();
     void on_contextActionListView_EditVersion_triggered();
     void on_contextActionListView_DeleteVersion_triggered();
     void on_contextActionListView_CreateCopy_triggered();
