@@ -368,7 +368,13 @@ void TabFileExplorer::on_contextActionListView_Preview_triggered()
 
     QModelIndexList listFileName = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexName);
     auto fileName = listFileName.first().data().toString();
-    QString fileExtension = fileName.split(".").last();
+
+    QString fileExtension = "";
+    QStringList tokens = fileName.split(".");
+
+    if(tokens.size() != 1)
+        fileExtension = tokens.last();
+
 
     QItemSelectionModel * listViewSelectionModel = ui->listView->selectionModel();
     QModelIndexList listVersionNumber = listViewSelectionModel->selectedRows(ListModelFileExplorer::ColumnIndexVersionNumber);
@@ -405,8 +411,8 @@ void TabFileExplorer::on_contextActionListView_Preview_triggered()
         tempFilePath = tempFile.fileName().replace(".", "_");
         tempFile.remove();
 
-        tempFilePath += ".";
-        tempFilePath += fileExtension;
+        if(!fileExtension.isEmpty())
+            tempFilePath += "." + fileExtension;
 
         isCopied = QFile::copy(internalFilePath, tempFilePath);
     });
@@ -423,8 +429,8 @@ void TabFileExplorer::on_contextActionListView_Preview_triggered()
         {
             QString title = tr("Can't open preview copy of the file !");
             QString message = tr("Preview copy of the file <b>%1</b> couldn't opened.<br>"
-                                 "Please install program for opening <b>.%2</b> files format and re-try.");
-            message = message.arg(fileName, fileExtension);
+                                 "Please install program for opening corresponding format and re-try.");
+            message = message.arg(fileName);
             QMessageBox::critical(this, title, message);
             return;
         }
