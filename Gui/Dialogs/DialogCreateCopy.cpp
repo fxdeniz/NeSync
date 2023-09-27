@@ -123,10 +123,10 @@ void DialogCreateCopy::on_buttonCreateCopy_clicked()
     QFuture<void> future = QtConcurrent::run([=, &isCopied] {
 
         auto fsm = FileStorageManager::instance();
-        QJsonObject fileJson = fsm->getFileVersionJson(currentFileSymbolPath, ui->comboBox->currentText().toInt());
+        QJsonObject versionJson = fsm->getFileVersionJson(currentFileSymbolPath, ui->comboBox->currentText().toInt());
 
         QString internalFilePath = fsm->getStorageFolderPath();
-        internalFilePath += fileJson[JsonKeys::FileVersion::InternalFileName].toString();
+        internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
 
         QFile::remove(userFilePath);
         isCopied = QFile::copy(internalFilePath, userFilePath);

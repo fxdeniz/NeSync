@@ -14,6 +14,7 @@
 #include <QtConcurrent>
 #include <QStandardPaths>
 #include <QProgressDialog>
+#include <QDesktopServices>
 
 TabFileExplorer::TabFileExplorer(QWidget *parent) :
     QWidget(parent),
@@ -67,12 +68,14 @@ void TabFileExplorer::buildContextMenuListFileExplorer()
     contextMenuListFileExplorer = new QMenu(ui->listView);
     QMenu *ptrMenu = contextMenuListFileExplorer;
 
-    QAction *actionEditVersion = ui->contextActionListView_EditVersion;
+    QAction *actionPreivew = ui->contextActionListView_Preview;
+    QAction *actionEditDescription = ui->contextActionListView_EditDescription;
     QAction *actionCreateCopy = ui->contextActionListView_CreateCopy;
     QAction *actionSetAsCurrentVerion = ui->contextActionListView_SetAsCurrentVersion;
     QAction *actionDelete = ui->contextActionListView_DeleteVersion;
 
-    ptrMenu->addAction(actionEditVersion);
+    ptrMenu->addAction(actionPreivew);
+    ptrMenu->addAction(actionEditDescription);
     ptrMenu->addAction(actionCreateCopy);
     ptrMenu->addAction(actionSetAsCurrentVerion);
     ptrMenu->addAction(actionDelete);
@@ -357,7 +360,92 @@ void TabFileExplorer::clearDescriptionDetails()
         delete listModel;
 }
 
-void TabFileExplorer::on_contextActionListView_EditVersion_triggered()
+void TabFileExplorer::on_contextActionListView_Preview_triggered()
+{
+    QItemSelectionModel *tableViewSelectionModel = ui->tableView->selectionModel();
+    QModelIndexList listSymbolPath = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexSymbolPath);
+    auto fileSymbolPath = listSymbolPath.first().data().toString();
+
+    QModelIndexList listFileName = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexName);
+    auto fileName = listFileName.first().data().toString();
+
+    QString fileExtension = "";
+    QStringList tokens = fileName.split(".");
+
+    if(tokens.size() != 1)
+        fileExtension = tokens.last();
+
+
+    QItemSelectionModel * listViewSelectionModel = ui->listView->selectionModel();
+    QModelIndexList listVersionNumber = listViewSelectionModel->selectedRows(ListModelFileExplorer::ColumnIndexVersionNumber);
+    auto versionNumber = listVersionNumber.first().data().toLongLong();
+
+    QFutureWatcher<void> futureWatcher;
+    QProgressDialog dialog(this);
+    dialog.setLabelText(tr("Creating preview copy from version <b>%1</b> of file <b>%2</b>...")
+                            .arg(versionNumber)
+                            .arg(fileName)
+                        );
+
+    QObject::connect(&futureWatcher, &QFutureWatcher<void>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, &futureWatcher, &QFutureWatcher<void>::cancel);
+    QObject::connect(&futureWatcher,  &QFutureWatcher<void>::progressRangeChanged, &dialog, &QProgressDialog::setRange);
+    QObject::connect(&futureWatcher, &QFutureWatcher<void>::progressValueChanged,  &dialog, &QProgressDialog::setValue);
+
+    bool isCopied = false;
+    QString tempFilePath;
+
+    QFuture<void> future = QtConcurrent::run([=, &isCopied, &tempFilePath] {
+
+        auto fsm = FileStorageManager::instance();
+        QJsonObject versionJson = fsm->getFileVersionJson(fileSymbolPath, versionNumber);
+
+        QString internalFilePath = fsm->getStorageFolderPath();
+        internalFilePath += versionJson[JsonKeys::FileVersion::InternalFileName].toString();
+
+        QFile actualFile(internalFilePath);
+        actualFile.open(QFile::OpenModeFlag::ReadOnly);
+
+        QTemporaryFile tempFile;
+        tempFile.open();
+        tempFilePath = tempFile.fileName().replace(".", "_");
+        tempFile.remove();
+
+        if(!fileExtension.isEmpty())
+            tempFilePath += "." + fileExtension;
+
+        isCopied = QFile::copy(internalFilePath, tempFilePath);
+    });
+
+    futureWatcher.setFuture(future);
+    dialog.exec();
+    futureWatcher.waitForFinished();
+
+    if(isCopied)
+    {
+        bool isOpened = QDesktopServices::openUrl(QUrl(tempFilePath, QUrl::ParsingMode::TolerantMode));
+
+        if(!isOpened)
+        {
+            QString title = tr("Can't open preview copy of the file !");
+            QString message = tr("Preview copy of the file <b>%1</b> couldn't opened.<br>"
+                                 "Please install program for opening corresponding format and re-try.");
+            message = message.arg(fileName);
+            QMessageBox::critical(this, title, message);
+            return;
+        }
+    }
+    else
+    {
+        QString title = tr("Can't create preview copy of the file !");
+        QString message = tr("Preview copy of the file <b>%1</b> couldn't created in the temp directory.");
+        message = message.arg(fileName);
+        QMessageBox::critical(this, title, message);
+        return;
+    }
+}
+
+void TabFileExplorer::on_contextActionListView_EditDescription_triggered()
 {
     QItemSelectionModel *tableViewSelectionModel = ui->tableView->selectionModel();
     QModelIndexList listSymbolPath = tableViewSelectionModel->selectedRows(TableModelFileExplorer::ColumnIndexSymbolPath);

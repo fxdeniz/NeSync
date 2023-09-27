@@ -342,12 +342,20 @@
     <string>Delete</string>
    </property>
   </action>
-  <action name="contextActionListView_EditVersion">
+  <action name="contextActionListView_Preview">
    <property name="text">
-    <string>Edit version</string>
+    <string>Preview</string>
    </property>
    <property name="toolTip">
-    <string>Edit version</string>
+    <string>Preview the selected version</string>
+   </property>
+  </action>
+  <action name="contextActionListView_EditDescription">
+   <property name="text">
+    <string>Edit description</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit description of the selected version</string>
    </property>
   </action>
   <action name="contextActionListView_CreateCopy">
