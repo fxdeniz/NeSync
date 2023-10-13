@@ -8,9 +8,60 @@
 #include <QtHttpServer/QHttpServerResponse>
 
 #include "Utility/AppConfig.h"
+#include "Utility/JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
 
 // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
+
+QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request)
+{
+    QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
+    QByteArray requestBody = request.body();
+
+    if (requestBody.isEmpty())
+    {
+        QString errorMessage = "Body is empty";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
+
+    if (jsonError.error != QJsonParseError::NoError)
+    {
+        QString errorMessage = "Input format is not parsable json.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    if (!jsonDoc.isObject())
+    {
+        QString errorMessage = "Input json is not an object.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString userFolderPath = jsonObject["userFolderPath"].toString();
+
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "userFolderPath = " << userFolderPath;
+
+    auto fsm = FileStorageManager::instance();
+    bool isAdded = fsm->addNewFolder(symbolFolderPath, userFolderPath);
+
+    if(isAdded)
+    {
+        QString reponseMessage = "Folder is created.";
+        response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Created);
+        return response;
+    }
+
+    return response;
+}
 
 QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
 {
@@ -42,7 +93,6 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
         return response;
     }
 
-
     QJsonObject jsonObject = jsonDoc.object();
 
     QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
@@ -55,6 +105,29 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     qDebug() << "description = " << description;
     qDebug() << "isFrozen = " << isFrozen;
 
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+
+    if(folderJson[JsonKeys::IsExist].toBool())
+    {
+        bool isAdded = fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
+
+        if(isAdded)
+        {
+            QString reponseMessage = "File is created.";
+            response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Created);
+            return response;
+        }
+    }
+
+    return response;
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
     QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
     storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
     storagePath += "nesync_server_";
@@ -64,25 +137,18 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     QDir().mkpath(storagePath);
     AppConfig().setStorageFolderPath(storagePath);
 
-    auto fsm = FileStorageManager::instance();
-
-    fsm->addNewFolder(symbolFolderPath, "");
-    fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
-
-    return response;
-}
-
-int main(int argc, char *argv[])
-{
-    QCoreApplication a(argc, argv);
-
     QHttpServer httpServer;
+
+    httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
+        return postAddNewFolder(request);
+    });
 
     httpServer.route("/addNewFile", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFile(request);
     });
 
-    qulonglong port = httpServer.listen(QHostAddress::SpecialAddress::Any);
+    quint16 targetPort = 1234; // Making this 0 means random port.
+    quint16 port = httpServer.listen(QHostAddress::SpecialAddress::Any, targetPort);
     if (port)
         qDebug() << "running on = " << "localhost:" + QString::number(port);
     else
