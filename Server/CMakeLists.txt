@@ -17,6 +17,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent HttpS
 include_directories(Utility/)
 include_directories(FileStorageSubSystem/)
 include_directories(FileStorageSubSystem/ORM/)
+include_directories(FileMonitorSubSystem/)
+
+add_subdirectory(Dependency/efsw)
 
 set(PROJECT_SOURCES
   main.cpp
@@ -48,6 +51,11 @@ set(PROJECT_SOURCES
       FileStorageSubSystem/ORM/Entity/FileVersionEntity.h
       FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
   #
+
+  # FileMonitoringSubSystem
+      FileMonitorSubSystem/FileSystemEventListener.h
+      FileMonitorSubSystem/FileSystemEventListener.cpp
+  #
 )
 
 if (WIN32)
@@ -66,7 +74,8 @@ endif()
 target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Sql
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Concurrent
-                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer)
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer
+                                    efsw)
 
 # This version info is required for MacOS compilation
 # Windows compilation uses /Resources/res_win.rc
