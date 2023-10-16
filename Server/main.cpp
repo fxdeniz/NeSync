@@ -10,6 +10,7 @@
 #include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
+#include "FileMonitorSubSystem/FileMonitoringManager.h"
 
 // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
 
@@ -124,6 +125,34 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     return response;
 }
 
+QHttpServerResponse postStartMonitoring(FileMonitoringManager &fmm, const QHttpServerRequest& request)
+{
+    auto fsm = FileStorageManager::instance();
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QJsonObject folderJson = value.toObject();
+
+        QString symbolFolderPath = folderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+        QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
+
+        fmm.addFolder(userFolderPath);
+
+        folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+
+        for(const QJsonValue &value : folderJson[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QJsonObject fileJson = value.toObject();
+            QString fileName = fileJson[JsonKeys::File::FileName].toString();
+
+            fmm.addFile(userFolderPath, fileName);
+        }
+    }
+
+    QString reponseMessage = "Monitoring started.";
+    return QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -138,6 +167,7 @@ int main(int argc, char *argv[])
     AppConfig().setStorageFolderPath(storagePath);
 
     QHttpServer httpServer;
+    FileMonitoringManager fmm;
 
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFolder(request);
@@ -145,6 +175,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/addNewFile", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFile(request);
+    });
+
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Post, [&fmm](const QHttpServerRequest &request) {
+        return postStartMonitoring(fmm, request);
     });
 
     quint16 targetPort = 1234; // Making this 0 means random port.
