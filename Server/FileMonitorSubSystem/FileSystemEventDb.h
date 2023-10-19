@@ -32,12 +32,17 @@ public:
     bool addMonitoredFile(const QString &userFolderPath, const QString &fileName);
     bool setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status);
 
+    QString getNewPathByOldPath(const QString &oldPath) const;
+    void addRenamingEntry(const QString &oldPath, const QString &newPath);
+    void removeRenamingChain(const QString &oldPath);
+
 private:
     QReadWriteLock *lock = nullptr;
 
     QHash<QString, efsw::WatchID> folderMap;
     QHash<QString, QSet<QString>> fileMap;
     QHash<QString, ItemStatus> statusMap;
+    QHash<QString, QString> renamingMap; // Old Path -> New Path
 };
 
 #endif // FILESYSTEMEVENTDB_H

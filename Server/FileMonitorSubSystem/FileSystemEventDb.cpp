@@ -90,3 +90,31 @@ bool FileSystemEventDb::setStatusOfMonitoredFile(const QString &userFolderPath, 
 
     return true;
 }
+
+QString FileSystemEventDb::getNewPathByOldPath(const QString &oldPath) const
+{
+    QReadLocker readLocker(lock);
+    QString result = renamingMap.value(oldPath);
+    return result;
+}
+
+void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &newPath)
+{
+    QWriteLocker writeLocker(lock);
+
+    renamingMap.insert(oldPath, newPath);
+}
+
+void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
+{
+    QWriteLocker writeLocker(lock);
+
+    QString currentEntry = oldPath;
+
+    while(renamingMap.contains(currentEntry))
+    {
+        QString nextEntry = renamingMap.value(currentEntry);
+        renamingMap.remove(currentEntry);
+        currentEntry = nextEntry;
+    }
+}

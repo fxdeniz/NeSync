@@ -69,6 +69,9 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
+    qDebug() << "deleteEvent = " << dir << fileName;
+    qDebug() << "";
+
     if(eventDb->isMonitoredFileExist(dir, fileName))
     {
         auto fsm = FileStorageManager::instance();
@@ -116,5 +119,18 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
 {
+    qDebug() << "renameEvent (old) -> (new) = " << oldFileName << fileName << dir;
+    qDebug() << "";
 
+    QString currentOldPath = QDir::toNativeSeparators(dir + oldFileName);
+    QString currentNewPath = QDir::toNativeSeparators(dir + fileName);
+    QFileInfo info(currentNewPath);
+
+    if(info.isFile() && !info.isHidden())
+    {
+        eventDb->addRenamingEntry(currentOldPath, currentNewPath);
+
+        if(eventDb->isMonitoredFileExist(dir, oldFileName))
+            eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+    }
 }
