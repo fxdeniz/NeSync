@@ -30,6 +30,7 @@ public:
 
     bool isMonitoredFileExist(const QString &userFolderPath, const QString &fileName) const;
     bool addMonitoredFile(const QString &userFolderPath, const QString &fileName);
+    bool setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status);
 
 private:
     QReadWriteLock *lock = nullptr;

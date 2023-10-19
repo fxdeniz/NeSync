@@ -76,3 +76,17 @@ bool FileSystemEventDb::addMonitoredFile(const QString &userFolderPath, const QS
 
     return true;
 }
+
+bool FileSystemEventDb::setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status)
+{
+    if(!isMonitoredFileExist(userFolderPath, fileName))
+        return false;
+
+    QWriteLocker writeLocker(lock);
+
+    QString key = userFolderPath + fileName;
+    statusMap.remove(key);
+    statusMap.insert(key, status);
+
+    return true;
+}
