@@ -69,7 +69,18 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
 {
+    if(eventDb->isMonitoredFileExist(dir, fileName))
+    {
+        auto fsm = FileStorageManager::instance();
+        QString currentPath = QDir::toNativeSeparators(dir + fileName);
+        QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
 
+        bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+        if(isFilePersists && !isFileFrozen)
+            eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Deleted);
+    }
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
