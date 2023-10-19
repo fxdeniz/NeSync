@@ -16,8 +16,8 @@ FileSystemEventDb::~FileSystemEventDb()
 bool FileSystemEventDb::isMonitoredFolderExist(const QString &userFolderPath) const
 {
     QReadLocker readLocker(lock);
-
-    bool result = folderDB.contains(userFolderPath);
+    
+    bool result = folderMap.contains(userFolderPath);
     return result;
 }
 
@@ -27,8 +27,22 @@ bool FileSystemEventDb::addMonitoredFolder(const QString &userFolderPath, efsw::
         return false;
 
     QWriteLocker writeLocker(lock);
+    
+    folderMap.insert(userFolderPath, watchID);
+    statusMap.insert(userFolderPath, ItemStatus::Monitored);
+    return true;
+}
 
-    folderDB.insert(userFolderPath, watchID);
+bool FileSystemEventDb::setStatusOfMonitoredFolder(const QString &userFolderPath, ItemStatus status)
+{
+    if(!isMonitoredFolderExist(userFolderPath))
+        return false;
+
+    QWriteLocker writeLocker(lock);
+
+    statusMap.remove(userFolderPath);
+    statusMap.insert(userFolderPath, status);
+
     return true;
 }
 
@@ -37,7 +51,7 @@ bool FileSystemEventDb::isMonitoredFileExist(const QString &userFolderPath, cons
     QReadLocker readLocker(lock);
 
     QSet<QString> emptySet;
-    QSet<QString> fileSet = fileDB.value(userFolderPath, emptySet);
+    QSet<QString> fileSet = fileMap.value(userFolderPath, emptySet);
     if(fileSet.contains(fileName))
         return true;
 
@@ -54,9 +68,11 @@ bool FileSystemEventDb::addMonitoredFile(const QString &userFolderPath, const QS
 
     QWriteLocker writeLocker(lock);
 
-    QSet<QString> fileSet = fileDB.value(userFolderPath);
+    QSet<QString> fileSet = fileMap.value(userFolderPath);
     fileSet.insert(fileName);
 
-    fileDB.insert(userFolderPath, fileSet);
+    fileMap.insert(userFolderPath, fileSet);
+    statusMap.insert(userFolderPath + fileName, ItemStatus::Monitored);
+
     return true;
 }
