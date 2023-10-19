@@ -2,9 +2,11 @@
 
 #include <QFileInfo>
 
-FileMonitoringManager::FileMonitoringManager(QObject *parent)
+FileMonitoringManager::FileMonitoringManager(FileSystemEventDb *fsEventDb, QObject *parent)
     : QObject{parent}
 {
+    this->eventDb = fsEventDb;
+
     QObject::connect(&fileSystemEventListener, &FileSystemEventListener::signalAddEventDetected,
                      this, &FileMonitoringManager::slotOnAddEventDetected);
 
@@ -22,34 +24,26 @@ FileMonitoringManager::FileMonitoringManager(QObject *parent)
 
 bool FileMonitoringManager::addFolder(const QString &userFolderPath)
 {
-    bool isFolderExist = folderDB.contains(userFolderPath);
-
-    if(isFolderExist)
+    if(eventDb->isMonitoredFolderExist(userFolderPath))
         return false;
-
-    bool result = false;
 
     efsw::WatchID watchId = fileWatcher.addWatch(userFolderPath.toStdString(), &fileSystemEventListener, false);
 
     if(watchId >= efsw::Errors::NoError)
     {
-        folderDB.insert(userFolderPath, watchId);
-        result = true;
+        eventDb->addMonitoredFolder(userFolderPath, watchId);
+        return true;
     }
 
-    return result;
+    return false;
 }
 
 bool FileMonitoringManager::addFile(const QString &userFolderPath, const QString &fileName)
 {
-    bool isFolderExist = folderDB.contains(userFolderPath);
-
-    if(!isFolderExist)
+    if(!eventDb->isMonitoredFolderExist(userFolderPath))
         return false;
 
-    bool isFileExist = fileDB.contains(userFolderPath);
-
-    if(isFileExist)
+    if(eventDb->isMonitoredFileExist(userFolderPath, fileName))
         return false;
 
     QFileInfo info(userFolderPath + fileName);
@@ -60,7 +54,7 @@ bool FileMonitoringManager::addFile(const QString &userFolderPath, const QString
     if(!isExist || !isFile)
         return false;
 
-    fileDB.insert(userFolderPath, fileName);
+    eventDb->addMonitoredFile(userFolderPath, fileName);
 
     return true;
 }

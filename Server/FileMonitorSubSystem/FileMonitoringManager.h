@@ -5,12 +5,13 @@
 #include <QMultiHash>
 
 #include "FileSystemEventListener.h"
+#include "FileSystemEventDb.h"
 
 class FileMonitoringManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileMonitoringManager(QObject *parent = nullptr);
+    explicit FileMonitoringManager(FileSystemEventDb *fsEventDb, QObject *parent = nullptr);
 
     bool addFolder(const QString &userFolderPath);
     bool addFile(const QString &userFolderPath, const QString &fileName);
@@ -24,10 +25,9 @@ private slots:
     void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
 
 private:
-    QMultiHash<QString, efsw::WatchID> folderDB;
-    QMultiHash<QString, QString> fileDB;
     FileSystemEventListener fileSystemEventListener;
     efsw::FileWatcher fileWatcher;
+    FileSystemEventDb *eventDb = nullptr;
 };
 
 #endif // FILEMONITORINGMANAGER_H

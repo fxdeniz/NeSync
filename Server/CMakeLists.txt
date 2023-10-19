@@ -55,6 +55,8 @@ set(PROJECT_SOURCES
   # FileMonitoringSubSystem
       FileMonitorSubSystem/FileSystemEventListener.h
       FileMonitorSubSystem/FileSystemEventListener.cpp
+      FileMonitorSubSystem/FileSystemEventDb.h
+      FileMonitorSubSystem/FileSystemEventDb.cpp
       FileMonitorSubSystem/FileMonitoringManager.h
       FileMonitorSubSystem/FileMonitoringManager.cpp
   #
@@ -70,6 +72,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         ${app_icon_resource_windows}
+        FileMonitorSubSystem/FileSystemEventDb.h FileMonitorSubSystem/FileSystemEventDb.cpp
     )
 endif()
 

@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
     AppConfig().setStorageFolderPath(storagePath);
 
     QHttpServer httpServer;
-    FileMonitoringManager fmm;
+    FileMonitoringManager fmm(new FileSystemEventDb());
 
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFolder(request);
