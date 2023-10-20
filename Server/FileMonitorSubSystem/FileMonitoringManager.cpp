@@ -128,9 +128,21 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
 
     if(info.isFile() && !info.isHidden())
     {
-        eventDb->addRenamingEntry(currentOldPath, currentNewPath);
+        auto fsm = FileStorageManager::instance();
 
-        if(eventDb->isMonitoredFileExist(dir, oldFileName))
-            eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+        QJsonObject newFileJson = fsm->getFileJsonByUserPath(currentNewPath);
+
+        bool isNewFilePersists = newFileJson[JsonKeys::IsExist].toBool();
+        bool isNewFileFrozen = newFileJson[JsonKeys::File::IsFrozen].toBool();
+
+        if(isNewFilePersists && !isNewFileFrozen) // When moved file overwritten to persistent file
+            eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
+        else
+        {
+            eventDb->addRenamingEntry(currentOldPath, currentNewPath);
+
+            if(eventDb->isMonitoredFileExist(dir, oldFileName))
+                eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+        }
     }
 }
