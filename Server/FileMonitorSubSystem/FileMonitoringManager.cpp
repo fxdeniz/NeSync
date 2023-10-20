@@ -73,6 +73,9 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
     if(info.isDir())
     {
+        efsw::WatchID watchID = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
+        // TODO: Add watchID error checking
+
         auto fsm = FileStorageManager::instance();
         QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
         bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
@@ -81,7 +84,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         if(!eventDb->isMonitoredFolderExist(currentPath))
         {
             if(!isFolderPersists)
-                eventDb->addNewAddedFolder(currentPath);
+                eventDb->addNewAddedFolder(currentPath, watchID);
         }
         else
         {
@@ -109,8 +112,8 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
     qDebug() << "";
 
     QString currentPath = QDir::toNativeSeparators(dir + fileName);
-
-    if(eventDb->getNewAddedFolderSet().contains(currentPath))
+    
+    if(eventDb->getNewAddedFolderMap().contains(currentPath))
         eventDb->removeNewAddedFolder(currentPath);
 
     else if(eventDb->getNewAddedFileSet(dir).contains(fileName))
@@ -192,13 +195,14 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             if(isOldFolderPersists && !isOldFolderFrozen)
                 eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
         }
-
-        if(!eventDb->getNewAddedFolderSet().contains(currentOldPath))
+        
+        if(!eventDb->getNewAddedFolderMap().contains(currentOldPath))
             eventDb->addRenamingEntry(currentOldPath, currentNewPath);
         else
         {
+            efsw::WatchID watchID = eventDb->getNewAddedFolderMap().value(currentOldPath);
             eventDb->removeNewAddedFolder(currentOldPath);
-            eventDb->addNewAddedFolder(currentNewPath);
+            eventDb->addNewAddedFolder(currentNewPath, watchID);
         }
     }
     else if(info.isFile() && !info.isHidden())

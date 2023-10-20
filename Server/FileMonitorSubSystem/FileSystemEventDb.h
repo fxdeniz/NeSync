@@ -36,9 +36,9 @@ public:
     void addRenamingEntry(const QString &oldPath, const QString &newPath);
     void removeRenamingChain(const QString &oldPath);
 
-    void addNewAddedFolder(const QString &userFolderPath);
+    void addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID);
     void removeNewAddedFolder(const QString &userFolderPath);
-    QSet<QString> getNewAddedFolderSet() const;
+    QHash<QString, efsw::WatchID> getNewAddedFolderMap() const;
 
     void addNewAddedFile(const QString &userFolderPath, const QString &fileName);
     void removeNewAddedFile(const QString &userFolderPath, const QString &fileName);
@@ -53,7 +53,7 @@ private:
     QHash<QString, ItemStatus> statusMap;
     QHash<QString, QString> renamingMap; // Old Path -> New Path
 
-    QSet<QString> newFolderSet;
+    QHash<QString, efsw::WatchID> newFolderMap;
     QHash<QString, QSet<QString>> newFileMap;
 };
 

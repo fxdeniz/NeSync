@@ -119,25 +119,25 @@ void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
     }
 }
 
-void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath)
+void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID)
 {
     QWriteLocker writeLocker(lock);
 
-    newFolderSet.insert(userFolderPath);
+    newFolderMap.insert(userFolderPath, watchID);
 }
 
 void FileSystemEventDb::removeNewAddedFolder(const QString &userFolderPath)
 {
     QWriteLocker writeLocker(lock);
 
-    newFolderSet.remove(userFolderPath);
+    newFolderMap.remove(userFolderPath);
 }
 
-QSet<QString> FileSystemEventDb::getNewAddedFolderSet() const
+QHash<QString, efsw::WatchID> FileSystemEventDb::getNewAddedFolderMap() const
 {
     QReadLocker readLocker(lock);
 
-    return newFolderSet;
+    return newFolderMap;
 }
 
 void FileSystemEventDb::addNewAddedFile(const QString &userFolderPath, const QString &fileName)
