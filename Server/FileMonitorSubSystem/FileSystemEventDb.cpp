@@ -137,3 +137,27 @@ QSet<QString> FileSystemEventDb::getNewAddedFolderSet() const
 {
     return newFolderSet;
 }
+
+void FileSystemEventDb::addNewAddedFile(const QString &userFolderPath, const QString &fileName)
+{
+    QSet<QString> fileSet = newFileMap.value(userFolderPath);
+    fileSet.insert(fileName);
+
+    newFileMap.insert(userFolderPath, fileSet);
+}
+
+void FileSystemEventDb::removeNewAddedFile(const QString &userFolderPath, const QString &fileName)
+{
+    if(newFileMap.contains(userFolderPath))
+    {
+        QSet<QString> fileSet = newFileMap.value(userFolderPath);
+        fileSet.remove(fileName);
+
+        newFileMap.insert(userFolderPath, fileSet);
+    }
+}
+
+QSet<QString> FileSystemEventDb::getNewAddedFileSet(const QString &userFolderPath) const
+{
+    return newFileMap.value(userFolderPath);
+}

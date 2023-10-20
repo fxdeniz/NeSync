@@ -96,7 +96,9 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
         bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
-        if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
+        if(!eventDb->isMonitoredFileExist(dir, fileName))
+            eventDb->addNewAddedFile(dir, fileName);
+        else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
             eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
     }
 }
