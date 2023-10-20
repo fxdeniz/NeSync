@@ -145,9 +145,7 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
 
-    bool isFileMonitored = eventDb->isMonitoredFileExist(dir, fileName);
-
-    if(isFileMonitored)
+    if(eventDb->isMonitoredFileExist(dir, fileName))
     {
         QString currentPath = QDir::toNativeSeparators(dir + fileName);
 
@@ -180,7 +178,30 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
     QString currentNewPath = QDir::toNativeSeparators(dir + fileName);
     QFileInfo info(currentNewPath);
 
-    if(info.isFile() && !info.isHidden())
+    if(info.isDir())
+    {
+        auto fsm = FileStorageManager::instance();
+
+        if(eventDb->isMonitoredFolderExist(currentOldPath))
+        {
+            QJsonObject oldFolderJson = fsm->getFolderJsonByUserPath(currentOldPath);
+
+            bool isOldFolderPersists = oldFolderJson[JsonKeys::IsExist].toBool();
+            bool isOldFolderFrozen = oldFolderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+            if(isOldFolderPersists && !isOldFolderFrozen)
+                eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+        }
+
+        if(!eventDb->getNewAddedFolderSet().contains(currentOldPath))
+            eventDb->addRenamingEntry(currentOldPath, currentNewPath);
+        else
+        {
+            eventDb->removeNewAddedFolder(currentOldPath);
+            eventDb->addNewAddedFolder(currentNewPath);
+        }
+    }
+    else if(info.isFile() && !info.isHidden())
     {
         auto fsm = FileStorageManager::instance();
 
@@ -204,7 +225,7 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
                     eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
             }
 
-            if(!eventDb->getNewAddedFolderSet().contains(currentOldPath))
+            if(!eventDb->getNewAddedFileSet(dir).contains(oldFileName))
                 eventDb->addRenamingEntry(currentOldPath, currentNewPath);
             else
             {
