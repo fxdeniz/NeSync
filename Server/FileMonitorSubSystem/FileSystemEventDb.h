@@ -36,6 +36,10 @@ public:
     void addRenamingEntry(const QString &oldPath, const QString &newPath);
     void removeRenamingChain(const QString &oldPath);
 
+    void addNewAddedFolder(const QString &userFolderPath);
+    void removeNewAddedFolder(const QString &userFolderPath);
+    QSet<QString> getNewAddedFolderSet() const;
+
 private:
     QReadWriteLock *lock = nullptr;
 
@@ -43,6 +47,8 @@ private:
     QHash<QString, QSet<QString>> fileMap;
     QHash<QString, ItemStatus> statusMap;
     QHash<QString, QString> renamingMap; // Old Path -> New Path
+
+    QSet<QString> newFolderSet;
 };
 
 #endif // FILESYSTEMEVENTDB_H

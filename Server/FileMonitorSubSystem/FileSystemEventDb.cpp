@@ -118,3 +118,22 @@ void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
         currentEntry = nextEntry;
     }
 }
+
+void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath)
+{
+    QWriteLocker writeLocker(lock);
+
+    newFolderSet.insert(userFolderPath);
+}
+
+void FileSystemEventDb::removeNewAddedFolder(const QString &userFolderPath)
+{
+    QWriteLocker writeLocker(lock);
+
+    newFolderSet.remove(userFolderPath);
+}
+
+QSet<QString> FileSystemEventDb::getNewAddedFolderSet() const
+{
+    return newFolderSet;
+}

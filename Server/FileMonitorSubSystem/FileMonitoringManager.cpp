@@ -71,7 +71,25 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
 
     QFileInfo info(currentPath);
 
-    if(info.isFile() && !info.isHidden()) // Only accept real files
+    if(info.isDir())
+    {
+        auto fsm = FileStorageManager::instance();
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
+        bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+        bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+        if(!eventDb->isMonitoredFolderExist(currentPath))
+        {
+            if(!isFolderPersists)
+                eventDb->addNewAddedFolder(currentPath);
+        }
+        else
+        {
+            if(isFolderPersists && !isFolderFrozen)
+                eventDb->setStatusOfMonitoredFolder(dir, FileSystemEventDb::ItemStatus::Updated);
+        }
+    }
+    else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
         auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
