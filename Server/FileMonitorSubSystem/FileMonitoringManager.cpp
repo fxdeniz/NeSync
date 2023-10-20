@@ -108,10 +108,28 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
     qDebug() << "deleteEvent = " << dir << fileName;
     qDebug() << "";
 
-    if(eventDb->isMonitoredFileExist(dir, fileName))
+    QString currentPath = QDir::toNativeSeparators(dir + fileName);
+
+    if(eventDb->getNewAddedFolderSet().contains(currentPath))
+        eventDb->removeNewAddedFolder(currentPath);
+
+    else if(eventDb->getNewAddedFileSet(dir).contains(fileName))
+        eventDb->removeNewAddedFile(dir, fileName);
+
+    else if(eventDb->isMonitoredFolderExist(currentPath))
     {
         auto fsm = FileStorageManager::instance();
-        QString currentPath = QDir::toNativeSeparators(dir + fileName);
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
+
+        bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+        bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+        if(isFolderPersists && !isFolderFrozen)
+            eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+    }
+    else if(eventDb->isMonitoredFileExist(dir, fileName))
+    {
+        auto fsm = FileStorageManager::instance();
         QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
 
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
