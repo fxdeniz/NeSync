@@ -42,6 +42,7 @@ public:
 
     void addNewAddedFile(const QString &userFolderPath, const QString &fileName);
     void removeNewAddedFile(const QString &userFolderPath, const QString &fileName);
+    QStringList getNewAddedFileFolders() const;
     QSet<QString> getNewAddedFileSet(const QString &userFolderPath) const;
 
 private:

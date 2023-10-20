@@ -135,11 +135,15 @@ void FileSystemEventDb::removeNewAddedFolder(const QString &userFolderPath)
 
 QSet<QString> FileSystemEventDb::getNewAddedFolderSet() const
 {
+    QReadLocker readLocker(lock);
+
     return newFolderSet;
 }
 
 void FileSystemEventDb::addNewAddedFile(const QString &userFolderPath, const QString &fileName)
 {
+    QWriteLocker writeLocker(lock);
+
     QSet<QString> fileSet = newFileMap.value(userFolderPath);
     fileSet.insert(fileName);
 
@@ -148,6 +152,8 @@ void FileSystemEventDb::addNewAddedFile(const QString &userFolderPath, const QSt
 
 void FileSystemEventDb::removeNewAddedFile(const QString &userFolderPath, const QString &fileName)
 {
+    QWriteLocker writeLocker(lock);
+
     if(newFileMap.contains(userFolderPath))
     {
         QSet<QString> fileSet = newFileMap.value(userFolderPath);
@@ -157,7 +163,16 @@ void FileSystemEventDb::removeNewAddedFile(const QString &userFolderPath, const 
     }
 }
 
+QStringList FileSystemEventDb::getNewAddedFileFolders() const
+{
+    QReadLocker readLocker(lock);
+
+    return newFileMap.keys();
+}
+
 QSet<QString> FileSystemEventDb::getNewAddedFileSet(const QString &userFolderPath) const
 {
+    QReadLocker readLocker(lock);
+
     return newFileMap.value(userFolderPath);
 }

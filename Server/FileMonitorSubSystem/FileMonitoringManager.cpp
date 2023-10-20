@@ -193,10 +193,24 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
         else
         {
-            eventDb->addRenamingEntry(currentOldPath, currentNewPath);
-
             if(eventDb->isMonitoredFileExist(dir, oldFileName))
-                eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+            {
+                QJsonObject oldFileJson = fsm->getFileJsonByUserPath(currentOldPath);
+
+                bool isOldFilePersists = oldFileJson[JsonKeys::IsExist].toBool();
+                bool isOldFileFrozen = oldFileJson[JsonKeys::File::IsFrozen].toBool();
+
+                if(isOldFilePersists && !isOldFileFrozen)
+                    eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+            }
+
+            if(!eventDb->getNewAddedFolderSet().contains(currentOldPath))
+                eventDb->addRenamingEntry(currentOldPath, currentNewPath);
+            else
+            {
+                eventDb->removeNewAddedFile(dir, oldFileName);
+                eventDb->addNewAddedFile(dir, fileName);
+            }
         }
     }
 }
