@@ -24,7 +24,7 @@ bool FileSystemEventDb::isMonitoredFolderExist(const QString &userFolderPath) co
 bool FileSystemEventDb::addMonitoredFolder(const QString &userFolderPath, efsw::WatchID watchID)
 {
     if(isMonitoredFolderExist(userFolderPath))
-        return false;
+        return true;
 
     QWriteLocker writeLocker(lock);
     
@@ -64,7 +64,7 @@ bool FileSystemEventDb::addMonitoredFile(const QString &userFolderPath, const QS
         return false;
     
     if(isMonitoredFileExist(userFolderPath, fileName))
-        return false;
+        return true;
 
     QWriteLocker writeLocker(lock);
 

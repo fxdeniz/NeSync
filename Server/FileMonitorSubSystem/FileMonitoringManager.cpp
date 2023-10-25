@@ -81,16 +81,10 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
         bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
 
-        if(!eventDb->isMonitoredFolderExist(currentPath))
-        {
-            if(!isFolderPersists)
-                eventDb->addNewAddedFolder(currentPath, watchID);
-        }
-        else
-        {
-            if(isFolderPersists && !isFolderFrozen)
+        if(!isFolderPersists)
+            eventDb->addNewAddedFolder(currentPath, watchID);
+        else if(isFolderPersists && !isFolderFrozen)
                 eventDb->setStatusOfMonitoredFolder(dir, FileSystemEventDb::ItemStatus::Updated);
-        }
     }
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
@@ -119,28 +113,23 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
     else if(eventDb->getNewAddedFileSet(dir).contains(fileName))
         eventDb->removeNewAddedFile(dir, fileName);
 
-    else if(eventDb->isMonitoredFolderExist(currentPath))
-    {
-        auto fsm = FileStorageManager::instance();
-        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
 
-        bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
-        bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
+    auto fsm = FileStorageManager::instance();
+    QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
 
-        if(isFolderPersists && !isFolderFrozen)
-            eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
-    }
-    else if(eventDb->isMonitoredFileExist(dir, fileName))
-    {
-        auto fsm = FileStorageManager::instance();
-        QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+    bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+    bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
 
-        bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
 
-        if(isFilePersists && !isFileFrozen)
-            eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Deleted);
-    }
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+    if(isFolderPersists && !isFolderFrozen)
+        eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
+
+    else if(isFilePersists && !isFileFrozen)
+        eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Deleted);
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
@@ -148,28 +137,25 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
 
-    if(eventDb->isMonitoredFileExist(dir, fileName))
-    {
-        QString currentPath = QDir::toNativeSeparators(dir + fileName);
+    QString currentPath = QDir::toNativeSeparators(dir + fileName);
 
-        auto fsm = FileStorageManager::instance();
+    auto fsm = FileStorageManager::instance();
 
-        QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
-        QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
-        qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+    QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+    qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
 
-        QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
-        QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
-        QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
-        QDateTime currentTimestamp = QFileInfo(currentPath).lastModified();
+    QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+    QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+    QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+    QDateTime currentTimestamp = QFileInfo(currentPath).lastModified();
 
-        bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
-        bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+    bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
 
-        if(isFilePersists && !isFileFrozen && isFileTouched)
-            eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
-    }
+    if(isFilePersists && !isFileFrozen && isFileTouched)
+        eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
 }
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
@@ -185,16 +171,13 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
     {
         auto fsm = FileStorageManager::instance();
 
-        if(eventDb->isMonitoredFolderExist(currentOldPath))
-        {
-            QJsonObject oldFolderJson = fsm->getFolderJsonByUserPath(currentOldPath);
+        QJsonObject oldFolderJson = fsm->getFolderJsonByUserPath(currentOldPath);
 
-            bool isOldFolderPersists = oldFolderJson[JsonKeys::IsExist].toBool();
-            bool isOldFolderFrozen = oldFolderJson[JsonKeys::Folder::IsFrozen].toBool();
+        bool isOldFolderPersists = oldFolderJson[JsonKeys::IsExist].toBool();
+        bool isOldFolderFrozen = oldFolderJson[JsonKeys::Folder::IsFrozen].toBool();
 
-            if(isOldFolderPersists && !isOldFolderFrozen)
-                eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
-        }
+        if(isOldFolderPersists && !isOldFolderFrozen)
+            eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
         
         if(!eventDb->getNewAddedFolderMap().contains(currentOldPath))
             eventDb->addRenamingEntry(currentOldPath, currentNewPath);
@@ -218,16 +201,13 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
         else
         {
-            if(eventDb->isMonitoredFileExist(dir, oldFileName))
-            {
-                QJsonObject oldFileJson = fsm->getFileJsonByUserPath(currentOldPath);
+            QJsonObject oldFileJson = fsm->getFileJsonByUserPath(currentOldPath);
 
-                bool isOldFilePersists = oldFileJson[JsonKeys::IsExist].toBool();
-                bool isOldFileFrozen = oldFileJson[JsonKeys::File::IsFrozen].toBool();
+            bool isOldFilePersists = oldFileJson[JsonKeys::IsExist].toBool();
+            bool isOldFileFrozen = oldFileJson[JsonKeys::File::IsFrozen].toBool();
 
-                if(isOldFilePersists && !isOldFileFrozen)
-                    eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
-            }
+            if(isOldFilePersists && !isOldFileFrozen)
+                eventDb->setStatusOfMonitoredFile(dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
 
             if(!eventDb->getNewAddedFileSet(dir).contains(oldFileName))
                 eventDb->addRenamingEntry(currentOldPath, currentNewPath);
