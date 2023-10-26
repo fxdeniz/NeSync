@@ -153,6 +153,19 @@ QHttpServerResponse postStartMonitoring(FileMonitoringManager &fmm, const QHttpS
     return QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
 }
 
+QHttpServerResponse getMonitoredFolderTree(FileSystemEventDb *fsEventDb)
+{
+    QHash<FileSystemEventDb::ItemStatus, QStringList> queryResult = fsEventDb->getMonitoredFiles();
+
+    auto status = FileSystemEventDb::ItemStatus::Updated;
+    QStringList updatedFolderList = queryResult.value(status);
+
+    QJsonObject jsonObject;
+    jsonObject.insert("updatedFileList", QJsonArray::fromStringList(updatedFolderList));
+
+    return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -167,7 +180,8 @@ int main(int argc, char *argv[])
     AppConfig().setStorageFolderPath(storagePath);
 
     QHttpServer httpServer;
-    FileMonitoringManager fmm(new FileSystemEventDb());
+    FileSystemEventDb *fsEventDb = new FileSystemEventDb();
+    FileMonitoringManager fmm(fsEventDb);
 
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFolder(request);
@@ -179,6 +193,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/startMonitoring", QHttpServerRequest::Method::Post, [&fmm](const QHttpServerRequest &request) {
         return postStartMonitoring(fmm, request);
+    });
+
+    httpServer.route("/getMonitoredFolderTree", QHttpServerRequest::Method::Get, [fsEventDb]() {
+        return getMonitoredFolderTree(fsEventDb);
     });
 
     quint16 targetPort = 1234; // Making this 0 means random port.

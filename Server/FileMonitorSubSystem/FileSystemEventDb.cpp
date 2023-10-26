@@ -91,6 +91,32 @@ bool FileSystemEventDb::setStatusOfMonitoredFile(const QString &userFolderPath, 
     return true;
 }
 
+QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getMonitoredFiles() const
+{
+    QReadLocker readLocker(lock);
+
+    QStringList updatedFileList;
+
+    QHashIterator<QString, QSet<QString>> hashIter(fileMap);
+    while(hashIter.hasNext())
+    {
+        hashIter.next();
+
+        for(const QString &fileName : hashIter.value())
+        {
+            QString currentFilePath = hashIter.key() + fileName;
+            FileSystemEventDb::ItemStatus value = statusMap.value(currentFilePath, FileSystemEventDb::ItemStatus::Invalid);
+
+            if(value == FileSystemEventDb::ItemStatus::Updated)
+                updatedFileList.append(currentFilePath);
+        }
+    }
+
+    QHash<FileSystemEventDb::ItemStatus, QStringList> result;
+    result.insert(FileSystemEventDb::ItemStatus::Updated, updatedFileList);
+    return result;
+}
+
 QString FileSystemEventDb::getNewPathByOldPath(const QString &oldPath) const
 {
     QReadLocker readLocker(lock);

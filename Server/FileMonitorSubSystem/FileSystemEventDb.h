@@ -32,6 +32,8 @@ public:
     bool addMonitoredFile(const QString &userFolderPath, const QString &fileName);
     bool setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status);
 
+    QHash<FileSystemEventDb::ItemStatus, QStringList> getMonitoredFiles() const;
+
     QString getNewPathByOldPath(const QString &oldPath) const;
     void addRenamingEntry(const QString &oldPath, const QString &newPath);
     void removeRenamingChain(const QString &oldPath);
