@@ -91,7 +91,7 @@ bool FileSystemEventDb::setStatusOfMonitoredFile(const QString &userFolderPath, 
     return true;
 }
 
-QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getMonitoredFiles() const
+QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getEventsOnMonitoredFiles() const
 {
     QReadLocker readLocker(lock);
 
@@ -197,7 +197,7 @@ void FileSystemEventDb::removeNewAddedFile(const QString &userFolderPath, const 
     }
 }
 
-QStringList FileSystemEventDb::getNewAddedFileFolders() const
+QStringList FileSystemEventDb::getFolderListOfNewAddedFiles() const
 {
     QReadLocker readLocker(lock);
 
@@ -209,4 +209,19 @@ QSet<QString> FileSystemEventDb::getNewAddedFileSet(const QString &userFolderPat
     QReadLocker readLocker(lock);
 
     return newFileMap.value(userFolderPath);
+}
+
+QStringList FileSystemEventDb::getNewAddedFileList() const
+{
+    QStringList result;
+
+    for(const QString &currentFolderPath : getFolderListOfNewAddedFiles())
+    {
+        QSet<QString> fileSet = getNewAddedFileSet(currentFolderPath);
+
+        for(const QString &currentFileName : fileSet)
+            result.append(currentFolderPath + currentFileName);
+    }
+
+    return result;
 }

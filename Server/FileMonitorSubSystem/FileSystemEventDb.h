@@ -32,7 +32,7 @@ public:
     bool addMonitoredFile(const QString &userFolderPath, const QString &fileName);
     bool setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status);
 
-    QHash<FileSystemEventDb::ItemStatus, QStringList> getMonitoredFiles() const;
+    QHash<FileSystemEventDb::ItemStatus, QStringList> getEventsOnMonitoredFiles() const;
 
     QString getNewPathByOldPath(const QString &oldPath) const;
     void addRenamingEntry(const QString &oldPath, const QString &newPath);
@@ -44,8 +44,9 @@ public:
 
     void addNewAddedFile(const QString &userFolderPath, const QString &fileName);
     void removeNewAddedFile(const QString &userFolderPath, const QString &fileName);
-    QStringList getNewAddedFileFolders() const;
+    QStringList getFolderListOfNewAddedFiles() const;
     QSet<QString> getNewAddedFileSet(const QString &userFolderPath) const;
+    QStringList getNewAddedFileList() const;
 
 private:
     QReadWriteLock *lock = nullptr;
