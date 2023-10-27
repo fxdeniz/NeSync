@@ -158,10 +158,14 @@ QHttpServerResponse getMonitoredFolderTree(FileSystemEventDb *fsEventDb)
     QHash<FileSystemEventDb::ItemStatus, QStringList> queryResult = fsEventDb->getMonitoredFiles();
 
     auto status = FileSystemEventDb::ItemStatus::Updated;
-    QStringList updatedFolderList = queryResult.value(status);
+    QStringList updatedFileList = queryResult.value(status);
+
+    status = FileSystemEventDb::ItemStatus::Deleted;
+    QStringList deletedFileList = queryResult.value(status);
 
     QJsonObject jsonObject;
-    jsonObject.insert("updatedFileList", QJsonArray::fromStringList(updatedFolderList));
+    jsonObject.insert("updatedFileList", QJsonArray::fromStringList(updatedFileList));
+    jsonObject.insert("deletedFileList", QJsonArray::fromStringList(deletedFileList));
 
     return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
 }

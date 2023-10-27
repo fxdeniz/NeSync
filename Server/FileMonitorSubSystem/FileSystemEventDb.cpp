@@ -96,6 +96,7 @@ QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getMonitore
     QReadLocker readLocker(lock);
 
     QStringList updatedFileList;
+    QStringList deletedFileList;
 
     QHashIterator<QString, QSet<QString>> hashIter(fileMap);
     while(hashIter.hasNext())
@@ -109,11 +110,14 @@ QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getMonitore
 
             if(value == FileSystemEventDb::ItemStatus::Updated)
                 updatedFileList.append(currentFilePath);
+            else if(value == FileSystemEventDb::ItemStatus::Deleted)
+                deletedFileList.append(currentFilePath);
         }
     }
 
     QHash<FileSystemEventDb::ItemStatus, QStringList> result;
     result.insert(FileSystemEventDb::ItemStatus::Updated, updatedFileList);
+    result.insert(FileSystemEventDb::ItemStatus::Deleted, deletedFileList);
     return result;
 }
 
