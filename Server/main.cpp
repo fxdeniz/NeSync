@@ -153,7 +153,7 @@ QHttpServerResponse postStartMonitoring(FileMonitoringManager &fmm, const QHttpS
     return QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse getMonitoredFolderTree(FileSystemEventDb *fsEventDb)
+QHttpServerResponse getFolderTreeStatus(FileSystemEventDb *fsEventDb)
 {
     QHash<FileSystemEventDb::ItemStatus, QStringList> queryResult = fsEventDb->getMonitoredFiles();
 
@@ -163,9 +163,13 @@ QHttpServerResponse getMonitoredFolderTree(FileSystemEventDb *fsEventDb)
     status = FileSystemEventDb::ItemStatus::Deleted;
     QStringList deletedFileList = queryResult.value(status);
 
+    status = FileSystemEventDb::ItemStatus::Renamed;
+    QStringList renamedFileList = queryResult.value(status);
+
     QJsonObject jsonObject;
     jsonObject.insert("updatedFileList", QJsonArray::fromStringList(updatedFileList));
     jsonObject.insert("deletedFileList", QJsonArray::fromStringList(deletedFileList));
+    jsonObject.insert("renamedFileList", QJsonArray::fromStringList(renamedFileList));
 
     return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
 }
@@ -199,8 +203,8 @@ int main(int argc, char *argv[])
         return postStartMonitoring(fmm, request);
     });
 
-    httpServer.route("/getMonitoredFolderTree", QHttpServerRequest::Method::Get, [fsEventDb]() {
-        return getMonitoredFolderTree(fsEventDb);
+    httpServer.route("/getFolderTreeStatus", QHttpServerRequest::Method::Get, [fsEventDb]() {
+        return getFolderTreeStatus(fsEventDb);
     });
 
     quint16 targetPort = 1234; // Making this 0 means random port.
