@@ -28,6 +28,8 @@ public:
     bool addMonitoredFolder(const QString &userFolderPath, efsw::WatchID watchID);
     bool setStatusOfMonitoredFolder(const QString &userFolderPath, ItemStatus status);
 
+    QHash<FileSystemEventDb::ItemStatus, QStringList> getEventsOnMonitoredFolders() const;
+
     bool isMonitoredFileExist(const QString &userFolderPath, const QString &fileName) const;
     bool addMonitoredFile(const QString &userFolderPath, const QString &fileName);
     bool setStatusOfMonitoredFile(const QString &userFolderPath, const QString &fileName, ItemStatus status);

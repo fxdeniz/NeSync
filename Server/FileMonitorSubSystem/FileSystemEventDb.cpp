@@ -46,6 +46,34 @@ bool FileSystemEventDb::setStatusOfMonitoredFolder(const QString &userFolderPath
     return true;
 }
 
+QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getEventsOnMonitoredFolders() const
+{
+    QReadLocker readLocker(lock);
+
+    QStringList deletedFolderList;
+    QStringList renamedFolderList;
+
+    QHashIterator<QString, efsw::WatchID> hashIter(folderMap);
+    while(hashIter.hasNext())
+    {
+        hashIter.next();
+
+        QString currentFolderPath = hashIter.key();
+
+        FileSystemEventDb::ItemStatus value = statusMap.value(currentFolderPath, FileSystemEventDb::ItemStatus::Invalid);
+
+        if(value == FileSystemEventDb::ItemStatus::Deleted)
+            deletedFolderList.append(currentFolderPath);
+        else if(value == FileSystemEventDb::ItemStatus::Renamed)
+            renamedFolderList.append(currentFolderPath);
+    }
+
+    QHash<FileSystemEventDb::ItemStatus, QStringList> result;
+    result.insert(FileSystemEventDb::ItemStatus::Deleted, deletedFolderList);
+    result.insert(FileSystemEventDb::ItemStatus::Renamed, renamedFolderList);
+    return result;
+}
+
 bool FileSystemEventDb::isMonitoredFileExist(const QString &userFolderPath, const QString &fileName) const
 {
     QReadLocker readLocker(lock);
