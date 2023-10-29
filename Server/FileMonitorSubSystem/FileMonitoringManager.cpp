@@ -77,12 +77,12 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         // TODO: Add watchID error checking
 
         auto fsm = FileStorageManager::instance();
-        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath + QDir::separator());
         bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
         bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
 
         if(!isFolderPersists)
-            eventDb->addNewAddedFolder(currentPath, watchID);
+            eventDb->addNewAddedFolder(currentPath + QDir::separator(), watchID);
         else if(isFolderPersists && !isFolderFrozen)
                 eventDb->setStatusOfMonitoredFolder(dir, FileSystemEventDb::ItemStatus::Updated);
     }
@@ -108,7 +108,7 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, c
     QString currentPath = QDir::toNativeSeparators(dir + fileName);
     
     if(eventDb->getNewAddedFolderMap().contains(currentPath + QDir::separator()))
-        eventDb->removeNewAddedFolder(currentPath);
+        eventDb->removeNewAddedFolder(currentPath + QDir::separator());
 
     else if(eventDb->getNewAddedFileSet(dir).contains(fileName))
         eventDb->removeNewAddedFile(dir, fileName);

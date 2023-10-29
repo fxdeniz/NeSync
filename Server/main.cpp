@@ -182,6 +182,18 @@ QHttpServerResponse getEventsOnFolderTree(FileSystemEventDb *fsEventDb)
     return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
 }
 
+QHttpServerResponse getNewAddedEvents(FileSystemEventDb *fsEventDb)
+{
+    QStringList newAddedFolderList = fsEventDb->getNewAddedFolderMap().keys();
+    QStringList newAddedFileList = fsEventDb->getNewAddedFileList();
+
+    QJsonObject jsonObject;
+    jsonObject.insert("newAddedFolderList", QJsonArray::fromStringList(newAddedFolderList));
+    jsonObject.insert("newAddedFileList", QJsonArray::fromStringList(newAddedFileList));
+
+    return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -213,6 +225,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/getEventsOnFolderTree", QHttpServerRequest::Method::Get, [fsEventDb]() {
         return getEventsOnFolderTree(fsEventDb);
+    });
+
+    httpServer.route("/getNewAddedEvents", QHttpServerRequest::Method::Get, [fsEventDb]() {
+        return getNewAddedEvents(fsEventDb);
     });
 
     quint16 targetPort = 1234; // Making this 0 means random port.
