@@ -56,7 +56,8 @@ private:
     QHash<QString, efsw::WatchID> folderMap;
     QHash<QString, QSet<QString>> fileMap;
     QHash<QString, ItemStatus> statusMap;
-    QHash<QString, QString> renamingMap; // Old Path -> New Path
+    QHash<QString, QString> forwardRenamingMap; // Old Path -> New Path
+    QHash<QString, QString> backwardRenamingMap; // New Path -> Old Path
 
     QHash<QString, efsw::WatchID> newFolderMap;
     QHash<QString, QSet<QString>> newFileMap;

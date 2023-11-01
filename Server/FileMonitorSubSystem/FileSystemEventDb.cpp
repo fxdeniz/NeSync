@@ -156,15 +156,15 @@ QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getEventsOn
 QString FileSystemEventDb::getNewPathByOldPath(const QString &oldPath) const
 {
     QReadLocker readLocker(lock);
-    QString result = renamingMap.value(oldPath);
+    QString result = forwardRenamingMap.value(oldPath);
     return result;
 }
 
 void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &newPath)
 {
     QWriteLocker writeLocker(lock);
-
-    renamingMap.insert(oldPath, newPath);
+    
+    forwardRenamingMap.insert(oldPath, newPath);
 }
 
 void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
@@ -172,11 +172,11 @@ void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
     QWriteLocker writeLocker(lock);
 
     QString currentEntry = oldPath;
-
-    while(renamingMap.contains(currentEntry))
+    
+    while(forwardRenamingMap.contains(currentEntry))
     {
-        QString nextEntry = renamingMap.value(currentEntry);
-        renamingMap.remove(currentEntry);
+        QString nextEntry = forwardRenamingMap.value(currentEntry);
+        forwardRenamingMap.remove(currentEntry);
         currentEntry = nextEntry;
     }
 }
