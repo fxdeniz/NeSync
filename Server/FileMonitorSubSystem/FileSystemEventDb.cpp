@@ -167,18 +167,21 @@ void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &
     forwardRenamingMap.insert(oldPath, newPath);
 }
 
-void FileSystemEventDb::removeRenamingChain(const QString &oldPath)
+QStringList FileSystemEventDb::getForwardRenamingChain(const QString &startPath) const
 {
-    QWriteLocker writeLocker(lock);
+    QReadLocker readLocker(lock);
 
-    QString currentEntry = oldPath;
+    QStringList result;
+    QString currentEntry = startPath;
     
     while(forwardRenamingMap.contains(currentEntry))
     {
+        result.append(currentEntry);;
         QString nextEntry = forwardRenamingMap.value(currentEntry);
-        forwardRenamingMap.remove(currentEntry);
         currentEntry = nextEntry;
     }
+
+    return result;
 }
 
 void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID)
