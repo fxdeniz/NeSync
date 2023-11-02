@@ -165,6 +165,7 @@ void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &
     QWriteLocker writeLocker(lock);
     
     forwardRenamingMap.insert(oldPath, newPath);
+    backwardRenamingMap.insert(newPath, oldPath);
 }
 
 QStringList FileSystemEventDb::getForwardRenamingChain(const QString &startPath) const
