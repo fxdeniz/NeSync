@@ -168,16 +168,18 @@ void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &
     backwardRenamingMap.insert(newPath, oldPath);
 }
 
-QStringList FileSystemEventDb::getForwardRenamingChain(const QString &startPath) const
+QHash<QString, QString> FileSystemEventDb::getForwardRenamingChain(const QString &startPath) const
 {
     QReadLocker readLocker(lock);
 
-    QStringList result;
+    QHash<QString, QString> result;
     QString currentEntry = startPath;
     
     while(forwardRenamingMap.contains(currentEntry))
     {
-        result.append(currentEntry);;
+        QString value = forwardRenamingMap.value(currentEntry);
+        result.insert(currentEntry, value);
+
         QString nextEntry = forwardRenamingMap.value(currentEntry);
         currentEntry = nextEntry;
     }
@@ -185,17 +187,19 @@ QStringList FileSystemEventDb::getForwardRenamingChain(const QString &startPath)
     return result;
 }
 
-QStringList FileSystemEventDb::getbackwardRenamingChain(const QString &startPath) const
+QHash<QString, QString> FileSystemEventDb::getbackwardRenamingChain(const QString &startPath) const
 {
     QReadLocker readLocker(lock);
 
-    QStringList result;
+    QHash<QString, QString> result;
     QString currentEntry = startPath;
 
     while(backwardRenamingMap.contains(currentEntry))
     {
-        result.append(currentEntry);;
-        QString nextEntry = forwardRenamingMap.value(currentEntry);
+        QString value = backwardRenamingMap.value(currentEntry);
+        result.insert(currentEntry, value);
+
+        QString nextEntry = backwardRenamingMap.value(currentEntry);
         currentEntry = nextEntry;
     }
 

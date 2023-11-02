@@ -38,8 +38,8 @@ public:
 
     QString getNewPathByOldPath(const QString &oldPath) const;
     void addRenamingEntry(const QString &oldPath, const QString &newPath);
-    QStringList getForwardRenamingChain(const QString &startPath) const;
-    QStringList getbackwardRenamingChain(const QString &startPath) const;
+    QHash<QString, QString> getForwardRenamingChain(const QString &startPath) const;
+    QHash<QString, QString> getbackwardRenamingChain(const QString &startPath) const;
 
     void addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID);
     void removeNewAddedFolder(const QString &userFolderPath);
