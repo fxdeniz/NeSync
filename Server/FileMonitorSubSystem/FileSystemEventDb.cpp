@@ -184,6 +184,23 @@ QStringList FileSystemEventDb::getForwardRenamingChain(const QString &startPath)
     return result;
 }
 
+QStringList FileSystemEventDb::getbackwardRenamingChain(const QString &startPath) const
+{
+    QReadLocker readLocker(lock);
+
+    QStringList result;
+    QString currentEntry = startPath;
+
+    while(backwardRenamingMap.contains(currentEntry))
+    {
+        result.append(currentEntry);;
+        QString nextEntry = forwardRenamingMap.value(currentEntry);
+        currentEntry = nextEntry;
+    }
+
+    return result;
+}
+
 void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID)
 {
     QWriteLocker writeLocker(lock);
