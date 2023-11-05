@@ -153,57 +153,82 @@ QHash<FileSystemEventDb::ItemStatus, QStringList> FileSystemEventDb::getEventsOn
     return result;
 }
 
-QString FileSystemEventDb::getNewPathByOldPath(const QString &oldPath) const
+void FileSystemEventDb::addFolderRenamingEntry(const QString &oldUserFolderPath, const QString &newUserFolderPath)
+{
+    bool isInsertingFirst = isMonitoredFolderExist(oldUserFolderPath);
+
+    QWriteLocker writeLocker(lock);
+
+    if(isInsertingFirst)
+    {
+        newFolderNameToOldMap.remove(newUserFolderPath);
+        newFolderNameToOldMap.insert(newUserFolderPath, oldUserFolderPath);
+    }
+    else if(newFolderNameToOldMap.contains(oldUserFolderPath))
+    {
+        QString originalFolderPath = newFolderNameToOldMap.value(oldUserFolderPath);
+
+        newFolderNameToOldMap.remove(oldUserFolderPath);
+        newFolderNameToOldMap.insert(newUserFolderPath, originalFolderPath);
+    }
+}
+
+QString FileSystemEventDb::resolveFolderRenaming(const QString &userFolderPath) const
 {
     QReadLocker readLocker(lock);
-    QString result = forwardRenamingMap.value(oldPath);
+
+    QString result;
+
+    if(newFolderNameToOldMap.contains(userFolderPath))
+        result = newFolderNameToOldMap.value(userFolderPath);
+
     return result;
 }
 
-void FileSystemEventDb::addRenamingEntry(const QString &oldPath, const QString &newPath)
+void FileSystemEventDb::removeFolderRenamingEntry(const QString &newUserFolderPath)
 {
     QWriteLocker writeLocker(lock);
-    
-    forwardRenamingMap.insert(oldPath, newPath);
-    backwardRenamingMap.insert(newPath, oldPath);
+
+    newFolderNameToOldMap.remove(newUserFolderPath);
 }
 
-QHash<QString, QString> FileSystemEventDb::getForwardRenamingChain(const QString &startPath) const
+void FileSystemEventDb::addFileRenamingEntry(const QString &userFolderPath, const QString &oldFileName, const QString &newFileName)
+{
+    bool isInsertingFirst = isMonitoredFileExist(userFolderPath, oldFileName);
+
+    QWriteLocker writeLocker(lock);
+    
+    if(isInsertingFirst)
+    {
+        newFileNameToOldMap.remove(userFolderPath + newFileName);
+        newFileNameToOldMap.insert(userFolderPath + newFileName, userFolderPath + oldFileName);
+    }
+    else if(newFileNameToOldMap.contains(userFolderPath + oldFileName))
+    {
+        QString originalFilePath = newFileNameToOldMap.value(userFolderPath + oldFileName);
+
+        newFileNameToOldMap.remove(userFolderPath + oldFileName);
+        newFileNameToOldMap.insert(userFolderPath + newFileName, originalFilePath);
+    }
+}
+
+QString FileSystemEventDb::resolveFileRenaming(const QString &userFolderPath, const QString &fileName) const
 {
     QReadLocker readLocker(lock);
 
-    QHash<QString, QString> result;
-    QString currentEntry = startPath;
-    
-    while(forwardRenamingMap.contains(currentEntry))
-    {
-        QString value = forwardRenamingMap.value(currentEntry);
-        result.insert(currentEntry, value);
+    QString result;
 
-        QString nextEntry = forwardRenamingMap.value(currentEntry);
-        currentEntry = nextEntry;
-    }
+    if(newFileNameToOldMap.contains(userFolderPath + fileName))
+        result = newFileNameToOldMap.value(userFolderPath + fileName);
 
     return result;
 }
 
-QHash<QString, QString> FileSystemEventDb::getbackwardRenamingChain(const QString &startPath) const
+void FileSystemEventDb::removeFileRenamingEntru(const QString &userFolderPath, const QString &newFileName)
 {
-    QReadLocker readLocker(lock);
+    QWriteLocker writeLocker(lock);
 
-    QHash<QString, QString> result;
-    QString currentEntry = startPath;
-
-    while(backwardRenamingMap.contains(currentEntry))
-    {
-        QString value = backwardRenamingMap.value(currentEntry);
-        result.insert(currentEntry, value);
-
-        QString nextEntry = backwardRenamingMap.value(currentEntry);
-        currentEntry = nextEntry;
-    }
-
-    return result;
+    newFileNameToOldMap.remove(userFolderPath + newFileName);
 }
 
 void FileSystemEventDb::addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID)

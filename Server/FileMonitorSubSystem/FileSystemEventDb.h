@@ -36,10 +36,13 @@ public:
 
     QHash<FileSystemEventDb::ItemStatus, QStringList> getEventsOnMonitoredFiles() const;
 
-    QString getNewPathByOldPath(const QString &oldPath) const;
-    void addRenamingEntry(const QString &oldPath, const QString &newPath);
-    QHash<QString, QString> getForwardRenamingChain(const QString &startPath) const;
-    QHash<QString, QString> getbackwardRenamingChain(const QString &startPath) const;
+    void addFolderRenamingEntry(const QString &oldUserFolderPath, const QString &newUserFolderPath);
+    QString resolveFolderRenaming(const QString &userFolderPath) const;
+    void removeFolderRenamingEntry(const QString &newUserFolderPath);
+
+    void addFileRenamingEntry(const QString &userFolderPath, const QString &oldFileName, const QString &newFileName);
+    QString resolveFileRenaming(const QString &userFolderPath, const QString &fileName) const;
+    void removeFileRenamingEntru(const QString &userFolderPath, const QString &newFileName);
 
     void addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID);
     void removeNewAddedFolder(const QString &userFolderPath);
@@ -57,8 +60,8 @@ private:
     QHash<QString, efsw::WatchID> folderMap;
     QHash<QString, QSet<QString>> fileMap;
     QHash<QString, ItemStatus> statusMap;
-    QHash<QString, QString> forwardRenamingMap; // Old Path -> New Path
-    QHash<QString, QString> backwardRenamingMap; // New Path -> Old Path
+    QHash<QString, QString> newFolderNameToOldMap;
+    QHash<QString, QString> newFileNameToOldMap;
 
     QHash<QString, efsw::WatchID> newFolderMap;
     QHash<QString, QSet<QString>> newFileMap;
