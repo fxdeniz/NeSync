@@ -133,25 +133,8 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     qDebug() << "updateEvent = " << dir << fileName;
     qDebug() << "";
 
-    QString currentPath = QDir::toNativeSeparators(dir + fileName);
-
-    auto fsm = FileStorageManager::instance();
-
-    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
-    QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
-    qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
-
-    QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
-    QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
-    QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
-    QDateTime currentTimestamp = QFileInfo(currentPath).lastModified();
-
-    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
-    bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
-
-    if(isFilePersists && !isFileFrozen && isFileTouched)
-        eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
+    QString _dir = QDir::toNativeSeparators(dir);
+    handleFileModificationEvent(_dir, fileName);
 }
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
@@ -261,5 +244,33 @@ void FileMonitoringManager::handleFileAddEvent(const QString &parentDirPath, con
     if(!eventDb->isMonitoredFileExist(_parentDirPath, fileName))
         eventDb->addNewAddedFile(_parentDirPath, fileName);
     else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
+        eventDb->setStatusOfMonitoredFile(_parentDirPath, fileName, FileSystemEventDb::ItemStatus::Updated);
+}
+
+void FileMonitoringManager::handleFileModificationEvent(const QString &parentDirPath, const QString &fileName)
+{
+    QString _parentDirPath = parentDirPath;
+
+    if(!_parentDirPath.endsWith(QDir::separator()))
+        _parentDirPath.append(QDir::separator());
+
+    QString currentPath = _parentDirPath + fileName;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+    QString symbolFilePath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+    qlonglong maxVersionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+
+    QJsonObject versionJson = fsm->getFileVersionJson(symbolFilePath, maxVersionNumber);
+    QString strLastModifiedTimestamp = versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString();
+    QDateTime lastModifiedTimestamp = QDateTime::fromString(strLastModifiedTimestamp, Qt::DateFormat::ISODateWithMs);
+    QDateTime currentTimestamp = QFileInfo(currentPath).lastModified();
+
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+    bool isFileTouched = (lastModifiedTimestamp != currentTimestamp);
+
+    if(isFilePersists && !isFileFrozen && isFileTouched)
         eventDb->setStatusOfMonitoredFile(_parentDirPath, fileName, FileSystemEventDb::ItemStatus::Updated);
 }

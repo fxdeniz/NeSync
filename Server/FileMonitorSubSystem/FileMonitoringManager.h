@@ -24,10 +24,10 @@ private slots:
     void slotOnModificationEventDetected(const QString &fileName, const QString &dir);
     void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
 
-
 private:
     void handleFolderAddEvent(const QString &parentDirPath, const QString &folderName);
     void handleFileAddEvent(const QString &parentDirPath, const QString &fileName);
+    void handleFileModificationEvent(const QString &parentDirPath, const QString &fileName);
 
 private:
     FileSystemEventListener fileSystemEventListener;
