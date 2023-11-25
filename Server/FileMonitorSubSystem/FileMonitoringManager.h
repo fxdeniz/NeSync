@@ -22,11 +22,12 @@ private slots:
     void slotOnAddEventDetected(const QString &fileOrFolderName, const QString &dir);
     void slotOnDeleteEventDetected(const QString &fileName, const QString &dir);
     void slotOnModificationEventDetected(const QString &fileName, const QString &dir);
-    void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
+    void slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir);
 
 private:
     void handleFolderAddEvent(const QString &parentDirPath, const QString &folderName);
     void handleFileAddEvent(const QString &parentDirPath, const QString &fileName);
+    void handleFolderMoveEvent(const QString &parentDirPath, const QString &oldFolderName, const QString &newFolderName);
     void handleFileModificationEvent(const QString &parentDirPath, const QString &fileName);
 
 private:

@@ -137,43 +137,21 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
     handleFileModificationEvent(_dir, fileName);
 }
 
-void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir)
+void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir)
 {
-    qDebug() << "renameEvent (old) -> (new) = " << oldFileName << fileName << dir;
+    qDebug() << "renameEvent (old) -> (new) = " << oldFileOrFolderName << fileOrFolderName << dir;
     qDebug() << "";
 
     QString _dir = QDir::toNativeSeparators(dir);
     if(!_dir.endsWith(QDir::separator()))
         _dir.append(QDir::separator());
 
-    QString currentOldPath = _dir + oldFileName;
-    QString currentNewPath = _dir + fileName;
+    QString currentOldPath = _dir + oldFileOrFolderName;
+    QString currentNewPath = _dir + fileOrFolderName;
     QFileInfo info(currentNewPath);
 
     if(info.isDir())
-    {
-        currentOldPath.append(QDir::separator());
-        currentNewPath.append(QDir::separator());
-
-        auto fsm = FileStorageManager::instance();
-
-        QJsonObject oldFolderJson = fsm->getFolderJsonByUserPath(currentOldPath);
-
-        bool isOldFolderPersists = oldFolderJson[JsonKeys::IsExist].toBool();
-        bool isOldFolderFrozen = oldFolderJson[JsonKeys::Folder::IsFrozen].toBool();
-
-        if(isOldFolderPersists && !isOldFolderFrozen)
-            eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
-        
-        if(!eventDb->getNewAddedFolderMap().contains(currentOldPath))
-            eventDb->addFolderRenamingEntry(currentOldPath, currentNewPath);
-        else
-        {
-            efsw::WatchID watchID = eventDb->getNewAddedFolderMap().value(currentOldPath);
-            eventDb->removeNewAddedFolder(currentOldPath);
-            eventDb->addNewAddedFolder(currentNewPath, watchID);
-        }
-    }
+        handleFolderMoveEvent(_dir, oldFileOrFolderName, fileOrFolderName);
     else if(info.isFile() && !info.isHidden())
     {
         auto fsm = FileStorageManager::instance();
@@ -184,7 +162,7 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
         bool isNewFileFrozen = newFileJson[JsonKeys::File::IsFrozen].toBool();
 
         if(isNewFilePersists && !isNewFileFrozen) // When moved file overwritten to persistent file
-            eventDb->setStatusOfMonitoredFile(_dir, fileName, FileSystemEventDb::ItemStatus::Updated);
+            eventDb->setStatusOfMonitoredFile(_dir, fileOrFolderName, FileSystemEventDb::ItemStatus::Updated);
         else
         {
             QJsonObject oldFileJson = fsm->getFileJsonByUserPath(currentOldPath);
@@ -193,14 +171,14 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             bool isOldFileFrozen = oldFileJson[JsonKeys::File::IsFrozen].toBool();
 
             if(isOldFilePersists && !isOldFileFrozen)
-                eventDb->setStatusOfMonitoredFile(_dir, oldFileName, FileSystemEventDb::ItemStatus::Renamed);
+                eventDb->setStatusOfMonitoredFile(_dir, oldFileOrFolderName, FileSystemEventDb::ItemStatus::Renamed);
 
-            if(!eventDb->getNewAddedFileSet(_dir).contains(oldFileName))
-                eventDb->addFileRenamingEntry(_dir, oldFileName, fileName);
+            if(!eventDb->getNewAddedFileSet(_dir).contains(oldFileOrFolderName))
+                eventDb->addFileRenamingEntry(_dir, oldFileOrFolderName, fileOrFolderName);
             else
             {
-                eventDb->removeNewAddedFile(_dir, oldFileName);
-                eventDb->addNewAddedFile(_dir, fileName);
+                eventDb->removeNewAddedFile(_dir, oldFileOrFolderName);
+                eventDb->addNewAddedFile(_dir, fileOrFolderName);
             }
         }
     }
@@ -245,6 +223,36 @@ void FileMonitoringManager::handleFileAddEvent(const QString &parentDirPath, con
         eventDb->addNewAddedFile(_parentDirPath, fileName);
     else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
         eventDb->setStatusOfMonitoredFile(_parentDirPath, fileName, FileSystemEventDb::ItemStatus::Updated);
+}
+
+void FileMonitoringManager::handleFolderMoveEvent(const QString &parentDirPath, const QString &oldFolderName, const QString &newFolderName)
+{
+    QString _parentDirPath = parentDirPath;
+
+    if(!_parentDirPath.endsWith(QDir::separator()))
+        _parentDirPath.append(QDir::separator());
+
+    QString currentOldPath = _parentDirPath + oldFolderName + QDir::separator();
+    QString currentNewPath = _parentDirPath + newFolderName + QDir::separator();
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject oldFolderJson = fsm->getFolderJsonByUserPath(currentOldPath);
+
+    bool isOldFolderPersists = oldFolderJson[JsonKeys::IsExist].toBool();
+    bool isOldFolderFrozen = oldFolderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(isOldFolderPersists && !isOldFolderFrozen)
+        eventDb->setStatusOfMonitoredFolder(currentOldPath, FileSystemEventDb::ItemStatus::Renamed);
+
+    if(!eventDb->getNewAddedFolderMap().contains(currentOldPath))
+        eventDb->addFolderRenamingEntry(currentOldPath, currentNewPath);
+    else
+    {
+        efsw::WatchID watchID = eventDb->getNewAddedFolderMap().value(currentOldPath);
+        eventDb->removeNewAddedFolder(currentOldPath);
+        eventDb->addNewAddedFolder(currentNewPath, watchID);
+    }
 }
 
 void FileMonitoringManager::handleFileModificationEvent(const QString &parentDirPath, const QString &fileName)
