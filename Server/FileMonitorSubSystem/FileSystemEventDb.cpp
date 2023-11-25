@@ -224,7 +224,7 @@ QString FileSystemEventDb::resolveFileRenaming(const QString &userFolderPath, co
     return result;
 }
 
-void FileSystemEventDb::removeFileRenamingEntru(const QString &userFolderPath, const QString &newFileName)
+void FileSystemEventDb::removeFileRenamingEntry(const QString &userFolderPath, const QString &newFileName)
 {
     QWriteLocker writeLocker(lock);
 

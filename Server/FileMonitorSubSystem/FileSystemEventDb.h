@@ -42,7 +42,7 @@ public:
 
     void addFileRenamingEntry(const QString &userFolderPath, const QString &oldFileName, const QString &newFileName);
     QString resolveFileRenaming(const QString &userFolderPath, const QString &fileName) const;
-    void removeFileRenamingEntru(const QString &userFolderPath, const QString &newFileName);
+    void removeFileRenamingEntry(const QString &userFolderPath, const QString &newFileName);
 
     void addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID);
     void removeNewAddedFolder(const QString &userFolderPath);

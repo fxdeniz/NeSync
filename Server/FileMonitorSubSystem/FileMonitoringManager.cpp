@@ -84,31 +84,8 @@ void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileOrFolde
 
     QString _dir = QDir::toNativeSeparators(dir);
 
-    if(!_dir.endsWith(QDir::separator()))
-        _dir.append(QDir::separator());
-
     handleFolderDeleteEvent(_dir, fileOrFolderName);
-
-    QString currentPath = _dir + fileOrFolderName;
-
-    if(eventDb->getNewAddedFileSet(_dir).contains(fileOrFolderName))
-        eventDb->removeNewAddedFile(_dir, fileOrFolderName);
-
-    auto fsm = FileStorageManager::instance();
-
-    if(!eventDb->resolveFileRenaming(_dir, fileOrFolderName).isEmpty())
-        currentPath = eventDb->resolveFileRenaming(_dir, fileOrFolderName);
-
-    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
-
-    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
-
-    if(isFilePersists && !isFileFrozen)
-    {
-        eventDb->setStatusOfMonitoredFile(_dir, fileJson[JsonKeys::File::FileName].toString(), FileSystemEventDb::ItemStatus::Deleted);
-        eventDb->removeFileRenamingEntru(_dir, fileOrFolderName);
-    }
+    handleFileDeleteEvent(_dir, fileOrFolderName);
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
@@ -186,10 +163,12 @@ void FileMonitoringManager::handleFolderDeleteEvent(const QString &parentDirPath
     if(!_parentDirPath.endsWith(QDir::separator()))
         _parentDirPath.append(QDir::separator());
 
-    QString currentPath = _parentDirPath + folderName;
+    QString _folderName = folderName;
 
-    if(!currentPath.endsWith(QDir::separator()))
-        currentPath.append(QDir::separator());
+    if(!_folderName.endsWith(QDir::separator()))
+        _folderName.append(QDir::separator());
+
+    QString currentPath = _parentDirPath + _folderName;
 
     if(eventDb->getNewAddedFolderMap().contains(currentPath))
         eventDb->removeNewAddedFolder(currentPath);
@@ -207,7 +186,36 @@ void FileMonitoringManager::handleFolderDeleteEvent(const QString &parentDirPath
     if(isFolderPersists && !isFolderFrozen)
     {
         eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Deleted);
-        eventDb->removeFolderRenamingEntry(currentPath);
+        eventDb->removeFolderRenamingEntry(_parentDirPath + _folderName);
+    }
+}
+
+void FileMonitoringManager::handleFileDeleteEvent(const QString &parentDirPath, const QString &fileName)
+{
+    QString _parentDirPath = parentDirPath;
+
+    if(!_parentDirPath.endsWith(QDir::separator()))
+        _parentDirPath.append(QDir::separator());
+
+    QString currentPath = _parentDirPath + fileName;
+
+    if(eventDb->getNewAddedFileSet(_parentDirPath).contains(fileName))
+        eventDb->removeNewAddedFile(_parentDirPath, fileName);
+
+    auto fsm = FileStorageManager::instance();
+
+    if(!eventDb->resolveFileRenaming(_parentDirPath, fileName).isEmpty())
+        currentPath = eventDb->resolveFileRenaming(_parentDirPath, fileName);
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+    if(isFilePersists && !isFileFrozen)
+    {
+        eventDb->setStatusOfMonitoredFile(_parentDirPath, fileJson[JsonKeys::File::FileName].toString(), FileSystemEventDb::ItemStatus::Deleted);
+        eventDb->removeFileRenamingEntry(_parentDirPath, fileName);
     }
 }
 
