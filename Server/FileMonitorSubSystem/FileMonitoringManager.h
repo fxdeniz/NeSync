@@ -19,10 +19,14 @@ public:
 signals:
 
 private slots:
-    void slotOnAddEventDetected(const QString &fileName, const QString &dir);
+    void slotOnAddEventDetected(const QString &fileOrFolderName, const QString &dir);
     void slotOnDeleteEventDetected(const QString &fileName, const QString &dir);
     void slotOnModificationEventDetected(const QString &fileName, const QString &dir);
     void slotOnMoveEventDetected(const QString &fileName, const QString &oldFileName, const QString &dir);
+
+
+private:
+    void handleFolderAddEvent(const QString &parentDirPath, const QString &folderName);
 
 private:
     FileSystemEventListener fileSystemEventListener;

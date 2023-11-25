@@ -62,9 +62,9 @@ bool FileMonitoringManager::addFile(const QString &userFolderPath, const QString
     return true;
 }
 
-void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, const QString &dir)
+void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderName, const QString &dir)
 {
-    QString currentPath = QDir::toNativeSeparators(dir + fileName);
+    QString currentPath = QDir::toNativeSeparators(dir + fileOrFolderName);
 
     qDebug() << "addEvent = " << currentPath;
     qDebug() << "";
@@ -72,20 +72,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
     QFileInfo info(currentPath);
 
     if(info.isDir())
-    {
-        efsw::WatchID watchID = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
-        // TODO: Add watchID error checking
-
-        auto fsm = FileStorageManager::instance();
-        QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath + QDir::separator());
-        bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
-        bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
-
-        if(!isFolderPersists)
-            eventDb->addNewAddedFolder(currentPath + QDir::separator(), watchID);
-        else if(isFolderPersists && !isFolderFrozen)
-                eventDb->setStatusOfMonitoredFolder(dir, FileSystemEventDb::ItemStatus::Updated);
-    }
+        handleFolderAddEvent(dir, fileOrFolderName);
     else if(info.isFile() && !info.isHidden()) // Only accept real files
     {
         auto fsm = FileStorageManager::instance();
@@ -93,10 +80,10 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileName, cons
         bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
         bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
 
-        if(!eventDb->isMonitoredFileExist(dir, fileName))
-            eventDb->addNewAddedFile(dir, fileName);
+        if(!eventDb->isMonitoredFileExist(dir, fileOrFolderName))
+            eventDb->addNewAddedFile(dir, fileOrFolderName);
         else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
-            eventDb->setStatusOfMonitoredFile(dir, fileName, FileSystemEventDb::ItemStatus::Updated);
+            eventDb->setStatusOfMonitoredFile(dir, fileOrFolderName, FileSystemEventDb::ItemStatus::Updated);
     }
 }
 
@@ -244,4 +231,25 @@ void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileName, con
             }
         }
     }
+}
+
+void FileMonitoringManager::handleFolderAddEvent(const QString &parentDirPath, const QString &folderName)
+{
+    QString currentPath = parentDirPath + folderName;
+
+    if(!currentPath.endsWith(QDir::separator()))
+        currentPath.append(QDir::separator());
+
+    efsw::WatchID watchID = fileWatcher.addWatch(currentPath.toStdString(), &fileSystemEventListener, false);
+    // TODO: Add watchID error checking
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
+    bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+    bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(!isFolderPersists)
+        eventDb->addNewAddedFolder(currentPath, watchID);
+    else if(isFolderPersists && !isFolderFrozen)
+        eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
 }
