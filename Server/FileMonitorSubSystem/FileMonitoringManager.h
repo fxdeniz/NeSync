@@ -28,6 +28,7 @@ private:
     void handleFolderAddEvent(const QString &parentDirPath, const QString &folderName);
     void handleFileAddEvent(const QString &parentDirPath, const QString &fileName);
     void handleFolderMoveEvent(const QString &parentDirPath, const QString &oldFolderName, const QString &newFolderName);
+    void handleFileMoveEvent(const QString &parentDirPath, const QString &oldFileName, const QString &newFileName);
     void handleFileModificationEvent(const QString &parentDirPath, const QString &fileName);
 
 private:
