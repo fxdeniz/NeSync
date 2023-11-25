@@ -74,17 +74,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderNa
     if(info.isDir())
         handleFolderAddEvent(dir, fileOrFolderName);
     else if(info.isFile() && !info.isHidden()) // Only accept real files
-    {
-        auto fsm = FileStorageManager::instance();
-        QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
-        bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-        bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
-
-        if(!eventDb->isMonitoredFileExist(dir, fileOrFolderName))
-            eventDb->addNewAddedFile(dir, fileOrFolderName);
-        else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
-            eventDb->setStatusOfMonitoredFile(dir, fileOrFolderName, FileSystemEventDb::ItemStatus::Updated);
-    }
+        handleFileAddEvent(dir, fileOrFolderName);
 }
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileName, const QString &dir)
@@ -252,4 +242,24 @@ void FileMonitoringManager::handleFolderAddEvent(const QString &parentDirPath, c
         eventDb->addNewAddedFolder(currentPath, watchID);
     else if(isFolderPersists && !isFolderFrozen)
         eventDb->setStatusOfMonitoredFolder(currentPath, FileSystemEventDb::ItemStatus::Updated);
+}
+
+void FileMonitoringManager::handleFileAddEvent(const QString &parentDirPath, const QString &fileName)
+{
+    QString _parentDirPath = parentDirPath;
+
+    if(!_parentDirPath.endsWith(QDir::separator()))
+        _parentDirPath.append(QDir::separator());
+
+    QString currentPath = _parentDirPath + fileName;
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+    if(!eventDb->isMonitoredFileExist(_parentDirPath, fileName))
+        eventDb->addNewAddedFile(_parentDirPath, fileName);
+    else if(isFilePersists & !isFileFrozen) // TODO: also add hash comparison here
+        eventDb->setStatusOfMonitoredFile(_parentDirPath, fileName, FileSystemEventDb::ItemStatus::Updated);
 }

@@ -27,6 +27,7 @@ private slots:
 
 private:
     void handleFolderAddEvent(const QString &parentDirPath, const QString &folderName);
+    void handleFileAddEvent(const QString &parentDirPath, const QString &fileName);
 
 private:
     FileSystemEventListener fileSystemEventListener;
