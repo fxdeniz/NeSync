@@ -169,15 +169,12 @@ QHttpServerResponse getEventsOnFolderTree(FileSystemEventDb *fsEventDb)
     QStringList renamedFolderList = folderQueryResult.value(status);
     QStringList renamedFileList = fileQueryResult.value(status);
 
-    QStringList newAddedFileList = fsEventDb->getNewAddedFileList();
-
     QJsonObject jsonObject;
     jsonObject.insert("deletedFolderList", QJsonArray::fromStringList(deletedFolderList));
     jsonObject.insert("renamedFolderList", QJsonArray::fromStringList(renamedFolderList));
     jsonObject.insert("updatedFileList", QJsonArray::fromStringList(updatedFileList));
     jsonObject.insert("deletedFileList", QJsonArray::fromStringList(deletedFileList));
     jsonObject.insert("renamedFileList", QJsonArray::fromStringList(renamedFileList));
-    jsonObject.insert("newAddedFileList", QJsonArray::fromStringList(newAddedFileList));
 
     return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
 }
