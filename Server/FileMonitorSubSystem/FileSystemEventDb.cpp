@@ -173,7 +173,7 @@ void FileSystemEventDb::addFolderRenamingEntry(const QString &oldUserFolderPath,
     }
 }
 
-QString FileSystemEventDb::resolveFolderRenaming(const QString &userFolderPath) const
+QString FileSystemEventDb::getOriginalFolderNameByNewName(const QString &userFolderPath) const
 {
     QReadLocker readLocker(lock);
 
@@ -212,7 +212,7 @@ void FileSystemEventDb::addFileRenamingEntry(const QString &userFolderPath, cons
     }
 }
 
-QString FileSystemEventDb::resolveFileRenaming(const QString &userFolderPath, const QString &fileName) const
+QString FileSystemEventDb::getOriginalFileNameByNewName(const QString &userFolderPath, const QString &fileName) const
 {
     QReadLocker readLocker(lock);
 

@@ -37,11 +37,11 @@ public:
     QHash<FileSystemEventDb::ItemStatus, QStringList> getEventsOnMonitoredFiles() const;
 
     void addFolderRenamingEntry(const QString &oldUserFolderPath, const QString &newUserFolderPath);
-    QString resolveFolderRenaming(const QString &userFolderPath) const;
+    QString getOriginalFolderNameByNewName(const QString &userFolderPath) const;
     void removeFolderRenamingEntry(const QString &newUserFolderPath);
 
     void addFileRenamingEntry(const QString &userFolderPath, const QString &oldFileName, const QString &newFileName);
-    QString resolveFileRenaming(const QString &userFolderPath, const QString &fileName) const;
+    QString getOriginalFileNameByNewName(const QString &userFolderPath, const QString &fileName) const;
     void removeFileRenamingEntry(const QString &userFolderPath, const QString &newFileName);
 
     void addNewAddedFolder(const QString &userFolderPath, efsw::WatchID watchID);

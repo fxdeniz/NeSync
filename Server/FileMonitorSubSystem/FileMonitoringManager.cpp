@@ -175,8 +175,8 @@ void FileMonitoringManager::handleFolderDeleteEvent(const QString &parentDirPath
 
     auto fsm = FileStorageManager::instance();
 
-    if(!eventDb->resolveFolderRenaming(currentPath).isEmpty())
-        currentPath = eventDb->resolveFolderRenaming(currentPath);
+    if(!eventDb->getOriginalFolderNameByNewName(currentPath).isEmpty())
+        currentPath = eventDb->getOriginalFolderNameByNewName(currentPath);
 
     QJsonObject folderJson = fsm->getFolderJsonByUserPath(currentPath);
 
@@ -204,8 +204,8 @@ void FileMonitoringManager::handleFileDeleteEvent(const QString &parentDirPath, 
 
     auto fsm = FileStorageManager::instance();
 
-    if(!eventDb->resolveFileRenaming(_parentDirPath, fileName).isEmpty())
-        currentPath = eventDb->resolveFileRenaming(_parentDirPath, fileName);
+    if(!eventDb->getOriginalFileNameByNewName(_parentDirPath, fileName).isEmpty())
+        currentPath = eventDb->getOriginalFileNameByNewName(_parentDirPath, fileName);
 
     QJsonObject fileJson = fsm->getFileJsonByUserPath(currentPath);
 
