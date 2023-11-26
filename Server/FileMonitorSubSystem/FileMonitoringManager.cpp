@@ -273,7 +273,10 @@ void FileMonitoringManager::handleFileMoveEvent(const QString &parentDirPath, co
     bool isNewFileFrozen = newFileJson[JsonKeys::File::IsFrozen].toBool();
 
     if(isNewFilePersists && !isNewFileFrozen) // When moved file overwritten to persistent file
+    {
         eventDb->setStatusOfMonitoredFile(_parentDirPath, newFileName, FileSystemEventDb::ItemStatus::Updated);
+        eventDb->removeNewAddedFile(_parentDirPath, oldFileName);
+    }
     else
     {
         QJsonObject oldFileJson = fsm->getFileJsonByUserPath(currentOldPath);
