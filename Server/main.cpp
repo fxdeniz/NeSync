@@ -125,6 +125,63 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     return response;
 }
 
+QHttpServerResponse postAppendVersion(const QHttpServerRequest& request)
+{
+    QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
+    QByteArray requestBody = request.body();
+
+    if (requestBody.isEmpty())
+    {
+        QString errorMessage = "Body is empty";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
+
+    if (jsonError.error != QJsonParseError::NoError)
+    {
+        QString errorMessage = "Input format is not parsable json.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    if (!jsonDoc.isObject())
+    {
+        QString errorMessage = "Input json is not an object.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString pathToFile = jsonObject["pathToFile"].toString();
+    QString description = jsonObject["description"].toString();
+
+    qDebug() << "pathToFile = " << pathToFile;
+    qDebug() << "description = " << description;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(pathToFile);
+
+    if(fileJson[JsonKeys::IsExist].toBool())
+    {
+        bool isAppended = fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(), pathToFile, description);
+
+        if(isAppended)
+        {
+            QString reponseMessage = "Version appended.";
+            response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
+            return response;
+        }
+    }
+
+    return response;
+}
+
 QHttpServerResponse postStartMonitoring(FileMonitoringManager &fmm, const QHttpServerRequest& request)
 {
     auto fsm = FileStorageManager::instance();
@@ -214,6 +271,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/addNewFile", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
         return postAddNewFile(request);
+    });
+
+    httpServer.route("/appendVersion", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
+        return postAppendVersion(request);
     });
 
     httpServer.route("/startMonitoring", QHttpServerRequest::Method::Post, [&fmm](const QHttpServerRequest &request) {
