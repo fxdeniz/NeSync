@@ -19,7 +19,7 @@ QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request)
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
 
-    if (requestBody.isEmpty())
+    if(requestBody.isEmpty())
     {
         QString errorMessage = "Body is empty";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -29,14 +29,14 @@ QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request)
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
 
-    if (jsonError.error != QJsonParseError::NoError)
+    if(jsonError.error != QJsonParseError::NoError)
     {
         QString errorMessage = "Input format is not parsable json.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
         return response;
     }
 
-    if (!jsonDoc.isObject())
+    if(!jsonDoc.isObject())
     {
         QString errorMessage = "Input json is not an object.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -69,7 +69,7 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
 
-    if (requestBody.isEmpty())
+    if(requestBody.isEmpty())
     {
         QString errorMessage = "Body is empty";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -80,14 +80,14 @@ QHttpServerResponse postAddNewFile(const QHttpServerRequest& request)
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
 
-    if (jsonError.error != QJsonParseError::NoError)
+    if(jsonError.error != QJsonParseError::NoError)
     {
         QString errorMessage = "Input format is not parsable json.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
         return response;
     }
 
-    if (!jsonDoc.isObject())
+    if(!jsonDoc.isObject())
     {
         QString errorMessage = "Input json is not an object.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -130,7 +130,7 @@ QHttpServerResponse postAppendVersion(const QHttpServerRequest& request)
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
 
-    if (requestBody.isEmpty())
+    if(requestBody.isEmpty())
     {
         QString errorMessage = "Body is empty";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -141,14 +141,14 @@ QHttpServerResponse postAppendVersion(const QHttpServerRequest& request)
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
 
-    if (jsonError.error != QJsonParseError::NoError)
+    if(jsonError.error != QJsonParseError::NoError)
     {
         QString errorMessage = "Input format is not parsable json.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
         return response;
     }
 
-    if (!jsonDoc.isObject())
+    if(!jsonDoc.isObject())
     {
         QString errorMessage = "Input json is not an object.";
         response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
@@ -208,6 +208,82 @@ QHttpServerResponse postStartMonitoring(FileMonitoringManager &fmm, const QHttpS
 
     QString reponseMessage = "Monitoring started.";
     return QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse patchSetStatusOfMonitoredFile(FileSystemEventDb *fsEventDb, const QHttpServerRequest& request)
+{
+    QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
+    QByteArray requestBody = request.body();
+
+    if(requestBody.isEmpty())
+    {
+        QString errorMessage = "Body is empty";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody, &jsonError);
+
+    if(jsonError.error != QJsonParseError::NoError)
+    {
+        QString errorMessage = "Input format is not parsable json.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    if(!jsonDoc.isObject())
+    {
+        QString errorMessage = "Input json is not an object.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString pathToFile = jsonObject["pathToFile"].toString();
+    FileSystemEventDb::ItemStatus status = FileSystemEventDb::toItemStatus(jsonObject["status"].toInteger());
+
+    qDebug() << "pathToFile = " << pathToFile;
+    qDebug() << "status = " << status;
+
+    if(status == FileSystemEventDb::ItemStatus::Invalid)
+    {
+        QString errorMessage = "Status is invalid.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(pathToFile);
+    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
+
+    QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
+    QString fileName = fileJson[JsonKeys::File::FileName].toString();
+
+    bool isFileMonitored = fsEventDb->isMonitoredFileExist(userFolderPath, fileName);
+
+    if(!isFileMonitored)
+    {
+        QString errorMessage = "File is not monitored.";
+        response = QHttpServerResponse(errorMessage, QHttpServerResponse::StatusCode::BadRequest);
+        return response;
+    }
+
+    if(fileJson[JsonKeys::IsExist].toBool())
+    {
+        bool isUpdated = fsEventDb->setStatusOfMonitoredFile(userFolderPath, fileName, status);
+
+        if(isUpdated)
+        {
+            QString reponseMessage = "File status updated.";
+            response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Ok);
+            return response;
+        }
+    }
+
+    return response;
 }
 
 QHttpServerResponse getEventsOnFolderTree(FileSystemEventDb *fsEventDb)
@@ -279,6 +355,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/startMonitoring", QHttpServerRequest::Method::Post, [&fmm](const QHttpServerRequest &request) {
         return postStartMonitoring(fmm, request);
+    });
+
+    httpServer.route("/setStatusOfMonitoredFile", QHttpServerRequest::Method::Patch, [fsEventDb](const QHttpServerRequest &request) {
+        return patchSetStatusOfMonitoredFile(fsEventDb, request);
     });
 
     httpServer.route("/getEventsOnFolderTree", QHttpServerRequest::Method::Get, [fsEventDb]() {

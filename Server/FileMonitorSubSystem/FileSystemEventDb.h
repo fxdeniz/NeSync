@@ -21,6 +21,8 @@ public:
         Missing = 5
     };
 
+    static ItemStatus toItemStatus(qlonglong value);
+
     FileSystemEventDb();
     virtual ~FileSystemEventDb();
 

@@ -3,6 +3,31 @@
 #include <QReadLocker>
 #include <QWriteLocker>
 
+FileSystemEventDb::ItemStatus FileSystemEventDb::toItemStatus(qlonglong value)
+{
+    FileSystemEventDb::ItemStatus result = FileSystemEventDb::ItemStatus::Invalid;
+
+    if(value == FileSystemEventDb::ItemStatus::Monitored)
+        result = FileSystemEventDb::ItemStatus::Monitored;
+
+    else if (value == FileSystemEventDb::ItemStatus::NewAdded)
+        result = FileSystemEventDb::ItemStatus::NewAdded;
+
+    else if (value == FileSystemEventDb::ItemStatus::Updated)
+        result = FileSystemEventDb::ItemStatus::Updated;
+
+    else if (value == FileSystemEventDb::ItemStatus::Renamed)
+        result = FileSystemEventDb::ItemStatus::Renamed;
+
+    else if (value == FileSystemEventDb::ItemStatus::Deleted)
+        result = FileSystemEventDb::ItemStatus::Deleted;
+
+    else if (value == FileSystemEventDb::ItemStatus::Missing)
+        result = FileSystemEventDb::ItemStatus::Missing;
+
+    return result;
+}
+
 FileSystemEventDb::FileSystemEventDb()
 {
     lock = new QReadWriteLock(QReadWriteLock::RecursionMode::Recursive);
