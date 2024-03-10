@@ -309,7 +309,10 @@ QHttpServerResponse getEventsOnFolderTree(FileSystemEventDb *fsEventDb)
     jsonObject.insert("deletedFileList", QJsonArray::fromStringList(deletedFileList));
     jsonObject.insert("renamedFileList", QJsonArray::fromStringList(renamedFileList));
 
-    return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
+    QHttpServerResponse response = QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    return response;
 }
 
 QHttpServerResponse getNewAddedEvents(FileSystemEventDb *fsEventDb)
