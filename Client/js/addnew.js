@@ -1,17 +1,18 @@
 addEventListener("DOMContentLoaded", (event) => {
     
-    let connectButton = document.getElementById('button-connect');
+    let addFolderButton = document.getElementById('button-add-folder');
 
-    connectButton.addEventListener('click', (e) => {
+    addFolderButton.addEventListener('click', (e) => {
 
         e.preventDefault();
 
-        let portNumber = document.getElementById('input-port').value;
+        let portNumber = sessionStorage.getItem('portNumber');
+
+        console.log(`port from external is = ${portNumber}`);
         
         fetch(`http://localhost:${portNumber}/getEventsOnFolderTree`)
             .then(response => response.json())
             .then(data => console.log(data))
-            .then(sessionStorage.setItem('portNumber', portNumber))
             .catch(error => console.error('Error:', error));
     });
 
