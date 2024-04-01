@@ -9,6 +9,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link href="./resources/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="./resources/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <link href="./resources/file_explorer.css" rel="stylesheet">
     <script src="./renderer.js" defer></script>
     <title>Hello World!</title>
   </head>
@@ -23,7 +24,7 @@
     </ul>
 
     <div id="content" class="container-fluid px-3 mt-3">
-        <div class="container-fluid">
+        <div id="file-explorer-panel">
 
             <div class="input-group">
                 <div class="btn-group" role="group" aria-label="Basic example">
@@ -35,53 +36,57 @@
 
               <div class="row mt-3">
                     <div class="col-9">
-                        <table class="table table-striped table-bordered table-hover">
-                            <thead>
-                              <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Located at</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td>sample_file.xlsx</td>
-                                <td>/Home/Desktop/sample_file.xlsx</td>
-                              </tr>
-                              <tr>
-                                <td>figures.pdf</td>
-                                <td>/Home/Documents/figures.pdf</td>
-                              </tr>
-                              <tr>
-                                <td>product demo.mp4</td>
-                                <td>/Home/Documents/product demo.mp4</td>
-                              </tr>
-                            </tbody>
+                      <div class="vertical-scroll-area">
+                          <table class="table table-striped table-bordered table-hover">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Name</th>
+                                  <th scope="col">Located at</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>sample_file.xlsx</td>
+                                  <td>/Home/Desktop/sample_file.xlsx</td>
+                                </tr>
+                                <tr>
+                                  <td>figures.pdf</td>
+                                  <td>/Home/Documents/figures.pdf</td>
+                                </tr>
+                                <tr>
+                                  <td>product demo.mp4</td>
+                                  <td>/Home/Documents/product demo.mp4</td>
+                                </tr>
+                              </tbody>
                           </table>
+                      </div>
                     </div>
                     <div class="col-3">
-                        <ol class="list-group list-group-numbered">
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                              <div class="ms-2 me-auto">
-                                <div class="fw-bold">Subheading</div>
-                                Content for list item
-                              </div>
-                              <span class="badge text-bg-primary rounded-pill">14</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                              <div class="ms-2 me-auto">
-                                <div class="fw-bold">Subheading</div>
-                                Content for list item
-                              </div>
-                              <span class="badge text-bg-primary rounded-pill">14</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                              <div class="ms-2 me-auto">
-                                <div class="fw-bold">Subheading</div>
-                                Content for list item
-                              </div>
-                              <span class="badge text-bg-primary rounded-pill">14</span>
-                            </li>
-                          </ol>
+                      <div class="vertical-scroll-area">
+                          <ol class="list-group list-group-numbered">
+                              <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                  <div class="fw-bold">Subheading</div>
+                                  Content for list item
+                                </div>
+                                <span class="badge text-bg-primary rounded-pill">14</span>
+                              </li>
+                              <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                  <div class="fw-bold">Subheading</div>
+                                  Content for list item
+                                </div>
+                                <span class="badge text-bg-primary rounded-pill">14</span>
+                              </li>
+                              <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                  <div class="fw-bold">Subheading</div>
+                                  Content for list item
+                                </div>
+                                <span class="badge text-bg-primary rounded-pill">14</span>
+                              </li>
+                            </ol>
+                        </div>
                     </div>
               </div>
               
