@@ -1,88 +1,117 @@
-<div id="file-explorer-content">
+<!--index.html-->
 
-    <div class="input-group">
-        <div class="btn-group gap-2" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-primary">&larr;</button>
-            <button type="button" class="btn btn-primary">&rarr;</button>
-        </div>
-            <input type="text" class="form-control mx-2" placeholder="Folder Path" aria-label="Folder Path" aria-describedby="btnGroupAddon">
-        <div class="btn-group gap-2" role="group" aria-label="Basic example">
-          <button type="button" class="btn btn-primary">+</button>
-          <button type="button" class="btn btn-primary">&darr;</button>
-      </div>
-      </div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link href="../bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="../bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <link href="./file_explorer.css" rel="stylesheet">
+    <script src="./file_explorer_renderer.js" defer></script>
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <ul class="nav nav-pills nav-fill">
+        <li class="nav-item">
+            <a class="nav-link active" id="button-file-explorer" aria-current="page" href="#">File Explorer</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">File Monitor</a>
+        </li>
+    </ul>
 
-      <div class="row mt-3">
-            <div class="col-9">
-              <div class="vertical-scroll-area">
-                  <table class="table table-striped table-bordered table-hover">
-                      <thead>
-                        <tr>
-                          <th scope="col">Name</th>
-                          <th scope="col">Located at</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>sample_file.xlsx</td>
-                          <td>/Home/Desktop/sample_file.xlsx</td>
-                        </tr>
-                        <tr>
-                          <td>figures.pdf</td>
-                          <td>/Home/Documents/figures.pdf</td>
-                        </tr>
-                        <tr>
-                          <td>product demo.mp4</td>
-                          <td>/Home/Documents/product demo.mp4</td>
-                        </tr>
-                      </tbody>
-                  </table>
-              </div>
+    <div id="content-container" class="container-fluid px-3 mt-3">
+      <div id="file-explorer-content">
+
+        <div class="input-group">
+            <div class="btn-group gap-2" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-primary">&larr;</button>
+                <button type="button" class="btn btn-primary">&rarr;</button>
             </div>
-            <div class="col-3">
-              <div class="vertical-scroll-area">
-                  <ol class="list-group list-group-numbered">
-                      <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                          <div class="fw-bold">Subheading</div>
-                          Content for list item
-                        </div>
-                        <span class="badge text-bg-primary rounded-pill">14</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                          <div class="fw-bold">Subheading</div>
-                          Content for list item
-                        </div>
-                        <span class="badge text-bg-primary rounded-pill">14</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                          <div class="fw-bold">Subheading</div>
-                          Content for list item
-                        </div>
-                        <span class="badge text-bg-primary rounded-pill">14</span>
-                      </li>
-                    </ol>
+                <input type="text" class="form-control mx-2" placeholder="Folder Path" aria-label="Folder Path" aria-describedby="btnGroupAddon">
+            <div class="btn-group gap-2" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary">+</button>
+              <button type="button" class="btn btn-primary">&darr;</button>
+          </div>
+          </div>
+    
+          <div class="row mt-3">
+                <div class="col-9">
+                  <div class="vertical-scroll-area">
+                      <table class="table table-striped table-bordered table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col">Name</th>
+                              <th scope="col">Located at</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>sample_file.xlsx</td>
+                              <td>/Home/Desktop/sample_file.xlsx</td>
+                            </tr>
+                            <tr>
+                              <td>figures.pdf</td>
+                              <td>/Home/Documents/figures.pdf</td>
+                            </tr>
+                            <tr>
+                              <td>product demo.mp4</td>
+                              <td>/Home/Documents/product demo.mp4</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                  </div>
                 </div>
-            </div>
-      </div>
-      
-      <div class="container w-50 mt-3">
-          <div class="card">
-              <div class="card-header">
-                Version Details
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">8.48 Mb</h5>
-                <p class="card-text">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Non autem eveniet, ullam voluptatum beatae dicta alias sunt expedita quam iure dolore laboriosam nobis fugiat quibusdam nostrum labore, fugit exercitationem quis!
-                Minima omnis commodi culpa dolor itaque obcaecati sapiente similique, in labore nulla iusto, dolorum impedit minus distinctio saepe iste asperiores quo et consequatur velit a! Eaque cum atque consectetur quod!</p>
-                <a href="#" class="btn btn-primary">Edit description</a>
-              </div>
-              <div class="card-footer text-body-secondary">
-                2 days ago
+                <div class="col-3">
+                  <div class="vertical-scroll-area">
+                      <ol class="list-group list-group-numbered">
+                          <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                              <div class="fw-bold">Subheading</div>
+                              Content for list item
+                            </div>
+                            <span class="badge text-bg-primary rounded-pill">14</span>
+                          </li>
+                          <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                              <div class="fw-bold">Subheading</div>
+                              Content for list item
+                            </div>
+                            <span class="badge text-bg-primary rounded-pill">14</span>
+                          </li>
+                          <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                              <div class="fw-bold">Subheading</div>
+                              Content for list item
+                            </div>
+                            <span class="badge text-bg-primary rounded-pill">14</span>
+                          </li>
+                        </ol>
+                    </div>
+                </div>
+          </div>
+          
+          <div class="container w-50 mt-3">
+              <div class="card">
+                  <div class="card-header">
+                    Version Details
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">8.48 Mb</h5>
+                    <p class="card-text">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Non autem eveniet, ullam voluptatum beatae dicta alias sunt expedita quam iure dolore laboriosam nobis fugiat quibusdam nostrum labore, fugit exercitationem quis!
+                    Minima omnis commodi culpa dolor itaque obcaecati sapiente similique, in labore nulla iusto, dolorum impedit minus distinctio saepe iste asperiores quo et consequatur velit a! Eaque cum atque consectetur quod!</p>
+                    <a href="#" class="btn btn-primary">Edit description</a>
+                  </div>
+                  <div class="card-footer text-body-secondary">
+                    2 days ago
+                  </div>
               </div>
           </div>
+    
       </div>
-
-</div>
+    </div>
+  </body>
+</html>
