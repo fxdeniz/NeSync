@@ -23,15 +23,18 @@ async function postJSON(targetUrl, requestBody) {
         throw new Error('Network response was not ok');
       }
       
-      const data = await response.json();
+      const result = await response.json();
       
-      console.log(data);
+      console.log(result);
+
+      return result;
+
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
     }
   }
 
-document.addEventListener("DOMContentLoaded", (event) => {
+document.addEventListener("DOMContentLoaded", async (event) => {
 
     let inputCurrentPath = document.getElementById('input-current-path');
     let buttonPrev = document.getElementById('button-prev');
@@ -54,6 +57,23 @@ document.addEventListener("DOMContentLoaded", (event) => {
         postJSON('http://localhost:1234/addNewFolder', requestBody);
     });
 
-    fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${inputCurrentPath.value}`);
+    let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${inputCurrentPath.value}`);
+
+    folderJson['childFolders'].forEach(currentFolder => {
+      let tableExplorerBody = document.querySelector('#table-explorer tbody');
+
+      let row = document.createElement('tr');
+      let colName = document.createElement('td');
+      let colLocation = document.createElement('td');
+      
+      colName.innerText = currentFolder['suffixPath'];
+      colLocation.innerText = currentFolder['userFolderPath'];
+
+      row.appendChild(colName);
+      row.appendChild(colLocation);
+
+      tableExplorerBody.appendChild(row);
+    });
+
   });
   
