@@ -25,8 +25,6 @@ async function postJSON(targetUrl, requestBody) {
       
       const result = await response.json();
       
-      console.log(result);
-
       return result;
 
     } catch (error) {
@@ -51,7 +49,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
         const selectedFolderPath = await window.fileExplorerApi.showFolderSelectDialog();
 
-        requestBody["symbolFolderPath"] = `/Home/Test/`;
+        let pathTokens = await window.pathApi.splitPath(selectedFolderPath);
+        requestBody["symbolFolderPath"] = inputCurrentPath.value + pathTokens.pop();
         requestBody["userFolderPath"] = selectedFolderPath;
 
         postJSON('http://localhost:1234/addNewFolder', requestBody);

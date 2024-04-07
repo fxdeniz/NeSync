@@ -16,6 +16,11 @@ async function showFolderSelectDialog () {
 }
 
 
+async function splitPath(givenPath) {
+  return givenPath.split(path.sep);
+}
+
+
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -33,6 +38,12 @@ const createWindow = () => {
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
+
+  ipcMain.handle('path:Split', async (event, input) => {
+    const result = splitPath(input);
+    return result;
+  });
+  
   createWindow();
 
   app.on('activate', () => {
