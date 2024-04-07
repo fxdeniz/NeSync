@@ -330,6 +330,20 @@ QHttpServerResponse getNewAddedEvents(FileSystemEventDb *fsEventDb)
     return QHttpServerResponse(jsonObject, QHttpServerResponse::StatusCode::Ok);
 }
 
+QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
+{
+    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject responseBody = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+
+    QHttpServerResponse response(responseBody);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+}
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -375,7 +389,11 @@ int main(int argc, char *argv[])
         return getNewAddedEvents(fsEventDb);
     });
 
-    quint16 targetPort = 1234; // Making this 0 means random port.
+    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [](const QHttpServerRequest &request) {
+        return getFolderContent(request);
+    });
+
+    quint16 targetPort = 1234; // Making this 0, means random port.
     quint16 port = httpServer.listen(QHostAddress::SpecialAddress::Any, targetPort);
     if (port)
         qDebug() << "running on = " << "localhost:" + QString::number(port);
