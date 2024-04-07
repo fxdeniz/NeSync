@@ -17,7 +17,15 @@ async function postJSON(url, data) {
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
+    let inputCurrentPath = document.getElementById('input-current-path');
+    let buttonPrev = document.getElementById('button-prev');
+    let buttonNext = document.getElementById('button-next');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
+
+    buttonPrev.disabled = true;
+    buttonNext.disabled = true;
+    inputCurrentPath.value = '\\';
+    inputCurrentPath.readOnly = true;
 
     buttonAddNewFolder.addEventListener('click', async () => {
 

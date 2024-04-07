@@ -16,7 +16,7 @@
   <body>
     <ul class="nav nav-pills nav-fill">
         <li class="nav-item">
-            <a class="nav-link active" id="button-file-explorer" aria-current="page" href="#">File Explorer</a>
+            <a id="button-file-explorer" class="nav-link active" aria-current="page" href="#">File Explorer</a>
         </li>
         <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">File Monitor</a>
@@ -28,10 +28,10 @@
 
         <div class="input-group">
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
-                <button type="button" class="btn btn-primary">&larr;</button>
-                <button type="button" class="btn btn-primary">&rarr;</button>
+                <button id="button-prev" type="button" class="btn btn-primary">&larr;</button>
+                <button id="button-next" type="button" class="btn btn-primary">&rarr;</button>
             </div>
-                <input type="text" class="form-control mx-2" placeholder="Folder Path" aria-label="Folder Path" aria-describedby="btnGroupAddon">
+                <input id="input-current-path" type="text" class="form-control mx-2" placeholder="Folder Path" aria-label="Folder Path" aria-describedby="btnGroupAddon">
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
               <button id="button-add-new-folder" type="button" class="btn btn-primary">+</button>
               <button type="button" class="btn btn-primary">&darr;</button>
