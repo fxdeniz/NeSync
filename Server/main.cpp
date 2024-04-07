@@ -17,6 +17,7 @@
 QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
+    response.addHeader("Access-Control-Allow-Origin", "*");
     QByteArray requestBody = request.body();
 
     if(requestBody.isEmpty())
@@ -57,8 +58,10 @@ QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request)
     if(isAdded)
     {
         QString reponseMessage = "Folder is created.";
-        response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Created);
-        return response;
+        QHttpServerResponse response = QHttpServerResponse(reponseMessage, QHttpServerResponse::StatusCode::Created);
+        response.addHeader("Access-Control-Allow-Origin", "*");
+
+        return response;        
     }
 
     return response;
