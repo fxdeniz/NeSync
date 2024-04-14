@@ -9,37 +9,64 @@ function routeToFileExplorer (event) {
 }
 
 
+function traverseFolder(folderPath) {
+    let result = {
+        folderPath: folderPath,
+        childFiles: [],
+        childFolders: []
+    };
+
+    const files = fs.readdirSync(folderPath);
+
+    files.forEach(file => {
+        const fullPath = path.join(folderPath, file);
+        const stats = fs.statSync(fullPath);
+
+        if (stats.isDirectory()) {
+            const childResult = traverseFolder(fullPath);
+            result.childFolders.push(childResult);
+        } else {
+            result.childFiles.push(fullPath);
+        }
+    });
+
+    return result;
+}
+
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
 
     if (!canceled) {
-        let stack = [filePaths[0]];
+        let stack = [{
+            folderPath: filePaths[0],
+            childFiles: [],
+            childFolders: []
+        }];
 
-        while (stack.length) {
-            const currentDirectory = stack.pop();
-            let folderItem = {"folderPath": currentDirectory, "childFiles": [], "childFolders": []};
-
-            const files = fs.readdirSync(currentDirectory);
-
+        let result = stack[0];
+    
+        while (stack.length > 0) {
+            const currentFolder = stack.pop();
+    
+            const files = fs.readdirSync(currentFolder.folderPath);
+    
             files.forEach(file => {
-                const fullPath = path.join(currentDirectory, file);
-
+                const fullPath = path.join(currentFolder.folderPath, file);
                 const stats = fs.statSync(fullPath);
-
+    
                 if (stats.isDirectory()) {
-                    stack.push(fullPath);
+                    const folderObj = {
+                        folderPath: fullPath,
+                        childFiles: [],
+                        childFolders: []
+                    };
+                    currentFolder.childFolders.push(folderObj);
+                    stack.push(folderObj);
                 } else {
-                    folderItem[`childFiles`].push(fullPath);
+                    currentFolder.childFiles.push(fullPath);
                 }
             });
-
-            if(result == null) {
-                result = folderItem;
-            }
-            else {
-                result[`childFolders`].push(folderItem);
-            }
         }
 
         return result;
