@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
 
 function routeToFileExplorer (event) {
   const webContents = event.sender;
@@ -9,10 +10,40 @@ function routeToFileExplorer (event) {
 
 
 async function showFolderSelectDialog () {
-  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
-  if (!canceled) {
-    return filePaths[0];
-  }
+    const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+    let result = null;
+
+    if (!canceled) {
+        let stack = [filePaths[0]];
+
+        while (stack.length) {
+            const currentDirectory = stack.pop();
+            let folderItem = {"folderPath": currentDirectory, "childFiles": [], "childFolders": []};
+
+            const files = fs.readdirSync(currentDirectory);
+
+            files.forEach(file => {
+                const fullPath = path.join(currentDirectory, file);
+
+                const stats = fs.statSync(fullPath);
+
+                if (stats.isDirectory()) {
+                    stack.push(fullPath);
+                } else {
+                    folderItem[`childFiles`].push(fullPath);
+                }
+            });
+
+            if(result == null) {
+                result = folderItem;
+            }
+            else {
+                result[`childFolders`].push(folderItem);
+            }
+        }
+
+        return result;
+    }
 }
 
 
