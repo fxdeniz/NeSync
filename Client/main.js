@@ -9,30 +9,6 @@ function routeToFileExplorer (event) {
 }
 
 
-function traverseFolder(folderPath) {
-    let result = {
-        folderPath: folderPath,
-        childFiles: [],
-        childFolders: []
-    };
-
-    const files = fs.readdirSync(folderPath);
-
-    files.forEach(file => {
-        const fullPath = path.join(folderPath, file);
-        const stats = fs.statSync(fullPath);
-
-        if (stats.isDirectory()) {
-            const childResult = traverseFolder(fullPath);
-            result.childFolders.push(childResult);
-        } else {
-            result.childFiles.push(fullPath);
-        }
-    });
-
-    return result;
-}
-
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
