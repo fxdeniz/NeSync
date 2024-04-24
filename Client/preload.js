@@ -15,5 +15,13 @@ contextBridge.exposeInMainWorld('pathApi', {
         .then(resolve)
         .catch(reject);
     });
+  },
+
+  fileNameWithExtension: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('path:FileName', input)
+        .then(resolve)
+        .catch(reject);
+    });
   }
 });

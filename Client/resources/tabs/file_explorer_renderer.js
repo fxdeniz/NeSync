@@ -46,16 +46,48 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonAddNewFolder.addEventListener('click', async () => {
 
-        let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-        const selectedFolderPath = await window.fileExplorerApi.showFolderSelectDialog();
+        const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
 
-        if(selectedFolderPath) {
-            console.log(selectedFolderPath);
-            let pathTokens = await window.pathApi.splitPath(selectedFolderPath);
-            requestBody["symbolFolderPath"] = inputCurrentPath.value + pathTokens.pop();
-            requestBody["userFolderPath"] = selectedFolderPath;
+        if(selectedFolderTree) {
 
-            postJSON('http://localhost:1234/addNewFolder', requestBody);
+            let stack = [selectedFolderTree];
+            let fileList = [];
+
+            while (stack.length > 0) {
+                let currentFolder = stack.pop();
+                let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
+                let symbolFolderSuffix = pathTokens.pop() + "/";
+
+                if(currentFolder.symbolFolderPath === undefined) // Check symbol folder path of the root.
+                  currentFolder.symbolFolderPath = "/" + symbolFolderSuffix;
+                else
+                  currentFolder.symbolFolderPath += symbolFolderSuffix;
+
+                sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
+
+                for(filePath of currentFolder.childFiles) {
+                  let fileName = await window.pathApi.fileNameWithExtension(filePath);
+                  fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
+                                  pathToFile: filePath,
+                                  description: `First version of <b>${fileName}</b>.`,
+                                  isFrozen: false
+                  });
+                }
+        
+                for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
+                    currentFolder.childFolders[index].symbolFolderPath = currentFolder.symbolFolderPath;
+                    stack.push(currentFolder.childFolders[index]);
+                }
+            }
+
+            // When files added inside the while loop, they cause some folders not to be created.
+            // So first create folders, then add the files.
+            for(currentFile of fileList) {
+              sendAddFileRequest(currentFile.symbolFolderPath,
+                currentFile.pathToFile,
+                currentFile.description,
+                currentFile.isFrozen);
+            }
         }
     });
 
@@ -79,3 +111,21 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   });
   
+
+function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
+  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
+  requestBody["symbolFolderPath"] = symbolFolderPath;
+  requestBody["userFolderPath"] = userFolderPath;
+
+  postJSON('http://localhost:1234/addNewFolder', requestBody);    
+}
+
+function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
+  let requestBody = {};
+  requestBody["symbolFolderPath"] = symbolFolderPath;
+  requestBody["pathToFile"] = pathToFile;
+  requestBody["description"] = description;
+  requestBody["isFrozen"] = isFrozen;
+
+  postJSON('http://localhost:1234/addNewFile', requestBody);    
+}

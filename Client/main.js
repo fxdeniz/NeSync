@@ -55,6 +55,11 @@ async function splitPath(givenPath) {
 }
 
 
+async function fileNameWithExtension(givenPath) {
+  return path.basename(givenPath);
+}
+
+
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -75,6 +80,11 @@ app.whenReady().then(() => {
 
   ipcMain.handle('path:Split', async (event, input) => {
     const result = splitPath(input);
+    return result;
+  });
+
+  ipcMain.handle('path:FileName', async (event, input) => {
+    const result = fileNameWithExtension(input);
     return result;
   });
   
