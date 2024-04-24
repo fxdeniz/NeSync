@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
                 else
                   currentFolder.symbolFolderPath += symbolFolderSuffix;
 
-                sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
+                await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
 
                 for(filePath of currentFolder.childFiles) {
                   let fileName = await window.pathApi.fileNameWithExtension(filePath);
@@ -83,10 +83,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
             // When files added inside the while loop, they cause some folders not to be created.
             // So first create folders, then add the files.
             for(currentFile of fileList) {
-              sendAddFileRequest(currentFile.symbolFolderPath,
-                currentFile.pathToFile,
-                currentFile.description,
-                currentFile.isFrozen);
+              await sendAddFileRequest(currentFile.symbolFolderPath,
+                                       currentFile.pathToFile,
+                                       currentFile.description,
+                                       currentFile.isFrozen);
             }
         }
     });
@@ -112,20 +112,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   });
   
 
-function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
+async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
-  postJSON('http://localhost:1234/addNewFolder', requestBody);    
+  await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
-function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
+async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
   let requestBody = {};
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["pathToFile"] = pathToFile;
   requestBody["description"] = description;
   requestBody["isFrozen"] = isFrozen;
 
-  postJSON('http://localhost:1234/addNewFile', requestBody);    
+  await postJSON('http://localhost:1234/addNewFile', requestBody);    
 }
