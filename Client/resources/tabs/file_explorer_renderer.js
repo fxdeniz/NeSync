@@ -68,27 +68,46 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${event.detail.targetPath}`);
 
   if(folderJson.childFolders) {
-    folderJson['childFolders'].forEach(currentFolder => {
+    folderJson.childFolders.forEach(currentFolder => {
         let row = document.createElement('tr');
         let colName = document.createElement('td');
         let colLocation = document.createElement('td');
         
-        colName.innerText = currentFolder['suffixPath'];
-        colLocation.innerText = currentFolder['userFolderPath'];
+        colName.innerText = currentFolder.suffixPath;
+        colLocation.innerText = currentFolder.userFolderPath;
     
         row.appendChild(colName);
         row.appendChild(colLocation);
         row.dataset.type = "folder";
-        row.dataset.symbolPath = currentFolder['symbolFolderPath'];
+        row.dataset.symbolFolderPath = currentFolder.symbolFolderPath;
     
         row.addEventListener('click', () => {
           if(row.dataset.type === "folder") {
-            let navigationEvnet = createDirectoryChangeEvent(row.dataset.symbolPath);
+            let navigationEvnet = createDirectoryChangeEvent(row.dataset.symbolFolderPath);
             event.target.dispatchEvent(navigationEvnet);
           }
         });
     
         tableExplorerBody.appendChild(row);
+    });
+  }
+
+  if(folderJson.childFiles) {
+    folderJson.childFiles.forEach(currentFile => {
+      let row = document.createElement('tr');
+      let colName = document.createElement('td');
+      let colLocation = document.createElement('td');
+      
+      colName.innerText = currentFile.fileName;
+      colLocation.innerText = currentFile.userFilePath;
+  
+      row.appendChild(colName);
+      row.appendChild(colLocation);
+      row.dataset.type = "file";
+      row.dataset.symbolFolderPath = currentFile.symbolFolderPath;
+      row.dataset.symbolFilePath = currentFile.symbolFilePath;
+  
+      tableExplorerBody.appendChild(row);
     });
   }
 }
