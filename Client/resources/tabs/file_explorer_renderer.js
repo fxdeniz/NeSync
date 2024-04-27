@@ -48,52 +48,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
        inputCurrentPath.value = event.detail.targetPath;
     });
 
-    buttonAddNewFolder.addEventListener('click', async () => {
-
-        const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
-
-        if(selectedFolderTree) {
-
-            let stack = [selectedFolderTree];
-            let fileList = [];
-
-            while (stack.length > 0) {
-                let currentFolder = stack.pop();
-                let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
-                let symbolFolderSuffix = pathTokens.pop() + "/";
-
-                if(currentFolder.symbolFolderPath === undefined) // Check symbol folder path of the root.
-                  currentFolder.symbolFolderPath = "/" + symbolFolderSuffix;
-                else
-                  currentFolder.symbolFolderPath += symbolFolderSuffix;
-
-                await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
-
-                for(filePath of currentFolder.childFiles) {
-                  let fileName = await window.pathApi.fileNameWithExtension(filePath);
-                  fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
-                                  pathToFile: filePath,
-                                  description: `First version of <b>${fileName}</b>.`,
-                                  isFrozen: false
-                  });
-                }
-        
-                for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
-                    currentFolder.childFolders[index].symbolFolderPath = currentFolder.symbolFolderPath;
-                    stack.push(currentFolder.childFolders[index]);
-                }
-            }
-
-            // When files added inside the while loop, they cause some folders not to be created.
-            // So first create folders, then add the files.
-            for(currentFile of fileList) {
-              await sendAddFileRequest(currentFile.symbolFolderPath,
-                                       currentFile.pathToFile,
-                                       currentFile.description,
-                                       currentFile.isFrozen);
-            }
-        }
-    });
+    buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
 
     let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${inputCurrentPath.value}`);
 
@@ -143,4 +98,48 @@ async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isF
   requestBody["isFrozen"] = isFrozen;
 
   await postJSON('http://localhost:1234/addNewFile', requestBody);    
+}
+
+async function onClickHandler_buttonAddNewFolder() {
+    const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
+
+    if(selectedFolderTree) {
+
+        let stack = [selectedFolderTree];
+        let fileList = [];
+
+        while (stack.length > 0) {
+            let currentFolder = stack.pop();
+            let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
+            let symbolFolderSuffix = pathTokens.pop() + "/";
+
+            if(currentFolder.symbolFolderPath === undefined) // Check symbol folder path of the root.
+              currentFolder.symbolFolderPath = "/" + symbolFolderSuffix;
+            else
+              currentFolder.symbolFolderPath += symbolFolderSuffix;
+
+            await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
+
+            for(filePath of currentFolder.childFiles) {
+              let fileName = await window.pathApi.fileNameWithExtension(filePath);
+              fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
+                              pathToFile: filePath,
+                              description: `First version of <b>${fileName}</b>.`,
+                              isFrozen: false
+              });
+            }
+    
+            for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
+                currentFolder.childFolders[index].symbolFolderPath = currentFolder.symbolFolderPath;
+                stack.push(currentFolder.childFolders[index]);
+            }
+        }
+
+        for(currentFile of fileList) {
+          await sendAddFileRequest(currentFile.symbolFolderPath,
+                                   currentFile.pathToFile,
+                                   currentFile.description,
+                                   currentFile.isFrozen);
+        }
+    }
 }
