@@ -44,6 +44,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     inputCurrentPath.value = '/';
     inputCurrentPath.readOnly = true;
 
+    inputCurrentPath.addEventListener('directoryNavigation', (event) => {
+       inputCurrentPath.value = event.detail.targetPath;
+    });
+
     buttonAddNewFolder.addEventListener('click', async () => {
 
         const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
@@ -105,6 +109,17 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       row.appendChild(colName);
       row.appendChild(colLocation);
+      row.dataset.type = "folder";
+      row.dataset.symbolPath = currentFolder['symbolFolderPath'];
+
+      row.addEventListener('click', () => {
+        if(row.dataset.type === "folder") {
+          let navigationEvnet = new CustomEvent('directoryNavigation', 
+                                                {bubbles: true, 
+                                                detail: {'targetPath': row.dataset.symbolPath}});
+          inputCurrentPath.dispatchEvent(navigationEvnet);
+        }
+      });
 
       tableExplorerBody.appendChild(row);
     });
