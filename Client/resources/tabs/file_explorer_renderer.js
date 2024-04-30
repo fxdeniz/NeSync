@@ -4,6 +4,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let buttonPrev = document.getElementById('button-prev');
     let buttonNext = document.getElementById('button-next');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
+    const buttonFileMonitor = document.getElementById("button-file-monitor");
+
+    buttonFileMonitor.addEventListener('click', async clickEvent => {
+      window.router.routeToFileMonitor();
+  });
 
     buttonPrev.disabled = true;
     buttonNext.disabled = true;

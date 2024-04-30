@@ -198,6 +198,15 @@ QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
     return response;
 }
 
+QHttpServerResponse startMonitoring(const QHttpServerRequest& request)
+{
+    QJsonObject responseBody;
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -228,6 +237,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [](const QHttpServerRequest &request) {
         return getFolderContent(request);
+    });
+
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [](const QHttpServerRequest &request) {
+        return startMonitoring(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.

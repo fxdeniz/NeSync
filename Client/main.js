@@ -9,6 +9,13 @@ function routeToFileExplorer (event) {
 }
 
 
+function routeToFileMonitor (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/tabs/file_monitor.html'));
+}
+
+
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
@@ -76,6 +83,7 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
+  ipcMain.on('route:FileMonitor', routeToFileMonitor);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {
