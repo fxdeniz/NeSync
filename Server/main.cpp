@@ -10,6 +10,7 @@
 #include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
+#include "FileMonitorSubSystem/FileSystemEventStore.h"
 
 // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
 
@@ -200,7 +201,26 @@ QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
 
 QHttpServerResponse startMonitoring(const QHttpServerRequest& request)
 {
+    FileSystemEventStore fses;
+
     QJsonObject responseBody;
+    auto fsm = FileStorageManager::instance();
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QJsonObject fileJson = value.toObject();
+        fses.addFolder(fileJson[JsonKeys::Folder::UserFolderPath].toString(), FileSystemEventStore::Status::Monitored);
+    }
+
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QJsonObject fileJson = value.toObject();
+        QString currentPath = fileJson[JsonKeys::Folder::UserFolderPath].toString();
+        FileSystemEventStore::Status status = fses.statusOfFolder(currentPath);
+
+        responseBody.insert(currentPath, status);
+    }
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");

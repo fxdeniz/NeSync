@@ -55,6 +55,8 @@ set(PROJECT_SOURCES
   # FileMonitoringSubSystem
       FileMonitorSubSystem/FileSystemEventListener.h
       FileMonitorSubSystem/FileSystemEventListener.cpp
+      FileMonitorSubSystem/FileSystemEventStore.h
+      FileMonitorSubSystem/FileSystemEventStore.cpp
   #
 )
 
