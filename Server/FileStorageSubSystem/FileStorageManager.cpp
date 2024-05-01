@@ -34,6 +34,14 @@ QSharedPointer<FileStorageManager> FileStorageManager::instance()
     return result;
 }
 
+FileStorageManager* FileStorageManager::rawInstance()
+{
+    AppConfig config;
+    QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
+
+    return new FileStorageManager(storageDb, config.getStorageFolderPath());
+}
+
 FileStorageManager::~FileStorageManager()
 {
     database.close();

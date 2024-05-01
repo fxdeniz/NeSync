@@ -10,7 +10,7 @@
 #include "Utility/AppConfig.h"
 #include "Utility/JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
-#include "FileMonitorSubSystem/FileSystemEventStore.h"
+#include "FileMonitorSubSystem/FileMonitoringManager.h"
 
 // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
 
@@ -199,28 +199,28 @@ QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
     return response;
 }
 
-QHttpServerResponse startMonitoring(const QHttpServerRequest& request)
+QHttpServerResponse startMonitoring(QThread *fileMonitorThread, const QHttpServerRequest& request)
 {
-    FileSystemEventStore fses;
+    if(fileMonitorThread != nullptr)
+    {
+        fileMonitorThread->quit();
+        fileMonitorThread->wait();
+        delete fileMonitorThread;
+        fileMonitorThread = nullptr;
+    }
+
+    fileMonitorThread = new QThread();
 
     QJsonObject responseBody;
-    auto fsm = FileStorageManager::instance();
+    FileStorageManager *fsm = FileStorageManager::rawInstance();
+    FileSystemEventStore *fses = new FileSystemEventStore();
 
-    for(const QJsonValue &value : fsm->getActiveFolderList())
-    {
-        QJsonObject fileJson = value.toObject();
-        fses.addFolder(fileJson[JsonKeys::Folder::UserFolderPath].toString(), FileSystemEventStore::Status::Monitored);
-    }
+    FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
 
+    // TODO: Do the signal slot connections for fmm here
 
-    for(const QJsonValue &value : fsm->getActiveFolderList())
-    {
-        QJsonObject fileJson = value.toObject();
-        QString currentPath = fileJson[JsonKeys::Folder::UserFolderPath].toString();
-        FileSystemEventStore::Status status = fses.statusOfFolder(currentPath);
-
-        responseBody.insert(currentPath, status);
-    }
+    fmm->moveToThread(fileMonitorThread);
+    fileMonitorThread->start();
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");
@@ -241,6 +241,8 @@ int main(int argc, char *argv[])
     QDir().mkpath(storagePath);
     AppConfig().setStorageFolderPath(storagePath);
 
+    QThread *fileMonitorThread = nullptr;
+
     QHttpServer httpServer;
 
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [](const QHttpServerRequest &request) {
@@ -259,8 +261,8 @@ int main(int argc, char *argv[])
         return getFolderContent(request);
     });
 
-    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [](const QHttpServerRequest &request) {
-        return startMonitoring(request);
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [fileMonitorThread](const QHttpServerRequest &request) {
+        return startMonitoring(fileMonitorThread, request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.

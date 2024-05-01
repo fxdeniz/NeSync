@@ -15,6 +15,7 @@ private:
 public:
     static const inline QString separator = "/";
     static QSharedPointer<FileStorageManager> instance();
+    static FileStorageManager* rawInstance();
 
     ~FileStorageManager();
 
