@@ -25,11 +25,9 @@ FileMonitoringManager::FileMonitoringManager(FileStorageManager *fsm,
 
 FileMonitoringManager::~FileMonitoringManager()
 {
+    qDebug() << "Deleting fmm = " << this;
     delete fsm;
-    delete fses;
-
     fsm = nullptr;
-    fses = nullptr;
 }
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderName, const QString &dir)

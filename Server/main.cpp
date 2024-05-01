@@ -199,7 +199,7 @@ QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
     return response;
 }
 
-QHttpServerResponse startMonitoring(QThread *fileMonitorThread, const QHttpServerRequest& request)
+QHttpServerResponse startMonitoring(QThread *fileMonitorThread, FileSystemEventStore *fses, const QHttpServerRequest& request)
 {
     if(fileMonitorThread != nullptr)
     {
@@ -209,18 +209,34 @@ QHttpServerResponse startMonitoring(QThread *fileMonitorThread, const QHttpServe
         fileMonitorThread = nullptr;
     }
 
+    fses->clear();
+
     fileMonitorThread = new QThread();
 
     QJsonObject responseBody;
     FileStorageManager *fsm = FileStorageManager::rawInstance();
-    FileSystemEventStore *fses = new FileSystemEventStore();
 
     FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
 
     // TODO: Do the signal slot connections for fmm here
+    QObject::connect(fileMonitorThread, &QThread::finished, fmm, &QObject::deleteLater);
 
     fmm->moveToThread(fileMonitorThread);
     fileMonitorThread->start();
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+}
+
+QHttpServerResponse dumpFses(FileSystemEventStore *fses, const QHttpServerRequest& request)
+{
+    QJsonObject responseBody;
+
+    for(const QString &currentFolderPath : fses->folderList())
+    {
+        responseBody.insert(currentFolderPath, fses->statusOfFolder(currentFolderPath));
+    }
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");
@@ -242,6 +258,7 @@ int main(int argc, char *argv[])
     AppConfig().setStorageFolderPath(storagePath);
 
     QThread *fileMonitorThread = nullptr;
+    FileSystemEventStore *fses = new FileSystemEventStore();
 
     QHttpServer httpServer;
 
@@ -261,8 +278,12 @@ int main(int argc, char *argv[])
         return getFolderContent(request);
     });
 
-    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [fileMonitorThread](const QHttpServerRequest &request) {
-        return startMonitoring(fileMonitorThread, request);
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [fileMonitorThread, fses](const QHttpServerRequest &request) {
+        return startMonitoring(fileMonitorThread, fses, request);
+    });
+
+    httpServer.route("/dumpFses", QHttpServerRequest::Method::Get, [fses](const QHttpServerRequest &request) {
+        return dumpFses(fses, request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.

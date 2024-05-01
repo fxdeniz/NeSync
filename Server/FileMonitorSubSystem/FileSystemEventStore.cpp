@@ -27,3 +27,17 @@ FileSystemEventStore::Status FileSystemEventStore::statusOfFolder(const QString 
 
     return folderMap.value(folderPath, Status::Invalid);
 }
+
+QStringList FileSystemEventStore::folderList() const
+{
+    QReadLocker readLocker(&lock);
+
+    return folderMap.keys();
+}
+
+void FileSystemEventStore::clear()
+{
+    QWriteLocker writeLocker(&lock);
+
+    folderMap.clear();
+}

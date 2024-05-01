@@ -25,6 +25,8 @@ public:
     void addFolder(const QString &path, Status status);
     void removeFolder(const QString &path);
     Status statusOfFolder(const QString &folderPath) const;
+    QStringList folderList() const;
+    void clear();
 
 private:
     QHash<QString, Status> folderMap;
