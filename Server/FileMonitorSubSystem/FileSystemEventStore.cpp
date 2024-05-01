@@ -14,6 +14,13 @@ void FileSystemEventStore::addFolder(const QString &path, Status status)
     folderMap.insert(path, status);
 }
 
+void FileSystemEventStore::removeFolder(const QString &path)
+{
+    QWriteLocker writeLocker(&lock);
+
+    folderMap.remove(path);
+}
+
 FileSystemEventStore::Status FileSystemEventStore::statusOfFolder(const QString &folderPath) const
 {
     QReadLocker readLocker(&lock);

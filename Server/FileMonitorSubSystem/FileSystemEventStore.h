@@ -23,6 +23,7 @@ public:
     FileSystemEventStore();
 
     void addFolder(const QString &path, Status status);
+    void removeFolder(const QString &path);
     Status statusOfFolder(const QString &folderPath) const;
 
 private:
