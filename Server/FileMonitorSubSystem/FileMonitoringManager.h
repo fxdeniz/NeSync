@@ -17,6 +17,8 @@ public:
 
     ~FileMonitoringManager();
 
+    void addFolder(const QString &userFolderPath);
+
 signals:
 
 private slots:
@@ -26,11 +28,11 @@ private slots:
     void slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir);
 
 private:
-    FileSystemEventListener fileSystemEventListener;
+    FileSystemEventListener *fileSystemEventListener;
     efsw::FileWatcher fileWatcher;
     FileStorageManager *fsm;
     FileSystemEventStore *fses;
-
+    QHash<QString, efsw::WatchID> watchedFolderMap;
 };
 
 #endif // FILEMONITORINGMANAGER_H

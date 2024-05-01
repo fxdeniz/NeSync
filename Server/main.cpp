@@ -201,22 +201,23 @@ QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
 
 QHttpServerResponse startMonitoring(QThread *fileMonitorThread, FileSystemEventStore *fses, const QHttpServerRequest& request)
 {
-    if(fileMonitorThread != nullptr)
-    {
-        fileMonitorThread->quit();
-        fileMonitorThread->wait();
-        delete fileMonitorThread;
-        fileMonitorThread = nullptr;
-    }
-
     fses->clear();
-
-    fileMonitorThread = new QThread();
 
     QJsonObject responseBody;
     FileStorageManager *fsm = FileStorageManager::rawInstance();
 
     FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QJsonObject folderJson = value.toObject();
+
+        QString symbolFolderPath = folderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+        QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
+
+        fmm->addFolder(userFolderPath);
+    }
+
 
     // TODO: Do the signal slot connections for fmm here
     QObject::connect(fileMonitorThread, &QThread::finished, fmm, &QObject::deleteLater);
@@ -278,7 +279,18 @@ int main(int argc, char *argv[])
         return getFolderContent(request);
     });
 
-    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [fileMonitorThread, fses](const QHttpServerRequest &request) {
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [&fileMonitorThread, fses](const QHttpServerRequest &request) {
+
+        if(fileMonitorThread != nullptr)
+        {
+            fileMonitorThread->quit();
+            fileMonitorThread->wait();
+            delete fileMonitorThread;
+            fileMonitorThread = nullptr;
+        }
+
+        fileMonitorThread = new QThread();
+
         return startMonitoring(fileMonitorThread, fses, request);
     });
 
