@@ -13,6 +13,7 @@ public:
 
     QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
+    QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
 
 signals:
 };
