@@ -19,6 +19,7 @@ public:
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
     QHttpServerResponse startMonitoring(const QHttpServerRequest& request);
+    QHttpServerResponse dumpFses(const QHttpServerRequest& request);
 
 signals:
 

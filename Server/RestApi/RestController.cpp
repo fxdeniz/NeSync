@@ -237,3 +237,26 @@ QHttpServerResponse RestController::startMonitoring(const QHttpServerRequest &re
     return response;
 
 }
+
+QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    if(fses == nullptr)
+    {
+        QString errorMessage = "Fses is null";
+        QHttpServerResponse response(errorMessage, QHttpServerResponse::StatusCode::NotImplemented);
+        response.addHeader("Access-Control-Allow-Origin", "*");
+
+        return response;
+    }
+
+    for(const QString &currentFolderPath : fses->folderList())
+    {
+        responseBody.insert(currentFolderPath, fses->statusOfFolder(currentFolderPath));
+    }
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+}

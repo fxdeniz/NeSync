@@ -28,7 +28,7 @@ private slots:
     void slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir);
 
 private:
-    FileSystemEventListener *fileSystemEventListener;
+    FileSystemEventListener fileSystemEventListener;
     efsw::FileWatcher fileWatcher;
     FileStorageManager *fsm;
     FileSystemEventStore *fses;

@@ -10,21 +10,6 @@
 #include "Utility/AppConfig.h"
 #include "RestApi/RestController.h"
 
-QHttpServerResponse dumpFses(FileSystemEventStore *fses, const QHttpServerRequest& request)
-{
-    QJsonObject responseBody;
-
-    for(const QString &currentFolderPath : fses->folderList())
-    {
-        responseBody.insert(currentFolderPath, fses->statusOfFolder(currentFolderPath));
-    }
-
-    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
-    response.addHeader("Access-Control-Allow-Origin", "*");
-    return response;
-}
-
-
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -37,9 +22,6 @@ int main(int argc, char *argv[])
 
     QDir().mkpath(storagePath);
     AppConfig().setStorageFolderPath(storagePath);
-
-    QThread *fileMonitorThread = nullptr;
-    FileSystemEventStore *fses = new FileSystemEventStore();
 
     QHttpServer httpServer;
     RestController restController;
@@ -65,8 +47,8 @@ int main(int argc, char *argv[])
         return restController.startMonitoring(request);
     });
 
-    httpServer.route("/dumpFses", QHttpServerRequest::Method::Get, [fses](const QHttpServerRequest &request) {
-        return dumpFses(fses, request);
+    httpServer.route("/dumpFses", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.dumpFses(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.
