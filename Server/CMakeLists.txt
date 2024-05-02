@@ -60,6 +60,11 @@ set(PROJECT_SOURCES
       FileMonitorSubSystem/FileMonitoringManager.h
       FileMonitorSubSystem/FileMonitoringManager.cpp
   #
+
+  # Rest Controllers
+      RestApi/RestController.h
+      RestApi/RestController.cpp
+  #
 )
 
 if (WIN32)
