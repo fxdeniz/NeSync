@@ -12,7 +12,7 @@ public:
     explicit RestController(QObject *parent = nullptr);
 
     QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request);
-
+    QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
 
 signals:
 };
