@@ -179,3 +179,16 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
 
     return response;
 }
+
+QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &request)
+{
+    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject responseBody = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+
+    QHttpServerResponse response(responseBody);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+}

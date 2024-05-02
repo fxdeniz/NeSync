@@ -13,19 +13,6 @@
 #include "FileStorageSubSystem/FileStorageManager.h"
 #include "FileMonitorSubSystem/FileMonitoringManager.h"
 
-QHttpServerResponse getFolderContent(const QHttpServerRequest& request)
-{
-    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
-    qDebug() << "symbolFolderPath = " << symbolFolderPath;
-
-    auto fsm = FileStorageManager::instance();
-    QJsonObject responseBody = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
-
-    QHttpServerResponse response(responseBody);
-    response.addHeader("Access-Control-Allow-Origin", "*");
-    return response;
-}
-
 QHttpServerResponse startMonitoring(QThread *fileMonitorThread, FileSystemEventStore *fses, const QHttpServerRequest& request)
 {
     fses->clear();
@@ -104,8 +91,8 @@ int main(int argc, char *argv[])
         return restController.postAppendVersion(request);
     });
 
-    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [](const QHttpServerRequest &request) {
-        return getFolderContent(request);
+    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.getFolderContent(request);
     });
 
     httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [&fileMonitorThread, fses](const QHttpServerRequest &request) {
