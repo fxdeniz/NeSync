@@ -8,41 +8,7 @@
 #include <QtHttpServer/QHttpServerResponse>
 
 #include "Utility/AppConfig.h"
-#include "Utility/JsonDtoFormat.h"
 #include "RestApi/RestController.h"
-#include "FileStorageSubSystem/FileStorageManager.h"
-#include "FileMonitorSubSystem/FileMonitoringManager.h"
-
-QHttpServerResponse startMonitoring(QThread *fileMonitorThread, FileSystemEventStore *fses, const QHttpServerRequest& request)
-{
-    fses->clear();
-
-    QJsonObject responseBody;
-    FileStorageManager *fsm = FileStorageManager::rawInstance();
-
-    FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
-
-    for(const QJsonValue &value : fsm->getActiveFolderList())
-    {
-        QJsonObject folderJson = value.toObject();
-
-        QString symbolFolderPath = folderJson[JsonKeys::Folder::SymbolFolderPath].toString();
-        QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
-
-        fmm->addFolder(userFolderPath);
-    }
-
-
-    // TODO: Do the signal slot connections for fmm here
-    QObject::connect(fileMonitorThread, &QThread::finished, fmm, &QObject::deleteLater);
-
-    fmm->moveToThread(fileMonitorThread);
-    fileMonitorThread->start();
-
-    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
-    response.addHeader("Access-Control-Allow-Origin", "*");
-    return response;
-}
 
 QHttpServerResponse dumpFses(FileSystemEventStore *fses, const QHttpServerRequest& request)
 {
@@ -95,19 +61,8 @@ int main(int argc, char *argv[])
         return restController.getFolderContent(request);
     });
 
-    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [&fileMonitorThread, fses](const QHttpServerRequest &request) {
-
-        if(fileMonitorThread != nullptr)
-        {
-            fileMonitorThread->quit();
-            fileMonitorThread->wait();
-            delete fileMonitorThread;
-            fileMonitorThread = nullptr;
-        }
-
-        fileMonitorThread = new QThread();
-
-        return startMonitoring(fileMonitorThread, fses, request);
+    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.startMonitoring(request);
     });
 
     httpServer.route("/dumpFses", QHttpServerRequest::Method::Get, [fses](const QHttpServerRequest &request) {

@@ -2,8 +2,11 @@
 #define RESTCONTROLLER_H
 
 #include <QObject>
+#include <QThread>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
+
+#include "FileMonitorSubSystem/FileSystemEventStore.h"
 
 class RestController : public QObject
 {
@@ -15,8 +18,13 @@ public:
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
+    QHttpServerResponse startMonitoring(const QHttpServerRequest& request);
 
 signals:
+
+private:
+    QThread *fileMonitorThread;
+    FileSystemEventStore *fses;
 };
 
 #endif // RESTCONTROLLER_H

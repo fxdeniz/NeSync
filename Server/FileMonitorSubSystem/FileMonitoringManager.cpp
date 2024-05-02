@@ -43,8 +43,10 @@ FileMonitoringManager::~FileMonitoringManager()
     }
 
     delete fsm;
+    delete fses;
     delete fileSystemEventListener;
     fsm = nullptr;
+    fses = nullptr;
 }
 
 void FileMonitoringManager::addFolder(const QString &userFolderPath)

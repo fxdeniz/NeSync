@@ -1,13 +1,17 @@
 #include "RestController.h"
 
 #include "JsonDtoFormat.h"
-#include "FileStorageManager.h"
+#include "FileStorageSubSystem/FileStorageManager.h"
+#include "FileMonitorSubSystem/FileMonitoringManager.h"
 #include <QJsonObject>
 #include <QJsonDocument>
 
 RestController::RestController(QObject *parent)
     : QObject{parent}
-{}
+{
+    fileMonitorThread = nullptr;
+    fses = nullptr;
+}
 
 QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& request)
 {
@@ -191,4 +195,45 @@ QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &r
     QHttpServerResponse response(responseBody);
     response.addHeader("Access-Control-Allow-Origin", "*");
     return response;
+}
+
+QHttpServerResponse RestController::startMonitoring(const QHttpServerRequest &request)
+{
+    if(fileMonitorThread != nullptr)
+    {
+        fileMonitorThread->quit();
+        fileMonitorThread->wait();
+        delete fileMonitorThread;
+        fileMonitorThread = nullptr;
+    }
+
+    fileMonitorThread = new QThread();
+    fses = new FileSystemEventStore();
+
+    QJsonObject responseBody;
+    FileStorageManager *fsm = FileStorageManager::rawInstance();
+
+    FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QJsonObject folderJson = value.toObject();
+
+        QString symbolFolderPath = folderJson[JsonKeys::Folder::SymbolFolderPath].toString();
+        QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
+
+        fmm->addFolder(userFolderPath);
+    }
+
+
+    // TODO: Do the signal slot connections for fmm here
+    QObject::connect(fileMonitorThread, &QThread::finished, fmm, &QObject::deleteLater);
+
+    fmm->moveToThread(fileMonitorThread);
+    fileMonitorThread->start();
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    response.addHeader("Access-Control-Allow-Origin", "*");
+    return response;
+
 }
