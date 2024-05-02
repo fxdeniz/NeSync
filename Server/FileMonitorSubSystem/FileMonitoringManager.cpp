@@ -1,4 +1,8 @@
 #include "FileMonitoringManager.h"
+#include "JsonDtoFormat.h"
+
+#include <QFileInfo>
+#include <QCryptographicHash>
 
 FileMonitoringManager::FileMonitoringManager(FileStorageManager *fsm,
                                              FileSystemEventStore *fses,
@@ -51,20 +55,53 @@ void FileMonitoringManager::addFolder(const QString &userFolderPath)
 
 void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderName, const QString &dir)
 {
-    fses->addFolder(fileOrFolderName + dir, FileSystemEventStore::Status::NewAdded);
+    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::NewAdded);
 }
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileOrFolderName, const QString &dir)
 {
-    fses->addFolder(fileOrFolderName + dir, FileSystemEventStore::Status::Deleted);
+    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Deleted);
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
 {
-    fses->addFolder(fileName + dir, FileSystemEventStore::Status::Updated);
+    QString completePath = dir + fileName;
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(completePath);
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+
+    if(isFilePersists)
+    {
+        QFileInfo info(completePath);
+
+        QString symbolPath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+        qlonglong versionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+
+        QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, versionNumber);
+
+        QDateTime timestamp = QDateTime::fromString(versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString());
+        QString hash = versionJson[JsonKeys::FileVersion::Hash].toString();
+
+        QFile file(completePath);
+        bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
+
+        if(!isOpen)
+            return;
+
+        QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
+        hasher.addData(&file);
+        QString fileHash = QString(hasher.result().toHex());
+
+        bool isTimestampChanged = (info.lastModified() != timestamp);
+        bool isHashChanged = (hash != fileHash);
+
+
+        if(isTimestampChanged && isHashChanged)
+            fses->addFile(completePath, FileSystemEventStore::Status::Updated);
+    }
 }
 
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir)
 {
-    fses->addFolder(fileOrFolderName + dir, FileSystemEventStore::Status::Renamed);
+    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Renamed);
 }

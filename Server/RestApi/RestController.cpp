@@ -251,9 +251,14 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
         return response;
     }
 
-    for(const QString &currentFolderPath : fses->folderList())
+    for(const QString &folderPath : fses->folderList())
     {
-        responseBody.insert(currentFolderPath, fses->statusOfFolder(currentFolderPath));
+        responseBody.insert(folderPath, fses->statusOfFolder(folderPath));
+    }
+
+    for(const QString &filePath : fses->fileList())
+    {
+        responseBody.insert(filePath, fses->statusOfFile(filePath));
     }
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
