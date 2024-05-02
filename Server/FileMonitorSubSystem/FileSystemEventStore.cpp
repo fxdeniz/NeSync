@@ -21,11 +21,11 @@ void FileSystemEventStore::removeFolder(const QString &path)
     folderMap.remove(path);
 }
 
-FileSystemEventStore::Status FileSystemEventStore::statusOfFolder(const QString &folderPath) const
+FileSystemEventStore::Status FileSystemEventStore::statusOfFolder(const QString &path) const
 {
     QReadLocker readLocker(&lock);
 
-    return folderMap.value(folderPath, Status::Invalid);
+    return folderMap.value(path, Status::Invalid);
 }
 
 QStringList FileSystemEventStore::folderList() const
@@ -35,9 +35,38 @@ QStringList FileSystemEventStore::folderList() const
     return folderMap.keys();
 }
 
+void FileSystemEventStore::addFile(const QString &path, Status status)
+{
+    QWriteLocker writeLocker(&lock);
+
+    fileMap.insert(path, status);
+}
+
+void FileSystemEventStore::removeFile(const QString &path)
+{
+    QWriteLocker writeLocker(&lock);
+
+    fileMap.remove(path);
+}
+
+FileSystemEventStore::Status FileSystemEventStore::statusOfFile(const QString &path) const
+{
+    QReadLocker readLocker(&lock);
+
+    return fileMap.value(path, Status::Invalid);
+}
+
+QStringList FileSystemEventStore::fileList() const
+{
+    QReadLocker readLocker(&lock);
+
+    return fileMap.keys();
+}
+
 void FileSystemEventStore::clear()
 {
     QWriteLocker writeLocker(&lock);
 
     folderMap.clear();
+    fileMap.clear();
 }

@@ -24,12 +24,19 @@ public:
 
     void addFolder(const QString &path, Status status);
     void removeFolder(const QString &path);
-    Status statusOfFolder(const QString &folderPath) const;
+    Status statusOfFolder(const QString &path) const;
     QStringList folderList() const;
+
+    void addFile(const QString &path, Status status);
+    void removeFile(const QString &path);
+    Status statusOfFile(const QString &path) const;
+    QStringList fileList() const;
+
     void clear();
 
 private:
     QHash<QString, Status> folderMap;
+    QHash<QString, Status> fileMap;
     static QReadWriteLock lock;
 };
 
