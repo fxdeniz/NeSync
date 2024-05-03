@@ -72,31 +72,26 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
     if(isFilePersists)
     {
-        QFileInfo info(completePath);
-
         QString symbolPath = fileJson[JsonKeys::File::SymbolFilePath].toString();
         qlonglong versionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
 
         QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, versionNumber);
 
-        QDateTime timestamp = QDateTime::fromString(versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString());
         QString hash = versionJson[JsonKeys::FileVersion::Hash].toString();
 
         QFile file(completePath);
         bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
 
-        if(!isOpen)
+        if(!isOpen) // TODO: Add here more preliminary checks like file.exist(), isFile() etc...
             return;
 
         QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
         hasher.addData(&file);
         QString fileHash = QString(hasher.result().toHex());
 
-        bool isTimestampChanged = (info.lastModified() != timestamp);
         bool isHashChanged = (hash != fileHash);
 
-
-        if(isTimestampChanged && isHashChanged)
+        if(isHashChanged)
             fses->addFile(completePath, FileSystemEventStore::Status::Updated);
     }
 }
