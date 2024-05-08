@@ -29,6 +29,7 @@ private slots:
 
 private:
     void handleFileModificationEvent(const QString &userFilePath);
+    void handleFileDeleteEvent(const QString &userFilePath);
 
 
 private:

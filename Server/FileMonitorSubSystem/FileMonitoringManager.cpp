@@ -47,7 +47,7 @@ FileMonitoringManager::~FileMonitoringManager()
 
 void FileMonitoringManager::addFolder(const QString &userFolderPath)
 {
-    efsw::WatchID watchId = fileWatcher.addWatch(userFolderPath.toStdString(), &fileSystemEventListener, false);
+    efsw::WatchID watchId = fileWatcher.addWatch(userFolderPath.toStdString(), &fileSystemEventListener, true);
 
     if(watchId >= efsw::Errors::NoError)
         watchedFolderMap.insert(userFolderPath, watchId);
@@ -65,6 +65,10 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderNa
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileOrFolderName, const QString &dir)
 {
     //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Deleted);
+
+    QString completePath = dir + fileOrFolderName;
+
+    handleFileDeleteEvent(completePath);
 }
 
 void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileName, const QString &dir)
@@ -109,4 +113,14 @@ void FileMonitoringManager::handleFileModificationEvent(const QString &userFileP
         if(isHashChanged)
             fses->addFile(userFilePath, FileSystemEventStore::Status::Updated);
     }
+}
+
+void FileMonitoringManager::handleFileDeleteEvent(const QString &userFilePath)
+{
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(userFilePath);
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+    if(isFilePersists && !isFileFrozen) // TODO: Add check here for whether file is ignored for events.
+        fses->addFile(userFilePath, FileSystemEventStore::Status::Deleted);
 }
