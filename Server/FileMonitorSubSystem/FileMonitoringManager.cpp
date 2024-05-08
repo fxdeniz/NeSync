@@ -59,37 +59,7 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderNa
 
     QString completePath = dir + fileOrFolderName;
 
-    QJsonObject fileJson = fsm->getFileJsonByUserPath(completePath);
-    QJsonObject folderJson = fsm->getFolderJsonByUserPath(completePath);
-    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
-    bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
-
-    if(isFilePersists)
-    {
-        QString symbolPath = fileJson[JsonKeys::File::SymbolFilePath].toString();
-        qlonglong versionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
-
-        QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, versionNumber);
-
-        QString hash = versionJson[JsonKeys::FileVersion::Hash].toString();
-
-        QFile file(completePath);
-        bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
-
-        if(!isOpen) // TODO: Add here more preliminary checks like file.exist(), isFile() etc...
-            return;
-
-        QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
-        hasher.addData(&file);
-        QString fileHash = QString(hasher.result().toHex());
-
-        bool isHashChanged = (hash != fileHash);
-
-        if(isHashChanged)
-            fses->addFile(completePath, FileSystemEventStore::Status::Updated);
-
-        return;
-    }
+    handleFileModificationEvent(completePath);
 }
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileOrFolderName, const QString &dir)
@@ -101,10 +71,21 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 {
     QString completePath = dir + fileName;
 
-    QJsonObject fileJson = fsm->getFileJsonByUserPath(completePath);
-    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    handleFileModificationEvent(completePath);
+}
 
-    if(isFilePersists)
+void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir)
+{
+    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Renamed);
+}
+
+void FileMonitoringManager::handleFileModificationEvent(const QString &userFilePath)
+{
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(userFilePath);
+    bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+    bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+    if(isFilePersists && !isFileFrozen) // TODO: Add check here for whether file is ignored for events.
     {
         QString symbolPath = fileJson[JsonKeys::File::SymbolFilePath].toString();
         qlonglong versionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
@@ -113,10 +94,10 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 
         QString hash = versionJson[JsonKeys::FileVersion::Hash].toString();
 
-        QFile file(completePath);
+        QFile file(userFilePath);
         bool isOpen = file.open(QFile::OpenModeFlag::ReadOnly);
 
-        if(!isOpen) // TODO: Add here more preliminary checks like file.exist(), isFile() etc...
+        if(!isOpen) // TODO: Add more preliminary checks like file.exist(), isFile() etc...
             return;
 
         QCryptographicHash hasher(QCryptographicHash::Algorithm::Sha3_256);
@@ -126,11 +107,6 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
         bool isHashChanged = (hash != fileHash);
 
         if(isHashChanged)
-            fses->addFile(completePath, FileSystemEventStore::Status::Updated);
+            fses->addFile(userFilePath, FileSystemEventStore::Status::Updated);
     }
-}
-
-void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir)
-{
-    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Renamed);
 }
