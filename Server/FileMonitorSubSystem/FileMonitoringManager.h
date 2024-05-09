@@ -28,6 +28,7 @@ private slots:
     void slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir);
 
 private:
+    void handleFolderDeleteEvent(const QString &userFolderPath);
     void handleFileModificationEvent(const QString &userFilePath);
     void handleFileDeleteEvent(const QString &userFilePath);
 

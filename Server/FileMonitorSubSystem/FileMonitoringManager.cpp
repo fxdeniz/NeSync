@@ -1,6 +1,7 @@
 #include "FileMonitoringManager.h"
 #include "JsonDtoFormat.h"
 
+#include <QDir>
 #include <QFileInfo>
 #include <QCryptographicHash>
 
@@ -64,10 +65,9 @@ void FileMonitoringManager::slotOnAddEventDetected(const QString &fileOrFolderNa
 
 void FileMonitoringManager::slotOnDeleteEventDetected(const QString &fileOrFolderName, const QString &dir)
 {
-    //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Deleted);
-
     QString completePath = dir + fileOrFolderName;
 
+    handleFolderDeleteEvent(completePath);
     handleFileDeleteEvent(completePath);
 }
 
@@ -81,6 +81,21 @@ void FileMonitoringManager::slotOnModificationEventDetected(const QString &fileN
 void FileMonitoringManager::slotOnMoveEventDetected(const QString &fileOrFolderName, const QString &oldFileOrFolderName, const QString &dir)
 {
     //fses->addFolder(dir + fileOrFolderName, FileSystemEventStore::Status::Renamed);
+}
+
+void FileMonitoringManager::handleFolderDeleteEvent(const QString &userFolderPath)
+{
+    QString _userFolderPath = QDir::toNativeSeparators(userFolderPath);
+
+    if(!_userFolderPath.endsWith(QDir::separator()))
+        _userFolderPath.append(QDir::separator());
+
+    QJsonObject folderJson = fsm->getFolderJsonByUserPath(_userFolderPath);
+    bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+    bool isFolderFrozen = folderJson[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(isFolderPersists && !isFolderFrozen) // TODO: Add check here for whether file is ignored for events.
+        fses->addFolder(_userFolderPath, FileSystemEventStore::Status::Deleted);
 }
 
 void FileMonitoringManager::handleFileModificationEvent(const QString &userFilePath)

@@ -253,10 +253,18 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
 
     auto fsm = FileStorageManager::instance();
 
+    QJsonObject folderObject;
+
     for(const QString &folderPath : fses->folderList())
     {
-        responseBody.insert(folderPath, fses->statusOfFolder(folderPath));
+        FileSystemEventStore::Status status = fses->statusOfFolder(folderPath);
+        QJsonObject folderJson = fsm->getFolderJsonByUserPath(folderPath);
+
+        folderJson.insert("status", FileSystemEventStore::statusToString(status));
+        folderObject.insert(folderPath, folderJson);
     }
+
+    responseBody.insert("folders", folderObject);
 
     QMultiHash<QString, QJsonObject> fileMap;
 
