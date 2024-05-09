@@ -251,15 +251,39 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
         return response;
     }
 
+    auto fsm = FileStorageManager::instance();
+
     for(const QString &folderPath : fses->folderList())
     {
         responseBody.insert(folderPath, fses->statusOfFolder(folderPath));
     }
 
+    QMultiHash<QString, QJsonObject> fileMap;
+
     for(const QString &filePath : fses->fileList())
     {
-        responseBody.insert(filePath, fses->statusOfFile(filePath));
+        FileSystemEventStore::Status status = fses->statusOfFile(filePath);
+        QJsonObject fileJson = fsm->getFileJsonByUserPath(filePath);
+
+        fileJson.insert("status", FileSystemEventStore::statusToString(status));
+        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
+
+        fileMap.insert(folderJson[JsonKeys::Folder::UserFolderPath].toString(), fileJson);
     }
+
+    QJsonObject fileObject;
+
+    for(const QString &key : fileMap.keys())
+    {
+        QJsonArray fileArray;
+
+        for(const QJsonValue &value : fileMap.values(key))
+            fileArray.append(value.toObject());
+
+        fileObject.insert(key, fileArray);
+    }
+
+    responseBody.insert("files", fileObject);
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");

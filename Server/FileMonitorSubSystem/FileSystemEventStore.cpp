@@ -5,6 +5,34 @@
 
 QReadWriteLock FileSystemEventStore::lock;
 
+QString FileSystemEventStore::statusToString(Status status)
+{
+    QString result;
+
+    if(status == FileSystemEventStore::Status::Monitored)
+        result = "Monitored";
+
+    else if(status == FileSystemEventStore::Status::NewAdded)
+        result = "New Added";
+
+    else if(status == FileSystemEventStore::Status::Updated)
+        result = "Updated";
+
+    else if(status == FileSystemEventStore::Status::Renamed)
+        result = "Renamed";
+
+    else if(status == FileSystemEventStore::Status::Deleted)
+        result = "Deleted";
+
+    else if(status == FileSystemEventStore::Status::Missing)
+        result = "Missing";
+
+    else
+        result = "Inavlid";
+
+    return result;
+}
+
 FileSystemEventStore::FileSystemEventStore() {}
 
 void FileSystemEventStore::addFolder(const QString &path, Status status)

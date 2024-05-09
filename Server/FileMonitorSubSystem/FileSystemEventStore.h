@@ -20,6 +20,8 @@ public:
         Missing = 5
     };
 
+    static QString statusToString(Status status);
+
     FileSystemEventStore();
 
     void addFolder(const QString &path, Status status);
