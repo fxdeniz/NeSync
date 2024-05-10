@@ -260,6 +260,10 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
         FileSystemEventStore::Status status = fses->statusOfFolder(folderPath);
         QJsonObject folderJson = fsm->getFolderJsonByUserPath(folderPath);
 
+        folderJson.remove("isExist");
+        folderJson.remove("isFrozen");
+        folderJson.remove("childFolders");
+        folderJson.remove("childFiles");
         folderJson.insert("status", FileSystemEventStore::statusToString(status));
         folderObject.insert(folderPath, folderJson);
     }
@@ -273,6 +277,10 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
         FileSystemEventStore::Status status = fses->statusOfFile(filePath);
         QJsonObject fileJson = fsm->getFileJsonByUserPath(filePath);
 
+        fileJson.remove("isExist");
+        fileJson.remove("isFrozen");
+        fileJson.remove("maxVersionNumber");
+        fileJson.remove("versionList");
         fileJson.insert("status", FileSystemEventStore::statusToString(status));
         QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
 
