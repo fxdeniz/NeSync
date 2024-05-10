@@ -253,24 +253,27 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
 
     auto fsm = FileStorageManager::instance();
 
-    QJsonObject folderObject;
+    QJsonObject deletedFoldersObject;
 
     for(const QString &folderPath : fses->folderList())
     {
         FileSystemEventStore::Status status = fses->statusOfFolder(folderPath);
-        QJsonObject folderJson = fsm->getFolderJsonByUserPath(folderPath);
 
-        folderJson.remove("isExist");
-        folderJson.remove("isFrozen");
-        folderJson.remove("childFolders");
-        folderJson.remove("childFiles");
-        folderJson.insert("status", FileSystemEventStore::statusToString(status));
-        folderObject.insert(folderPath, folderJson);
+        if(status == FileSystemEventStore::Status::Deleted)
+        {
+            QJsonObject folderJson = fsm->getFolderJsonByUserPath(folderPath);
+
+            folderJson.remove("isExist");
+            folderJson.remove("isFrozen");
+            folderJson.remove("childFolders");
+            folderJson.remove("childFiles");
+            deletedFoldersObject.insert(folderPath, folderJson);
+        }
     }
 
-    responseBody.insert("folders", folderObject);
+    responseBody.insert("deletedFolders", deletedFoldersObject);
 
-    QMultiHash<QString, QJsonObject> fileMap;
+    QJsonObject updatedFilesObject, deletedFilesObject;
 
     for(const QString &filePath : fses->fileList())
     {
@@ -281,25 +284,28 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
         fileJson.remove("isFrozen");
         fileJson.remove("maxVersionNumber");
         fileJson.remove("versionList");
-        fileJson.insert("status", FileSystemEventStore::statusToString(status));
         QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
 
-        fileMap.insert(folderJson[JsonKeys::Folder::UserFolderPath].toString(), fileJson);
+        QString parentFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
+
+        if(status == FileSystemEventStore::Status::Updated)
+        {
+            QJsonArray parentFolderArray = updatedFilesObject[parentFolderPath].toArray();
+            parentFolderArray.append(fileJson);
+
+            updatedFilesObject.insert(parentFolderPath, parentFolderArray);
+        }
+        else if(status == FileSystemEventStore::Status::Deleted)
+        {
+            QJsonArray parentFolderArray = deletedFilesObject[parentFolderPath].toArray();
+            parentFolderArray.append(fileJson);
+
+            deletedFilesObject.insert(parentFolderPath, parentFolderArray);
+        }
     }
 
-    QJsonObject fileObject;
-
-    for(const QString &key : fileMap.keys())
-    {
-        QJsonArray fileArray;
-
-        for(const QJsonValue &value : fileMap.values(key))
-            fileArray.append(value.toObject());
-
-        fileObject.insert(key, fileArray);
-    }
-
-    responseBody.insert("files", fileObject);
+    responseBody.insert("updatedFiles", updatedFilesObject);
+    responseBody.insert("deletedFiles", deletedFilesObject);
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");
