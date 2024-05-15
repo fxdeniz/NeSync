@@ -37,7 +37,8 @@ public:
 private:
     QHash<QString, Status> folderMap;
     QHash<QString, Status> fileMap;
-    static QReadWriteLock lock;
+    static QReadWriteLock folderLock;
+    static QReadWriteLock fileLock;
 };
 
 #endif // FILESYSTEMEVENTSTORE_H
