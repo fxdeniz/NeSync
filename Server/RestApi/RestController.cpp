@@ -319,7 +319,8 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     auto fsm = FileStorageManager::instance();
 
-    QJsonArray folderList, fileList;
+    QStringList newFolderList;
+    QMultiHash<QString, QString> newFileMap;
 
     for(const QJsonValue &value : fsm->getActiveFolderList())
     {
@@ -341,7 +342,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
 
                 if(!isFolderPersists)
-                    folderList.append(path);
+                    newFolderList.append(path);
             }
             else if(info.isFile())
             {
@@ -349,13 +350,34 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
 
                 if(!isFilePersists)
-                    fileList.append(path);
+                {
+                    QFileInfo info(path);
+                    QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                    if(!parentPath.endsWith(QDir::separator()))
+                        parentPath.append(QDir::separator());
+
+                    newFileMap.insert(parentPath, path);
+                }
             }
         }
     }
 
-    responseBody.insert("folders", folderList);
-    responseBody.insert("files", fileList);
+    std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    responseBody.insert("newFolders", QJsonArray::fromStringList(newFolderList));
+
+    QJsonObject newFilesObject;
+
+    for(const QString &parentPath : newFileMap.keys())
+    {
+        QStringList files = newFileMap.values(parentPath);
+        newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
+    }
+
+    responseBody.insert("newFiles", newFilesObject);
 
     return responseBody;
 }
