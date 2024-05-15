@@ -51,6 +51,10 @@ int main(int argc, char *argv[])
         return restController.dumpFses(request);
     });
 
+    httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.newAddedList(request);
+    });
+
     quint16 targetPort = 1234; // Making this 0, means random port.
     quint16 port = httpServer.listen(QHostAddress::SpecialAddress::Any, targetPort);
     if (port)

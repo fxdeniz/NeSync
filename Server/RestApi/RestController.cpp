@@ -3,7 +3,9 @@
 #include "JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
 #include "FileMonitorSubSystem/FileMonitoringManager.h"
+
 #include <QJsonObject>
+#include <QDirIterator>
 #include <QJsonDocument>
 
 RestController::RestController(QObject *parent)
@@ -219,7 +221,6 @@ QHttpServerResponse RestController::startMonitoring(const QHttpServerRequest &re
     {
         QJsonObject folderJson = value.toObject();
 
-        QString symbolFolderPath = folderJson[JsonKeys::Folder::SymbolFolderPath].toString();
         QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
 
         fmm->addFolder(userFolderPath);
@@ -310,4 +311,51 @@ QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");
     return response;
+}
+
+QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonArray folderList, fileList;
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QDirIterator dirIterator(value[JsonKeys::Folder::UserFolderPath].toString(),
+                                 QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot,
+                                 QDirIterator::IteratorFlag::Subdirectories);
+
+        while (dirIterator.hasNext())
+        {
+            QString path = QDir::toNativeSeparators(dirIterator.next());
+            QFileInfo info = dirIterator.fileInfo();
+
+            if(info.isDir())
+            {
+                if(!path.endsWith(QDir::separator()))
+                    path.append(QDir::separator());
+
+                QJsonObject folderJson = fsm->getFolderJsonByUserPath(path);
+                bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
+
+                if(!isFolderPersists)
+                    folderList.append(path);
+            }
+            else if(info.isFile())
+            {
+                QJsonObject fileJson = fsm->getFileJsonByUserPath(path);
+                bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+
+                if(!isFilePersists)
+                    fileList.append(path);
+            }
+        }
+    }
+
+    responseBody.insert("folders", folderList);
+    responseBody.insert("files", fileList);
+
+    return responseBody;
 }

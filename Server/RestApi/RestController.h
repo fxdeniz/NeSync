@@ -20,6 +20,7 @@ public:
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
     QHttpServerResponse startMonitoring(const QHttpServerRequest& request);
     QHttpServerResponse dumpFses(const QHttpServerRequest& request);
+    QHttpServerResponse newAddedList(const QHttpServerRequest& request);
 
 signals:
 
