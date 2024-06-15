@@ -21,6 +21,7 @@ public:
     QHttpServerResponse startMonitoring(const QHttpServerRequest& request);
     QHttpServerResponse dumpFses(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
+    QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
 
 signals:
 

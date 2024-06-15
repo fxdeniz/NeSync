@@ -381,3 +381,60 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     return responseBody;
 }
+
+QHttpServerResponse RestController::updatedFileList(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    auto fsm = FileStorageManager::instance();
+
+    QMultiHash<QString, QString> fileMap;
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QDirIterator dirIterator(value[JsonKeys::Folder::UserFolderPath].toString(),
+                                 QDir::Filter::Files | QDir::Filter::NoDotAndDotDot);
+
+        while (dirIterator.hasNext())
+        {
+            QString path = QDir::toNativeSeparators(dirIterator.next());
+            QFileInfo info = dirIterator.fileInfo();
+
+            QJsonObject fileJson = fsm->getFileJsonByUserPath(path);
+
+            bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
+            bool isFileFrozen = fileJson[JsonKeys::File::IsFrozen].toBool();
+
+            if(isFilePersists && !isFileFrozen)
+            {
+                QString symbolPath = fileJson[JsonKeys::File::SymbolFilePath].toString();
+
+                qlonglong versionNumber = fileJson[JsonKeys::File::MaxVersionNumber].toInteger();
+                QJsonObject versionJson = fsm->getFileVersionJson(symbolPath, versionNumber);
+
+                QDateTime savedTimestamp = QDateTime::fromString(versionJson[JsonKeys::FileVersion::LastModifiedTimestamp].toString(),
+                                                                 Qt::DateFormat::ISODateWithMs);
+
+                QFileInfo info(path);
+                QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                QDateTime lastTimestamp = info.lastModified();
+
+                if(!parentPath.endsWith(QDir::separator()))
+                    parentPath.append(QDir::separator());
+
+                if(lastTimestamp != savedTimestamp)
+                    fileMap.insert(parentPath, info.fileName());
+            }
+        }
+    }
+
+    //TODO: add sorting by parentPath
+    for(const QString &parentPath : fileMap.keys())
+    {
+        QStringList files = fileMap.values(parentPath);
+        responseBody.insert(parentPath, QJsonArray::fromStringList(files));
+    }
+
+    return responseBody;
+}
