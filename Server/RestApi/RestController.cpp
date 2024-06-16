@@ -449,7 +449,6 @@ QHttpServerResponse RestController::updatedFileList(const QHttpServerRequest &re
         while (dirIterator.hasNext())
         {
             QString path = QDir::toNativeSeparators(dirIterator.next());
-            QFileInfo info = dirIterator.fileInfo();
 
             QJsonObject fileJson = fsm->getFileJsonByUserPath(path);
 
