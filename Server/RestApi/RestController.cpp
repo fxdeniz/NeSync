@@ -382,6 +382,57 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
     return responseBody;
 }
 
+QHttpServerResponse RestController::deletedList(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    auto fsm = FileStorageManager::instance();
+
+    QStringList folderList;
+    QMultiHash<QString, QString> fileMap;
+
+    for(const QJsonValue &folderObject : fsm->getActiveFolderList())
+    {
+        QString folderPath = folderObject[JsonKeys::Folder::UserFolderPath].toString();
+        QFileInfo folderInfo(folderPath);
+        bool isFolderFrozen = folderObject[JsonKeys::Folder::IsFrozen].toBool();
+
+        if(!folderInfo.exists() && !isFolderFrozen)
+            folderList.append(folderPath);
+
+        QJsonObject fatFolderJson = fsm->getFolderJsonByUserPath(folderPath, true);
+
+        for(const QJsonValue &fileObject : fatFolderJson[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QString filePath = fileObject[JsonKeys::File::UserFilePath].toString();
+            QString fileName = fileObject[JsonKeys::File::FileName].toString();
+            QFileInfo fileInfo(filePath);
+            bool isFileFrozen = fileObject[JsonKeys::File::IsFrozen].toBool();
+
+            if(!fileInfo.exists() && !isFileFrozen)
+                fileMap.insert(folderPath, fileName);
+        }
+    }
+
+    std::sort(folderList.begin(), folderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    responseBody.insert("folders", QJsonArray::fromStringList(folderList));
+
+    QJsonObject newFilesObject;
+
+    for(const QString &parentPath : fileMap.keys())
+    {
+        QStringList files = fileMap.values(parentPath);
+        newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
+    }
+
+    responseBody.insert("files", newFilesObject);
+
+    return responseBody;
+}
+
 QHttpServerResponse RestController::updatedFileList(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;

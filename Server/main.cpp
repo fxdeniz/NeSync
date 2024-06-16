@@ -55,6 +55,10 @@ int main(int argc, char *argv[])
         return restController.newAddedList(request);
     });
 
+    httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.deletedList(request);
+    });
+
     httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
         return restController.updatedFileList(request);
     });
