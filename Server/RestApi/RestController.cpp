@@ -321,6 +321,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     QStringList newFolderList;
     QMultiHash<QString, QString> newFileMap;
+    QSet<QString> visitedSet;
 
     for(const QJsonValue &value : fsm->getActiveFolderList())
     {
@@ -341,23 +342,26 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 QJsonObject folderJson = fsm->getFolderJsonByUserPath(path);
                 bool isFolderPersists = folderJson[JsonKeys::IsExist].toBool();
 
-                if(!isFolderPersists)
+                if(!isFolderPersists && !visitedSet.contains(path))
+                {
                     newFolderList.append(path);
+                    visitedSet.insert(path);
+                }
             }
             else if(info.isFile())
             {
                 QJsonObject fileJson = fsm->getFileJsonByUserPath(path);
                 bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
 
-                if(!isFilePersists)
+                if(!isFilePersists && !visitedSet.contains(path))
                 {
-                    QFileInfo info(path);
                     QString parentPath = QDir::toNativeSeparators(info.absolutePath());
 
                     if(!parentPath.endsWith(QDir::separator()))
                         parentPath.append(QDir::separator());
 
-                    newFileMap.insert(parentPath, path);
+                    newFileMap.insert(parentPath, info.fileName());
+                    visitedSet.insert(path);
                 }
             }
         }
@@ -367,7 +371,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         return s1.length() < s2.length();
     });
 
-    responseBody.insert("newFolders", QJsonArray::fromStringList(newFolderList));
+    responseBody.insert("folders", QJsonArray::fromStringList(newFolderList));
 
     QJsonObject newFilesObject;
 
@@ -377,7 +381,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
     }
 
-    responseBody.insert("newFiles", newFilesObject);
+    responseBody.insert("files", newFilesObject);
 
     return responseBody;
 }
