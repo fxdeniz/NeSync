@@ -6,7 +6,6 @@
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
 
-#include "FileMonitorSubSystem/FileSystemEventStore.h"
 
 class RestController : public QObject
 {
@@ -18,17 +17,12 @@ public:
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
-    QHttpServerResponse startMonitoring(const QHttpServerRequest& request);
-    QHttpServerResponse dumpFses(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
 
 signals:
 
-private:
-    QThread *fileMonitorThread;
-    FileSystemEventStore *fses;
 };
 
 #endif // RESTCONTROLLER_H

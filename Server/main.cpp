@@ -43,14 +43,6 @@ int main(int argc, char *argv[])
         return restController.getFolderContent(request);
     });
 
-    httpServer.route("/startMonitoring", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.startMonitoring(request);
-    });
-
-    httpServer.route("/dumpFses", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.dumpFses(request);
-    });
-
     httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
         return restController.newAddedList(request);
     });

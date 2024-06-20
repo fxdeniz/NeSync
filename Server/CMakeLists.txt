@@ -11,15 +11,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql Concurrent HttpServer)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql Concurrent HttpServer)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql HttpServer)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer)
 
 include_directories(Utility/)
 include_directories(FileStorageSubSystem/)
 include_directories(FileStorageSubSystem/ORM/)
-include_directories(FileMonitorSubSystem/)
 
-add_subdirectory(Dependency/efsw)
 
 set(PROJECT_SOURCES
   main.cpp
@@ -52,15 +50,6 @@ set(PROJECT_SOURCES
       FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
   #
 
-  # FileMonitoringSubSystem
-      FileMonitorSubSystem/FileSystemEventListener.h
-      FileMonitorSubSystem/FileSystemEventListener.cpp
-      FileMonitorSubSystem/FileSystemEventStore.h
-      FileMonitorSubSystem/FileSystemEventStore.cpp
-      FileMonitorSubSystem/FileMonitoringManager.h
-      FileMonitorSubSystem/FileMonitoringManager.cpp
-  #
-
   # Rest Controllers
       RestApi/RestController.h
       RestApi/RestController.cpp
@@ -82,9 +71,7 @@ endif()
 
 target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Sql
-                                    PRIVATE Qt${QT_VERSION_MAJOR}::Concurrent
-                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer
-                                    efsw)
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer)
 
 # This version info is required for MacOS compilation
 # Windows compilation uses /Resources/res_win.rc

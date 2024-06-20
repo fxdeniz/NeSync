@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async (event) => {
-    console.log(await fetchJSON('http://localhost:1234/startMonitoring'));
+
 });
 
 

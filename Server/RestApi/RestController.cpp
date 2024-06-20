@@ -2,7 +2,6 @@
 
 #include "JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
-#include "FileMonitorSubSystem/FileMonitoringManager.h"
 
 #include <QJsonObject>
 #include <QDirIterator>
@@ -11,8 +10,6 @@
 RestController::RestController(QObject *parent)
     : QObject{parent}
 {
-    fileMonitorThread = nullptr;
-    fses = nullptr;
 }
 
 QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& request)
@@ -195,120 +192,6 @@ QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &r
     QJsonObject responseBody = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
 
     QHttpServerResponse response(responseBody);
-    response.addHeader("Access-Control-Allow-Origin", "*");
-    return response;
-}
-
-QHttpServerResponse RestController::startMonitoring(const QHttpServerRequest &request)
-{
-    if(fileMonitorThread != nullptr)
-    {
-        fileMonitorThread->quit();
-        fileMonitorThread->wait();
-        delete fileMonitorThread;
-        fileMonitorThread = nullptr;
-    }
-
-    fileMonitorThread = new QThread();
-    fses = new FileSystemEventStore();
-
-    QJsonObject responseBody;
-    FileStorageManager *fsm = FileStorageManager::rawInstance();
-
-    FileMonitoringManager *fmm = new FileMonitoringManager(fsm, fses);
-
-    for(const QJsonValue &value : fsm->getActiveFolderList())
-    {
-        QJsonObject folderJson = value.toObject();
-
-        QString userFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
-
-        fmm->addFolder(userFolderPath);
-    }
-
-
-    // TODO: Do the signal slot connections for fmm here
-    QObject::connect(fileMonitorThread, &QThread::finished, fmm, &QObject::deleteLater);
-
-    fmm->moveToThread(fileMonitorThread);
-    fileMonitorThread->start();
-
-    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
-    response.addHeader("Access-Control-Allow-Origin", "*");
-    return response;
-
-}
-
-QHttpServerResponse RestController::dumpFses(const QHttpServerRequest &request)
-{
-    QJsonObject responseBody;
-
-    if(fses == nullptr)
-    {
-        QString errorMessage = "Fses is null";
-        QHttpServerResponse response(errorMessage, QHttpServerResponse::StatusCode::NotImplemented);
-        response.addHeader("Access-Control-Allow-Origin", "*");
-
-        return response;
-    }
-
-    auto fsm = FileStorageManager::instance();
-
-    QJsonObject deletedFoldersObject;
-
-    for(const QString &folderPath : fses->folderList())
-    {
-        FileSystemEventStore::Status status = fses->statusOfFolder(folderPath);
-
-        if(status == FileSystemEventStore::Status::Deleted)
-        {
-            QJsonObject folderJson = fsm->getFolderJsonByUserPath(folderPath);
-
-            folderJson.remove("isExist");
-            folderJson.remove("isFrozen");
-            folderJson.remove("childFolders");
-            folderJson.remove("childFiles");
-            deletedFoldersObject.insert(folderPath, folderJson);
-        }
-    }
-
-    responseBody.insert("deletedFolders", deletedFoldersObject);
-
-    QJsonObject updatedFilesObject, deletedFilesObject;
-
-    for(const QString &filePath : fses->fileList())
-    {
-        FileSystemEventStore::Status status = fses->statusOfFile(filePath);
-        QJsonObject fileJson = fsm->getFileJsonByUserPath(filePath);
-
-        fileJson.remove("isExist");
-        fileJson.remove("isFrozen");
-        fileJson.remove("maxVersionNumber");
-        fileJson.remove("versionList");
-        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(fileJson[JsonKeys::File::SymbolFolderPath].toString());
-
-        QString parentFolderPath = folderJson[JsonKeys::Folder::UserFolderPath].toString();
-
-        if(status == FileSystemEventStore::Status::Updated)
-        {
-            QJsonArray parentFolderArray = updatedFilesObject[parentFolderPath].toArray();
-            parentFolderArray.append(fileJson);
-
-            updatedFilesObject.insert(parentFolderPath, parentFolderArray);
-        }
-        else if(status == FileSystemEventStore::Status::Deleted)
-        {
-            QJsonArray parentFolderArray = deletedFilesObject[parentFolderPath].toArray();
-            parentFolderArray.append(fileJson);
-
-            deletedFilesObject.insert(parentFolderPath, parentFolderArray);
-        }
-    }
-
-    responseBody.insert("updatedFiles", updatedFilesObject);
-    responseBody.insert("deletedFiles", deletedFilesObject);
-
-    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     response.addHeader("Access-Control-Allow-Origin", "*");
     return response;
 }
