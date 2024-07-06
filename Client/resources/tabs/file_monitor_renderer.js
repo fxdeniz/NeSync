@@ -53,45 +53,66 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
 
-    let accordionItemHeader = document.createElement('h2');
-    accordionItemHeader.classList.add('accordion-header');
+    if (document.getElementById('accordion-tree') !== null)
+      document.getElementById('accordion-tree').remove();
 
-    let accordionButton = document.createElement('button');
-    accordionButton.classList.add('accordion-button');
-    accordionButton.setAttribute('type', 'button');
-    accordionButton.setAttribute('data-bs-toggle', 'collapse');
-    accordionButton.setAttribute('data-bs-target', '#collapseTwo');
-    accordionButton.setAttribute('aria-expanded', 'true');
-    accordionButton.setAttribute('aria-controls', 'collapseTwo');
-    accordionButton.textContent = 'Dynamic Button';
-
-    accordionItemHeader.appendChild(accordionButton);
-
-    let accordionBodyTopDiv = document.createElement('div');
-    accordionBodyTopDiv.setAttribute('id', 'collapseTwo');
-    accordionBodyTopDiv.classList.add('accordion-collapse');
-    accordionBodyTopDiv.classList.add('collapse');
-    accordionBodyTopDiv.classList.add('show');
-    accordionBodyTopDiv.setAttribute('data-bs-parent', '#dynamicExample');
-
-    let accordionBodyDiv = document.createElement('div');
-    accordionBodyDiv.classList.add('accordion-body');
-    accordionBodyDiv.textContent = 'Dynamic Text Here';
-
-    accordionBodyTopDiv.appendChild(accordionBodyDiv);
-
-    let accordionItem = document.createElement('div');
-    accordionItem.classList.add('accordion-item');
-    accordionItem.appendChild(accordionItemHeader);
-    accordionItem.appendChild(accordionBodyTopDiv);
+    let collapseIndex = 0;
 
     let accordion = document.createElement('div');
     accordion.classList.add('accordion');
-    accordion.setAttribute('id', 'dynamicExample');
-    accordion.appendChild(accordionItem);
+    accordion.setAttribute('id', `accordion-tree`);
 
     document.getElementById('content-container').appendChild(accordion);
 
+    for(folderPath in tree) {
+
+      let accordionItemHeader = document.createElement('h2');
+      accordionItemHeader.classList.add('accordion-header');
+  
+      let accordionButton = document.createElement('button');
+      accordionButton.classList.add('accordion-button');
+      accordionButton.setAttribute('type', 'button');
+      accordionButton.setAttribute('data-bs-toggle', 'collapse');
+      accordionButton.setAttribute('data-bs-target', `#collapse${collapseIndex}`);
+      accordionButton.setAttribute('aria-expanded', 'true');
+      accordionButton.setAttribute('aria-controls', `collapse${collapseIndex}`);
+      accordionButton.textContent = folderPath;
+  
+      accordionItemHeader.appendChild(accordionButton);
+  
+      let accordionBodyTopDiv = document.createElement('div');
+      accordionBodyTopDiv.setAttribute('id', `collapse${collapseIndex}`);
+      accordionBodyTopDiv.classList.add('accordion-collapse');
+      accordionBodyTopDiv.classList.add('collapse');
+      accordionBodyTopDiv.classList.add('show');
+      accordionBodyTopDiv.setAttribute('data-bs-parent', `#dynamic${collapseIndex}`);
+  
+      let accordionBodyDiv = document.createElement('div');
+      accordionBodyDiv.classList.add('accordion-body');
+      accordionBodyDiv.textContent = 'Dynamic Text Here';
+
+      if(tree[folderPath].length !== 0) {
+        let ulItem = document.createElement('ul');
+        accordionBodyDiv.appendChild(ulItem);
+
+        tree[folderPath].forEach(item => {let liItem = document.createElement('li');
+                                          liItem.textContent = item;
+                                          ulItem.appendChild(liItem);
+        });
+      }
+
+      accordionBodyTopDiv.appendChild(accordionBodyDiv);
+  
+      let accordionItem = document.createElement('div');
+      accordionItem.classList.add('accordion-item');
+      accordionItem.appendChild(accordionItemHeader);
+      accordionItem.appendChild(accordionBodyTopDiv);
+  
+      accordion.appendChild(accordionItem);
+  
+      collapseIndex += 1;
+    }
+    
   });
 
 });
