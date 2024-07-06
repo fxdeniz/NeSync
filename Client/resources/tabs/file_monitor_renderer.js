@@ -10,26 +10,32 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);
     console.log(`updated: ${JSON.stringify(updatedJson, null, 2)}`);
 
+    let treeStatus = {};
     let folderPathSet = new Set();
 
     for(currentFolder of newAddedJson.folders) {
       folderPathSet.add(currentFolder);
+      treeStatus[currentFolder] = "NEW";
     }
 
     for(currentFolder in newAddedJson.files) {
       folderPathSet.add(currentFolder);
+      newAddedJson.files[currentFolder].forEach(fileName => {treeStatus[currentFolder + fileName] = "NEW"});
     }
 
     for(currentFolder of deletedJson.folders) {
       folderPathSet.add(currentFolder);
+      treeStatus[currentFolder] = "DELETED";
     }
 
     for(currentFolder in deletedJson.files) {
       folderPathSet.add(currentFolder);
+      deletedJson.files[currentFolder].forEach(fileName => {treeStatus[currentFolder + fileName] = "DELETED"});
     }
 
     Object.keys(updatedJson).forEach(key => {
       folderPathSet.add(key);
+      updatedJson[key].forEach(fileName => {treeStatus[key + fileName] = "UPDATED"});
     });
 
     let folderPathList = Array.from(folderPathSet);
@@ -52,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     }
 
     console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
+    console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
 
     if (document.getElementById('accordion-tree') !== null)
       document.getElementById('accordion-tree').remove();
@@ -76,8 +83,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       accordionButton.setAttribute('data-bs-target', `#collapse${collapseIndex}`);
       accordionButton.setAttribute('aria-expanded', 'true');
       accordionButton.setAttribute('aria-controls', `collapse${collapseIndex}`);
-      accordionButton.textContent = folderPath;
-  
+
+      if(folderPath in treeStatus)
+        accordionButton.textContent = `${folderPath} (${treeStatus[folderPath].toLowerCase()})`;
+      else 
+        accordionButton.textContent = folderPath;
+
       accordionItemHeader.appendChild(accordionButton);
   
       let accordionBodyTopDiv = document.createElement('div');
@@ -89,15 +100,19 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   
       let accordionBodyDiv = document.createElement('div');
       accordionBodyDiv.classList.add('accordion-body');
-      accordionBodyDiv.textContent = 'Dynamic Text Here';
 
       if(tree[folderPath].length !== 0) {
         let ulItem = document.createElement('ul');
         accordionBodyDiv.appendChild(ulItem);
 
-        tree[folderPath].forEach(item => {let liItem = document.createElement('li');
-                                          liItem.textContent = item;
-                                          ulItem.appendChild(liItem);
+        tree[folderPath].forEach(fileName => {let liItem = document.createElement('li');
+
+                                              if(folderPath + fileName in treeStatus)
+                                                liItem.textContent = `${fileName} (${treeStatus[folderPath + fileName].toLowerCase()})`;
+                                              else
+                                                liItem.textContent = fileName;
+
+                                              ulItem.appendChild(liItem);
         });
       }
 
