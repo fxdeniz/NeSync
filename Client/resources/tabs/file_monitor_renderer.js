@@ -101,7 +101,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       let accordionBodyDiv = document.createElement('div');
       accordionBodyDiv.classList.add('accordion-body');
 
-      if(tree[folderPath].length !== 0) {
+      if(tree[folderPath].length === 0)
+        accordionBodyDiv.textContent = 'No files in this folder.';
+      else {
         let ulItem = document.createElement('ul');
         accordionBodyDiv.appendChild(ulItem);
 
