@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src http://localhost:*;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src http: https: data:; connect-src http://localhost:*;">
     <link href="../bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="../bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
     <script src="./file_monitor_renderer.js" defer></script>
@@ -24,6 +24,22 @@
 
     <div id="content-container" class="container-fluid px-3 mt-3">
       <button id="button-refresh" type="button" class="btn btn-primary">Refresh</button>
+      
+      <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Accordion Item #1
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              content here
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </body>
 </html>
