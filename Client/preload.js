@@ -2,7 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron/renderer');
 
 contextBridge.exposeInMainWorld('router', {
   routeToFileExplorer: () => ipcRenderer.send('route:FileExplorer'),
-  routeToFileMonitor: () => ipcRenderer.send('route:FileMonitor')
+  routeToFileMonitor: () => ipcRenderer.send('route:FileMonitor'),
+  routeToSaveChanges: () => ipcRenderer.send('route:SaveChanges')
 });
 
 contextBridge.exposeInMainWorld('fileExplorerApi', {
