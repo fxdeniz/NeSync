@@ -193,7 +193,7 @@ QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &r
     return response;
 }
 
-QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+QHttpServerResponse RestController::newAddedListOld(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
 
@@ -245,6 +245,111 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 }
             }
         }
+    }
+
+    std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    responseBody.insert("folders", QJsonArray::fromStringList(newFolderList));
+
+    QJsonObject newFilesObject;
+
+    for(const QString &parentPath : newFileMap.keys())
+    {
+        QStringList files = newFileMap.values(parentPath);
+        newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
+    }
+
+    responseBody.insert("files", newFilesObject);
+
+    return responseBody;
+}
+
+QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    auto fsm = FileStorageManager::instance();
+    QSet<QString> existingFolderSet, existingFileSet;
+    QStringList existingFolderList;
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString symbolPath = value[JsonKeys::Folder::SymbolFolderPath].toString();
+        QString userPath = value[JsonKeys::Folder::UserFolderPath].toString();
+
+        existingFolderSet.insert(userPath);
+        existingFolderList.append(userPath);
+
+        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolPath, true);
+
+        for(const QJsonValue &file : folderJson[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QString userFilePath = file[JsonKeys::File::UserFilePath].toString();
+            existingFileSet.insert(userFilePath);
+        }
+    }
+
+    std::sort(existingFolderList.begin(), existingFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+
+    QStringList newFolderList;
+    QMultiHash<QString, QString> newFileMap;
+
+    for(const QString &value : existingFolderList)
+    {
+        QDirIterator dirIterator(value,
+                                 QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot,
+                                 QDirIterator::IteratorFlag::Subdirectories);
+
+        while (dirIterator.hasNext())
+        {
+            QString path = QDir::toNativeSeparators(dirIterator.next());
+
+            // MacOS normalization
+            //https://ss64.com/mac/syntax-filenames.html
+            // TODO: Add if condition to check whether running MacOS
+            path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+            QFileInfo info = dirIterator.fileInfo();
+
+            if(info.isDir() && !path.endsWith(QDir::separator()))
+                path.append(QDir::separator());
+
+            if(!existingFolderSet.contains(path) && !existingFileSet.contains(path))
+            {
+                qDebug() << "new = " << path;
+
+                if(info.isDir())
+                    newFolderList.append(path);
+                else if(info.isFile())
+                {
+                    QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                    if(!parentPath.endsWith(QDir::separator()))
+                        parentPath.append(QDir::separator());
+
+                    newFileMap.insert(parentPath, info.fileName());
+                }
+            }
+        }
+    }
+
+    qDebug() << "";
+    qDebug() << "existing folders: ";
+    for(const QString &value : existingFolderList)
+    {
+        qDebug() << value;
+    }
+
+    qDebug() << "";
+    qDebug() << "existing files: ";
+    for(const QString &value : existingFileSet)
+    {
+        qDebug() << value;
     }
 
     std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
