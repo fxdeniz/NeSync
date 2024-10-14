@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QDirIterator>
 #include <QJsonDocument>
+#include <QOperatingSystemVersion>
 
 RestController::RestController(QObject *parent)
     : QObject{parent}
@@ -311,8 +312,8 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
             // MacOS normalization
             //https://ss64.com/mac/syntax-filenames.html
-            // TODO: Add if condition to check whether running MacOS
-            path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+            if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
 
             QFileInfo info = dirIterator.fileInfo();
 
@@ -321,8 +322,6 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
             if(!existingFolderSet.contains(path) && !existingFileSet.contains(path))
             {
-                qDebug() << "new = " << path;
-
                 if(info.isDir())
                     newFolderList.append(path);
                 else if(info.isFile())
@@ -336,20 +335,6 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 }
             }
         }
-    }
-
-    qDebug() << "";
-    qDebug() << "existing folders: ";
-    for(const QString &value : existingFolderList)
-    {
-        qDebug() << value;
-    }
-
-    qDebug() << "";
-    qDebug() << "existing files: ";
-    for(const QString &value : existingFileSet)
-    {
-        qDebug() << value;
     }
 
     std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
