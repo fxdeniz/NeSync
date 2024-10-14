@@ -17,7 +17,8 @@ public:
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedListOld(const QHttpServerRequest& request);
+    QHttpServerResponse newAddedList_V1(const QHttpServerRequest& request);
+    QHttpServerResponse newAddedList_V2(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);

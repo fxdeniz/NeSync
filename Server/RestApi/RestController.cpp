@@ -209,7 +209,7 @@ QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &r
     return response;
 }
 
-QHttpServerResponse RestController::newAddedListOld(const QHttpServerRequest &request)
+QHttpServerResponse RestController::newAddedList_V1(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
 
@@ -282,7 +282,7 @@ QHttpServerResponse RestController::newAddedListOld(const QHttpServerRequest &re
     return responseBody;
 }
 
-QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+QHttpServerResponse RestController::newAddedList_V2(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
 
@@ -352,6 +352,135 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         }
     }
 
+    std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    responseBody.insert("folders", QJsonArray::fromStringList(newFolderList));
+
+    QJsonObject newFilesObject;
+
+    for(const QString &parentPath : newFileMap.keys())
+    {
+        QStringList files = newFileMap.values(parentPath);
+        newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
+    }
+
+    responseBody.insert("files", newFilesObject);
+
+    return responseBody;
+}
+
+// Version 3, only visits each folder once.
+QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody;
+
+    auto fsm = FileStorageManager::instance();
+    QSet<QString> existingFolderSet, existingFileSet;
+    QStringList existingFolderList;
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString symbolPath = value[JsonKeys::Folder::SymbolFolderPath].toString();
+        QString userPath = value[JsonKeys::Folder::UserFolderPath].toString();
+
+        existingFolderSet.insert(userPath);
+        existingFolderList.append(userPath);
+
+        QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolPath, true);
+
+        for(const QJsonValue &file : folderJson[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QString userFilePath = file[JsonKeys::File::UserFilePath].toString();
+            existingFileSet.insert(userFilePath);
+        }
+    }
+
+    std::sort(existingFolderList.begin(), existingFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+
+    QStringList newRootFolderList;
+
+    for(const QString &value : existingFolderList)
+    {
+        QDirIterator dirIterator(value, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+
+        // TODO: remove isDir() checks inside this loop.
+        while (dirIterator.hasNext())
+        {
+            QString path = QDir::toNativeSeparators(dirIterator.next());
+
+            // MacOS normalization
+            //https://ss64.com/mac/syntax-filenames.html
+            if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+            QFileInfo info = dirIterator.fileInfo();
+
+            if(info.isDir() && !path.endsWith(QDir::separator()))
+                path.append(QDir::separator());
+
+            if(info.isDir() && !existingFolderSet.contains(path))
+                newRootFolderList.append(path);
+        }
+    }
+
+    // TODO: remove this sorting if possible.
+    std::sort(newRootFolderList.begin(), newRootFolderList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    QStringList newFolderList;
+    QSet<QString> visitedFolderSet;
+    QMultiHash<QString, QString> newFileMap;
+
+    for(const QString &value : newRootFolderList)
+    {
+        QDirIterator dirIterator(value,
+                                 QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot,
+                                 QDirIterator::IteratorFlag::Subdirectories);
+
+        while (dirIterator.hasNext())
+        {
+            QString path = QDir::toNativeSeparators(dirIterator.next());
+
+            // MacOS normalization
+            //https://ss64.com/mac/syntax-filenames.html
+            if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+            QFileInfo info = dirIterator.fileInfo();
+
+            if(info.isDir() && !path.endsWith(QDir::separator()))
+                path.append(QDir::separator());
+
+            if(!visitedFolderSet.contains(path) && !existingFolderSet.contains(path) && !existingFileSet.contains(path))
+            {
+                if(info.isDir())
+                {
+                    newFolderList.append(path);
+                    visitedFolderSet.insert(path);
+                }
+                else if(info.isFile())
+                {
+                    QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                    if(!parentPath.endsWith(QDir::separator()))
+                        parentPath.append(QDir::separator());
+
+                    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                        parentPath = parentPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+                    newFileMap.insert(parentPath, info.fileName());
+                }
+            }
+        }
+    }
+
+    // TODO: Remove this sorting, because data comes already sorted from previous loop.
     std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
         return s1.length() < s2.length();
     });
