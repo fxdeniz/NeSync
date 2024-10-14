@@ -47,6 +47,12 @@ QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& r
     QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
     QString userFolderPath = jsonObject["userFolderPath"].toString();
 
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+    {
+        symbolFolderPath = symbolFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+        userFolderPath = userFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+    }
+
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
     qDebug() << "userFolderPath = " << userFolderPath;
 
@@ -100,6 +106,12 @@ QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &req
     QString pathToFile = jsonObject["pathToFile"].toString();
     QString description = jsonObject["description"].toString();
     bool isFrozen = jsonObject["isFrozen"].toBool();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+    {
+        symbolFolderPath = symbolFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+        pathToFile = pathToFile.normalized(QString::NormalizationForm::NormalizationForm_D);
+    }
 
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
     qDebug() << "pathToFile = " << pathToFile;
@@ -159,6 +171,9 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
 
     QString pathToFile = jsonObject["pathToFile"].toString();
     QString description = jsonObject["description"].toString();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+        pathToFile = pathToFile.normalized(QString::NormalizationForm::NormalizationForm_D);
 
     qDebug() << "pathToFile = " << pathToFile;
     qDebug() << "description = " << description;
