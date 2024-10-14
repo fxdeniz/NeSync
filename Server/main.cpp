@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     QDir().mkpath(storagePath);
     AppConfig().setStorageFolderPath(storagePath);
 
-    QTcpServer *tcpServer = new QTcpServer();
+    QTcpServer tcpServer;
     QHttpServer httpServer;
     RestController restController;
 
@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.
-    tcpServer->listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
+    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
 
-    if (tcpServer->isListening() && httpServer.bind(tcpServer))
+    if (tcpServer.isListening() && httpServer.bind(&tcpServer))
         qDebug() << "running on = " << "localhost:" + QString::number(targetPort);
     else
     {
