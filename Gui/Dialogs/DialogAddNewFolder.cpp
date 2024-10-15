@@ -9,6 +9,7 @@
 #include <QStandardPaths>
 #include <QHashIterator>
 #include <QStorageInfo>
+#include <QDirIterator>
 #include <QFileDialog>
 
 DialogAddNewFolder::DialogAddNewFolder(QWidget *parent) :

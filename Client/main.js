@@ -16,6 +16,13 @@ function routeToFileMonitor (event) {
 }
 
 
+function routeToSaveChanges (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/tabs/save_changes.html'));
+}
+
+
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
@@ -84,6 +91,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
+  ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {

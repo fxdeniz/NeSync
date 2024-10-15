@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QDebug>
+#include <QTcpServer>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QStandardPaths>
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
     QDir().mkpath(storagePath);
     AppConfig().setStorageFolderPath(storagePath);
 
+    QTcpServer tcpServer;
     QHttpServer httpServer;
     RestController restController;
 
@@ -56,9 +58,10 @@ int main(int argc, char *argv[])
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.
-    quint16 port = httpServer.listen(QHostAddress::SpecialAddress::Any, targetPort);
-    if (port)
-        qDebug() << "running on = " << "localhost:" + QString::number(port);
+    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
+
+    if (tcpServer.isListening() && httpServer.bind(&tcpServer))
+        qDebug() << "running on = " << "localhost:" + QString::number(targetPort);
     else
     {
         qWarning() << QCoreApplication::translate("QHttpServerExample",

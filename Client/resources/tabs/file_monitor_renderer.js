@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async (event) => {
   let buttonRefresh = document.getElementById(`button-refresh`);
+  let buttonSave = document.getElementById('button-save');
 
   buttonRefresh.addEventListener(`click`, async (event) => {
     let newAddedJson = await fetchJSON(`http://localhost:1234/newAddedList`);
@@ -130,6 +131,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       collapseIndex += 1;
     }
     
+  });
+
+  buttonSave.addEventListener('click', async (event) => {
+    window.router.routeToSaveChanges();
   });
 
 });
