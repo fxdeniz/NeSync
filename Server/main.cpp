@@ -45,6 +45,10 @@ int main(int argc, char *argv[])
         return restController.getFolderContent(request);
     });
 
+    httpServer.route("/getFolderContentByUserPath", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.getFolderContentByUserPath(request);
+    });
+
     httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
         return restController.newAddedList(request);
     });
