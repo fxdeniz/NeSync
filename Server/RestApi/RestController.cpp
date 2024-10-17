@@ -221,6 +221,18 @@ QHttpServerResponse RestController::getFolderContentByUserPath(const QHttpServer
     return response;
 }
 
+QHttpServerResponse RestController::getFileContentByUserPath(const QHttpServerRequest &request)
+{
+    QString userFilePath = request.query().queryItemValue("userFilePath");
+    qDebug() << "userFilePath = " << userFilePath;
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject responseBody = fsm->getFileJsonByUserPath(userFilePath, true);
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 QHttpServerResponse RestController::newAddedList_V1(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
