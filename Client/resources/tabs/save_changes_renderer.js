@@ -56,6 +56,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
     console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
+
+    for(currentFolder in deletedJson.files) {
+      deletedJson.files[currentFolder].forEach(async fileName => {
+        let fileJson = await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${currentFolder + fileName}`);
+        console.log(`file ${fileJson.symbolFilePath} will be deleted`);
+      });
+    }
 });
 
 
@@ -74,4 +81,4 @@ async function fetchJSON(targetUrl) {
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
     }
-  }
+}
