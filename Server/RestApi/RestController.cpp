@@ -480,6 +480,8 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         }
     }
 
+    newFolderList.append(newRootFolderList); // Append roots missed in the previous for loop.
+
     // TODO: Remove this sorting, because data comes already sorted from previous loop.
     std::sort(newFolderList.begin(), newFolderList.end(), [](const QString &s1, const QString &s2) {
         return s1.length() < s2.length();
