@@ -455,10 +455,11 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
 
     QStringList newRootFolderList;
+    QMultiHash<QString, QString> newFileMap;
 
     for(const QString &value : existingFolderList)
     {
-        QDirIterator dirIterator(value, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+        QDirIterator dirIterator(value, QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
 
         // TODO: remove isDir() checks inside this loop.
         while (dirIterator.hasNext())
@@ -477,6 +478,18 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
             if(info.isDir() && !existingFolderSet.contains(path))
                 newRootFolderList.append(path);
+            else if(info.isFile() && !existingFileSet.contains(path))
+            {
+                QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                if(!parentPath.endsWith(QDir::separator()))
+                    parentPath.append(QDir::separator());
+
+                if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                    parentPath = parentPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+                newFileMap.insert(parentPath, info.fileName());
+            }
         }
     }
 
@@ -487,7 +500,6 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     QStringList newFolderList;
     QSet<QString> visitedFolderSet;
-    QMultiHash<QString, QString> newFileMap;
 
     for(const QString &value : newRootFolderList)
     {
