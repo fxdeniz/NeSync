@@ -59,14 +59,16 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for(currentFolder in deletedJson.files) {
       deletedJson.files[currentFolder].forEach(async fileName => {
-        const fileJson = await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${currentFolder + fileName}`);
-        const response = await fetch(`http://localhost:1234/deleteFile?symbolPath=${fileJson.symbolFilePath}`, {
-          method: 'DELETE',
-        });
+        if(!deletedJson.folders.includes(currentFolder))
+        {
+          const fileJson = await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${currentFolder + fileName}`);
+          const response = await fetch(`http://localhost:1234/deleteFile?symbolPath=${fileJson.symbolFilePath}`, {
+            method: 'DELETE',
+          });
 
-        const result = await response.json();
-
-        console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);
+          const result = await response.json();
+          console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);  
+        }
       });
     }
 });
