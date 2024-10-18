@@ -197,6 +197,20 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
     return response;
 }
 
+QHttpServerResponse RestController::deleteFolder(const QHttpServerRequest &request)
+{
+    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+
+    auto fsm = FileStorageManager::instance();
+    bool result = fsm->deleteFolder(symbolFolderPath);
+
+    QJsonObject responseBody {{"isDeleted", result}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 QHttpServerResponse RestController::deleteFile(const QHttpServerRequest &request)
 {
     QString symbolFilePath = request.query().queryItemValue("symbolPath");

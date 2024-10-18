@@ -41,6 +41,10 @@ int main(int argc, char *argv[])
         return restController.postAppendVersion(request);
     });
 
+    httpServer.route("/deleteFolder", QHttpServerRequest::Method::Delete, [&restController](const QHttpServerRequest &request) {
+        return restController.deleteFolder(request);
+    });
+
     httpServer.route("/deleteFile", QHttpServerRequest::Method::Delete, [&restController](const QHttpServerRequest &request) {
         return restController.deleteFile(request);
     });
