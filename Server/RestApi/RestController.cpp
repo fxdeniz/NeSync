@@ -645,6 +645,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     QStringList newFolderList;
     QSet<QString> visitedFolderSet;
+    QMultiHash<QString, QString> childFooldersOfNewRootFolderMap;
 
     for(const QString &value : newRootFolderList)
     {
@@ -671,6 +672,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
                 if(info.isDir())
                 {
                     newFolderList.append(path);
+                    childFooldersOfNewRootFolderMap.insert(value, path);
                     visitedFolderSet.insert(path);
                 }
                 else if(info.isFile())
@@ -691,12 +693,25 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     responseBody.insert("rootFolders", QJsonArray::fromStringList(newRootFolderList));
 
-    QJsonObject rootOfNewRootFolderObject;
+    QJsonObject rootOfNewRootFolderObject, childFoldersOfNewRootFolderObject;
 
-    for (auto it = newRootFolderRootMap.begin(); it != newRootFolderRootMap.end(); ++it)
+    for (auto it = newRootFolderRootMap.constBegin(); it != newRootFolderRootMap.constEnd(); ++it)
         rootOfNewRootFolderObject.insert(it.key(), it.value());
 
     responseBody.insert("rootOfRootFolder", rootOfNewRootFolderObject);
+
+    for(const QString &parentPath : childFooldersOfNewRootFolderMap.keys())
+    {
+        QStringList folders = childFooldersOfNewRootFolderMap.values(parentPath);
+
+        std::sort(folders.begin(), folders.end(), [](const QString &s1, const QString &s2) {
+            return s1.length() < s2.length();
+        });
+
+        childFoldersOfNewRootFolderObject.insert(parentPath, QJsonArray::fromStringList(folders));
+    }
+
+    responseBody.insert("childFoldersOfRootFolder", childFoldersOfNewRootFolderObject);
 
     newFolderList.append(newRootFolderList); // Append roots missed in the previous for loop.
 
