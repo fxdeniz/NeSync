@@ -700,9 +700,12 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     responseBody.insert("rootOfRootFolder", rootOfNewRootFolderObject);
 
-    for(const QString &parentPath : childFooldersOfNewRootFolderMap.keys())
+    for(const QString &parentPath : childFooldersOfNewRootFolderMap.uniqueKeys())
     {
         QStringList folders = childFooldersOfNewRootFolderMap.values(parentPath);
+
+        for(QString &value : folders)
+            value = value.split(parentPath).last();
 
         std::sort(folders.begin(), folders.end(), [](const QString &s1, const QString &s2) {
             return s1.length() < s2.length();
@@ -711,7 +714,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         childFoldersOfNewRootFolderObject.insert(parentPath, QJsonArray::fromStringList(folders));
     }
 
-    responseBody.insert("childFoldersOfRootFolder", childFoldersOfNewRootFolderObject);
+    responseBody.insert("childFolderSuffixes", childFoldersOfNewRootFolderObject);
 
     newFolderList.append(newRootFolderList); // Append roots missed in the previous for loop.
 
