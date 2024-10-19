@@ -81,7 +81,48 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         }
       });
     }
+
+    for (let index = 0; index < newAddedJson.rootFolders.length; index++) {
+      const currentUserFolderPath = newAddedJson.rootFolders[index];
+      const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
+
+      const parentFolderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${parentUserFolderPath}`);
+      let pathTokens = await window.pathApi.splitPath(currentUserFolderPath);
+      pathTokens.pop(); // remove last element whcih is ''
+
+      const symbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop();
+
+      await sendAddFolderRequest(symbolFolderPath, currentUserFolderPath);
+    }
+    
 });
+
+
+async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
+  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
+  requestBody["symbolFolderPath"] = symbolFolderPath;
+  requestBody["userFolderPath"] = userFolderPath;
+
+  await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+}
+
+
+async function postJSON(targetUrl, requestBody) {
+  try {
+    const response = await fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const result = await response.text();
+    console.log("Success:", result);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
 
 
 async function fetchJSON(targetUrl) {

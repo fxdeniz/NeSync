@@ -691,7 +691,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
         }
     }
 
-    responseBody.insert("rootFolders", QJsonArray::fromStringList(newRootFolderList));
+    responseBody.insert("rootFolders", QJsonArray::fromStringList(newRootFolderList)); // Already sorted in line 642.
 
     QJsonObject rootOfNewRootFolderObject, childFoldersOfNewRootFolderObject;
 
