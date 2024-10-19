@@ -724,7 +724,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
     QJsonObject newFilesObject;
 
-    for(const QString &parentPath : newFileMap.keys())
+    for(const QString &parentPath : newFileMap.uniqueKeys())
     {
         QStringList files = newFileMap.values(parentPath);
         newFilesObject.insert(parentPath, QJsonArray::fromStringList(files));
