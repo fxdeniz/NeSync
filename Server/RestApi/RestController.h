@@ -23,6 +23,7 @@ public:
     QHttpServerResponse getFileContentByUserPath(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList_V1(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList_V2(const QHttpServerRequest& request);
+    QHttpServerResponse newAddedList_V3(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
