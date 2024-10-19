@@ -90,15 +90,17 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       let pathTokens = await window.pathApi.splitPath(currentUserFolderPath);
       pathTokens.pop(); // remove last element whcih is ''
 
-      const symbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop();
+      const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";
 
-      await sendAddFolderRequest(symbolFolderPath, currentUserFolderPath);
+      await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
 
       let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
 
-      console.log(`parent ${currentUserFolderPath} has children:`);
       for(let childIndex = 0; childIndex < childSuffixes.length; childIndex++) {
-        console.log(`\t\t ${childSuffixes[childIndex]}`);
+        const childFolderUserPath = currentUserFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
+        const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
+
+        sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
       }
     }
     
