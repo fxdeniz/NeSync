@@ -93,6 +93,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const symbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop();
 
       await sendAddFolderRequest(symbolFolderPath, currentUserFolderPath);
+
+      let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
+
+      console.log(`parent ${currentUserFolderPath} has children:`);
+      for(let childIndex = 0; childIndex < childSuffixes.length; childIndex++) {
+        console.log(`\t\t ${childSuffixes[childIndex]}`);
+      }
     }
     
 });
