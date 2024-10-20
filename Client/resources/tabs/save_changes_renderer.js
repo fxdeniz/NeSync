@@ -67,21 +67,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       console.log(`folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);  
     }
 
-    for(currentFolder in deletedJson.files) {
-      deletedJson.files[currentFolder].forEach(async fileName => {
-        if(!deletedJson.folders.includes(currentFolder))
-        {
+    for (const currentFolder in deletedJson.files) {
+      for (const fileName of deletedJson.files[currentFolder]) {
+        if (!deletedJson.folders.includes(currentFolder)) {
           const fileJson = await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${currentFolder + fileName}`);
           const response = await fetch(`http://localhost:1234/deleteFile?symbolPath=${fileJson.symbolFilePath}`, {
             method: 'DELETE',
           });
-
+    
           const result = await response.json();
-          console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);  
+          console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);
         }
-      });
+      }
     }
-
+    
     for (let index = 0; index < newAddedJson.rootFolders.length; index++) {
       const currentUserFolderPath = newAddedJson.rootFolders[index];
       const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
