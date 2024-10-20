@@ -126,6 +126,9 @@ QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &req
     {
         bool isAdded = fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
 
+        qDebug() << "isAdded = " << isAdded;
+        qDebug() << "";
+
         if(isAdded)
         {
             QString reponseMessage = "File is created.";

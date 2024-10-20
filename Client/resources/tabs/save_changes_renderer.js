@@ -100,10 +100,16 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         const childFolderUserPath = currentUserFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
         const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
 
-        sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
+        await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
       }
     }
-    
+
+    for (const currentFolder in newAddedJson.files) {
+      for (const fileName of newAddedJson.files[currentFolder]) {
+        const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
+        await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
+      }
+    }      
 });
 
 
@@ -113,6 +119,17 @@ async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   requestBody["userFolderPath"] = userFolderPath;
 
   await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+}
+
+
+async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
+  let requestBody = {};
+  requestBody["symbolFolderPath"] = symbolFolderPath;
+  requestBody["pathToFile"] = pathToFile;
+  requestBody["description"] = description;
+  requestBody["isFrozen"] = isFrozen;
+
+  await postJSON('http://localhost:1234/addNewFile', requestBody);    
 }
 
 
