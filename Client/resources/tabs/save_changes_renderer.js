@@ -108,7 +108,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
         await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
       }
-    }      
+    }
+
+    for (const currentFolder in updatedJson) {
+      for (const fileName of updatedJson[currentFolder]) {
+        const result = await sendAppendVersionRequest(currentFolder + fileName, "");
+        console.log(`new version of ${currentFolder + fileName} is added = ${result}`);
+      }
+    }
 });
 
 
@@ -129,6 +136,15 @@ async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isF
   requestBody["isFrozen"] = isFrozen;
 
   await postJSON('http://localhost:1234/addNewFile', requestBody);    
+}
+
+
+async function sendAppendVersionRequest(pathToFile, description) {
+  let requestBody = {};
+  requestBody["pathToFile"] = pathToFile;
+  requestBody["description"] = description;
+
+  await postJSON('http://localhost:1234/appendVersion', requestBody);    
 }
 
 

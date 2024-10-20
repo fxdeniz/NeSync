@@ -189,6 +189,9 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
     {
         bool isAppended = fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(), pathToFile, description);
 
+        qDebug() << "isAppended = " << isAppended;
+        qDebug() << "";
+
         if(isAppended)
         {
             QString reponseMessage = "Version appended.";
