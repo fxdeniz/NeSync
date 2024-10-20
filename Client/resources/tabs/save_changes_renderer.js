@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
     console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
 
-    deletedJson.folders.forEach(async currentFolder => {
+    for (const currentFolder of deletedJson.folders) {
       const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
       const response = await fetch(`http://localhost:1234/deleteFolder?symbolPath=${folderJson.symbolFolderPath}`, {
         method: 'DELETE',
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       const result = await response.json();
       console.log(`folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);  
-    });
+    }
 
     for(currentFolder in deletedJson.files) {
       deletedJson.files[currentFolder].forEach(async fileName => {
