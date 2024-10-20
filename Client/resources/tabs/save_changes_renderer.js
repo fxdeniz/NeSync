@@ -57,6 +57,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
     console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
 
+    let textAreaLog = document.getElementById('text-area-log');
+
     for (const currentFolder of deletedJson.folders) {
       const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
       const response = await fetch(`http://localhost:1234/deleteFolder?symbolPath=${folderJson.symbolFolderPath}`, {
@@ -64,7 +66,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       });
 
       const result = await response.json();
-      console.log(`folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);  
+      console.log(`folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);
+      appendLog(textAreaLog, `(-) Deleting folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);
     }
 
     for (const currentFolder in deletedJson.files) {
@@ -77,6 +80,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     
           const result = await response.json();
           console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);
+          appendLog(textAreaLog, `(-) Deleting file ${currentFolder + fileName} isDeleted = ${result.isDeleted}`);
         }
       }
     }
@@ -92,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";
 
       await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
+      appendLog(textAreaLog, `(+) Adding new folder ${currentUserFolderPath}:`);
 
       let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
 
@@ -100,23 +105,35 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
 
         await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
+        appendLog(textAreaLog, `\t(+) Adding new child folder ${childFolderUserPath}...`);
       }
     }
 
     for (const currentFolder in newAddedJson.files) {
+      textAreaLog.value += `(+) Adding new files of new folder:  ${currentFolder}:\n`;
       for (const fileName of newAddedJson.files[currentFolder]) {
         const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
         await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
+        appendLog(textAreaLog, `\t(+) Adding new file  ${currentFolder + fileName}...`);
       }
     }
 
     for (const currentFolder in updatedJson) {
+      textAreaLog.value += `(+) Adding updated files inside folder:  ${currentFolder}:\n`;
       for (const fileName of updatedJson[currentFolder]) {
         const result = await sendAppendVersionRequest(currentFolder + fileName, "");
         console.log(`new version of ${currentFolder + fileName} is added = ${result}`);
+        appendLog(textAreaLog, `\t(+) Adding new version of ${currentFolder + fileName} is added = ${result}`);
       }
     }
 });
+
+
+function appendLog(elementTextArea, logText) {
+  elementTextArea.value += logText + '\n';
+  elementTextArea.scrollTop = elementTextArea.scrollHeight;
+  elementTextArea.focus();
+}
 
 
 async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
