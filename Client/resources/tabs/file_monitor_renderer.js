@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     await window.fmState.setNewAddedJson(newAddedJson);
     await window.fmState.setDeletedJson(deletedJson);
+    await window.fmState.setUpdatedJson(updatedJson);
   
     console.log(`newAdded: ${JSON.stringify(newAddedJson, null, 2)}`);
     console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);

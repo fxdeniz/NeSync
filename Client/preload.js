@@ -75,5 +75,21 @@ contextBridge.exposeInMainWorld('fmState', {
         .then(resolve)
         .catch(reject);
     });
+  },
+
+  setUpdatedJson: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:setUpdatedJson', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
+
+  getUpdatedJson: () => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:getUpdatedJson')
+        .then(resolve)
+        .catch(reject);
+    });
   }
 });

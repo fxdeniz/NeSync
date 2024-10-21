@@ -91,7 +91,8 @@ const createWindow = () => {
 
 let fmState_CommitMessage;
 let fmState_NewAddedJson;
-let fmState_deletedJson;
+let fmState_DeletedJson;
+let fmState_UpdatedJson;
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
@@ -126,11 +127,19 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('fmState:setDeletedJson', async (event, input) => {
-    fmState_deletedJson = input;
+    fmState_DeletedJson = input;
   });
 
   ipcMain.handle('fmState:getDeletedJson', async (event) => {
-    return fmState_deletedJson ? fmState_deletedJson : null;
+    return fmState_DeletedJson ? fmState_DeletedJson : null;
+  });
+
+  ipcMain.handle('fmState:setUpdatedJson', async (event, input) => {
+    fmState_UpdatedJson = input;
+  });
+
+  ipcMain.handle('fmState:getUpdatedJson', async (event) => {
+    return fmState_UpdatedJson ? fmState_UpdatedJson : null;
   });
   
   createWindow();
