@@ -13,7 +13,7 @@ RestController::RestController(QObject *parent)
 {
 }
 
-QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& request)
+QHttpServerResponse RestController::postAddNewFolder_V1(const QHttpServerRequest& request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -70,7 +70,36 @@ QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& r
     return response;
 }
 
-QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &request)
+// Version 2 more straight forward.
+QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString userFolderPath = jsonObject["userFolderPath"].toString();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+    {
+        symbolFolderPath = symbolFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+        userFolderPath = userFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+    }
+
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "userFolderPath = " << userFolderPath;
+
+    auto fsm = FileStorageManager::instance();
+    bool isAdded = fsm->addNewFolder(symbolFolderPath, userFolderPath);
+
+    QJsonObject responseBody {{"isAdded", isAdded}};
+    QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+
+    return response;
+}
+
+QHttpServerResponse RestController::postAddNewFile_V1(const QHttpServerRequest &request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -136,6 +165,45 @@ QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &req
             return response;
         }
     }
+
+    return response;
+}
+
+// Version 2 more straight forward.
+QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString pathToFile = jsonObject["pathToFile"].toString();
+    QString description = jsonObject["description"].toString();
+    bool isFrozen = jsonObject["isFrozen"].toBool();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+    {
+        symbolFolderPath = symbolFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+        pathToFile = pathToFile.normalized(QString::NormalizationForm::NormalizationForm_D);
+    }
+
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "pathToFile = " << pathToFile;
+    qDebug() << "description = " << description;
+    qDebug() << "isFrozen = " << isFrozen;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+
+    bool isAdded = fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
+
+    qDebug() << "isAdded = " << isAdded;
+    qDebug() << "";
+
+    QJsonObject responseBody {{"isAdded", isAdded}};
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
 
     return response;
 }

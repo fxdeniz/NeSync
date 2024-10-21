@@ -13,7 +13,9 @@ class RestController : public QObject
 public:
     explicit RestController(QObject *parent = nullptr);
 
+    QHttpServerResponse postAddNewFolder_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request);
+    QHttpServerResponse postAddNewFile_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse deleteFolder(const QHttpServerRequest& request);

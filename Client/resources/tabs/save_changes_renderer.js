@@ -121,8 +121,8 @@ async function postJSON(targetUrl, requestBody) {
       body: JSON.stringify(requestBody),
     });
 
-    const result = await response.text();
-    console.log("Success:", result);
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error("Error:", error);
   }
