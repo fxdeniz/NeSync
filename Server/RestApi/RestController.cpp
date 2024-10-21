@@ -812,6 +812,11 @@ QHttpServerResponse RestController::updatedFileList(const QHttpServerRequest &re
         {
             QString path = QDir::toNativeSeparators(dirIterator.next());
 
+            // MacOS normalization
+            //https://ss64.com/mac/syntax-filenames.html
+            if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
             QJsonObject fileJson = fsm->getFileJsonByUserPath(path);
 
             bool isFilePersists = fileJson[JsonKeys::IsExist].toBool();
@@ -829,6 +834,9 @@ QHttpServerResponse RestController::updatedFileList(const QHttpServerRequest &re
 
                 QFileInfo info(path);
                 QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+                if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                    parentPath = parentPath.normalized(QString::NormalizationForm::NormalizationForm_D);
 
                 QDateTime lastTimestamp = info.lastModified();
 
