@@ -208,7 +208,7 @@ QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &req
     return response;
 }
 
-QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &request)
+QHttpServerResponse RestController::postAppendVersion_V1(const QHttpServerRequest &request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -267,6 +267,39 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
             return response;
         }
     }
+
+    return response;
+}
+
+// Version 2 more straight forward.
+QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString pathToFile = jsonObject["pathToFile"].toString();
+    QString description = jsonObject["description"].toString();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+        pathToFile = pathToFile.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+    qDebug() << "pathToFile = " << pathToFile;
+    qDebug() << "description = " << description;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject fileJson = fsm->getFileJsonByUserPath(pathToFile);
+
+    bool isAppended = fsm->appendVersion(fileJson[JsonKeys::File::SymbolFilePath].toString(), pathToFile, description);
+
+    qDebug() << "isAppended = " << isAppended;
+    qDebug() << "";
+
+    QJsonObject responseBody {{"isAppended", isAppended}};
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
 
     return response;
 }

@@ -17,6 +17,7 @@ public:
     QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFile_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFile(const QHttpServerRequest& request);
+    QHttpServerResponse postAppendVersion_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAppendVersion(const QHttpServerRequest& request);
     QHttpServerResponse deleteFolder(const QHttpServerRequest& request);
     QHttpServerResponse deleteFile(const QHttpServerRequest& request);
