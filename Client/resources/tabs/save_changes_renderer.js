@@ -2,60 +2,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let newAddedJson = await window.fmState.getNewAddedJson();
     let deletedJson = await window.fmState.getDeletedJson();
     let updatedJson = await window.fmState.getUpdatedJson();
-  
-    console.log(`newAdded: ${JSON.stringify(await window.fmState.getNewAddedJson(), null, 2)}`);
-    console.log(`deleted: ${JSON.stringify(await window.fmState.getDeletedJson(), null, 2)}`);
-    console.log(`updated: ${JSON.stringify(await window.fmState.getUpdatedJson(), null, 2)}`);
-
-    let treeStatus = {};
-    let folderPathSet = new Set();
-
-    for(currentFolder of newAddedJson.folders) {
-      folderPathSet.add(currentFolder);
-      treeStatus[currentFolder] = "NEW";
-    }
-
-    for(currentFolder in newAddedJson.files) {
-      folderPathSet.add(currentFolder);
-      newAddedJson.files[currentFolder].forEach(fileName => {treeStatus[currentFolder + fileName] = "NEW"});
-    }
-
-    for(currentFolder of deletedJson.folders) {
-      folderPathSet.add(currentFolder);
-      treeStatus[currentFolder] = "DELETED";
-    }
-
-    for(currentFolder in deletedJson.files) {
-      folderPathSet.add(currentFolder);
-      deletedJson.files[currentFolder].forEach(fileName => {treeStatus[currentFolder + fileName] = "DELETED"});
-    }
-
-    Object.keys(updatedJson).forEach(key => {
-      folderPathSet.add(key);
-      updatedJson[key].forEach(fileName => {treeStatus[key + fileName] = "UPDATED"});
-    });
-
-    let folderPathList = Array.from(folderPathSet);
-    folderPathList.sort((a, b) => a.length - b.length);
-
-    let tree = {};
-
-    for(path of folderPathList) {
-      tree[path] = [];
-
-      if(path in newAddedJson.files)
-        tree[path].push(...newAddedJson.files[path]);
-
-      if(path in deletedJson.files)
-        tree[path].push(...deletedJson.files[path]);
-
-      if(path in updatedJson)
-        tree[path].push(...updatedJson[path]);
-
-    }
-
-    console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
-    console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
 
     let textAreaLog = document.getElementById('text-area-log');
 
