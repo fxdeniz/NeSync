@@ -27,3 +27,21 @@ contextBridge.exposeInMainWorld('pathApi', {
     });
   }
 });
+
+contextBridge.exposeInMainWorld('fmState', {
+  setCommitMessage: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:setCommitMessage', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
+
+  getCommitMessage: () => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:getCommitMessage')
+        .then(resolve)
+        .catch(reject);
+    });
+  }
+});

@@ -88,6 +88,8 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+let fmState_CommitMessage;
+
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
@@ -102,6 +104,14 @@ app.whenReady().then(() => {
   ipcMain.handle('path:FileName', async (event, input) => {
     const result = fileNameWithExtension(input);
     return result;
+  });
+
+  ipcMain.handle('fmState:setCommitMessage', async (event, input) => {
+    fmState_CommitMessage = input;
+  });
+
+  ipcMain.handle('fmState:getCommitMessage', async (event) => {
+    return fmState_CommitMessage ? fmState_CommitMessage : "";
   });
   
   createWindow();

@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     for (const currentFolder in updatedJson) {
       textAreaLog.value += `(+) Adding updated files inside folder:  ${currentFolder}:\n`;
       for (const fileName of updatedJson[currentFolder]) {
-        const result = await sendAppendVersionRequest(currentFolder + fileName, "");
+        const result = await sendAppendVersionRequest(currentFolder + fileName, await window.fmState.getCommitMessage());
         console.log(`new version of ${currentFolder + fileName} is added = ${result}`);
         appendLog(textAreaLog, `\t(+) Adding new version of ${currentFolder + fileName} is added = ${result}`);
       }

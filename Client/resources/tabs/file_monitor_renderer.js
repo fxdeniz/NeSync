@@ -134,6 +134,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   });
 
   buttonSave.addEventListener('click', async (event) => {
+    const commitMessage = document.getElementById(`input-commit-message`).value;
+    await window.fmState.setCommitMessage(commitMessage);
     window.router.routeToSaveChanges();
   });
 
