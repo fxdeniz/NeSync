@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let updatedJson = await fetchJSON(`http://localhost:1234/updatedFileList`);
 
     await window.fmState.setNewAddedJson(newAddedJson);
+    await window.fmState.setDeletedJson(deletedJson);
   
     console.log(`newAdded: ${JSON.stringify(newAddedJson, null, 2)}`);
     console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);

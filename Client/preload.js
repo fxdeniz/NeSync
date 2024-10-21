@@ -60,4 +60,20 @@ contextBridge.exposeInMainWorld('fmState', {
         .catch(reject);
     });
   },
+
+  setDeletedJson: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:setDeletedJson', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
+
+  getDeletedJson: () => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fmState:getDeletedJson')
+        .then(resolve)
+        .catch(reject);
+    });
+  }
 });

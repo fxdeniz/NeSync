@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", async (event) => {
     let newAddedJson = await window.fmState.getNewAddedJson();
-    let deletedJson = await fetchJSON(`http://localhost:1234/deletedList`);
+    let deletedJson = await window.fmState.getDeletedJson();
     let updatedJson = await fetchJSON(`http://localhost:1234/updatedFileList`);
   
     console.log(`newAdded: ${JSON.stringify(await window.fmState.getNewAddedJson(), null, 2)}`);
-    console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);
+    console.log(`deleted: ${JSON.stringify(await window.fmState.getDeletedJson(), null, 2)}`);
     console.log(`updated: ${JSON.stringify(updatedJson, null, 2)}`);
 
     let treeStatus = {};
