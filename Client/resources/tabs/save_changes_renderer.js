@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     let textAreaLog = document.getElementById('text-area-log');
 
+    appendLog(textAreaLog, "Deleting these folders including all child files & folders:");
+
     for (const currentFolder of deletedJson.folders) {
       const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
       const response = await fetch(`http://localhost:1234/deleteFolder?symbolPath=${folderJson.symbolFolderPath}`, {
@@ -12,8 +14,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       });
 
       const result = await response.json();
-      console.log(`folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);
-      appendLog(textAreaLog, `(-) Deleting folder ${folderJson.symbolFolderPath} isDeleted = ${result.isDeleted}`);
+      appendLog(textAreaLog, `\t - Deleting folder ${folderJson.symbolFolderPath} with contents...`);
+      appendLog(textAreaLog, `\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
     }
 
     for (const currentFolder in deletedJson.files) {
