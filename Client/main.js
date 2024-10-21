@@ -88,7 +88,9 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+
 let fmState_CommitMessage;
+let fmState_NewAddedJson;
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
@@ -112,6 +114,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fmState:getCommitMessage', async (event) => {
     return fmState_CommitMessage ? fmState_CommitMessage : "";
+  });
+
+  ipcMain.handle('fmState:setNewAddedJson', async (event, input) => {
+    fmState_NewAddedJson = input;
+  });
+
+  ipcMain.handle('fmState:getNewAddedJson', async (event) => {
+    return fmState_NewAddedJson ? fmState_NewAddedJson : null;
   });
   
   createWindow();
