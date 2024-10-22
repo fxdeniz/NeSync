@@ -32,13 +32,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
           });
     
           const result = await response.json();
-          console.log(`file ${fileJson.symbolFilePath} isDeleted = ${result.isDeleted}`);
           appendLog(textAreaLog, `\t\t - Deleting file ${fileName}...`);
           appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
         }
       }
     }
     
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "Creating new added folders:");
+
     for (let index = 0; index < newAddedJson.rootFolders.length; index++) {
       const currentUserFolderPath = newAddedJson.rootFolders[index];
       const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
@@ -49,17 +51,22 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";
 
-      await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
-      appendLog(textAreaLog, `(+) Adding new folder ${currentUserFolderPath}:`);
+      appendLog(textAreaLog, `\t - Creating new folder ${currentUserFolderPath}...`);
+      const result = await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
+      appendLog(textAreaLog, `\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
 
       let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
+
+      if(childSuffixes.length > 0)
+        appendLog(textAreaLog, `\t\t Creating child folders of: ${currentUserFolderPath}...`);
 
       for(let childIndex = 0; childIndex < childSuffixes.length; childIndex++) {
         const childFolderUserPath = currentUserFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
         const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
 
-        await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
-        appendLog(textAreaLog, `\t(+) Adding new child folder ${childFolderUserPath}...`);
+        appendLog(textAreaLog, `\t\t\t - Creating new child folder ${childSuffixes[childIndex]}...`);
+        const result = await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
+        appendLog(textAreaLog, `\t\t\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
       }
     }
 
@@ -95,7 +102,7 @@ async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
-  await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
 
@@ -106,7 +113,7 @@ async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isF
   requestBody["description"] = description;
   requestBody["isFrozen"] = isFrozen;
 
-  await postJSON('http://localhost:1234/addNewFile', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
 }
 
 
@@ -115,7 +122,7 @@ async function sendAppendVersionRequest(pathToFile, description) {
   requestBody["pathToFile"] = pathToFile;
   requestBody["description"] = description;
 
-  await postJSON('http://localhost:1234/appendVersion', requestBody);    
+  return await postJSON('http://localhost:1234/appendVersion', requestBody);    
 }
 
 

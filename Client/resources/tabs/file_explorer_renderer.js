@@ -126,7 +126,7 @@ async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
-  await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
 async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
@@ -136,7 +136,7 @@ async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isF
   requestBody["description"] = description;
   requestBody["isFrozen"] = isFrozen;
 
-  await postJSON('http://localhost:1234/addNewFile', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
 }
 
 async function postJSON(targetUrl, requestBody) {
