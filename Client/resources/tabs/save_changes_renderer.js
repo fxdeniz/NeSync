@@ -7,7 +7,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     appendLog(textAreaLog, "ℹ️ Deleting these folders including all child files & folders:");
 
-    for (const currentFolder of deletedJson.folders) {
+    let reversedFolders = Array.from(deletedJson.folders);
+    reversedFolders.reverse(); // TODO: improve outputs without using this
+    // We are using reverse to delete leaf first
+    // When deletion starts from roots, child items shown as error in log
+    // This due to deleting roots also deletes children on the server.
+
+    for (const currentFolder of reversedFolders) {
       const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
       const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
 
