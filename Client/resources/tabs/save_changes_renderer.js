@@ -85,12 +85,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       }
     }
 
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "Adding updated files inside existing folders:");
+
     for (const currentFolder in updatedJson) {
-      textAreaLog.value += `(+) Adding updated files inside folder:  ${currentFolder}:\n`;
+      appendLog(textAreaLog, `\t - Adding updated files inside folder: ${currentFolder}...`);
       for (const fileName of updatedJson[currentFolder]) {
         const result = await sendAppendVersionRequest(currentFolder + fileName, await window.fmState.getCommitMessage());
-        console.log(`new version of ${currentFolder + fileName} is added = ${result}`);
-        appendLog(textAreaLog, `\t(+) Adding new version of ${currentFolder + fileName} is added = ${result}`);
+        appendLog(textAreaLog, `\t\t - Adding new version of ${fileName}...`);
+        appendLog(textAreaLog, `\t\t\t Added Successfully: ${result.isAppended ? '✅' : '❌'}:`);
       }
     }
 });
