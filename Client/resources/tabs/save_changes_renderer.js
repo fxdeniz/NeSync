@@ -20,16 +20,16 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "ℹ️ Deleting these files:");
 
     for (const currentFolder in deletedJson.files) {
-      appendLog(textAreaLog, `\t Deleting selected files inside ${currentFolder}:`);
+      if (!deletedJson.folders.includes(currentFolder)) {
+        appendLog(textAreaLog, `\t Deleting selected files inside ${currentFolder}:`);
 
-      for (const fileName of deletedJson.files[currentFolder]) {
-        if (!deletedJson.folders.includes(currentFolder)) {
-          const fileJson = await sendGetFileByUserPathRequest(currentFolder + fileName);
-          const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
-    
-          const result = await response.json();
-          appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
-          appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
+        for (const fileName of deletedJson.files[currentFolder]) {
+            const fileJson = await sendGetFileByUserPathRequest(currentFolder + fileName);
+            const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
+      
+            const result = await response.json();
+            appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
+            appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
         }
       }
     }
