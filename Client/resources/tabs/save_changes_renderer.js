@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     let textAreaLog = document.getElementById('text-area-log');
 
-    appendLog(textAreaLog, "Deleting these folders including all child files & folders:");
+    appendLog(textAreaLog, "ℹ️ Deleting these folders including all child files & folders:");
 
     for (const currentFolder of deletedJson.folders) {
       const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
@@ -14,15 +14,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       });
 
       const result = await response.json();
-      appendLog(textAreaLog, `\t - Deleting folder ${folderJson.symbolFolderPath} with contents...`);
+      appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.symbolFolderPath} with contents...`);
       appendLog(textAreaLog, `\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
     }
 
     appendLog(textAreaLog, "");
-    appendLog(textAreaLog, "Deleting these files:");
+    appendLog(textAreaLog, "ℹ️ Deleting these files:");
 
     for (const currentFolder in deletedJson.files) {
-      appendLog(textAreaLog, `\t - Deleting selected files inside ${currentFolder}:`);
+      appendLog(textAreaLog, `\t Deleting selected files inside ${currentFolder}:`);
 
       for (const fileName of deletedJson.files[currentFolder]) {
         if (!deletedJson.folders.includes(currentFolder)) {
@@ -32,14 +32,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
           });
     
           const result = await response.json();
-          appendLog(textAreaLog, `\t\t - Deleting file ${fileName}...`);
+          appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
           appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
         }
       }
     }
     
     appendLog(textAreaLog, "");
-    appendLog(textAreaLog, "Creating new added folders:");
+    appendLog(textAreaLog, "ℹ️ Creating new added folders:");
 
     for (let index = 0; index < newAddedJson.rootFolders.length; index++) {
       const currentUserFolderPath = newAddedJson.rootFolders[index];
@@ -51,20 +51,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";
 
-      appendLog(textAreaLog, `\t - Creating new folder ${currentUserFolderPath}...`);
+      appendLog(textAreaLog, `\t 👉 Creating new folder ${currentUserFolderPath}`);
       const result = await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
       appendLog(textAreaLog, `\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
 
       let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
 
       if(childSuffixes) {
-        appendLog(textAreaLog, `\t\t Creating child folders of: ${currentUserFolderPath}...`);
+        appendLog(textAreaLog, `\t\t Creating child folders of: ${currentUserFolderPath}`);
 
         for(let childIndex = 0; childIndex < childSuffixes.length; childIndex++) {
           const childFolderUserPath = currentUserFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
           const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
   
-          appendLog(textAreaLog, `\t\t\t - Creating new child folder ${childSuffixes[childIndex]}...`);
+          appendLog(textAreaLog, `\t\t\t 👉 Creating new child folder ${childSuffixes[childIndex]}`);
           const result = await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
           appendLog(textAreaLog, `\t\t\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
         }
@@ -72,27 +72,27 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     }
 
     appendLog(textAreaLog, "");
-    appendLog(textAreaLog, "Adding new files into previously created folders:");
+    appendLog(textAreaLog, "ℹ️ Adding new files into previously created folders:");
 
     for (const currentFolder in newAddedJson.files) {
-      appendLog(textAreaLog, `\t Adding new files of new folder:  ${currentFolder}...`);
+      appendLog(textAreaLog, `\t Adding new files of new folder: ${currentFolder}`);
 
       for (const fileName of newAddedJson.files[currentFolder]) {
         const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
         const result = await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
-        appendLog(textAreaLog, `\t\t Adding new file  ${fileName}...`);
+        appendLog(textAreaLog, `\t\t 👉 Adding new file  ${fileName}`);
         appendLog(textAreaLog, `\t\t\t Added  Successfully: ${result.isAdded ? '✅' : '❌'}:`);
       }
     }
 
     appendLog(textAreaLog, "");
-    appendLog(textAreaLog, "Adding updated files inside existing folders:");
+    appendLog(textAreaLog, "ℹ️ Adding updated files inside existing folders:");
 
     for (const currentFolder in updatedJson) {
-      appendLog(textAreaLog, `\t - Adding updated files inside folder: ${currentFolder}...`);
+      appendLog(textAreaLog, `\t Adding updated files inside folder: ${currentFolder}`);
       for (const fileName of updatedJson[currentFolder]) {
         const result = await sendAppendVersionRequest(currentFolder + fileName, await window.fmState.getCommitMessage());
-        appendLog(textAreaLog, `\t\t - Adding new version of ${fileName}...`);
+        appendLog(textAreaLog, `\t\t 👉 Adding new version of ${fileName}`);
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${result.isAppended ? '✅' : '❌'}:`);
       }
     }
