@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       appendLog(textAreaLog, `\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
     }
 
+    appendLog(textAreaLog, "👍 Finished deleting folders.")
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Deleting these files:");
 
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       }
     }
     
+    appendLog(textAreaLog, "👍 Finished deleting files.")
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Creating new added folders:");
 
@@ -73,6 +75,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       }
     }
 
+    appendLog(textAreaLog, "👍 Finished creating new folders.")
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding new files into previously created folders:");
 
@@ -87,6 +90,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       }
     }
 
+    appendLog(textAreaLog, "👍 Finished adding new files.")
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding updated files inside existing folders:");
 
@@ -98,6 +102,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${result.isAppended ? '✅' : '❌'}:`);
       }
     }
+
+    appendLog(textAreaLog, "👍 Finished adding updated files.")
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "💯 All file & folder operations finished.");
 });
 
 
