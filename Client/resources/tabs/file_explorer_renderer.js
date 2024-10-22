@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
-  });
+    });
 
     buttonPrev.disabled = true;
     buttonNext.disabled = true;

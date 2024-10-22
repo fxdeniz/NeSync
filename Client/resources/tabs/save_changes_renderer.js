@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let deletedJson = await window.fmState.getDeletedJson();
     let updatedJson = await window.fmState.getUpdatedJson();
 
+    let buttonClose = document.getElementById('button-close');
+    buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
+    disableButton(buttonClose);
+
     let textAreaLog = document.getElementById('text-area-log');
 
     appendLog(textAreaLog, "ℹ️ Deleting these folders including all child files & folders:");
@@ -106,6 +110,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "👍 Finished adding updated files.")
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "💯 All file & folder operations finished.");
+    enableButton(buttonClose);
 });
 
 
@@ -113,6 +118,18 @@ function appendLog(elementTextArea, logText) {
   elementTextArea.value += logText + '\n';
   elementTextArea.scrollTop = elementTextArea.scrollHeight;
   elementTextArea.focus();
+}
+
+
+function disableButton(elementButton) {
+  elementButton.disabled = true;
+  elementButton.textContent = "In progress...";
+}
+
+
+function enableButton(elementButton) {
+  elementButton.disabled = false;
+  elementButton.textContent = "Close";
 }
 
 
