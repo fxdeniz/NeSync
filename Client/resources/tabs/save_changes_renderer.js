@@ -8,10 +8,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "ℹ️ Deleting these folders including all child files & folders:");
 
     for (const currentFolder of deletedJson.folders) {
-      const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
-      const response = await fetch(`http://localhost:1234/deleteFolder?symbolPath=${folderJson.symbolFolderPath}`, {
-        method: 'DELETE',
-      });
+      const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
+      const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
 
       const result = await response.json();
       appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.symbolFolderPath} with contents...`);
@@ -26,10 +24,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       for (const fileName of deletedJson.files[currentFolder]) {
         if (!deletedJson.folders.includes(currentFolder)) {
-          const fileJson = await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${currentFolder + fileName}`);
-          const response = await fetch(`http://localhost:1234/deleteFile?symbolPath=${fileJson.symbolFilePath}`, {
-            method: 'DELETE',
-          });
+          const fileJson = await sendGetFileByUserPathRequest(currentFolder + fileName);
+          const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
     
           const result = await response.json();
           appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
@@ -45,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const currentUserFolderPath = newAddedJson.rootFolders[index];
       const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
 
-      const parentFolderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${parentUserFolderPath}`);
+      const parentFolderJson = await sendGetFolderByUserPathRequest(parentUserFolderPath);
       let pathTokens = await window.pathApi.splitPath(currentUserFolderPath);
       pathTokens.pop(); // remove last element whcih is ''
 
@@ -78,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       appendLog(textAreaLog, `\t Adding new files of new folder: ${currentFolder}`);
 
       for (const fileName of newAddedJson.files[currentFolder]) {
-        const folderJson = await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${currentFolder}`);
+        const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
         const result = await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
         appendLog(textAreaLog, `\t\t 👉 Adding new file  ${fileName}`);
         appendLog(textAreaLog, `\t\t\t Added  Successfully: ${result.isAdded ? '✅' : '❌'}:`);
@@ -106,12 +102,36 @@ function appendLog(elementTextArea, logText) {
 }
 
 
+async function sendGetFolderByUserPathRequest(userFolderPath) {
+  return await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${userFolderPath}`);
+}
+
+
+async function sendGetFileByUserPathRequest(userFilePath) {
+  return await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${userFilePath}`);
+}
+
+
+async function sendDeleteFolderRequest(symbolFolderPath) {
+  return await fetch(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, {
+    method: 'DELETE',
+  });
+}
+
+
 async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
   return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+}
+
+
+async function sendDeleteFileRequest(symbolFilePath) {
+  return await fetch(`http://localhost:1234/deleteFile?symbolPath=${symbolFilePath}`, {
+    method: 'DELETE',
+  });
 }
 
 
