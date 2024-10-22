@@ -156,9 +156,9 @@ async function postJSON(targetUrl, requestBody) {
   }
 }
 
-async function fetchJSON(targetUrl) {
+async function fetchJSON(targetUrl, methodType = "GET") {
   try {
-    const response = await fetch(targetUrl);
+    const response = await fetch(targetUrl, {method: methodType});
     
     if (!response.ok) {
       throw new Error('Network response was not ok');

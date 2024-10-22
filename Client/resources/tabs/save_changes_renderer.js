@@ -20,10 +20,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     for (const currentFolder of reversedFolders) {
       const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
       const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
-
-      const result = await response.json();
-      appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.symbolFolderPath} with contents...`);
-      appendLog(textAreaLog, `\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
+      appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.userFolderPath} with contents...`);
+      appendLog(textAreaLog, `\t\t Deleted Successfully: ${response.isDeleted ? '✅' : '❌'}`);
     }
 
     appendLog(textAreaLog, "👍 Finished deleting folders.")
@@ -37,10 +35,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         for (const fileName of deletedJson.files[currentFolder]) {
             const fileJson = await sendGetFileByUserPathRequest(currentFolder + fileName);
             const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
-      
-            const result = await response.json();
             appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
-            appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${result.isDeleted ? '✅' : '❌'}`);
+            appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${response.isDeleted ? '✅' : '❌'}`);
         }
       }
     }
@@ -144,9 +140,7 @@ async function sendGetFileByUserPathRequest(userFilePath) {
 
 
 async function sendDeleteFolderRequest(symbolFolderPath) {
-  return await fetch(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, {
-    method: 'DELETE',
-  });
+  return await fetchJSON(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
 }
 
 
@@ -160,9 +154,7 @@ async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
 
 
 async function sendDeleteFileRequest(symbolFilePath) {
-  return await fetch(`http://localhost:1234/deleteFile?symbolPath=${symbolFilePath}`, {
-    method: 'DELETE',
-  });
+  return await fetchJSON(`http://localhost:1234/deleteFile?symbolPath=${symbolFilePath}`, "DELETE");
 }
 
 
@@ -204,9 +196,9 @@ async function postJSON(targetUrl, requestBody) {
 }
 
 
-async function fetchJSON(targetUrl) {
+async function fetchJSON(targetUrl, methodType = "GET") {
     try {
-      const response = await fetch(targetUrl);
+      const response = await fetch(targetUrl, {method: methodType});
       
       if (!response.ok) {
         throw new Error('Network response was not ok');
