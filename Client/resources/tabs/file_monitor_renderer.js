@@ -2,6 +2,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   let buttonRefresh = document.getElementById(`button-refresh`);
   let buttonSave = document.getElementById('button-save');
 
+  buttonSave.disabled = true;
+
+  buttonSave.addEventListener('click', async (event) => {
+    const commitMessage = document.getElementById(`input-commit-message`).value;
+    await window.fmState.setCommitMessage(commitMessage);
+    window.router.routeToSaveChanges();
+  });
+
   buttonRefresh.addEventListener(`click`, async (event) => {
     let newAddedJson = await fetchJSON(`http://localhost:1234/newAddedList`);
     let deletedJson = await fetchJSON(`http://localhost:1234/deletedList`);
@@ -134,31 +142,32 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   
       collapseIndex += 1;
     }
-    
-  });
 
-  buttonSave.addEventListener('click', async (event) => {
-    const commitMessage = document.getElementById(`input-commit-message`).value;
-    await window.fmState.setCommitMessage(commitMessage);
-    window.router.routeToSaveChanges();
-  });
+    const isAnyFileUpdated = Object.keys(updatedJson).length > 0;
+    const isAnyNewFileAdded = Object.keys(newAddedJson.files).length > 0;
+    const isAnyFileDeleted = Object.keys(deletedJson.files).length > 0;
+    const isAnyNewFolderAdded = newAddedJson.folders.length > 0;
+    const isAnyFolderDeleted = deletedJson.folders.length > 0;
 
+    if(isAnyFileUpdated || isAnyNewFileAdded || isAnyFileDeleted || isAnyNewFolderAdded || isAnyFolderDeleted)
+      buttonSave.disabled = false;
+  });
 });
 
 
-async function fetchJSON(targetUrl) {
-    try {
-      const response = await fetch(targetUrl);
-      
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      
-      const result = await response.json();
-      
-      return result;
-  
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+async function fetchJSON(targetUrl, methodType = "GET") {
+  try {
+    const response = await fetch(targetUrl, {method: methodType});
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
+    
+    const result = await response.json();
+    
+    return result;
+
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
   }
+}
