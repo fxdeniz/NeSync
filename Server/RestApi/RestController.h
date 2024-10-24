@@ -33,6 +33,25 @@ public:
 
 signals:
 
+private:
+    void newAddedList_findExisting(QSet<QString> &existingFolderSet,
+                                   QSet<QString> &existingFileSet,
+                                   QStringList &existingFolderList);
+
+    void newAddedList_findNewAtRootLevel(QSet<QString> existingFolderSet,
+                                         QSet<QString> existingFileSet,
+                                         QStringList existingFolderList,
+                                         QStringList &newRootFolderList,
+                                         QMultiHash<QString, QString> &newFileMap,
+                                         QHash<QString, QString> &newRootFolderRootMap);
+
+    void newAddedList_findChildrenOfRootFolders(QSet<QString> existingFolderSet,
+                                                QSet<QString> existingFileSet,
+                                                QStringList newRootFolderList,
+                                                QStringList &newFolderList,
+                                                QMultiHash<QString, QString> &childFoldersOfNewRootFolderMap,
+                                                QMultiHash<QString, QString> &newFileMap);
+
 };
 
 #endif // RESTCONTROLLER_H
