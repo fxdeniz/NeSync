@@ -19,8 +19,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for (const currentFolder of reversedFolders) {
       const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
-      const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
       appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.userFolderPath} with contents...`);
+      const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
       appendLog(textAreaLog, `\t\t Deleted Successfully: ${response.isDeleted ? '✅' : '❌'}`);
     }
 
@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
         for (const fileName of deletedJson.files[currentFolder]) {
             const fileJson = await sendGetFileByUserPathRequest(currentFolder + fileName);
-            const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
             appendLog(textAreaLog, `\t\t 👉 Deleting file ${fileName}`);
+            const response = await sendDeleteFileRequest(fileJson.symbolFilePath);
             appendLog(textAreaLog, `\t\t\t Deleted Successfully: ${response.isDeleted ? '✅' : '❌'}`);
         }
       }
@@ -84,8 +84,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       for (const fileName of newAddedJson.files[currentFolder]) {
         const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
-        const result = await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
         appendLog(textAreaLog, `\t\t 👉 Adding new file  ${fileName}`);
+        const result = await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
         appendLog(textAreaLog, `\t\t\t Added  Successfully: ${result.isAdded ? '✅' : '❌'}:`);
       }
     }
@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     for (const currentFolder in updatedJson) {
       appendLog(textAreaLog, `\t Adding updated files inside folder: ${currentFolder}`);
       for (const fileName of updatedJson[currentFolder]) {
-        const result = await sendAppendVersionRequest(currentFolder + fileName, await window.fmState.getCommitMessage());
         appendLog(textAreaLog, `\t\t 👉 Adding new version of ${fileName}`);
+        const result = await sendAppendVersionRequest(currentFolder + fileName, await window.fmState.getCommitMessage());
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${result.isAppended ? '✅' : '❌'}:`);
       }
     }
