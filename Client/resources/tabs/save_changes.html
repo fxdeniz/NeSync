@@ -14,20 +14,14 @@
     <title>Hello World!</title>
   </head>
   <body>
-    <ul class="nav nav-pills nav-fill">
-        <li class="nav-item">
-            <a id="button-file-explorer" class="nav-link active" aria-current="page" href="#">File Explorer</a>
-        </li>
-        <li class="nav-item">
-            <a id="button-file-monitor" class="nav-link" aria-disabled="true">File Monitor</a>
-        </li>
-    </ul>
-
+    <div class="text-center mt-3">
+      <button id="button-close" type="button" class="btn btn-primary">Close</button>
+    </div>
     <div id="content-container" class="container-fluid px-3 mt-3">
       <div id="save-changes-content">
         <div class="mb-3">
-            <label for="textArea" class="form-label">File Operations Log</label>
-            <textarea class="form-control" id="textArea"></textarea>
+            <label for="text-area-log" class="form-label">File & Folder Operations Log:</label>
+            <textarea id="text-area-log" class="form-control" readonly></textarea>
         </div>
       </div>
     </div>

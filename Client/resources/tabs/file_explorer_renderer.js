@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
-  });
+    });
 
     buttonPrev.disabled = true;
     buttonNext.disabled = true;
@@ -126,7 +126,7 @@ async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
-  await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
 async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
@@ -136,7 +136,7 @@ async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isF
   requestBody["description"] = description;
   requestBody["isFrozen"] = isFrozen;
 
-  await postJSON('http://localhost:1234/addNewFile', requestBody);    
+  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
 }
 
 async function postJSON(targetUrl, requestBody) {
@@ -149,16 +149,16 @@ async function postJSON(targetUrl, requestBody) {
       body: JSON.stringify(requestBody),
     });
 
-    const result = await response.text();
-    console.log("Success:", result);
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error("Error:", error);
   }
 }
 
-async function fetchJSON(targetUrl) {
+async function fetchJSON(targetUrl, methodType = "GET") {
   try {
-    const response = await fetch(targetUrl);
+    const response = await fetch(targetUrl, {method: methodType});
     
     if (!response.ok) {
       throw new Error('Network response was not ok');

@@ -88,6 +88,12 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+
+let fmState_CommitMessage;
+let fmState_NewAddedJson;
+let fmState_DeletedJson;
+let fmState_UpdatedJson;
+
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
@@ -102,6 +108,38 @@ app.whenReady().then(() => {
   ipcMain.handle('path:FileName', async (event, input) => {
     const result = fileNameWithExtension(input);
     return result;
+  });
+
+  ipcMain.handle('fmState:setCommitMessage', async (event, input) => {
+    fmState_CommitMessage = input;
+  });
+
+  ipcMain.handle('fmState:getCommitMessage', async (event) => {
+    return fmState_CommitMessage ? fmState_CommitMessage : "";
+  });
+
+  ipcMain.handle('fmState:setNewAddedJson', async (event, input) => {
+    fmState_NewAddedJson = input;
+  });
+
+  ipcMain.handle('fmState:getNewAddedJson', async (event) => {
+    return fmState_NewAddedJson ? fmState_NewAddedJson : null;
+  });
+
+  ipcMain.handle('fmState:setDeletedJson', async (event, input) => {
+    fmState_DeletedJson = input;
+  });
+
+  ipcMain.handle('fmState:getDeletedJson', async (event) => {
+    return fmState_DeletedJson ? fmState_DeletedJson : null;
+  });
+
+  ipcMain.handle('fmState:setUpdatedJson', async (event, input) => {
+    fmState_UpdatedJson = input;
+  });
+
+  ipcMain.handle('fmState:getUpdatedJson', async (event) => {
+    return fmState_UpdatedJson ? fmState_UpdatedJson : null;
   });
   
   createWindow();
