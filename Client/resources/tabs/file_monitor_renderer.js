@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   buttonRefresh.disabled = true;
   buttonSave.disabled = true;
+  displayAlertDiv("Analyzing file system changes, please wait...");
 
   let newAddedJson = await sendGetNewAddedListRequest();
   let deletedJson = await sendGetDeletedListRequest();
@@ -83,6 +84,7 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   console.log(`tree: ${JSON.stringify(tree, null, 2)}`);
   console.log(`treeStatus: ${JSON.stringify(treeStatus, null, 2)}`);
 
+  closeAlertDiv();
   buttonRefresh.disabled = false;
 
   const isAnyFileUpdated = Object.keys(updatedJson).length > 0;
@@ -93,6 +95,26 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
 
   if(isAnyFileUpdated || isAnyNewFileAdded || isAnyFileDeleted || isAnyNewFolderAdded || isAnyFolderDeleted)
     buttonSave.disabled = false;
+}
+
+
+function displayAlertDiv(alertMessage) {
+  let divAlert = document.createElement("div");
+  divAlert.id = "div-alert";
+  divAlert.className = "alert alert-warning text-center";
+  divAlert.setAttribute("role", "alert");
+  divAlert.textContent = alertMessage;
+
+  let container = document.getElementById("content-container");
+  let referenceNode = container.querySelector(".row");
+
+  container.insertBefore(divAlert, referenceNode);
+}
+
+
+function closeAlertDiv() {
+  let divAlert = document.getElementById("div-alert");
+  divAlert.remove();
 }
 
 
