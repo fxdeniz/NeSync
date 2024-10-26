@@ -11,12 +11,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql HttpServer)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql HttpServer Core5Compat)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer Core5Compat)
 
 include_directories(Utility/)
 include_directories(FileStorageSubSystem/)
 include_directories(FileStorageSubSystem/ORM/)
+
+add_subdirectory(Dependency/quazip)
 
 
 set(PROJECT_SOURCES
@@ -71,7 +73,9 @@ endif()
 
 target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Sql
-                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer)
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::Core5Compat
+                                    QuaZip::QuaZip)
 
 # This version info is required for MacOS compilation
 # Windows compilation uses /Resources/res_win.rc
