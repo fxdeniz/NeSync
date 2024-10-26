@@ -10,6 +10,7 @@
 
 #include "Utility/AppConfig.h"
 #include "RestApi/RestController.h"
+#include "RestApi/ZipExportController.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +28,7 @@ int main(int argc, char *argv[])
     QTcpServer tcpServer;
     QHttpServer httpServer;
     RestController restController;
+    ZipExportController zipExportController;
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [&restController](const QHttpServerRequest &request) {
@@ -71,6 +73,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
         return restController.updatedFileList(request);
+    });
+
+    httpServer.route("/postCreateZipArchive", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.postCreateArchive(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.
