@@ -11,8 +11,15 @@ class ZipExportController : public QObject
 public:
     explicit ZipExportController(QObject *parent = nullptr);
     QHttpServerResponse postCreateArchive(const QHttpServerRequest& request);
+    QHttpServerResponse postAddFolderJson(const QHttpServerRequest& request);
+
+    QString getZipFilePath() const;
+    void setZipFilePath(const QString &newZipFilePath);
 
 signals:
+
+private:
+    QString zipFilePath;
 
 };
 
