@@ -38,7 +38,67 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
     return response;
 }
 
+// Version 2, starts from the selected root.
 QHttpServerResponse ZipExportController::postAddFolderJson(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString rootSymbolFolderPath = jsonObject["rootSymbolFolderPath"].toString();
+
+    qDebug() << "rootSymbolFolderPath = " << rootSymbolFolderPath;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+
+    QList<QJsonObject> folderStack;
+    folderStack.append(fsm->getFolderJsonBySymbolPath(rootSymbolFolderPath));
+
+    QStringList folderJsonContent;
+
+    while(!folderStack.isEmpty())
+    {
+        QJsonObject currentFolder = folderStack.first();
+        folderStack.removeFirst();
+
+        folderJsonContent.append(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString());
+
+        currentFolder = fsm->getFolderJsonBySymbolPath(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFolders].toArray())
+            folderStack.append(value.toObject());
+    }
+
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
+
+    QuaZipFile foldersJsonFile(&archive);
+    bool isFileOpened = foldersJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("folders.json"));
+
+    if(!isArchiveOpened || !isFileOpened)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    std::sort(folderJsonContent.begin(), folderJsonContent.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    QJsonDocument document(QJsonArray::fromStringList(folderJsonContent));
+    qint64 bytesWritten = foldersJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+
+    QJsonObject responseBody {{"isAdded", true}};
+
+    if(bytesWritten <= -1)
+        responseBody.insert("isAdded", false);
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::postAddFolderJson_V1(const QHttpServerRequest &request)
 {
     auto fsm = FileStorageManager::instance();
 
