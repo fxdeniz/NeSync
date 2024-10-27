@@ -60,7 +60,7 @@ QHttpServerResponse ZipExportController::postAddFolderJson(const QHttpServerRequ
     }
 
     QuaZip archive(getZipFilePath());
-    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAppend);
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile foldersJsonFile(&archive);
     bool isFileOpened = foldersJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("folders.json"));
@@ -77,6 +77,71 @@ QHttpServerResponse ZipExportController::postAddFolderJson(const QHttpServerRequ
 
     QJsonDocument document(QJsonArray::fromStringList(folderJsonContent));
     qint64 bytesWritten = foldersJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+
+    QJsonObject responseBody {{"isAdded", true}};
+
+    if(bytesWritten <= -1)
+        responseBody.insert("isAdded", false);
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerRequest &request)
+{
+    auto fsm = FileStorageManager::instance();
+
+    QList<QJsonObject> folderStack;
+    folderStack.append(fsm->getFolderJsonBySymbolPath("/"));
+
+    QJsonArray filesJsonContent;
+
+    while(!folderStack.isEmpty())
+    {
+        QJsonObject currentFolder = folderStack.first();
+        folderStack.removeFirst();
+
+        currentFolder = fsm->getFolderJsonBySymbolPath(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFolders].toArray())
+            folderStack.append(value.toObject());
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QJsonObject currentFile = fsm->getFileJsonBySymbolPath(value.toObject()[JsonKeys::File::SymbolFilePath].toString(), true);
+            currentFile.remove(JsonKeys::IsExist);
+            currentFile.remove(JsonKeys::File::IsFrozen);
+            currentFile.remove(JsonKeys::File::UserFilePath);
+
+            QJsonArray versionList = currentFile[JsonKeys::File::VersionList].toArray();
+
+            for (qlonglong index = 0; index < versionList.size(); ++index)
+            {
+                QJsonObject version = versionList[index].toObject();
+                version.remove(JsonKeys::IsExist);
+                version.remove(JsonKeys::FileVersion::NewVersionNumber);
+                versionList[index] = version;
+            }
+
+            currentFile[JsonKeys::File::VersionList] = versionList;
+
+            filesJsonContent.append(currentFile);
+        }
+    }
+
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
+
+    QuaZipFile filesJsonFile(&archive);
+    bool isFileOpened = filesJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("files.json"));
+
+    if(!isArchiveOpened || !isFileOpened)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    QJsonDocument document(filesJsonContent);
+    qint64 bytesWritten = filesJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
 
     QJsonObject responseBody {{"isAdded", true}};
 
