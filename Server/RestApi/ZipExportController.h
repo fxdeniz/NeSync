@@ -13,6 +13,7 @@ public:
     QHttpServerResponse postCreateArchive(const QHttpServerRequest& request);
     QHttpServerResponse postAddFolderJson(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileJson(const QHttpServerRequest& request);
+    QHttpServerResponse postAddFileJson_V1(const QHttpServerRequest& request);
 
     QString getZipFilePath() const;
     void setZipFilePath(const QString &newZipFilePath);
