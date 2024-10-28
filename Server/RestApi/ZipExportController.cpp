@@ -5,6 +5,7 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QOperatingSystemVersion>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
@@ -22,6 +23,9 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
 
     QString folderPath = jsonObject["folderPath"].toString();
     QString fileName = jsonObject["fileName"].toString();
+
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+        folderPath = folderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
 
     qDebug() << "folderPath = " << folderPath;
     qDebug() << "fileName = " << fileName;
