@@ -151,8 +151,154 @@ QHttpServerResponse ZipExportController::postAddFolderJson_V1(const QHttpServerR
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
-// Version 2, starts from the selected root.
+// Version 3, starts from the selected root & returns "files" object in response.
 QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString rootSymbolFolderPath = jsonObject["rootSymbolFolderPath"].toString();
+
+    qDebug() << "rootSymbolFolderPath = " << rootSymbolFolderPath;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+
+    QList<QJsonObject> folderStack;
+    folderStack.append(fsm->getFolderJsonBySymbolPath(rootSymbolFolderPath));
+
+    QJsonObject filesJsonContent;
+
+    while(!folderStack.isEmpty())
+    {
+        QJsonObject currentFolder = folderStack.first();
+        folderStack.removeFirst();
+
+        currentFolder = fsm->getFolderJsonBySymbolPath(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFolders].toArray())
+            folderStack.append(value.toObject());
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QJsonObject currentFile = fsm->getFileJsonBySymbolPath(value.toObject()[JsonKeys::File::SymbolFilePath].toString(), true);
+            currentFile.remove(JsonKeys::IsExist);
+            currentFile.remove(JsonKeys::File::IsFrozen);
+            currentFile.remove(JsonKeys::File::UserFilePath);
+
+            QJsonArray versionList = currentFile[JsonKeys::File::VersionList].toArray();
+
+            for (qlonglong index = 0; index < versionList.size(); ++index)
+            {
+                QJsonObject version = versionList[index].toObject();
+                version.remove(JsonKeys::IsExist);
+                version.remove(JsonKeys::FileVersion::NewVersionNumber);
+                versionList[index] = version;
+            }
+
+            currentFile[JsonKeys::File::VersionList] = versionList;
+
+            filesJsonContent.insert(currentFile[JsonKeys::File::SymbolFilePath].toString(), currentFile);
+        }
+    }
+
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
+
+    QuaZipFile filesJsonFile(&archive);
+    bool isFileOpened = filesJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("files.json"));
+
+    if(!isArchiveOpened || !isFileOpened)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    QJsonDocument document(filesJsonContent);
+    qint64 bytesWritten = filesJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+
+    QJsonObject responseBody {{"isAdded", true}};
+    responseBody.insert("files", filesJsonContent);
+    setFilesJson(filesJsonContent);
+
+    if(bytesWritten <= -1)
+    {
+        responseBody.insert("isAdded", false);
+        responseBody.insert("files", {});
+        setFilesJson({});
+    }
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::postAddFileJson_V1(const QHttpServerRequest &request)
+{
+    auto fsm = FileStorageManager::instance();
+
+    QList<QJsonObject> folderStack;
+    folderStack.append(fsm->getFolderJsonBySymbolPath("/"));
+
+    QJsonArray filesJsonContent;
+
+    while(!folderStack.isEmpty())
+    {
+        QJsonObject currentFolder = folderStack.first();
+        folderStack.removeFirst();
+
+        currentFolder = fsm->getFolderJsonBySymbolPath(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFolders].toArray())
+            folderStack.append(value.toObject());
+
+        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFiles].toArray())
+        {
+            QJsonObject currentFile = fsm->getFileJsonBySymbolPath(value.toObject()[JsonKeys::File::SymbolFilePath].toString(), true);
+            currentFile.remove(JsonKeys::IsExist);
+            currentFile.remove(JsonKeys::File::IsFrozen);
+            currentFile.remove(JsonKeys::File::UserFilePath);
+
+            QJsonArray versionList = currentFile[JsonKeys::File::VersionList].toArray();
+
+            for (qlonglong index = 0; index < versionList.size(); ++index)
+            {
+                QJsonObject version = versionList[index].toObject();
+                version.remove(JsonKeys::IsExist);
+                version.remove(JsonKeys::FileVersion::NewVersionNumber);
+                versionList[index] = version;
+            }
+
+            currentFile[JsonKeys::File::VersionList] = versionList;
+
+            filesJsonContent.append(currentFile);
+        }
+    }
+
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
+
+    QuaZipFile filesJsonFile(&archive);
+    bool isFileOpened = filesJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("files.json"));
+
+    if(!isArchiveOpened || !isFileOpened)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    QJsonDocument document(filesJsonContent);
+    qint64 bytesWritten = filesJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
+
+    QJsonObject responseBody {{"isAdded", true}};
+
+    if(bytesWritten <= -1)
+        responseBody.insert("isAdded", false);
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::postAddFileJson_V2(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -227,71 +373,6 @@ QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerReques
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipExportController::postAddFileJson_V1(const QHttpServerRequest &request)
-{
-    auto fsm = FileStorageManager::instance();
-
-    QList<QJsonObject> folderStack;
-    folderStack.append(fsm->getFolderJsonBySymbolPath("/"));
-
-    QJsonArray filesJsonContent;
-
-    while(!folderStack.isEmpty())
-    {
-        QJsonObject currentFolder = folderStack.first();
-        folderStack.removeFirst();
-
-        currentFolder = fsm->getFolderJsonBySymbolPath(currentFolder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
-
-        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFolders].toArray())
-            folderStack.append(value.toObject());
-
-        for(const QJsonValue &value : currentFolder[JsonKeys::Folder::ChildFiles].toArray())
-        {
-            QJsonObject currentFile = fsm->getFileJsonBySymbolPath(value.toObject()[JsonKeys::File::SymbolFilePath].toString(), true);
-            currentFile.remove(JsonKeys::IsExist);
-            currentFile.remove(JsonKeys::File::IsFrozen);
-            currentFile.remove(JsonKeys::File::UserFilePath);
-
-            QJsonArray versionList = currentFile[JsonKeys::File::VersionList].toArray();
-
-            for (qlonglong index = 0; index < versionList.size(); ++index)
-            {
-                QJsonObject version = versionList[index].toObject();
-                version.remove(JsonKeys::IsExist);
-                version.remove(JsonKeys::FileVersion::NewVersionNumber);
-                versionList[index] = version;
-            }
-
-            currentFile[JsonKeys::File::VersionList] = versionList;
-
-            filesJsonContent.append(currentFile);
-        }
-    }
-
-    QuaZip archive(getZipFilePath());
-    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
-
-    QuaZipFile filesJsonFile(&archive);
-    bool isFileOpened = filesJsonFile.open(QFile::OpenModeFlag::WriteOnly, QuaZipNewInfo("files.json"));
-
-    if(!isArchiveOpened || !isFileOpened)
-    {
-        QJsonObject responseBody {{"isAdded", false}};
-        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
-    }
-
-    QJsonDocument document(filesJsonContent);
-    qint64 bytesWritten = filesJsonFile.write(document.toJson(QJsonDocument::JsonFormat::Indented));
-
-    QJsonObject responseBody {{"isAdded", true}};
-
-    if(bytesWritten <= -1)
-        responseBody.insert("isAdded", false);
-
-    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
-}
-
 QString ZipExportController::getZipFilePath() const
 {
     return zipFilePath;
@@ -300,4 +381,14 @@ QString ZipExportController::getZipFilePath() const
 void ZipExportController::setZipFilePath(const QString &newZipFilePath)
 {
     zipFilePath = newZipFilePath;
+}
+
+QJsonObject ZipExportController::getFilesJson() const
+{
+    return filesJson;
+}
+
+void ZipExportController::setFilesJson(const QJsonObject &newFileJson)
+{
+    filesJson = newFileJson;
 }
