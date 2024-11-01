@@ -17,8 +17,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
 
       if(selectedPath) {
-        inputZipPath.value = selectedPath;
+        if(!selectedPath.endsWith(".zip")) {
+          alert("File name should end with \".zip\" extension.");
+          return;
+        }
 
+        inputZipPath.value = selectedPath;
         const buttonExport = document.getElementById("button-export");
         buttonExport.disabled = false;
         buttonExport.focus();
