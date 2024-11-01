@@ -20,21 +20,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let navigationEvnet = createDirectoryChangeEvent('/');
     inputCurrentPath.dispatchEvent(navigationEvnet);
 
-    const exampleModalEl = document.getElementById('exampleModal');
+    const exportModal = document.getElementById('export-modal');
 
-    exampleModalEl.addEventListener('shown.bs.modal', function () {
-      // Function to add dynamic content to the modal
-      const modalBody = document.getElementById('div-modal-body');
-      modalBody.innerHTML = '<p>This is dynamically added content!</p>';
-      
-      // Example: append more complex dynamic HTML
-      const dynamicList = `
-        <ul>
-          <li>Dynamic Item 1</li>
-          <li>Dynamic Item 2</li>
-          <li>Dynamic Item 3</li>
-        </ul>`;
-      modalBody.insertAdjacentHTML('beforeend', dynamicList);
+    exportModal.addEventListener('shown.bs.modal', function () {
+      const currentPath = document.getElementById("input-current-path").value;
+      const pExportSource = document.getElementById("p-export-source");
+      pExportSource.innerHTML = `<b>${currentPath}</b>`;
       });
   });
 
