@@ -21,19 +21,17 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
     QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
     QJsonObject jsonObject = jsonDoc.object();
 
-    QString folderPath = jsonObject["folderPath"].toString();
-    QString fileName = jsonObject["fileName"].toString();
+    QString filePath = jsonObject["filePath"].toString();
 
     if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
-        folderPath = folderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+        filePath = filePath.normalized(QString::NormalizationForm::NormalizationForm_D);
 
-    qDebug() << "folderPath = " << folderPath;
-    qDebug() << "fileName = " << fileName;
+    qDebug() << "filePath = " << filePath;
     qDebug() << "";
 
-    setZipFilePath(folderPath + fileName);
+    setZipFilePath(filePath);
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(filePath);
     bool isCreated = archive.open(QuaZip::Mode::mdCreate);
 
     QJsonObject responseBody {{"isCreated", isCreated}};

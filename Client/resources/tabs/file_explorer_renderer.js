@@ -6,13 +6,28 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
     const buttonSelectZipFilePath = document.getElementById("button-select-zip-path");
+    const buttonExport = document.getElementById("button-export");
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
     });
 
     buttonSelectZipFilePath.addEventListener("click", async clickEvent => {
-      console.log(await window.fileExplorerApi.showFileSaveDialog())
+      const inputZipPath = document.getElementById("input-zip-path");
+      const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
+
+      if(selectedPath) {
+        inputZipPath.value = selectedPath;
+
+        const buttonExport = document.getElementById("button-export");
+        buttonExport.disabled = false;
+        buttonExport.focus();
+      }
+    });
+
+    buttonExport.addEventListener("click", async clickEvent => {
+      const filePath = document.getElementById("input-zip-path").value;
+      await sendPostCreateZipArchiveRequest(filePath);
     });
 
     buttonPrev.disabled = true;
@@ -28,6 +43,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const exportModal = document.getElementById('export-modal');
 
     exportModal.addEventListener('shown.bs.modal', function () {
+      document.getElementById("input-zip-path").value = "";
+      document.getElementById("button-export").disabled = true;
+      document.getElementById("button-select-zip-path").focus();
+
       const currentPath = document.getElementById("input-current-path").value;
       const pExportSource = document.getElementById("p-export-source");
       pExportSource.innerHTML = `<b>${currentPath}</b>`;
@@ -130,9 +149,19 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   }
 }
 
+
 function createDirectoryChangeEvent(targetPath) {
   return new CustomEvent('directoryNavigation', {bubbles: true, detail: {'targetPath': targetPath}});
 }
+
+
+async function sendPostCreateZipArchiveRequest(filePath) {
+  let requestBody = {"filePath": null};
+  requestBody["filePath"] = filePath;
+
+  return await postJSON('http://localhost:1234/postCreateZipArchive', requestBody);    
+}
+
 
 async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
