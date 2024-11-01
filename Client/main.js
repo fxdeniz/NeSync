@@ -64,6 +64,17 @@ async function showFolderSelectDialog () {
 }
 
 
+async function showFileSaveDialog () {
+  const { canceled, filePath } = await dialog.showSaveDialog({ defaultPath: app.getPath('desktop') });
+  let result = null;
+
+  if (!canceled)
+    result = filePath;
+
+  return result;
+}
+
+
 async function splitPath(givenPath) {
   return givenPath.split(path.sep);
 }
@@ -99,6 +110,7 @@ app.whenReady().then(() => {
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
+  ipcMain.handle('dialog:SaveFile', showFileSaveDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {
     const result = splitPath(input);

@@ -5,9 +5,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let buttonNext = document.getElementById('button-next');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
+    const buttonSelectZipFilePath = document.getElementById("button-select-zip-path");
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
+    });
+
+    buttonSelectZipFilePath.addEventListener("click", async clickEvent => {
+      console.log(await window.fileExplorerApi.showFileSaveDialog())
     });
 
     buttonPrev.disabled = true;
