@@ -23,6 +23,13 @@ function routeToSaveChanges (event) {
 }
 
 
+function routeToZipExport (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/pages/zip_export.html'));
+}
+
+
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
@@ -109,6 +116,7 @@ app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
+  ipcMain.on('route:ZipExport', routeToZipExport);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
   ipcMain.handle('dialog:SaveFile', showFileSaveDialog);
 

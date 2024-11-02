@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonExport.addEventListener("click", async clickEvent => {
       const filePath = document.getElementById("input-zip-path").value;
       await sendPostCreateZipArchiveRequest(filePath);
+      window.router.routeToZipExport();
     });
 
     buttonPrev.disabled = true;
