@@ -14,7 +14,7 @@ ZipExportController::ZipExportController(QObject *parent)
     : QObject{parent}
 {}
 
-QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::postSetZipFilePath(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -29,9 +29,22 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
     qDebug() << "filePath = " << filePath;
     qDebug() << "";
 
-    setZipFilePath(filePath);
+    this->zipFilePath = filePath;
 
-    QuaZip archive(filePath);
+    return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::getZipFilePath(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody {{"filePath", this->zipFilePath}};
+    QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+
+    return response;
+}
+
+QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequest &request)
+{
+    QuaZip archive(this->zipFilePath);
     bool isCreated = archive.open(QuaZip::Mode::mdCreate);
 
     QJsonObject responseBody {{"isCreated", isCreated}};
@@ -73,7 +86,7 @@ QHttpServerResponse ZipExportController::postAddFolderJson(const QHttpServerRequ
             folderStack.append(value.toObject());
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile foldersJsonFile(&archive);
@@ -122,7 +135,7 @@ QHttpServerResponse ZipExportController::postAddFolderJson_V1(const QHttpServerR
             folderStack.append(value.toObject());
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile foldersJsonFile(&archive);
@@ -202,7 +215,7 @@ QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerReques
         }
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile filesJsonFile(&archive);
@@ -273,7 +286,7 @@ QHttpServerResponse ZipExportController::postAddFileJson_V1(const QHttpServerReq
         }
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile filesJsonFile(&archive);
@@ -348,7 +361,7 @@ QHttpServerResponse ZipExportController::postAddFileJson_V2(const QHttpServerReq
         }
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     QuaZipFile filesJsonFile(&archive);
@@ -401,7 +414,7 @@ QHttpServerResponse ZipExportController::postAddFileToZip(const QHttpServerReque
         }
     }
 
-    QuaZip archive(getZipFilePath());
+    QuaZip archive(this->zipFilePath);
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
 
     if(!isArchiveOpened)
@@ -441,16 +454,6 @@ QHttpServerResponse ZipExportController::postAddFileToZip(const QHttpServerReque
 
     QJsonObject responseBody {{"isAdded", true}};
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
-}
-
-QString ZipExportController::getZipFilePath() const
-{
-    return zipFilePath;
-}
-
-void ZipExportController::setZipFilePath(const QString &newZipFilePath)
-{
-    zipFilePath = newZipFilePath;
 }
 
 QJsonObject ZipExportController::getFilesJson() const

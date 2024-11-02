@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonExport.addEventListener("click", async clickEvent => {
       const filePath = document.getElementById("input-zip-path").value;
-      await window.feState.setZipFilePath(filePath);
+      await sendSetZipFilePathRequest(filePath);
       window.router.routeToZipExport();
     });
 
@@ -157,6 +157,14 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
 function createDirectoryChangeEvent(targetPath) {
   return new CustomEvent('directoryNavigation', {bubbles: true, detail: {'targetPath': targetPath}});
+}
+
+
+async function sendSetZipFilePathRequest(filePath) {
+  let requestBody = {"filePath": null};
+  requestBody["filePath"] = filePath;
+
+  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);    
 }
 
 

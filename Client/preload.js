@@ -95,21 +95,3 @@ contextBridge.exposeInMainWorld('fmState', {
     });
   }
 });
-
-contextBridge.exposeInMainWorld('feState', {
-  setZipFilePath: (input) => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('feState:setZipFilePath', input)
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  getZipFilePath: () => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('feState:getZipFilePath')
-        .then(resolve)
-        .catch(reject);
-    });
-  }
-});

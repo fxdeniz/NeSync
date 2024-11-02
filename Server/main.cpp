@@ -75,6 +75,14 @@ int main(int argc, char *argv[])
         return restController.updatedFileList(request);
     });
 
+    httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.postSetZipFilePath(request);
+    });
+
+    httpServer.route("/getZipFilePath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getZipFilePath(request);
+    });
+
     httpServer.route("/postCreateZipArchive", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
         return zipExportController.postCreateArchive(request);
     });

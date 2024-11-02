@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     appendLog(textAreaLog, "ℹ️ Crearting zip file...");
 
-    const responseCreate = await sendPostCreateZipArchiveRequest(await window.feState.getZipFilePath());
+    const responseFilePath = await sendGetZipFilePathRequest();
+    const responseCreate = await sendPostCreateZipArchiveRequest(responseFilePath.filePath);
 
     appendLog(textAreaLog, `\t Created Successfully: ${responseCreate.isCreated ? '✅' : '❌'}`);
 
@@ -37,6 +38,11 @@ function disableButton(elementButton) {
 function enableButton(elementButton) {
   elementButton.disabled = false;
   elementButton.textContent = "Close";
+}
+
+
+async function sendGetZipFilePathRequest() {
+  return await fetchJSON('http://localhost:1234/getZipFilePath');    
 }
 
 
