@@ -8,6 +8,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     appendLog(textAreaLog, "ℹ️ Crearting zip file...");
 
+    const responseCreate = await sendPostCreateZipArchiveRequest(await window.feState.getZipFilePath());
+
+    appendLog(textAreaLog, `\t Created Successfully: ${responseCreate.isCreated ? '✅' : '❌'}`);
+
+    if(!responseCreate.isCreated) {
+      enableButton(buttonClose);
+      return;
+    }
+
     //enableButton(buttonClose);
 });
 
@@ -28,6 +37,14 @@ function disableButton(elementButton) {
 function enableButton(elementButton) {
   elementButton.disabled = false;
   elementButton.textContent = "Close";
+}
+
+
+async function sendPostCreateZipArchiveRequest(filePath) {
+  let requestBody = {"filePath": null};
+  requestBody["filePath"] = filePath;
+
+  return await postJSON('http://localhost:1234/postCreateZipArchive', requestBody);    
 }
 
 

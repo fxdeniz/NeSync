@@ -111,6 +111,7 @@ let fmState_CommitMessage;
 let fmState_NewAddedJson;
 let fmState_DeletedJson;
 let fmState_UpdatedJson;
+let feState_ZipFilePath;
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
@@ -160,6 +161,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fmState:getUpdatedJson', async (event) => {
     return fmState_UpdatedJson ? fmState_UpdatedJson : null;
+  });
+
+  ipcMain.handle('feState:setZipFilePath', async (event, input) => {
+    feState_ZipFilePath = input;
+  });
+
+  ipcMain.handle('feState:getZipFilePath', async (event) => {
+    return feState_ZipFilePath ? feState_ZipFilePath : null;
   });
   
   createWindow();
