@@ -83,6 +83,14 @@ int main(int argc, char *argv[])
         return zipExportController.getZipFilePath(request);
     });
 
+    httpServer.route("/postSetRootSymbolFolderPath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.postSetRootSymbolFolderPath(request);
+    });
+
+    httpServer.route("/getRootSymbolFolderPath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getRootSymbolFolderPath(request);
+    });
+
     httpServer.route("/postCreateZipArchive", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
         return zipExportController.postCreateArchive(request);
     });

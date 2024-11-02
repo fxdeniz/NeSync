@@ -31,7 +31,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonExport.addEventListener("click", async clickEvent => {
       const filePath = document.getElementById("input-zip-path").value;
+      // Get rootSymbolFolderPath without the <b> tags
+      const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
       await sendSetZipFilePathRequest(filePath);
+      await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
       window.router.routeToZipExport();
     });
 
@@ -165,6 +168,14 @@ async function sendSetZipFilePathRequest(filePath) {
   requestBody["filePath"] = filePath;
 
   return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);    
+}
+
+
+async function sendSetRootSymbolFolderPath(rootPath) {
+  let requestBody = {"rootSymbolFolderPath": null};
+  requestBody["rootSymbolFolderPath"] = rootPath;
+
+  return await postJSON('http://localhost:1234/postSetRootSymbolFolderPath', requestBody);    
 }
 
 

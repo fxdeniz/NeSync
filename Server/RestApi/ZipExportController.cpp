@@ -42,6 +42,35 @@ QHttpServerResponse ZipExportController::getZipFilePath(const QHttpServerRequest
     return response;
 }
 
+QHttpServerResponse ZipExportController::postSetRootSymbolFolderPath(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString rootSymbolFolderPath = jsonObject["rootSymbolFolderPath"].toString();
+
+    // TODO: Make a research whether normalization here is necessary or not.
+    //if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+    //    rootSymbolFolderPath = rootSymbolFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+    qDebug() << "rootSymbolFolderPath = " << rootSymbolFolderPath;
+    qDebug() << "";
+
+    this->rootSymbolFolderPath = rootSymbolFolderPath;
+
+    return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
+}
+
+QHttpServerResponse ZipExportController::getRootSymbolFolderPath(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody {{"rootPath", this->rootSymbolFolderPath}};
+    QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+
+    return response;
+}
+
 QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequest &request)
 {
     QuaZip archive(this->zipFilePath);
@@ -56,20 +85,10 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
 // Version 2, starts from the selected root.
 QHttpServerResponse ZipExportController::postAddFolderJson(const QHttpServerRequest &request)
 {
-    QByteArray requestBody = request.body();
-
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
-    QJsonObject jsonObject = jsonDoc.object();
-
-    QString rootSymbolFolderPath = jsonObject["rootSymbolFolderPath"].toString();
-
-    qDebug() << "rootSymbolFolderPath = " << rootSymbolFolderPath;
-    qDebug() << "";
-
     auto fsm = FileStorageManager::instance();
 
     QList<QJsonObject> folderStack;
-    folderStack.append(fsm->getFolderJsonBySymbolPath(rootSymbolFolderPath));
+    folderStack.append(fsm->getFolderJsonBySymbolPath(this->rootSymbolFolderPath));
 
     QStringList folderJsonContent;
 
@@ -165,20 +184,10 @@ QHttpServerResponse ZipExportController::postAddFolderJson_V1(const QHttpServerR
 // Version 3, starts from the selected root & returns "files" object in response.
 QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerRequest &request)
 {
-    QByteArray requestBody = request.body();
-
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
-    QJsonObject jsonObject = jsonDoc.object();
-
-    QString rootSymbolFolderPath = jsonObject["rootSymbolFolderPath"].toString();
-
-    qDebug() << "rootSymbolFolderPath = " << rootSymbolFolderPath;
-    qDebug() << "";
-
     auto fsm = FileStorageManager::instance();
 
     QList<QJsonObject> folderStack;
-    folderStack.append(fsm->getFolderJsonBySymbolPath(rootSymbolFolderPath));
+    folderStack.append(fsm->getFolderJsonBySymbolPath(this->rootSymbolFolderPath));
 
     QJsonObject filesJsonContent;
 
