@@ -17,6 +17,8 @@ public:
     QHttpServerResponse postAddFileJson(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileJson_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileJson_V2(const QHttpServerRequest& request);
+    QHttpServerResponse postAddFileToZip(const QHttpServerRequest& request);
+
 
     QString getZipFilePath() const;
     void setZipFilePath(const QString &newZipFilePath);

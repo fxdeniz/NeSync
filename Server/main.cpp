@@ -87,6 +87,10 @@ int main(int argc, char *argv[])
         return zipExportController.postAddFileJson(request);
     });
 
+    httpServer.route("/postAddFileToZip", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.postAddFileToZip(request);
+    });
+
     quint16 targetPort = 1234; // Making this 0, means random port.
     tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
 

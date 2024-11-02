@@ -371,6 +371,78 @@ QHttpServerResponse ZipExportController::postAddFileJson_V2(const QHttpServerReq
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
+QHttpServerResponse ZipExportController::postAddFileToZip(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    qlonglong versionNumber = jsonObject["versionNumber"].toInteger();
+
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "versionNumber = " << versionNumber;
+    qDebug() << "";
+
+    QJsonObject file = getFilesJson()[symbolFilePath].toObject();
+    QJsonObject version;
+
+    // TODO: Find something more efficent than traversing and searching the version number.
+    for(const QJsonValue &value : file[JsonKeys::File::VersionList].toArray())
+    {
+        QJsonObject current = value.toObject();
+        qlonglong number = value[JsonKeys::FileVersion::VersionNumber].toInteger();
+
+        if(versionNumber == number)
+        {
+            version = current;
+            break;
+        }
+    }
+
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdAdd);
+
+    if(!isArchiveOpened)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    auto fsm = FileStorageManager::instance();
+
+    QString internalFileName = version[JsonKeys::FileVersion::InternalFileName].toString();
+    QString internalFilePath = fsm->getStorageFolderPath() + internalFileName;
+
+    QFile rawFile(internalFilePath);
+    bool isReadable = rawFile.open(QFile::OpenModeFlag::ReadOnly);
+
+    if(!isReadable)
+    {
+        QJsonObject responseBody {{"isAdded", false}};
+        return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+    }
+
+    QuaZipNewInfo info(internalFileName, internalFilePath);
+    QuaZipFile fileInZip(&archive);
+    fileInZip.open(QFile::OpenModeFlag::WriteOnly, info);
+
+    while(!rawFile.atEnd())
+    {
+        // Write up to 100mb in every iteration.
+        qlonglong bytesWritten = fileInZip.write(rawFile.read(104857600));
+        if(bytesWritten == -1)
+        {
+            QJsonObject responseBody {{"isAdded", false}};
+            return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+        }
+    }
+
+    QJsonObject responseBody {{"isAdded", true}};
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}
+
 QString ZipExportController::getZipFilePath() const
 {
     return zipFilePath;
