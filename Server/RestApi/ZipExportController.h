@@ -17,10 +17,7 @@ public:
     QHttpServerResponse getRootSymbolFolderPath(const QHttpServerRequest& request);
     QHttpServerResponse postCreateArchive(const QHttpServerRequest& request);
     QHttpServerResponse postAddFolderJson(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFolderJson_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileJson(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFileJson_V1(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFileJson_V2(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileToZip(const QHttpServerRequest& request);
 
     QJsonObject getFilesJson() const;
