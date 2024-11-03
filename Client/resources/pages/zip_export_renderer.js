@@ -18,7 +18,19 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       return;
     }
 
-    //enableButton(buttonClose);
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "ℹ️ Adding folder tree metadata to zip file...");
+
+    const responseAddFolders = await sendAddFoldersJsonRequest();
+
+    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFolders.isAdded ? '✅' : '❌'}`);
+
+    if(!responseAddFolders.isAdded) {
+      enableButton(buttonClose);
+      return;
+    }
+
+    enableButton(buttonClose);
 });
 
 
@@ -51,6 +63,12 @@ async function sendPostCreateZipArchiveRequest(filePath) {
   requestBody["filePath"] = filePath;
 
   return await postJSON('http://localhost:1234/postCreateZipArchive', requestBody);    
+}
+
+
+async function sendAddFoldersJsonRequest() {
+  let requestBody = {};
+  return await postJSON('http://localhost:1234/postAddFolderJson', requestBody);    
 }
 
 
