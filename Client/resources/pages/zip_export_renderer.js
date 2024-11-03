@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, `\t Created Successfully: ${responseCreate.isCreated ? '✅' : '❌'}`);
 
     if(!responseCreate.isCreated) {
+      appendLog(textAreaLog, "⛔ Exporting aborted due to error, please try again.");
       enableButton(buttonClose);
       return;
     }
@@ -21,11 +22,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding folder tree metadata to zip file...");
 
-    const responseAddFoldersMeta = await sendAddFoldersJsonRequest();
+    const responseAddFoldersJson = await sendAddFoldersJsonRequest();
 
-    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFoldersMeta.isAdded ? '✅' : '❌'}`);
+    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFoldersJson.isAdded ? '✅' : '❌'}`);
 
-    if(!responseAddFoldersMeta.isAdded) {
+    if(!responseAddFoldersJson.isAdded) {
+      appendLog(textAreaLog, "⛔ Exporting aborted due to error, please try again.");
       enableButton(buttonClose);
       return;
     }
@@ -33,15 +35,41 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding files' metadata to zip file...");
 
-    const responseAddFilesMeta = await sendAddFilesJsonRequest();
+    const responseAddFilesJson = await sendAddFilesJsonRequest();
 
-    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFilesMeta.isAdded ? '✅' : '❌'}`);
+    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFilesJson.isAdded ? '✅' : '❌'}`);
 
-    if(!responseAddFilesMeta.isAdded) {
+    if(!responseAddFilesJson.isAdded) {
+      appendLog(textAreaLog, "⛔ Exporting aborted due to error, please try again.");
       enableButton(buttonClose);
       return;
     }
 
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "ℹ️ Adding actual files into zip file...");
+
+    const files = responseAddFilesJson.files;
+
+    for (symbolFilePath in files) {
+      const fileObject = files[symbolFilePath];
+      appendLog(textAreaLog, `\t 👉 Adding copies of file: ${fileObject.symbolFilePath}`);
+
+      for (versionObject of fileObject.versionList) {
+        const versionNumber = versionObject.versionNumber;
+        appendLog(textAreaLog, `\t\t Adding version: ${versionNumber}`);
+        const responseAddFileToZip = await sendAddFileToZipRequest(symbolFilePath, versionNumber);
+        appendLog(textAreaLog, `\t\t\t Added Successfully: ${responseAddFileToZip.isAdded ? '✅' : '❌'}`);
+
+        if(!responseAddFileToZip.isAdded) {
+          appendLog(textAreaLog, "⛔ Exporting aborted due to error, please try again.");
+          enableButton(buttonClose);
+          return;    
+        }
+      }
+    }
+
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "💯 Exporting to a zip file completed successfully.");
     enableButton(buttonClose);
 });
 
@@ -87,6 +115,15 @@ async function sendAddFilesJsonRequest() {
 async function sendAddFoldersJsonRequest() {
   let requestBody = {};
   return await postJSON('http://localhost:1234/postAddFolderJson', requestBody);    
+}
+
+
+async function sendAddFileToZipRequest(symbolFilePath, versionNumber) {
+  let requestBody = {"symbolFilePath": null, "versionNumber": null};
+  requestBody["symbolFilePath"] = symbolFilePath;
+  requestBody["versionNumber"] = versionNumber;
+
+  return await postJSON('http://localhost:1234/postAddFileToZip', requestBody);    
 }
 
 
