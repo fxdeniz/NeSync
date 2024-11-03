@@ -21,11 +21,23 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding folder tree metadata to zip file...");
 
-    const responseAddFolders = await sendAddFoldersJsonRequest();
+    const responseAddFoldersMeta = await sendAddFoldersJsonRequest();
 
-    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFolders.isAdded ? '✅' : '❌'}`);
+    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFoldersMeta.isAdded ? '✅' : '❌'}`);
 
-    if(!responseAddFolders.isAdded) {
+    if(!responseAddFoldersMeta.isAdded) {
+      enableButton(buttonClose);
+      return;
+    }
+
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "ℹ️ Adding files' metadata to zip file...");
+
+    const responseAddFilesMeta = await sendAddFilesJsonRequest();
+
+    appendLog(textAreaLog, `\t Added Successfully: ${responseAddFilesMeta.isAdded ? '✅' : '❌'}`);
+
+    if(!responseAddFilesMeta.isAdded) {
       enableButton(buttonClose);
       return;
     }
@@ -63,6 +75,12 @@ async function sendPostCreateZipArchiveRequest(filePath) {
   requestBody["filePath"] = filePath;
 
   return await postJSON('http://localhost:1234/postCreateZipArchive', requestBody);    
+}
+
+
+async function sendAddFilesJsonRequest() {
+  let requestBody = {};
+  return await postJSON('http://localhost:1234/postAddFileJson', requestBody);    
 }
 
 
