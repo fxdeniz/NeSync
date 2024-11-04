@@ -754,7 +754,78 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
 
 QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest &request)
 {
+    auto fsm = FileStorageManager::instance();
+    QStringList rootFolders;
 
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
+        QStringList children = findNewFolders(path);
+
+        if(!children.isEmpty())
+            rootFolders.append(children);
+    }
+
+    QStringList folders;
+    QMultiHash<QString, QString> childFolderSuffixesOfRoot;
+
+    for(const QString &rootPath : rootFolders)
+    {
+        QStringList children = findNewFolders(rootPath, true);
+        folders.append(children);
+
+        for(const QString &child : children)
+        {
+            QString suffix = child.split(rootPath).last();
+            childFolderSuffixesOfRoot.insert(rootPath, suffix);
+        }
+    }
+
+    folders.append(rootFolders);
+
+    std::sort(folders.begin(), folders.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    QJsonObject responseBody;
+    responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolders));
+    responseBody.insert("folders", QJsonArray::fromStringList(folders));
+
+    QJsonObject suffixObj;
+    for(const QString &rootPath : childFolderSuffixesOfRoot.uniqueKeys())
+    {
+        QStringList values = childFolderSuffixesOfRoot.values(rootPath);
+
+        std::sort(values.begin(), values.end(), [](const QString &s1, const QString &s2) {
+            return s1.length() < s2.length();
+        });
+
+        QJsonArray array = QJsonArray::fromStringList(values);
+        suffixObj.insert(rootPath, array);
+    }
+
+    responseBody.insert("childFolderSuffixes", suffixObj);
+
+    QJsonObject rootOfRootObj;
+    for(const QString &rootPath : rootFolders)
+    {
+        QFileInfo info(rootPath.chopped(1));
+        QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+        qDebug() << "absolute path = " << parentPath;
+
+        if(!parentPath.endsWith(QDir::separator()))
+            parentPath.append(QDir::separator());
+
+        if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+            parentPath = parentPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+        rootOfRootObj.insert(rootPath, parentPath);
+    }
+
+    responseBody.insert("rootOfRootFolder", rootOfRootObj);
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    return response;
 }
 
 QHttpServerResponse RestController::deletedList(const QHttpServerRequest &request)
@@ -1000,16 +1071,24 @@ void RestController::newAddedList_findChildrenOfRootFolders(QSet<QString> existi
     }
 }
 
-QStringList RestController::findNewFoldersNonRecursively(const QString &rootPath)
+QStringList RestController::findNewFolders(const QString &rootPath, bool isRecursive)
 {
     auto fsm = FileStorageManager::instance();
     QStringList result;
 
-    QDirIterator dirIterator(rootPath, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+    QScopedPointer<QDirIterator>ptr(new QDirIterator(rootPath, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot));
 
-    while (dirIterator.hasNext())
+    if(isRecursive)
     {
-        QString path = QDir::toNativeSeparators(dirIterator.next());
+        auto rawPtr = new QDirIterator(rootPath,
+                                       QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot,
+                                       QDirIterator::IteratorFlag::Subdirectories);
+        ptr.reset(rawPtr);
+    }
+
+    while (ptr->hasNext())
+    {
+        QString path = QDir::toNativeSeparators(ptr->next());
 
         // MacOS normalization
         //https://ss64.com/mac/syntax-filenames.html

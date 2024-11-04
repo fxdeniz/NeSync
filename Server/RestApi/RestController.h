@@ -31,8 +31,6 @@ public:
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
 
-    QStringList findNewFoldersNonRecursively(const QString &rootPath);
-
 signals:
 
 private:
@@ -53,6 +51,8 @@ private:
                                                 QStringList &newFolderList,
                                                 QMultiHash<QString, QString> &childFoldersOfNewRootFolderMap,
                                                 QMultiHash<QString, QString> &newFileMap);
+
+    QStringList findNewFolders(const QString &rootPath, bool isRecursive = false);
 };
 
 #endif // RESTCONTROLLER_H

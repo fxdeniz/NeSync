@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QTcpServer>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QStandardPaths>
 #include <QtHttpServer/QHttpServer>
@@ -76,13 +75,8 @@ int main(int argc, char *argv[])
         return restController.updatedFileList(request);
     });
 
-    httpServer.route("/findRootFolders", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        QString path = request.query().queryItemValue("path");
-
-        QJsonObject obj;
-        QStringList result = restController.findNewFoldersNonRecursively(path);
-        obj.insert("folders", QJsonArray::fromStringList(result));
-        return QHttpServerResponse(obj, QHttpServerResponder::StatusCode::Ok);
+    httpServer.route("/simpleNewAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
+        return restController.simpleNewAddedList(request);
     });
 
     httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
