@@ -2,7 +2,6 @@
 #define RESTCONTROLLER_H
 
 #include <QObject>
-#include <QThread>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
 
@@ -28,8 +27,11 @@ public:
     QHttpServerResponse newAddedList_V2(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList_V3(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
+    QHttpServerResponse simpleNewAddedList(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
+
+    QStringList findNewFoldersNonRecursively(const QString &rootPath);
 
 signals:
 
@@ -51,7 +53,6 @@ private:
                                                 QStringList &newFolderList,
                                                 QMultiHash<QString, QString> &childFoldersOfNewRootFolderMap,
                                                 QMultiHash<QString, QString> &newFileMap);
-
 };
 
 #endif // RESTCONTROLLER_H

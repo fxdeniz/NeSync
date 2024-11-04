@@ -752,6 +752,11 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
     return responseBody;
 }
 
+QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest &request)
+{
+
+}
+
 QHttpServerResponse RestController::deletedList(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
@@ -993,4 +998,32 @@ void RestController::newAddedList_findChildrenOfRootFolders(QSet<QString> existi
             }
         }
     }
+}
+
+QStringList RestController::findNewFoldersNonRecursively(const QString &rootPath)
+{
+    auto fsm = FileStorageManager::instance();
+    QStringList result;
+
+    QDirIterator dirIterator(rootPath, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot);
+
+    while (dirIterator.hasNext())
+    {
+        QString path = QDir::toNativeSeparators(dirIterator.next());
+
+        // MacOS normalization
+        //https://ss64.com/mac/syntax-filenames.html
+        if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+            path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+        if(!path.endsWith(QDir::separator()))
+            path.append(QDir::separator());
+
+        bool isExists = fsm->getFolderJsonByUserPath(path)[JsonKeys::IsExist].toBool();
+
+        if(!isExists)
+            result.append(path);
+    }
+
+    return result;
 }
