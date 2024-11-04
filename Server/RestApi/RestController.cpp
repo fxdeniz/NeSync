@@ -757,13 +757,24 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
     auto fsm = FileStorageManager::instance();
     QStringList rootFolders;
 
+    QJsonObject filesObj;
+
     for(const QJsonValue &value : fsm->getActiveFolderList())
     {
         QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
-        QStringList children = findNewFolders(path);
+        QStringList childFolders = findNewFolders(path);
+        QStringList childFiles = findNewFiles(path); // Find files in existing folders non-recursively.
 
-        if(!children.isEmpty())
-            rootFolders.append(children);
+        if(!childFolders.isEmpty())
+            rootFolders.append(childFolders);
+
+        if(!childFiles.isEmpty())
+        {
+            for (qlonglong index = 0; index < childFiles.size(); ++index)
+                childFiles[index] = childFiles[index].split(path).last();
+
+            filesObj.insert(path, QJsonArray::fromStringList(childFiles));
+        }
     }
 
     QStringList folders;
@@ -771,13 +782,32 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
 
     for(const QString &rootPath : rootFolders)
     {
-        QStringList children = findNewFolders(rootPath, true);
-        folders.append(children);
+        QStringList childFolders = findNewFolders(rootPath, true);
+        QStringList childFilesOfRoot = findNewFiles(rootPath); // Find files in new root folders non-recursively.
+        folders.append(childFolders);
 
-        for(const QString &child : children)
+        if(!childFilesOfRoot.isEmpty())
+        {
+            for (qlonglong index = 0; index < childFilesOfRoot.size(); ++index)
+                childFilesOfRoot[index] = childFilesOfRoot[index].split(rootPath).last();
+
+            filesObj.insert(rootPath, QJsonArray::fromStringList(childFilesOfRoot));
+        }
+
+        for(const QString &child : childFolders)
         {
             QString suffix = child.split(rootPath).last();
             childFolderSuffixesOfRoot.insert(rootPath, suffix);
+
+            QStringList childFiles = findNewFiles(child); // Find files in child folders of new root folders non-recursively.
+
+            if(!childFiles.isEmpty())
+            {
+                for (qlonglong index = 0; index < childFiles.size(); ++index)
+                    childFiles[index] = childFiles[index].split(child).last();
+
+                filesObj.insert(child, QJsonArray::fromStringList(childFiles));
+            }
         }
     }
 
@@ -790,6 +820,7 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
     QJsonObject responseBody;
     responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolders));
     responseBody.insert("folders", QJsonArray::fromStringList(folders));
+    responseBody.insert("files", filesObj);
 
     QJsonObject suffixObj;
     for(const QString &rootPath : childFolderSuffixesOfRoot.uniqueKeys())
@@ -811,7 +842,6 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
     {
         QFileInfo info(rootPath.chopped(1));
         QString parentPath = QDir::toNativeSeparators(info.absolutePath());
-        qDebug() << "absolute path = " << parentPath;
 
         if(!parentPath.endsWith(QDir::separator()))
             parentPath.append(QDir::separator());
@@ -1099,6 +1129,39 @@ QStringList RestController::findNewFolders(const QString &rootPath, bool isRecur
             path.append(QDir::separator());
 
         bool isExists = fsm->getFolderJsonByUserPath(path)[JsonKeys::IsExist].toBool();
+
+        if(!isExists)
+            result.append(path);
+    }
+
+    return result;
+}
+
+QStringList RestController::findNewFiles(const QString &rootPath, bool isRecursive)
+{
+    auto fsm = FileStorageManager::instance();
+    QStringList result;
+
+    QScopedPointer<QDirIterator>ptr(new QDirIterator(rootPath, QDir::Filter::Files | QDir::Filter::NoDotAndDotDot));
+
+    if(isRecursive)
+    {
+        auto rawPtr = new QDirIterator(rootPath,
+                                       QDir::Filter::Files | QDir::Filter::NoDotAndDotDot,
+                                       QDirIterator::IteratorFlag::Subdirectories);
+        ptr.reset(rawPtr);
+    }
+
+    while (ptr->hasNext())
+    {
+        QString path = QDir::toNativeSeparators(ptr->next());
+
+        // MacOS normalization
+        //https://ss64.com/mac/syntax-filenames.html
+        if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+            path = path.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+        bool isExists = fsm->getFileJsonByUserPath(path)[JsonKeys::IsExist].toBool();
 
         if(!isExists)
             result.append(path);

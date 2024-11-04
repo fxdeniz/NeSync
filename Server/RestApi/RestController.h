@@ -53,6 +53,8 @@ private:
                                                 QMultiHash<QString, QString> &newFileMap);
 
     QStringList findNewFolders(const QString &rootPath, bool isRecursive = false);
+    QStringList findNewFiles(const QString &rootPath, bool isRecursive = false);
+
 };
 
 #endif // RESTCONTROLLER_H
