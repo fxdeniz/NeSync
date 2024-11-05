@@ -858,6 +858,21 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
     return response;
 }
 
+QHttpServerResponse RestController::simpleNewAddedList_V2(const QHttpServerRequest &request)
+{
+    QStringList rootFolderList = generateRootFoldersList();
+    QStringList folderList = generateFoldersList();
+    QJsonObject responseBody;
+
+    responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolderList));
+    responseBody.insert("folders", QJsonArray::fromStringList(folderList));
+    responseBody.insert("childFolderSuffixes", generateChildFolderSuffixObject(rootFolderList));
+    responseBody.insert("rootOfRootFolder", generateRootOfRootFoldersObject(rootFolderList));
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    return response;
+}
+
 QHttpServerResponse RestController::deletedList(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
@@ -1099,6 +1114,92 @@ void RestController::newAddedList_findChildrenOfRootFolders(QSet<QString> existi
             }
         }
     }
+}
+
+QStringList RestController::generateRootFoldersList()
+{
+    QStringList result;
+
+    auto fsm = FileStorageManager::instance();
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
+        QStringList childFolders = findNewFolders(path);
+
+        if(!childFolders.isEmpty())
+            result.append(childFolders);
+    }
+
+    return result;
+}
+
+QJsonObject RestController::generateChildFolderSuffixObject(QStringList rootFolderList)
+{
+    QJsonObject result;
+
+    for(const QString &rootPath : rootFolderList)
+    {
+        QStringList childFolders = findNewFolders(rootPath, true);
+        QStringList suffixList;
+
+        for(const QString &child : childFolders)
+        {
+            QString suffix = child.split(rootPath).last();
+            suffixList.append(suffix);
+        }
+
+        std::sort(suffixList.begin(), suffixList.end(), [](const QString &s1, const QString &s2) {
+            return s1.length() < s2.length();
+        });
+
+        result.insert(rootPath, QJsonArray::fromStringList(suffixList));
+    }
+
+    return result;
+}
+
+QJsonObject RestController::generateRootOfRootFoldersObject(QStringList rootFolderList)
+{
+    QJsonObject result;
+
+    for(const QString &rootPath : rootFolderList)
+    {
+        QFileInfo info(rootPath.chopped(1));
+        QString parentPath = QDir::toNativeSeparators(info.absolutePath());
+
+        if(!parentPath.endsWith(QDir::separator()))
+            parentPath.append(QDir::separator());
+
+        if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+            parentPath = parentPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+        result.insert(rootPath, parentPath);
+    }
+
+    return result;
+}
+
+QStringList RestController::generateFoldersList()
+{
+    QStringList result;
+
+    auto fsm = FileStorageManager::instance();
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
+        QStringList childFolders = findNewFolders(path, true);
+
+        if(!childFolders.isEmpty())
+            result.append(childFolders);
+    }
+
+    std::sort(result.begin(), result.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    return result;
 }
 
 QStringList RestController::findNewFolders(const QString &rootPath, bool isRecursive)

@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
     });
 
     httpServer.route("/simpleNewAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.simpleNewAddedList(request);
+        //return restController.simpleNewAddedList(request);
+        return restController.simpleNewAddedList_V2(request);
     });
 
     httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {

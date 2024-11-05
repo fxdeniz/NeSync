@@ -28,6 +28,7 @@ public:
     QHttpServerResponse newAddedList_V3(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse simpleNewAddedList(const QHttpServerRequest& request);
+    QHttpServerResponse simpleNewAddedList_V2(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
 
@@ -52,6 +53,10 @@ private:
                                                 QMultiHash<QString, QString> &childFoldersOfNewRootFolderMap,
                                                 QMultiHash<QString, QString> &newFileMap);
 
+    QStringList generateRootFoldersList();
+    QJsonObject generateChildFolderSuffixObject(QStringList rootFolderList);
+    QJsonObject generateRootOfRootFoldersObject(QStringList rootFolderList);
+    QStringList generateFoldersList();
     QStringList findNewFolders(const QString &rootPath, bool isRecursive = false);
     QStringList findNewFiles(const QString &rootPath, bool isRecursive = false);
 
