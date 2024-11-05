@@ -28,7 +28,7 @@ public:
     QHttpServerResponse newAddedList_V3(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse simpleNewAddedList(const QHttpServerRequest& request);
-    QHttpServerResponse simpleNewAddedList_V2(const QHttpServerRequest& request);
+    QHttpServerResponse simpleNewAddedList_V1(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
 
@@ -57,6 +57,7 @@ private:
     QJsonObject generateChildFolderSuffixObject(QStringList rootFolderList);
     QJsonObject generateRootOfRootFoldersObject(QStringList rootFolderList);
     QStringList generateFoldersList();
+    QJsonObject generateFilesObject();
     QStringList findNewFolders(const QString &rootPath, bool isRecursive = false);
     QStringList findNewFiles(const QString &rootPath, bool isRecursive = false);
 
