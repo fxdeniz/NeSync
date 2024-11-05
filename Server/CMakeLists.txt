@@ -55,6 +55,8 @@ set(PROJECT_SOURCES
   # Rest Controllers
       RestApi/RestController.h
       RestApi/RestController.cpp
+      RestApi/FileSystemMonitorController.h
+      RestApi/FileSystemMonitorController.cpp
       RestApi/ZipExportController.h
       RestApi/ZipExportController.cpp
   #

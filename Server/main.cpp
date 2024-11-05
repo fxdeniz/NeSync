@@ -11,6 +11,7 @@
 #include "Utility/AppConfig.h"
 #include "RestApi/RestController.h"
 #include "RestApi/ZipExportController.h"
+#include "RestApi/FileSystemMonitorController.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
     QTcpServer tcpServer;
     QHttpServer httpServer;
     RestController restController;
+    FileSystemMonitorController fsMonitorController;
     ZipExportController zipExportController;
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
@@ -63,16 +65,16 @@ int main(int argc, char *argv[])
         return restController.getFileContentByUserPath(request);
     });
 
-    httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.newAddedList(request);
+    httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+        return fsMonitorController.newAddedList(request);
     });
 
-    httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.deletedList(request);
+    httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+        return fsMonitorController.deletedList(request);
     });
 
-    httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&restController](const QHttpServerRequest &request) {
-        return restController.updatedFileList(request);
+    httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+        return fsMonitorController.updatedFileList(request);
     });
 
     httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
