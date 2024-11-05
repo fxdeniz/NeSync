@@ -23,8 +23,6 @@ public:
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContentByUserPath(const QHttpServerRequest& request);
     QHttpServerResponse getFileContentByUserPath(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedList_V1(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedList_V2(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse deletedList(const QHttpServerRequest& request);
     QHttpServerResponse updatedFileList(const QHttpServerRequest& request);
@@ -32,24 +30,6 @@ public:
 signals:
 
 private:
-    void newAddedList_findExisting(QSet<QString> &existingFolderSet,
-                                   QSet<QString> &existingFileSet,
-                                   QStringList &existingFolderList);
-
-    void newAddedList_findNewAtRootLevel(QSet<QString> existingFolderSet,
-                                         QSet<QString> existingFileSet,
-                                         QStringList existingFolderList,
-                                         QStringList &newRootFolderList,
-                                         QMultiHash<QString, QString> &newFileMap,
-                                         QHash<QString, QString> &newRootFolderRootMap);
-
-    void newAddedList_findChildrenOfRootFolders(QSet<QString> existingFolderSet,
-                                                QSet<QString> existingFileSet,
-                                                QStringList newRootFolderList,
-                                                QStringList &newFolderList,
-                                                QMultiHash<QString, QString> &childFoldersOfNewRootFolderMap,
-                                                QMultiHash<QString, QString> &newFileMap);
-
     QStringList generateRootFoldersList();
     QJsonObject generateChildFolderSuffixObject(QStringList rootFolderList);
     QJsonObject generateRootOfRootFoldersObject(QStringList rootFolderList);
