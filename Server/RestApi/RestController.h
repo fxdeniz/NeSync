@@ -56,8 +56,8 @@ private:
     QStringList generateRootFoldersList();
     QJsonObject generateChildFolderSuffixObject(QStringList rootFolderList);
     QJsonObject generateRootOfRootFoldersObject(QStringList rootFolderList);
+    QJsonObject generateFilesObject(QStringList rootFolderList);
     QStringList generateFoldersList();
-    QJsonObject generateFilesObject();
     QStringList findNewFolders(const QString &rootPath, bool isRecursive = false);
     QStringList findNewFiles(const QString &rootPath, bool isRecursive = false);
 

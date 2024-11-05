@@ -760,10 +760,10 @@ QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest 
     QJsonObject responseBody;
 
     responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolderList));
-    responseBody.insert("folders", QJsonArray::fromStringList(folderList));
     responseBody.insert("childFolderSuffixes", generateChildFolderSuffixObject(rootFolderList));
     responseBody.insert("rootOfRootFolder", generateRootOfRootFoldersObject(rootFolderList));
-    responseBody.insert("files", generateFilesObject());
+    responseBody.insert("files", generateFilesObject(rootFolderList));
+    responseBody.insert("folders", QJsonArray::fromStringList(folderList));
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     return response;
@@ -1155,7 +1155,8 @@ QJsonObject RestController::generateChildFolderSuffixObject(QStringList rootFold
             return s1.length() < s2.length();
         });
 
-        result.insert(rootPath, QJsonArray::fromStringList(suffixList));
+        if(!childFolders.isEmpty())
+            result.insert(rootPath, QJsonArray::fromStringList(suffixList));
     }
 
     return result;
@@ -1182,39 +1183,43 @@ QJsonObject RestController::generateRootOfRootFoldersObject(QStringList rootFold
     return result;
 }
 
-QStringList RestController::generateFoldersList()
-{
-    QStringList result;
-
-    auto fsm = FileStorageManager::instance();
-
-    for(const QJsonValue &value : fsm->getActiveFolderList())
-    {
-        QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
-        QStringList childFolders = findNewFolders(path, true);
-
-        if(!childFolders.isEmpty())
-            result.append(childFolders);
-    }
-
-    std::sort(result.begin(), result.end(), [](const QString &s1, const QString &s2) {
-        return s1.length() < s2.length();
-    });
-
-    return result;
-}
-
-QJsonObject RestController::generateFilesObject()
+QJsonObject RestController::generateFilesObject(QStringList rootFolderList)
 {
     QJsonObject result;
     QMultiHash<QString, QString> fileMap;
 
     auto fsm = FileStorageManager::instance();
 
+    // Find new files in existing folders.
     for(const QJsonValue &value : fsm->getActiveFolderList())
     {
         QString folderPath = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
-        QStringList childFiles = findNewFiles(folderPath, true);
+        QStringList childFiles = findNewFiles(folderPath);
+
+        if(!childFiles.isEmpty())
+        {
+            QString parentFolderPath;
+
+            for (qlonglong index = 0; index < childFiles.size(); ++index)
+            {
+                parentFolderPath = QFileInfo(childFiles[index]).absolutePath();
+
+                if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
+                    parentFolderPath = parentFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+                if(!parentFolderPath.endsWith(QDir::separator()))
+                    parentFolderPath.append(QDir::separator());
+
+                QString fileName = childFiles[index].split(parentFolderPath).last();
+                fileMap.insert(parentFolderPath, fileName);
+            }
+        }
+    }
+
+    // Find new files in new root folders.
+    for(const QString &rootPath : rootFolderList)
+    {
+        QStringList childFiles = findNewFiles(rootPath, true); // This step is recursive, in the previous step it is not.
 
         if(!childFiles.isEmpty())
         {
@@ -1239,10 +1244,31 @@ QJsonObject RestController::generateFilesObject()
     for(const QString &folderPath : fileMap.uniqueKeys())
     {
         QStringList values = fileMap.values(folderPath);
-        QSet<QString> uniqueValues(values.begin(), values.end()); // Remove duplicate file names.
 
-        result.insert(folderPath, QJsonArray::fromStringList(uniqueValues.values()));
+        result.insert(folderPath, QJsonArray::fromStringList(values));
     }
+
+    return result;
+}
+
+QStringList RestController::generateFoldersList()
+{
+    QStringList result;
+
+    auto fsm = FileStorageManager::instance();
+
+    for(const QJsonValue &value : fsm->getActiveFolderList())
+    {
+        QString path = value.toObject()[JsonKeys::Folder::UserFolderPath].toString();
+        QStringList childFolders = findNewFolders(path, true);
+
+        if(!childFolders.isEmpty())
+            result.append(childFolders);
+    }
+
+    std::sort(result.begin(), result.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
 
     return result;
 }
