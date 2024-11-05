@@ -368,8 +368,7 @@ QHttpServerResponse RestController::getFileContentByUserPath(const QHttpServerRe
     return response;
 }
 
-// Version 4, returns new added folder tree structure.
-QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+QHttpServerResponse RestController::newAddedList_V1(const QHttpServerRequest &request)
 {
     QJsonObject responseBody;
 
@@ -447,23 +446,7 @@ QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &reque
     return responseBody;
 }
 
-// Version 2, code is simpler.
-QHttpServerResponse RestController::simpleNewAddedList(const QHttpServerRequest &request)
-{
-    QStringList rootFolderList = generateRootFoldersList();
-    QJsonObject responseBody;
-
-    responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolderList));
-    responseBody.insert("childFolderSuffixes", generateChildFolderSuffixObject(rootFolderList));
-    responseBody.insert("rootOfRootFolder", generateRootOfRootFoldersObject(rootFolderList));
-    responseBody.insert("files", generateFilesObject(rootFolderList));
-    responseBody.insert("folders", QJsonArray::fromStringList(generateFoldersList(rootFolderList)));
-
-    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
-    return response;
-}
-
-QHttpServerResponse RestController::simpleNewAddedList_V1(const QHttpServerRequest &request)
+QHttpServerResponse RestController::newAddedList_V2(const QHttpServerRequest &request)
 {
     auto fsm = FileStorageManager::instance();
     QStringList rootFolders;
@@ -564,6 +547,22 @@ QHttpServerResponse RestController::simpleNewAddedList_V1(const QHttpServerReque
     }
 
     responseBody.insert("rootOfRootFolder", rootOfRootObj);
+
+    QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
+    return response;
+}
+
+// Version 3, code is simpler.
+QHttpServerResponse RestController::newAddedList(const QHttpServerRequest &request)
+{
+    QStringList rootFolderList = generateRootFoldersList();
+    QJsonObject responseBody;
+
+    responseBody.insert("rootFolders", QJsonArray::fromStringList(rootFolderList));
+    responseBody.insert("childFolderSuffixes", generateChildFolderSuffixObject(rootFolderList));
+    responseBody.insert("rootOfRootFolder", generateRootOfRootFoldersObject(rootFolderList));
+    responseBody.insert("files", generateFilesObject(rootFolderList));
+    responseBody.insert("folders", QJsonArray::fromStringList(generateFoldersList(rootFolderList)));
 
     QHttpServerResponse response(responseBody, QHttpServerResponse::StatusCode::Ok);
     return response;
