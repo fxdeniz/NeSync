@@ -23,9 +23,6 @@ public:
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContentByUserPath(const QHttpServerRequest& request);
     QHttpServerResponse getFileContentByUserPath(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedList_V1(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedList_V2(const QHttpServerRequest& request);
-    QHttpServerResponse newAddedList_V3(const QHttpServerRequest& request);
     QHttpServerResponse newAddedList(const QHttpServerRequest& request);
     QHttpServerResponse simpleNewAddedList(const QHttpServerRequest& request);
     QHttpServerResponse simpleNewAddedList_V1(const QHttpServerRequest& request);
