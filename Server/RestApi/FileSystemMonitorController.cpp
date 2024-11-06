@@ -224,7 +224,7 @@ QJsonObject FileSystemMonitorController::generateFilesObject(QStringList rootFol
         {
             QString parentFolderPath;
 
-            for (qlonglong index = 0; index < childFiles.size(); ++index)
+            for (qulonglong index = 0; index < childFiles.size(); ++index)
             {
                 parentFolderPath = QFileInfo(childFiles[index]).absolutePath();
 
@@ -249,7 +249,7 @@ QJsonObject FileSystemMonitorController::generateFilesObject(QStringList rootFol
         {
             QString parentFolderPath;
 
-            for (qlonglong index = 0; index < childFiles.size(); ++index)
+            for (qulonglong index = 0; index < childFiles.size(); ++index)
             {
                 parentFolderPath = QFileInfo(childFiles[index]).absolutePath();
 
