@@ -7,35 +7,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonFileMonitor = document.getElementById("button-file-monitor");
     const buttonSelectZipFilePath = document.getElementById("button-select-zip-path");
     const buttonExport = document.getElementById("button-export");
+    const exportModal = document.getElementById("export-modal");
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
-    });
-
-    buttonSelectZipFilePath.addEventListener("click", async clickEvent => {
-      const inputZipPath = document.getElementById("input-zip-path");
-      const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
-
-      if(selectedPath) {
-        if(!selectedPath.endsWith(".zip")) {
-          alert("File name should end with \".zip\" extension.");
-          return;
-        }
-
-        inputZipPath.value = selectedPath;
-        const buttonExport = document.getElementById("button-export");
-        buttonExport.disabled = false;
-        buttonExport.focus();
-      }
-    });
-
-    buttonExport.addEventListener("click", async clickEvent => {
-      const filePath = document.getElementById("input-zip-path").value;
-      // Get rootSymbolFolderPath without the <b> tags
-      const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-      await sendSetZipFilePathRequest(filePath);
-      await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
-      window.router.routeToZipExport();
     });
 
     buttonPrev.disabled = true;
@@ -44,22 +19,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
+    buttonSelectZipFilePath.addEventListener("click", onClickHandler_buttonSelectZipFilePath);
+    buttonExport.addEventListener("click", onClickHandler_buttonExport);
+    exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
 
     let navigationEvnet = createDirectoryChangeEvent('/');
     inputCurrentPath.dispatchEvent(navigationEvnet);
-
-    const exportModal = document.getElementById('export-modal');
-
-    exportModal.addEventListener('shown.bs.modal', function () {
-      document.getElementById("input-zip-path").value = "";
-      document.getElementById("button-export").disabled = true;
-      document.getElementById("button-select-zip-path").focus();
-
-      const currentPath = document.getElementById("input-current-path").value;
-      const pExportSource = document.getElementById("p-export-source");
-      pExportSource.innerHTML = `<b>${currentPath}</b>`;
-      });
-  });
+});
 
 async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
@@ -157,6 +123,41 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   }
 }
 
+async function onClickHandler_buttonSelectZipFilePath() {
+  const inputZipPath = document.getElementById("input-zip-path");
+  const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
+
+  if(selectedPath) {
+    if(!selectedPath.endsWith(".zip")) {
+      alert("File name should end with \".zip\" extension.");
+      return;
+    }
+
+    inputZipPath.value = selectedPath;
+    const buttonExport = document.getElementById("button-export");
+    buttonExport.disabled = false;
+    buttonExport.focus();
+  }
+}
+
+async function onClickHandler_buttonExport() {
+  const filePath = document.getElementById("input-zip-path").value;
+  // Get rootSymbolFolderPath without the <b> tags
+  const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
+  await sendSetZipFilePathRequest(filePath);
+  await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
+  window.router.routeToZipExport();
+}
+
+function onShownHandler_exportModal() {
+  document.getElementById("input-zip-path").value = "";
+  document.getElementById("button-export").disabled = true;
+  document.getElementById("button-select-zip-path").focus();
+
+  const currentPath = document.getElementById("input-current-path").value;
+  const pExportSource = document.getElementById("p-export-source");
+  pExportSource.innerHTML = `<b>${currentPath}</b>`;
+}
 
 function createDirectoryChangeEvent(targetPath) {
   return new CustomEvent('directoryNavigation', {bubbles: true, detail: {'targetPath': targetPath}});
