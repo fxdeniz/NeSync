@@ -1,11 +1,11 @@
 #ifndef ZIPEXPORTCONTROLLER_H
 #define ZIPEXPORTCONTROLLER_H
 
+#include "Services/ZipExportService.h"
+
 #include <QObject>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
-
-#include "Services/ZipExportService.h"
 
 class ZipExportController : public QObject
 {

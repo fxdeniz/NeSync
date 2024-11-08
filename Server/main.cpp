@@ -66,15 +66,15 @@ int main(int argc, char *argv[])
     });
 
     httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
-        return fsMonitorController.newAddedList(request);
+        return fsMonitorController.newAddedItems(request);
     });
 
     httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
-        return fsMonitorController.deletedList(request);
+        return fsMonitorController.deletedItems(request);
     });
 
     httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
-        return fsMonitorController.updatedFileList(request);
+        return fsMonitorController.updatedFiles(request);
     });
 
     httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
