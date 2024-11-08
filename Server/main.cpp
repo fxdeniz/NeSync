@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     });
 
     httpServer.route("/postAddFolderJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFolderJson(request);
+        return zipExportController.postAddFoldersJson(request);
     });
 
     httpServer.route("/postAddFileJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {

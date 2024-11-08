@@ -2,9 +2,10 @@
 #define ZIPEXPORTCONTROLLER_H
 
 #include <QObject>
-#include <QJsonObject>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
+
+#include "Services/ZipExportService.h"
 
 class ZipExportController : public QObject
 {
@@ -16,19 +17,14 @@ public:
     QHttpServerResponse postSetRootSymbolFolderPath(const QHttpServerRequest& request);
     QHttpServerResponse getRootSymbolFolderPath(const QHttpServerRequest& request);
     QHttpServerResponse postCreateArchive(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFolderJson(const QHttpServerRequest& request);
+    QHttpServerResponse postAddFoldersJson(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileJson(const QHttpServerRequest& request);
     QHttpServerResponse postAddFileToZip(const QHttpServerRequest& request);
-
-    QJsonObject getFilesJson() const;
-    void setFilesJson(const QJsonObject &newFileJson);
 
 signals:
 
 private:
-    QString zipFilePath;
-    QString rootSymbolFolderPath;
-    QJsonObject filesJson;
+    ZipExportService service;
 
 };
 
