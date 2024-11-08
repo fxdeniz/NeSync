@@ -52,7 +52,12 @@ set(PROJECT_SOURCES
       FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
   #
 
-  # Rest Controllers
+  # Rest Api
+      # Services
+      RestApi/Services/ZipExportService.h
+      RestApi/Services/ZipExportService.cpp
+
+      # Controllers
       RestApi/RestController.h
       RestApi/RestController.cpp
       RestApi/FileSystemMonitorController.h
