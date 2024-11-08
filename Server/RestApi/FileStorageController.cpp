@@ -1,4 +1,4 @@
-#include "RestController.h"
+#include "FileStorageController.h"
 
 #include "JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
@@ -8,12 +8,12 @@
 #include <QJsonDocument>
 #include <QOperatingSystemVersion>
 
-RestController::RestController(QObject *parent)
+FileStorageController::FileStorageController(QObject *parent)
     : QObject{parent}
 {
 }
 
-QHttpServerResponse RestController::postAddNewFolder_V1(const QHttpServerRequest& request)
+QHttpServerResponse FileStorageController::postAddNewFolder_V1(const QHttpServerRequest& request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -71,7 +71,7 @@ QHttpServerResponse RestController::postAddNewFolder_V1(const QHttpServerRequest
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& request)
+QHttpServerResponse FileStorageController::postAddNewFolder(const QHttpServerRequest& request)
 {
     QByteArray requestBody = request.body();
 
@@ -99,7 +99,7 @@ QHttpServerResponse RestController::postAddNewFolder(const QHttpServerRequest& r
     return response;
 }
 
-QHttpServerResponse RestController::postAddNewFile_V1(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::postAddNewFile_V1(const QHttpServerRequest &request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -170,7 +170,7 @@ QHttpServerResponse RestController::postAddNewFile_V1(const QHttpServerRequest &
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::postAddNewFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -208,7 +208,7 @@ QHttpServerResponse RestController::postAddNewFile(const QHttpServerRequest &req
     return response;
 }
 
-QHttpServerResponse RestController::postAppendVersion_V1(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::postAppendVersion_V1(const QHttpServerRequest &request)
 {
     QHttpServerResponse response(QHttpServerResponse::StatusCode::NotImplemented);
     QByteArray requestBody = request.body();
@@ -272,7 +272,7 @@ QHttpServerResponse RestController::postAppendVersion_V1(const QHttpServerReques
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::postAppendVersion(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -304,7 +304,7 @@ QHttpServerResponse RestController::postAppendVersion(const QHttpServerRequest &
     return response;
 }
 
-QHttpServerResponse RestController::deleteFolder(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest &request)
 {
     QString symbolFolderPath = request.query().queryItemValue("symbolPath");
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
@@ -318,7 +318,7 @@ QHttpServerResponse RestController::deleteFolder(const QHttpServerRequest &reque
     return response;
 }
 
-QHttpServerResponse RestController::deleteFile(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
 {
     QString symbolFilePath = request.query().queryItemValue("symbolPath");
     qDebug() << "symbolFilePath = " << symbolFilePath;
@@ -332,7 +332,7 @@ QHttpServerResponse RestController::deleteFile(const QHttpServerRequest &request
     return response;
 }
 
-QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFolderContent(const QHttpServerRequest &request)
 {
     QString symbolFolderPath = request.query().queryItemValue("symbolPath");
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
@@ -344,7 +344,7 @@ QHttpServerResponse RestController::getFolderContent(const QHttpServerRequest &r
     return response;
 }
 
-QHttpServerResponse RestController::getFolderContentByUserPath(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFolderContentByUserPath(const QHttpServerRequest &request)
 {
     QString userFolderPath = request.query().queryItemValue("userFolderPath");
     qDebug() << "userFolderPath = " << userFolderPath;
@@ -356,7 +356,7 @@ QHttpServerResponse RestController::getFolderContentByUserPath(const QHttpServer
     return response;
 }
 
-QHttpServerResponse RestController::getFileContentByUserPath(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFileContentByUserPath(const QHttpServerRequest &request)
 {
     QString userFilePath = request.query().queryItemValue("userFilePath");
     qDebug() << "userFilePath = " << userFilePath;

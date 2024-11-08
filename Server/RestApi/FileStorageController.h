@@ -1,16 +1,16 @@
-#ifndef RESTCONTROLLER_H
-#define RESTCONTROLLER_H
+#ifndef FILESTORAGECONTROLLER_H
+#define FILESTORAGECONTROLLER_H
 
 #include <QObject>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
 
 
-class RestController : public QObject
+class FileStorageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit RestController(QObject *parent = nullptr);
+    explicit FileStorageController(QObject *parent = nullptr);
     QHttpServerResponse postAddNewFolder_V1(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFolder(const QHttpServerRequest& request);
     QHttpServerResponse postAddNewFile_V1(const QHttpServerRequest& request);
@@ -27,4 +27,4 @@ signals:
 
 };
 
-#endif // RESTCONTROLLER_H
+#endif // FILESTORAGECONTROLLER_H

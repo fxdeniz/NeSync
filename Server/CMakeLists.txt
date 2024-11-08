@@ -62,12 +62,12 @@ set(PROJECT_SOURCES
       RestApi/Services/FileSystemMonitorService.cpp
 
       # Controllers
-      RestApi/RestController.h
-      RestApi/RestController.cpp
-      RestApi/FileSystemMonitorController.h
-      RestApi/FileSystemMonitorController.cpp
       RestApi/ZipExportController.h
       RestApi/ZipExportController.cpp
+      RestApi/FileStorageController.h
+      RestApi/FileStorageController.cpp
+      RestApi/FileSystemMonitorController.h
+      RestApi/FileSystemMonitorController.cpp
   #
 )
 
