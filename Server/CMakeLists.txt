@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(NeSync_Server LANGUAGES CXX)
+project(nesync LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -17,6 +17,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer Core5
 include_directories(Utility/)
 include_directories(FileStorageSubSystem/)
 include_directories(FileStorageSubSystem/ORM/)
+include_directories(RestApi/)
+include_directories(RestApi/Services)
 
 add_subdirectory(Dependency/quazip)
 
@@ -73,14 +75,14 @@ if (WIN32)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(NeSync_Server
+    qt_add_executable(nesync
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         ${app_icon_resource_windows}
     )
 endif()
 
-target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
+target_link_libraries(nesync PRIVATE Qt${QT_VERSION_MAJOR}::Core
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Sql
                                     PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Core5Compat
@@ -91,7 +93,7 @@ target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
 
 set (PROJECT_VERSION 2.0)
 
-set_target_properties(NeSync_Server PROPERTIES
+set_target_properties(nesync PROPERTIES
     # MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     # MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     # MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -100,11 +102,11 @@ set_target_properties(NeSync_Server PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS NeSync_Server
+install(TARGETS nesync
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(NeSync_Server)
+    qt_finalize_executable(nesync)
 endif()
