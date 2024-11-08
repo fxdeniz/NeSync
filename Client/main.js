@@ -5,21 +5,28 @@ const fs = require('node:fs');
 function routeToFileExplorer (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/tabs/file_explorer.html'));
+  win.loadFile(path.join(__dirname,'resources/pages/file_explorer.html'));
 }
 
 
 function routeToFileMonitor (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/tabs/file_monitor.html'));
+  win.loadFile(path.join(__dirname,'resources/pages/file_monitor.html'));
 }
 
 
 function routeToSaveChanges (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/tabs/save_changes.html'));
+  win.loadFile(path.join(__dirname,'resources/pages/save_changes.html'));
+}
+
+
+function routeToZipExport (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/pages/zip_export.html'));
 }
 
 
@@ -64,6 +71,17 @@ async function showFolderSelectDialog () {
 }
 
 
+async function showFileSaveDialog () {
+  const { canceled, filePath } = await dialog.showSaveDialog({ defaultPath: app.getPath('desktop') });
+  let result = null;
+
+  if (!canceled)
+    result = filePath;
+
+  return result;
+}
+
+
 async function splitPath(givenPath) {
   return givenPath.split(path.sep);
 }
@@ -98,7 +116,9 @@ app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
+  ipcMain.on('route:ZipExport', routeToZipExport);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
+  ipcMain.handle('dialog:SaveFile', showFileSaveDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {
     const result = splitPath(input);

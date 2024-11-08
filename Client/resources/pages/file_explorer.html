@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src http://localhost:*;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src http: https: data:; connect-src http://localhost:*;">
     <link href="../bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="../bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
     <link href="./file_explorer.css" rel="stylesheet">
@@ -34,8 +34,32 @@
                 <input id="input-current-path" type="text" class="form-control mx-2" placeholder="Folder Path" aria-label="Folder Path" aria-describedby="btnGroupAddon">
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
               <button id="button-add-new-folder" type="button" class="btn btn-primary">+</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#export-modal">&uarr;</button>
               <button type="button" class="btn btn-primary">&darr;</button>
-          </div>
+            </div>
+            
+            <!--File export modal.-->
+            <div id="export-modal" class="modal" tabindex="-1">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 id="export-modal-label" class="modal-title">Export to zip file</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div id="div-modal-body" class="modal-body">
+                    <p class="align-baseline">All files & folders inside the folder below will be exported:</p>
+                    <p id="p-export-source" class="align-baseline"><b>Source here</b></p>
+                    <div class="input-group mb-3">
+                      <input id="input-zip-path" type="text" class="form-control" placeholder="Select zip file path" aria-label="Select zip file path" aria-describedby="button-export" readonly>
+                      <button id="button-select-zip-path" class="btn btn-outline-secondary" type="button">📁</button>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button id="button-export" type="button" class="btn btn-primary">Export</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
     
           <div class="row mt-3">

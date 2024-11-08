@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(NeSync_Server LANGUAGES CXX)
+project(nesync LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -11,12 +11,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql HttpServer)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql HttpServer Core5Compat)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql HttpServer Core5Compat)
 
 include_directories(Utility/)
 include_directories(FileStorageSubSystem/)
 include_directories(FileStorageSubSystem/ORM/)
+include_directories(RestApi/)
+include_directories(RestApi/Services)
+
+add_subdirectory(Dependency/quazip)
 
 
 set(PROJECT_SOURCES
@@ -50,9 +54,20 @@ set(PROJECT_SOURCES
       FileStorageSubSystem/ORM/Entity/FileVersionEntity.cpp
   #
 
-  # Rest Controllers
-      RestApi/RestController.h
-      RestApi/RestController.cpp
+  # Rest Api
+      # Services
+      RestApi/Services/ZipExportService.h
+      RestApi/Services/ZipExportService.cpp
+      RestApi/Services/FileSystemMonitorService.h
+      RestApi/Services/FileSystemMonitorService.cpp
+
+      # Controllers
+      RestApi/ZipExportController.h
+      RestApi/ZipExportController.cpp
+      RestApi/FileStorageController.h
+      RestApi/FileStorageController.cpp
+      RestApi/FileSystemMonitorController.h
+      RestApi/FileSystemMonitorController.cpp
   #
 )
 
@@ -62,23 +77,25 @@ if (WIN32)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(NeSync_Server
+    qt_add_executable(nesync
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         ${app_icon_resource_windows}
     )
 endif()
 
-target_link_libraries(NeSync_Server PRIVATE Qt${QT_VERSION_MAJOR}::Core
+target_link_libraries(nesync PRIVATE Qt${QT_VERSION_MAJOR}::Core
                                     PRIVATE Qt${QT_VERSION_MAJOR}::Sql
-                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer)
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::HttpServer
+                                    PRIVATE Qt${QT_VERSION_MAJOR}::Core5Compat
+                                    QuaZip::QuaZip)
 
 # This version info is required for MacOS compilation
 # Windows compilation uses /Resources/res_win.rc
 
 set (PROJECT_VERSION 2.0)
 
-set_target_properties(NeSync_Server PROPERTIES
+set_target_properties(nesync PROPERTIES
     # MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     # MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     # MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -87,11 +104,11 @@ set_target_properties(NeSync_Server PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS NeSync_Server
+install(TARGETS nesync
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(NeSync_Server)
+    qt_finalize_executable(nesync)
 endif()
