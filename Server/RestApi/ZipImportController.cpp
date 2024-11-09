@@ -51,3 +51,10 @@ QHttpServerResponse ZipImportController::readFoldersJson(const QHttpServerReques
 
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
+
+QHttpServerResponse ZipImportController::readFilesJson(const QHttpServerRequest &request)
+{
+    QJsonObject responseBody {service.readFilesJson()};
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}

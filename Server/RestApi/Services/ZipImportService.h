@@ -14,15 +14,17 @@ public:
     QString getZipFilePath() const;
     void setZipFilePath(QString newZipFilePath);
     QJsonArray getFoldersJson() const;
-    void setFoldersJson(const QJsonArray &newFoldersJson);
     QJsonObject getFilesJson() const;
-    void setFilesJson(const QJsonObject &newFoldersJson);
     bool openArchive() const;
     QJsonArray readFoldersJson();
+    QJsonObject readFilesJson();
 
 signals:
 
 private:
+    void setFoldersJson(const QJsonArray &newFoldersJson);
+    void setFilesJson(const QJsonObject &newFoldersJson);
+
     QString zipFilePath;
     QJsonArray foldersJson;
     QJsonObject filesJson;

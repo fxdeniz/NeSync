@@ -58,7 +58,6 @@ QJsonArray ZipImportService::readFoldersJson()
         return {};
     }
 
-
     QString fileName = "folders.json";
     bool isFileFound = archive.setCurrentFile(fileName);
 
@@ -90,5 +89,51 @@ QJsonArray ZipImportService::readFoldersJson()
 
     QJsonArray result = document.array();
     setFoldersJson(result);
+    return result;
+}
+
+QJsonObject ZipImportService::readFilesJson()
+{
+    QuaZip archive(getZipFilePath());
+
+    bool isArchiveOpened = archive.open(QuaZip::mdUnzip);
+
+    if(!isArchiveOpened)
+    {
+        setFilesJson({});
+        return {};
+    }
+
+    QString fileName = "files.json";
+    bool isFileFound = archive.setCurrentFile(fileName);
+
+    if(!isFileFound)
+    {
+        setFilesJson({});
+        return {};
+    }
+
+    QuaZipFile filesJsonFile(&archive);
+    bool isFileOpened = filesJsonFile.open(QFile::OpenModeFlag::ReadOnly);
+
+    if(!isFileOpened)
+    {
+        setFilesJson({});
+        return {};
+    }
+
+    QJsonParseError parseError;
+    QJsonDocument document = QJsonDocument::fromJson(filesJsonFile.readAll(), &parseError);
+
+    if(parseError.error != QJsonParseError::ParseError::NoError || !document.isObject())
+    {
+        setFilesJson({});
+        return {};
+    }
+
+    // TODO: add json schema validation.
+
+    QJsonObject result = document.object();
+    setFilesJson(result);
     return result;
 }

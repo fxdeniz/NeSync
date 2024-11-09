@@ -127,6 +127,10 @@ int main(int argc, char *argv[])
         return zipImportController.readFoldersJson(request);
     });
 
+    httpServer.route("/zip/import/ReadFilesJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.readFilesJson(request);
+    });
+
     quint16 targetPort = 1234; // Making this 0, means random port.
     tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
 

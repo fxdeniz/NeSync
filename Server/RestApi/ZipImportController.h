@@ -15,6 +15,7 @@ public:
     QHttpServerResponse getZipFilePath(const QHttpServerRequest& request);
     QHttpServerResponse openArchive(const QHttpServerRequest& request);
     QHttpServerResponse readFoldersJson(const QHttpServerRequest& request);
+    QHttpServerResponse readFilesJson(const QHttpServerRequest& request);
 
 signals:
 
