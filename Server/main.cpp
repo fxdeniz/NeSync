@@ -11,6 +11,7 @@
 #include "Utility/AppConfig.h"
 #include "RestApi/FileStorageController.h"
 #include "RestApi/ZipExportController.h"
+#include "RestApi/ZipImportController.h"
 #include "RestApi/FileSystemMonitorController.h"
 
 int main(int argc, char *argv[])
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
     FileStorageController storageController;
     FileSystemMonitorController fsMonitorController;
     ZipExportController zipExportController;
+    ZipImportController zipImportController;
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
     httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
@@ -107,6 +109,22 @@ int main(int argc, char *argv[])
 
     httpServer.route("/postAddFileToZip", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
         return zipExportController.postAddFileToZip(request);
+    });
+
+    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.setZipFilePath(request);
+    });
+
+    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.getZipFilePath(request);
+    });
+
+    httpServer.route("/zip/import/OpenFile", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.openArchive(request);
+    });
+
+    httpServer.route("/zip/import/ReadFoldersJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.readFoldersJson(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.

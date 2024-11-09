@@ -69,7 +69,6 @@ QHttpServerResponse ZipExportController::getRootSymbolFolderPath(const QHttpServ
 
 QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequest &request)
 {
-
     QJsonObject responseBody {{"isCreated", service.createArchive()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 

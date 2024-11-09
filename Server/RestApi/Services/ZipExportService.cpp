@@ -3,7 +3,6 @@
 #include "JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
 
-#include <QJsonObject>
 #include <QJsonDocument>
 #include <QOperatingSystemVersion>
 #include <quazip/quazip.h>
