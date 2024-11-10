@@ -58,3 +58,22 @@ QHttpServerResponse ZipImportController::readFilesJson(const QHttpServerRequest 
 
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
+
+QHttpServerResponse ZipImportController::importFileVersion(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    qulonglong versionNumber = jsonObject["versionNumber"].toInteger();
+
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "versionNumber = " << versionNumber;
+    qDebug() << "";
+
+    QJsonObject responseBody {{"isImported", service.importFileVersion(symbolFilePath, versionNumber)}};
+
+    return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
+}

@@ -1,6 +1,10 @@
 #include "ZipImportService.h"
 
+#include "JsonDtoFormat.h"
+#include "FileStorageSubSystem/FileStorageManager.h"
+
 #include <QJsonDocument>
+#include <QTemporaryFile>
 #include <QOperatingSystemVersion>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
@@ -146,5 +150,68 @@ QJsonObject ZipImportService::readFilesJson()
 
     QJsonObject result = document.object();
     setFilesJson(result);
+    return result;
+}
+
+bool ZipImportService::importFileVersion(QString symbolFilePath, qulonglong versionNumber)
+{
+    QuaZip archive(getZipFilePath());
+    bool isArchiveOpened = archive.open(QuaZip::Mode::mdUnzip);
+
+    if(!isArchiveOpened)
+        return false;
+
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject file = getFilesJson()[symbolFilePath].toObject();
+    QJsonObject version;
+
+    // TODO: Find something more efficent than traversing and searching the version number.
+    for(const QJsonValue &value : file[JsonKeys::File::VersionList].toArray())
+    {
+        QJsonObject current = value.toObject();
+        qulonglong number = value[JsonKeys::FileVersion::VersionNumber].toInteger();
+
+        if(versionNumber == number)
+        {
+            version = current;
+            break;
+        }
+    }
+
+    archive.setCurrentFile(version[JsonKeys::FileVersion::InternalFileName].toString());
+
+    QuaZipFile fileInZip(&archive);
+    bool isSourceOpened = fileInZip.open(QFile::OpenModeFlag::ReadOnly);
+    QTemporaryFile tempFile;
+    bool isTempOpened = tempFile.open();
+
+    if(!isSourceOpened || !isTempOpened)
+        return false;
+
+    while(!fileInZip.atEnd())
+    {
+        qlonglong bytesWritten = tempFile.write(fileInZip.read(104857600)); // Read up to 100mb.
+        tempFile.flush();
+
+        if(bytesWritten <= -1)
+            return false;
+    }
+
+    bool result = false;
+
+    // Below temp.fileName() calls returns the absolute path with file name.
+    if(versionNumber != 1) // If adding versions other than first version.
+        result = fsm->appendVersion(symbolFilePath, tempFile.fileName(), version[JsonKeys::FileVersion::Description].toString());
+    else
+    {
+        result = fsm->addNewFile(file[JsonKeys::File::SymbolFolderPath].toString(),
+                                 tempFile.fileName(),
+                                 true,
+                                 file[JsonKeys::File::FileName].toString(),
+                                 version[JsonKeys::FileVersion::Description].toString());
+
+    }
+
     return result;
 }

@@ -16,6 +16,7 @@ public:
     QHttpServerResponse openArchive(const QHttpServerRequest& request);
     QHttpServerResponse readFoldersJson(const QHttpServerRequest& request);
     QHttpServerResponse readFilesJson(const QHttpServerRequest& request);
+    QHttpServerResponse importFileVersion(const QHttpServerRequest& request);
 
 signals:
 
