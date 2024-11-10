@@ -162,7 +162,7 @@ bool ZipExportService::addFileJson()
     return true;
 }
 
-bool ZipExportService::addFileToZip(QString symbolFilePath, qlonglong versionNumber)
+bool ZipExportService::addFileToZip(QString symbolFilePath, qulonglong versionNumber)
 {   
     QJsonObject file = getFilesJson()[symbolFilePath].toObject();
     QJsonObject version;
@@ -171,7 +171,7 @@ bool ZipExportService::addFileToZip(QString symbolFilePath, qlonglong versionNum
     for(const QJsonValue &value : file[JsonKeys::File::VersionList].toArray())
     {
         QJsonObject current = value.toObject();
-        qlonglong number = value[JsonKeys::FileVersion::VersionNumber].toInteger();
+        qulonglong number = value[JsonKeys::FileVersion::VersionNumber].toInteger();
 
         if(versionNumber == number)
         {

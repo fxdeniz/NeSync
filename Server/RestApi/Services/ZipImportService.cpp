@@ -88,6 +88,17 @@ QJsonArray ZipImportService::readFoldersJson()
     // TODO: add json schema validation.
 
     QJsonArray result = document.array();
+    QStringList stringList;
+
+    for (const QVariant &item : result.toVariantList())
+        stringList << item.toString();
+
+    std::sort(stringList.begin(), stringList.end(), [](const QString &s1, const QString &s2) {
+        return s1.length() < s2.length();
+    });
+
+    result = QJsonArray::fromStringList(stringList);
+
     setFoldersJson(result);
     return result;
 }

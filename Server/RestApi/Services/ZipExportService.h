@@ -19,7 +19,7 @@ public:
     bool createArchive();
     bool addFoldersJson();
     bool addFileJson();
-    bool addFileToZip(QString symbolFilePath, qlonglong versionNumber);
+    bool addFileToZip(QString symbolFilePath, qulonglong versionNumber);
 
 signals:
 
