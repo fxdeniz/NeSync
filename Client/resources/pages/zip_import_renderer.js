@@ -6,6 +6,18 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     let textAreaLog = document.getElementById('text-area-log');
 
+    const responseOpenZip = await sendOpenImportZipRequest();
+
+    appendLog(textAreaLog, "ℹ️ Trying to open zip file...");
+    appendLog(textAreaLog, `\t File Opened Successfully: ${responseOpenZip.isOpened ? '✅' : '❌'}`);
+
+    if(!responseOpenZip.isOpened) {
+      appendLog(textAreaLog, "⛔ File could not opened, please try again.");
+      enableButton(buttonClose);
+      return;
+    }
+
+
     enableButton(buttonClose);
 });
 
@@ -26,6 +38,21 @@ function disableButton(elementButton) {
 function enableButton(elementButton) {
   elementButton.disabled = false;
   elementButton.textContent = "Close";
+}
+
+
+async function sendOpenImportZipRequest(symbolFolderPath) {
+  return await fetchJSON("http://localhost:1234/zip/import/OpenFile");
+}
+
+
+async function sendGetFolderRequest(symbolFolderPath) {
+  return await fetchJSON(`http://localhost:1234/getFolderContent?symbolFolderPath=${symbolFolderPath}`);
+}
+
+
+async function sendGetFolderRequest() {
+  return await fetchJSON(`http://localhost:1234/getFolderContent?symbolFolderPath=${symbolFolderPath}`);
 }
 
 
