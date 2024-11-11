@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonSelectZipFileImportPath = document.getElementById("button-select-zip-import-path");
     const buttonExport = document.getElementById("button-export");
     const exportModal = document.getElementById("export-modal");
+    const importModal = document.getElementById("import-modal");
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
@@ -24,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
     buttonExport.addEventListener("click", onClickHandler_buttonExport);
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
+    importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
     let navigationEvnet = createDirectoryChangeEvent('/');
     inputCurrentPath.dispatchEvent(navigationEvnet);
@@ -176,6 +178,12 @@ function onShownHandler_exportModal() {
   const currentPath = document.getElementById("input-current-path").value;
   const pExportSource = document.getElementById("p-export-source");
   pExportSource.innerHTML = `<b>${currentPath}</b>`;
+}
+
+function onShownHandler_importModal() {
+  document.getElementById("input-zip-import-path").value = "";
+  document.getElementById("button-import").disabled = true;
+  document.getElementById("button-select-zip-import-path").focus();
 }
 
 function createDirectoryChangeEvent(targetPath) {
