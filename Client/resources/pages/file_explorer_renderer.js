@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
     const buttonSelectZipFileExportPath = document.getElementById("button-select-zip-export-path");
+    const buttonSelectZipFileImportPath = document.getElementById("button-select-zip-import-path");
     const buttonExport = document.getElementById("button-export");
     const exportModal = document.getElementById("export-modal");
 
@@ -19,7 +20,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
-    buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFilePath);
+    buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
+    buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
     buttonExport.addEventListener("click", onClickHandler_buttonExport);
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
 
@@ -123,7 +125,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   }
 }
 
-async function onClickHandler_buttonSelectZipFilePath() {
+async function onClickHandler_buttonSelectZipFileExportPath() {
   const inputZipExportPath = document.getElementById("input-zip-export-path");
   const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
 
@@ -137,6 +139,23 @@ async function onClickHandler_buttonSelectZipFilePath() {
     const buttonExport = document.getElementById("button-export");
     buttonExport.disabled = false;
     buttonExport.focus();
+  }
+}
+
+async function onClickHandler_buttonSelectZipFileImportPath() {
+  const inputZipImportPath = document.getElementById("input-zip-import-path");
+  const selectedPath = await window.fileExplorerApi.showFileSelectDialog();
+
+  if(selectedPath) {
+    if(!selectedPath.endsWith(".zip")) {
+      alert("File name should end with \".zip\" extension.");
+      return;
+    }
+
+    inputZipImportPath.value = selectedPath;
+    const buttonImport = document.getElementById("button-import");
+    buttonImport.disabled = false;
+    buttonImport.focus();
   }
 }
 

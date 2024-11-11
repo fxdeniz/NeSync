@@ -8,8 +8,9 @@ contextBridge.exposeInMainWorld('router', {
 });
 
 contextBridge.exposeInMainWorld('fileExplorerApi', {
-  showFolderSelectDialog: () => ipcRenderer.invoke('dialog:OpenFolder'),
-  showFileSaveDialog: () => ipcRenderer.invoke('dialog:SaveFile')
+  showFolderSelectDialog: () => ipcRenderer.invoke("dialog:OpenFolder"),
+  showFileSelectDialog: () => ipcRenderer.invoke("dialog:OpenFile"),
+  showFileSaveDialog: () => ipcRenderer.invoke("dialog:SaveFile")
 });
 
 contextBridge.exposeInMainWorld('pathApi', {

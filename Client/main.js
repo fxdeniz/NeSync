@@ -71,6 +71,17 @@ async function showFolderSelectDialog () {
 }
 
 
+async function showFileSelectDialog () {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ["openFile"], defaultPath: app.getPath("desktop") });
+  let result = null;
+
+  if (!canceled)
+    result = filePaths[0];
+
+  return result;
+}
+
+
 async function showFileSaveDialog () {
   const { canceled, filePath } = await dialog.showSaveDialog({ defaultPath: app.getPath('desktop') });
   let result = null;
@@ -118,6 +129,7 @@ app.whenReady().then(() => {
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.on('route:ZipExport', routeToZipExport);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
+  ipcMain.handle('dialog:OpenFile', showFileSelectDialog);
   ipcMain.handle('dialog:SaveFile', showFileSaveDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {
