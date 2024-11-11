@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonSelectZipFileExportPath = document.getElementById("button-select-zip-export-path");
     const buttonSelectZipFileImportPath = document.getElementById("button-select-zip-import-path");
     const buttonExport = document.getElementById("button-export");
+    const buttonImport = document.getElementById("button-import");
     const exportModal = document.getElementById("export-modal");
     const importModal = document.getElementById("import-modal");
 
@@ -24,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
     buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
     buttonExport.addEventListener("click", onClickHandler_buttonExport);
+    buttonImport.addEventListener("click", onClickHandler_buttonImport);
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
     importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
@@ -165,9 +167,15 @@ async function onClickHandler_buttonExport() {
   const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-  await sendSetZipFilePathRequest(filePath);
+  await sendSetExportZipFilePathRequest(filePath);
   await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
   window.router.routeToZipExport();
+}
+
+async function onClickHandler_buttonImport() {
+  const filePath = document.getElementById("input-zip-import-path").value;
+  await sendSetImportZipFilePathRequest(filePath);
+  window.router.routeToZipImport();
 }
 
 function onShownHandler_exportModal() {
@@ -191,11 +199,19 @@ function createDirectoryChangeEvent(targetPath) {
 }
 
 
-async function sendSetZipFilePathRequest(filePath) {
+async function sendSetExportZipFilePathRequest(filePath) {
   let requestBody = {"filePath": null};
   requestBody["filePath"] = filePath;
 
-  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);    
+  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);
+}
+
+
+async function sendSetImportZipFilePathRequest(filePath) {
+  let requestBody = {"filePath": null};
+  requestBody["filePath"] = filePath;
+
+  return await postJSON('http://localhost:1234/zip/import/ZipFilePath', requestBody);
 }
 
 

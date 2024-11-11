@@ -4,7 +4,8 @@ contextBridge.exposeInMainWorld('router', {
   routeToFileExplorer: () => ipcRenderer.send('route:FileExplorer'),
   routeToFileMonitor: () => ipcRenderer.send('route:FileMonitor'),
   routeToSaveChanges: () => ipcRenderer.send('route:SaveChanges'),
-  routeToZipExport: () => ipcRenderer.send('route:ZipExport')
+  routeToZipExport: () => ipcRenderer.send('route:ZipExport'),
+  routeToZipImport: () => ipcRenderer.send('route:ZipImport')
 });
 
 contextBridge.exposeInMainWorld('fileExplorerApi', {
