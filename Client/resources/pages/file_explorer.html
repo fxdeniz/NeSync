@@ -35,7 +35,7 @@
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
               <button id="button-add-new-folder" type="button" class="btn btn-primary">+</button>
               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#export-modal">&uarr;</button>
-              <button type="button" class="btn btn-primary">&darr;</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#import-modal">&darr;</button>
             </div>
             
             <!--File export modal.-->
@@ -43,10 +43,10 @@
               <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 id="export-modal-label" class="modal-title">Export to zip file</h5>
+                    <h5 class="modal-title">Export to zip file</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <div id="div-export-modal-body" class="modal-body">
+                  <div class="modal-body">
                     <p class="align-baseline">All files & folders inside the folder below will be exported:</p>
                     <p id="p-export-source" class="align-baseline"><b>Source here</b></p>
                     <div class="input-group mb-3">
@@ -56,6 +56,26 @@
                   </div>
                   <div class="modal-footer">
                     <button id="button-export" type="button" class="btn btn-primary">Export</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--File import modal.-->
+            <div id="import-modal" class="modal" tabindex="-1">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Import a zip file</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="input-group mb-3">
+                      <input id="input-zip-import-path" type="text" class="form-control" placeholder="Select zip file path" aria-label="Select zip file path" aria-describedby="button-import" readonly>
+                      <button id="button-select-zip-import-path" class="btn btn-outline-secondary" type="button">📁</button>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button id="button-import" type="button" class="btn btn-primary">Import</button>
                   </div>
                 </div>
               </div>
