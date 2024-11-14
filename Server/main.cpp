@@ -63,6 +63,10 @@ int main(int argc, char *argv[])
         return storageController.getFolderContentByUserPath(request);
     });
 
+    httpServer.route("/getFileContent", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFileContent(request);
+    });
+
     httpServer.route("/getFileContentByUserPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFileContentByUserPath(request);
     });
@@ -131,7 +135,7 @@ int main(int argc, char *argv[])
         return zipImportController.readFilesJson(request);
     });
 
-    httpServer.route("/zip/import/FileVersion", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+    httpServer.route("/zip/import/file", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
         return zipImportController.importFile(request);
     });
 

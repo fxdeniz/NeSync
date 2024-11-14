@@ -45,9 +45,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "ℹ️ Creating folders...");
 
     for (const symbolFolderPath of foldersJson) {
-      const folder = await sendGetFolderRequest(symbolFolderPath);
-
       appendLog(textAreaLog, `\t 👉 Checking folder: ${symbolFolderPath}`);
+      const folder = await sendGetFolderRequest(symbolFolderPath);
 
       if(folder.isExist)
         appendLog(textAreaLog, "\t\t Folder exists, no need to create.");
@@ -63,8 +62,40 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         }
       }
     }
-    
 
+    appendLog(textAreaLog, "👍 Finished creating folders.")
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "ℹ️ Importing files...");
+
+    for (const symbolFilePath in filesJson) {
+      appendLog(textAreaLog, `\t 👉 Checking file: ${symbolFilePath}`);
+      const file = await sendGetFileRequest(symbolFilePath);
+
+      if(file.isExist)
+        appendLog(textAreaLog, "\t\t File exists, no need to add.");
+      else {
+        appendLog(textAreaLog, "\t\t File not exists, importing it...");
+        const newFile = filesJson[symbolFilePath];
+
+        for(const version of newFile.versionList) {
+          const versionNumber = version.versionNumber;
+          appendLog(textAreaLog, `\t\t\t Importing version ${versionNumber}:`);
+          const importVersion = await sendImportFileRequest(symbolFilePath, versionNumber);
+          appendLog(textAreaLog, `\t\t\t\t Imported Successfully ${importVersion.isImported ? '✅' : '❌'}`);
+
+          if(!importVersion.isImported) {
+            appendLog(textAreaLog, "⛔ Could not import a file, please try again.");
+            enableButton(buttonClose);
+            return;
+          }
+        }
+      }
+    }
+
+    appendLog(textAreaLog, "👍 Finished importing files.")
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "💯 Import completed.");
+    
     enableButton(buttonClose);
 });
 
@@ -108,12 +139,26 @@ async function sendGetFolderRequest(symbolFolderPath) {
 }
 
 
+async function sendGetFileRequest(symbolFilePath) {
+  return await fetchJSON(`http://localhost:1234/getFileContent?symbolPath=${symbolFilePath}`);
+}
+
+
 async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
   let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
   requestBody["symbolFolderPath"] = symbolFolderPath;
   requestBody["userFolderPath"] = userFolderPath;
 
   return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
+}
+
+
+async function sendImportFileRequest(symbolFilePath, versionNumber) {
+  let requestBody = {"symbolFilePath": null, "versionNumber": null};
+  requestBody["symbolFilePath"] = symbolFilePath;
+  requestBody["versionNumber"] = versionNumber;
+
+  return await postJSON("http://localhost:1234/zip/import/file", requestBody);    
 }
 
 
