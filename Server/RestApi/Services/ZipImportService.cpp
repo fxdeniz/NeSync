@@ -50,6 +50,9 @@ bool ZipImportService::openArchive() const
     return isOpened;
 }
 
+// TODO: On error this returns [], this can be seen as error when there is no folders in the array.
+// But having no folder implies error, because "/" should always be in the system.
+// Maybe, instead of returning array, returning {"success": true, "folders": []} will help.
 QJsonArray ZipImportService::readFoldersJson()
 {
     QuaZip archive(getZipFilePath());
@@ -107,6 +110,8 @@ QJsonArray ZipImportService::readFoldersJson()
     return result;
 }
 
+// TODO: On error this returns {}, this can be seen as error when there is no files in the object.
+// Maybe, instead of returning object, returning {"success": true, "files": {}} will help.
 QJsonObject ZipImportService::readFilesJson()
 {
     QuaZip archive(getZipFilePath());
@@ -153,7 +158,7 @@ QJsonObject ZipImportService::readFilesJson()
     return result;
 }
 
-bool ZipImportService::importFileVersion(QString symbolFilePath, qulonglong versionNumber)
+bool ZipImportService::importFile(QString symbolFilePath, qulonglong versionNumber)
 {
     QuaZip archive(getZipFilePath());
     bool isArchiveOpened = archive.open(QuaZip::Mode::mdUnzip);

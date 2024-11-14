@@ -29,6 +29,18 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       return;
     }
 
+    const filesJson = await sendReadFilesJsonRequest();
+
+    appendLog(textAreaLog, "");
+    appendLog(textAreaLog, "ℹ️ Reading files.json");
+    appendLog(textAreaLog, `\t Read Successfully: ${Object.keys(filesJson).length !== 0 ? '✅' : '❌'}`);
+
+    if(Object.keys(filesJson).length === 0) {
+      appendLog(textAreaLog, "⛔ files.json could not opened, please try again.");
+      enableButton(buttonClose);
+      return;
+    }
+
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Creating folders...");
 
@@ -83,6 +95,11 @@ async function sendOpenImportZipRequest(symbolFolderPath) {
 
 async function sendReadFoldersJsonRequest(symbolFolderPath) {
   return await fetchJSON("http://localhost:1234/zip/import/ReadFoldersJson");
+}
+
+
+async function sendReadFilesJsonRequest(symbolFolderPath) {
+  return await fetchJSON("http://localhost:1234/zip/import/ReadFilesJson");
 }
 
 
