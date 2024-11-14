@@ -356,10 +356,24 @@ QHttpServerResponse FileStorageController::getFolderContentByUserPath(const QHtt
     return response;
 }
 
+QHttpServerResponse FileStorageController::getFileContent(const QHttpServerRequest &request)
+{
+    QString symbolFilePath = request.query().queryItemValue("symbolPath", QUrl::ComponentFormattingOption::FullyDecoded);
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject responseBody = fsm->getFileJsonBySymbolPath(symbolFilePath, true);
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 QHttpServerResponse FileStorageController::getFileContentByUserPath(const QHttpServerRequest &request)
 {
     QString userFilePath = request.query().queryItemValue("userFilePath");
     qDebug() << "userFilePath = " << userFilePath;
+    qDebug() << "";
 
     auto fsm = FileStorageManager::instance();
     QJsonObject responseBody = fsm->getFileJsonByUserPath(userFilePath, true);

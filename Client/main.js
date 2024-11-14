@@ -30,6 +30,13 @@ function routeToZipExport (event) {
 }
 
 
+function routeToZipImport (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/pages/zip_import.html'));
+}
+
+
 async function showFolderSelectDialog () {
     const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
     let result = null;
@@ -68,6 +75,17 @@ async function showFolderSelectDialog () {
 
         return result;
     }
+}
+
+
+async function showFileSelectDialog () {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ["openFile"], defaultPath: app.getPath("desktop") });
+  let result = null;
+
+  if (!canceled)
+    result = filePaths[0];
+
+  return result;
 }
 
 
@@ -117,7 +135,9 @@ app.whenReady().then(() => {
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.on('route:ZipExport', routeToZipExport);
+  ipcMain.on('route:ZipImport', routeToZipImport);
   ipcMain.handle('dialog:OpenFolder', showFolderSelectDialog);
+  ipcMain.handle('dialog:OpenFile', showFileSelectDialog);
   ipcMain.handle('dialog:SaveFile', showFileSaveDialog);
 
   ipcMain.handle('path:Split', async (event, input) => {

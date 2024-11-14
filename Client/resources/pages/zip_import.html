@@ -1,0 +1,29 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src http://localhost:*;">
+    <link href="../bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="../bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <link href="./zip_import.css" rel="stylesheet">
+    <script src="./zip_import_renderer.js" defer></script>
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <div class="text-center mt-3">
+      <button id="button-close" type="button" class="btn btn-primary">Close</button>
+    </div>
+    <div id="content-container" class="container-fluid px-3 mt-3">
+      <div id="save-changes-content">
+        <div class="mb-3">
+            <label for="text-area-log" class="form-label">Zip Import Log:</label>
+            <textarea id="text-area-log" class="form-control" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -5,9 +5,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let buttonNext = document.getElementById('button-next');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
-    const buttonSelectZipFilePath = document.getElementById("button-select-zip-path");
+    const buttonSelectZipFileExportPath = document.getElementById("button-select-zip-export-path");
+    const buttonSelectZipFileImportPath = document.getElementById("button-select-zip-import-path");
     const buttonExport = document.getElementById("button-export");
+    const buttonImport = document.getElementById("button-import");
     const exportModal = document.getElementById("export-modal");
+    const importModal = document.getElementById("import-modal");
 
     buttonFileMonitor.addEventListener('click', async clickEvent => {
       window.router.routeToFileMonitor();
@@ -19,9 +22,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
-    buttonSelectZipFilePath.addEventListener("click", onClickHandler_buttonSelectZipFilePath);
+    buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
+    buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
     buttonExport.addEventListener("click", onClickHandler_buttonExport);
+    buttonImport.addEventListener("click", onClickHandler_buttonImport);
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
+    importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
     let navigationEvnet = createDirectoryChangeEvent('/');
     inputCurrentPath.dispatchEvent(navigationEvnet);
@@ -123,8 +129,8 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   }
 }
 
-async function onClickHandler_buttonSelectZipFilePath() {
-  const inputZipPath = document.getElementById("input-zip-path");
+async function onClickHandler_buttonSelectZipFileExportPath() {
+  const inputZipExportPath = document.getElementById("input-zip-export-path");
   const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
 
   if(selectedPath) {
@@ -133,30 +139,59 @@ async function onClickHandler_buttonSelectZipFilePath() {
       return;
     }
 
-    inputZipPath.value = selectedPath;
+    inputZipExportPath.value = selectedPath;
     const buttonExport = document.getElementById("button-export");
     buttonExport.disabled = false;
     buttonExport.focus();
   }
 }
 
+async function onClickHandler_buttonSelectZipFileImportPath() {
+  const inputZipImportPath = document.getElementById("input-zip-import-path");
+  const selectedPath = await window.fileExplorerApi.showFileSelectDialog();
+
+  if(selectedPath) {
+    if(!selectedPath.endsWith(".zip")) {
+      alert("File name should end with \".zip\" extension.");
+      return;
+    }
+
+    inputZipImportPath.value = selectedPath;
+    const buttonImport = document.getElementById("button-import");
+    buttonImport.disabled = false;
+    buttonImport.focus();
+  }
+}
+
 async function onClickHandler_buttonExport() {
-  const filePath = document.getElementById("input-zip-path").value;
+  const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-  await sendSetZipFilePathRequest(filePath);
+  await sendSetExportZipFilePathRequest(filePath);
   await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
   window.router.routeToZipExport();
 }
 
+async function onClickHandler_buttonImport() {
+  const filePath = document.getElementById("input-zip-import-path").value;
+  await sendSetImportZipFilePathRequest(filePath);
+  window.router.routeToZipImport();
+}
+
 function onShownHandler_exportModal() {
-  document.getElementById("input-zip-path").value = "";
+  document.getElementById("input-zip-export-path").value = "";
   document.getElementById("button-export").disabled = true;
-  document.getElementById("button-select-zip-path").focus();
+  document.getElementById("button-select-zip-export-path").focus();
 
   const currentPath = document.getElementById("input-current-path").value;
   const pExportSource = document.getElementById("p-export-source");
   pExportSource.innerHTML = `<b>${currentPath}</b>`;
+}
+
+function onShownHandler_importModal() {
+  document.getElementById("input-zip-import-path").value = "";
+  document.getElementById("button-import").disabled = true;
+  document.getElementById("button-select-zip-import-path").focus();
 }
 
 function createDirectoryChangeEvent(targetPath) {
@@ -164,11 +199,19 @@ function createDirectoryChangeEvent(targetPath) {
 }
 
 
-async function sendSetZipFilePathRequest(filePath) {
+async function sendSetExportZipFilePathRequest(filePath) {
   let requestBody = {"filePath": null};
   requestBody["filePath"] = filePath;
 
-  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);    
+  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);
+}
+
+
+async function sendSetImportZipFilePathRequest(filePath) {
+  let requestBody = {"filePath": null};
+  requestBody["filePath"] = filePath;
+
+  return await postJSON('http://localhost:1234/zip/import/ZipFilePath', requestBody);
 }
 
 
