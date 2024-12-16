@@ -1,3 +1,5 @@
+import FolderApi from "../rest_api/folder_api.js";
+
 document.addEventListener("DOMContentLoaded", async (event) => {
 
     let inputCurrentPath = document.getElementById('input-current-path');
@@ -83,6 +85,9 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
   let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${event.detail.targetPath}`);
+
+  const folderApi = new FolderApi('localhost', 1234);
+  console.log(`from api = ${folderApi.getFolderContent(event.detail.targetPath)}`);
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
