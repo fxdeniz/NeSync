@@ -39,6 +39,7 @@ async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
 
   if(selectedFolderTree) {
+      let folderApi = new FolderApi('localhost', 1234);
       let stack = [selectedFolderTree];
       let fileList = [];
 
@@ -52,7 +53,8 @@ async function onClickHandler_buttonAddNewFolder() {
           else
             currentFolder.symbolFolderPath += symbolFolderSuffix;
 
-          await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
+          // TODO: check return result
+          await folderApi.addFolder(currentFolder.symbolFolderPath, currentFolder.folderPath);
 
           for(const filePath of currentFolder.childFiles) {
             let fileName = await window.pathApi.fileNameWithExtension(filePath);
@@ -84,11 +86,9 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   let tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
-  let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${event.detail.targetPath}`);
-
   const folderApi = new FolderApi('localhost', 1234);
-  const apiResult = await folderApi.getFolderContent(event.detail.targetPath);
-  console.log(`from api = ${JSON.stringify(apiResult, null, 2)}`);
+
+  let folderJson = await folderApi.getFolderContent(event.detail.targetPath);
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
@@ -229,14 +229,6 @@ async function sendSetRootSymbolFolderPath(rootPath) {
 }
 
 
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
-}
-
 async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
   let requestBody = {};
   requestBody["symbolFolderPath"] = symbolFolderPath;
@@ -261,22 +253,5 @@ async function postJSON(targetUrl, requestBody) {
     return result;
   } catch (error) {
     console.error("Error:", error);
-  }
-}
-
-async function fetchJSON(targetUrl, methodType = "GET") {
-  try {
-    const response = await fetch(targetUrl, {method: methodType});
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    const result = await response.json();
-    
-    return result;
-
-  } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
   }
 }
