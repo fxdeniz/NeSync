@@ -1,7 +1,11 @@
+import FolderApi from "../rest_api/folder_api.mjs";
+
 document.addEventListener("DOMContentLoaded", async (event) => {
     let newAddedJson = await window.fmState.getNewAddedJson();
     let deletedJson = await window.fmState.getDeletedJson();
     let updatedJson = await window.fmState.getUpdatedJson();
+
+    let folderApi = new FolderApi('localhost', 1234);
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
@@ -18,9 +22,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     // This due to deleting roots also deletes children on the server.
 
     for (const currentFolder of reversedFolders) {
-      const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
+      const folderJson = await folderApi.getFolderByUserPath(currentFolder);
       appendLog(textAreaLog, `\t 👉 Deleting folder ${folderJson.userFolderPath} with contents...`);
-      const response = await sendDeleteFolderRequest(folderJson.symbolFolderPath);
+      const response = await folderApi.deleteFolder(folderJson.symbolFolderPath);
       appendLog(textAreaLog, `\t\t Deleted Successfully: ${response.isDeleted ? '✅' : '❌'}`);
     }
 
@@ -49,14 +53,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const currentUserFolderPath = newAddedJson.rootFolders[index];
       const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
 
-      const parentFolderJson = await sendGetFolderByUserPathRequest(parentUserFolderPath);
+      const parentFolderJson = await folderApi.getFolderByUserPath(parentUserFolderPath);
       let pathTokens = await window.pathApi.splitPath(currentUserFolderPath);
       pathTokens.pop(); // remove last element whcih is ''
 
       const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";
 
       appendLog(textAreaLog, `\t 👉 Creating new folder ${currentUserFolderPath}`);
-      const result = await sendAddFolderRequest(parentSymbolFolderPath, currentUserFolderPath);
+      const result = await folderApi.addFolder(parentSymbolFolderPath, currentUserFolderPath);
       appendLog(textAreaLog, `\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
 
       let childSuffixes = newAddedJson.childFolderSuffixes[currentUserFolderPath];
@@ -69,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
           const childFolderSymbolPath = parentSymbolFolderPath + childSuffixes[childIndex]; // Suffix already ends with /.
   
           appendLog(textAreaLog, `\t\t\t 👉 Creating new child folder ${childSuffixes[childIndex]}`);
-          const result = await sendAddFolderRequest(childFolderSymbolPath, childFolderUserPath);
+          const result = await folderApi.addFolder(childFolderSymbolPath, childFolderUserPath);
           appendLog(textAreaLog, `\t\t\t\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
         }
       }
@@ -83,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       appendLog(textAreaLog, `\t Adding new files of new folder: ${currentFolder}`);
 
       for (const fileName of newAddedJson.files[currentFolder]) {
-        const folderJson = await sendGetFolderByUserPathRequest(currentFolder);
+        const folderJson = await folderApi.getFolderByUserPath(currentFolder);
         appendLog(textAreaLog, `\t\t 👉 Adding new file  ${fileName}`);
         const result = await sendAddFileRequest(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
         appendLog(textAreaLog, `\t\t\t Added  Successfully: ${result.isAdded ? '✅' : '❌'}:`);
@@ -129,27 +133,8 @@ function enableButton(elementButton) {
 }
 
 
-async function sendGetFolderByUserPathRequest(userFolderPath) {
-  return await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${userFolderPath}`);
-}
-
-
 async function sendGetFileByUserPathRequest(userFilePath) {
   return await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${userFilePath}`);
-}
-
-
-async function sendDeleteFolderRequest(symbolFolderPath) {
-  return await fetchJSON(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
-}
-
-
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
 
