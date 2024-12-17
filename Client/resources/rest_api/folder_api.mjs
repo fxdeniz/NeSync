@@ -8,7 +8,7 @@ export default class FolderApi {
     }
 
     async getFolderContent(symbolFolderPath) {
-        return await fetchJSON(`http://$${this.#host}:${this.#port}/getFolderContent?symbolPath=${symbolFolderPath}`);
+        return await fetchJSON(`http://${this.#host}:${this.#port}/getFolderContent?symbolPath=${symbolFolderPath}`);
     }
 }
 

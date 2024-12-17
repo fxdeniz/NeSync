@@ -1,4 +1,4 @@
-import FolderApi from "../rest_api/folder_api.js";
+import FolderApi from "../rest_api/folder_api.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
@@ -54,7 +54,7 @@ async function onClickHandler_buttonAddNewFolder() {
 
           await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
 
-          for(filePath of currentFolder.childFiles) {
+          for(const filePath of currentFolder.childFiles) {
             let fileName = await window.pathApi.fileNameWithExtension(filePath);
             fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
                             pathToFile: filePath,
@@ -69,7 +69,7 @@ async function onClickHandler_buttonAddNewFolder() {
           }
       }
 
-      for(currentFile of fileList) {
+      for(const currentFile of fileList) {
         await sendAddFileRequest(currentFile.symbolFolderPath,
                                   currentFile.pathToFile,
                                   currentFile.description,
@@ -87,7 +87,8 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${event.detail.targetPath}`);
 
   const folderApi = new FolderApi('localhost', 1234);
-  console.log(`from api = ${folderApi.getFolderContent(event.detail.targetPath)}`);
+  const apiResult = await folderApi.getFolderContent(event.detail.targetPath);
+  console.log(`from api = ${JSON.stringify(apiResult, null, 2)}`);
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
