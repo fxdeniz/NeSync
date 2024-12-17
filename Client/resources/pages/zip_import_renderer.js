@@ -1,4 +1,8 @@
+import FolderApi from "../rest_api/folder_api.mjs";
+
 document.addEventListener("DOMContentLoaded", async (event) => {
+
+    let folderApi = new FolderApi('localhost', 1234);
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
@@ -46,13 +50,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for (const symbolFolderPath of foldersJson) {
       appendLog(textAreaLog, `\t 👉 Checking folder: ${symbolFolderPath}`);
-      const folder = await sendGetFolderRequest(symbolFolderPath);
+      const folder = await folderApi.getFolderContent(symbolFolderPath);
 
       if(folder.isExist)
         appendLog(textAreaLog, "\t\t Folder exists, no need to create.");
       else {
         appendLog(textAreaLog, "\t\t Folder not exists, creating it...");
-        const responseCreateFolder = await sendAddFolderRequest(symbolFolderPath, null);
+        const responseCreateFolder = await folderApi.addFolder(symbolFolderPath, null);
         appendLog(textAreaLog, `\t\t\t Created Successfully: ${responseCreateFolder.isAdded ? '✅' : '❌'}`);
 
         if(!responseCreateFolder.isAdded) {
@@ -134,22 +138,8 @@ async function sendReadFilesJsonRequest(symbolFolderPath) {
 }
 
 
-async function sendGetFolderRequest(symbolFolderPath) {
-  return await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${symbolFolderPath}`);
-}
-
-
 async function sendGetFileRequest(symbolFilePath) {
   return await fetchJSON(`http://localhost:1234/getFileContent?symbolPath=${symbolFilePath}`);
-}
-
-
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
 }
 
 
