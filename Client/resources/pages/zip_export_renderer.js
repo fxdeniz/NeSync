@@ -50,11 +50,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const files = responseAddFilesJson.files;
 
-    for (symbolFilePath in files) {
+    for (const symbolFilePath in files) {
       const fileObject = files[symbolFilePath];
       appendLog(textAreaLog, `\t 👉 Adding copies of file: ${fileObject.symbolFilePath}`);
 
-      for (versionObject of fileObject.versionList) {
+      for (const versionObject of fileObject.versionList) {
         const versionNumber = versionObject.versionNumber;
         appendLog(textAreaLog, `\t\t Adding version: ${versionNumber}`);
         const responseAddFileToZip = await sendAddFileToZipRequest(symbolFilePath, versionNumber);
@@ -124,55 +124,6 @@ async function sendAddFileToZipRequest(symbolFilePath, versionNumber) {
   requestBody["versionNumber"] = versionNumber;
 
   return await postJSON('http://localhost:1234/postAddFileToZip', requestBody);    
-}
-
-
-async function sendGetFolderByUserPathRequest(userFolderPath) {
-  return await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${userFolderPath}`);
-}
-
-
-async function sendGetFileByUserPathRequest(userFilePath) {
-  return await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${userFilePath}`);
-}
-
-
-async function sendDeleteFolderRequest(symbolFolderPath) {
-  return await fetchJSON(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
-}
-
-
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
-}
-
-
-async function sendDeleteFileRequest(symbolFilePath) {
-  return await fetchJSON(`http://localhost:1234/deleteFile?symbolPath=${symbolFilePath}`, "DELETE");
-}
-
-
-async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
-  let requestBody = {};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-  requestBody["isFrozen"] = isFrozen;
-
-  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
-}
-
-
-async function sendAppendVersionRequest(pathToFile, description) {
-  let requestBody = {};
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-
-  return await postJSON('http://localhost:1234/appendVersion', requestBody);    
 }
 
 
