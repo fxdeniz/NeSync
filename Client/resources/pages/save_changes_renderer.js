@@ -1,4 +1,4 @@
-import FolderApi from "../rest_api/folder_api.mjs";
+import FolderApi from "../rest_api/FolderApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     let newAddedJson = await window.fmState.getNewAddedJson();
