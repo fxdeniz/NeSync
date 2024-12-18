@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         return storageController.getFileContent(request);
     });
 
-    httpServer.route("/getFileContentByUserPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/getFileContentByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFileContentByUserPath(request);
     });
 

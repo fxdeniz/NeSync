@@ -17,7 +17,10 @@ export default class FileApi {
     }
 
     async getFileByUserPath(userFilePath) {
-      return await fetchJSON(`http://${this.#host}:${this.#port}/getFileContentByUserPath?userFilePath=${userFilePath}`);
+      let requestBody = {};
+      requestBody["userFilePath"] = userFilePath;
+
+      return await postJSON(`http://${this.#host}:${this.#port}/getFileContentByUserPath`, requestBody);
     }
 
     async addFile(symbolFolderPath, pathToFile, description, isFrozen) {

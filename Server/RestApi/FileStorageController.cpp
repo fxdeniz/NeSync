@@ -386,7 +386,12 @@ QHttpServerResponse FileStorageController::getFileContent(const QHttpServerReque
 
 QHttpServerResponse FileStorageController::getFileContentByUserPath(const QHttpServerRequest &request)
 {
-    QString userFilePath = request.query().queryItemValue("userFilePath");
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString userFilePath = jsonObject["userFilePath"].toString();
     qDebug() << "userFilePath = " << userFilePath;
     qDebug() << "";
 
