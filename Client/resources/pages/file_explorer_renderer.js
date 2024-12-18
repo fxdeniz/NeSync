@@ -1,5 +1,6 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs";
+import ZipExportApi from "../rest_api/ZipExportApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
@@ -173,11 +174,12 @@ async function onClickHandler_buttonSelectZipFileImportPath() {
 }
 
 async function onClickHandler_buttonExport() {
+  let exportApi = new ZipExportApi('localhost', 1234);
   const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-  await sendSetExportZipFilePathRequest(filePath);
-  await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
+  await exportApi.setExportZipFilePath(filePath);
+  await exportApi.setRootSymbolFolderPath(rootSymbolFolderPath);
   window.router.routeToZipExport();
 }
 
@@ -208,27 +210,11 @@ function createDirectoryChangeEvent(targetPath) {
 }
 
 
-async function sendSetExportZipFilePathRequest(filePath) {
-  let requestBody = {"filePath": null};
-  requestBody["filePath"] = filePath;
-
-  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);
-}
-
-
 async function sendSetImportZipFilePathRequest(filePath) {
   let requestBody = {"filePath": null};
   requestBody["filePath"] = filePath;
 
   return await postJSON('http://localhost:1234/zip/import/ZipFilePath', requestBody);
-}
-
-
-async function sendSetRootSymbolFolderPath(rootPath) {
-  let requestBody = {"rootSymbolFolderPath": null};
-  requestBody["rootSymbolFolderPath"] = rootPath;
-
-  return await postJSON('http://localhost:1234/postSetRootSymbolFolderPath', requestBody);    
 }
 
 
