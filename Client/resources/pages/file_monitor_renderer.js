@@ -1,3 +1,5 @@
+import MonitorApi from "../rest_api/MonitorApi.mjs";
+
 document.addEventListener("DOMContentLoaded", async (event) => {
   let buttonRefresh = document.getElementById(`button-refresh`);
   let buttonSave = document.getElementById('button-save');
@@ -21,9 +23,11 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   buttonSave.disabled = true;
   displayAlertDiv("Analyzing file system changes, please wait...");
 
-  let newAddedJson = await sendGetNewAddedListRequest();
-  let deletedJson = await sendGetDeletedListRequest();
-  let updatedJson = await sendGetUpdatedFileListRequest();
+  let monitorApi = new MonitorApi('localhost', 1234);
+
+  let newAddedJson = await monitorApi.getNewAddedList();
+  let deletedJson = await monitorApi.getDeletedList();
+  let updatedJson = await monitorApi.getUpdatedFileList();
 
   await window.fmState.setNewAddedJson(newAddedJson);
   await window.fmState.setDeletedJson(deletedJson);
@@ -187,38 +191,5 @@ function displayAccordion(tree, treeStatus) {
     accordion.appendChild(accordionItem);
 
     collapseIndex += 1;
-  }
-}
-
-
-async function sendGetNewAddedListRequest() {
-  return await fetchJSON(`http://localhost:1234/newAddedList`);
-}
-
-
-async function sendGetDeletedListRequest() {
-  return await fetchJSON(`http://localhost:1234/deletedList`);
-}
-
-
-async function sendGetUpdatedFileListRequest() {
-  return await fetchJSON(`http://localhost:1234/updatedFileList`);
-}
-
-
-async function fetchJSON(targetUrl, methodType = "GET") {
-  try {
-    const response = await fetch(targetUrl, {method: methodType});
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    const result = await response.json();
-    
-    return result;
-
-  } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
   }
 }
