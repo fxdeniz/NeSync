@@ -368,7 +368,12 @@ QHttpServerResponse FileStorageController::getFolderContentByUserPath(const QHtt
 
 QHttpServerResponse FileStorageController::getFileContent(const QHttpServerRequest &request)
 {
-    QString symbolFilePath = request.query().queryItemValue("symbolPath", QUrl::ComponentFormattingOption::FullyDecoded);
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFilePath = " << symbolFilePath;
     qDebug() << "";
 
