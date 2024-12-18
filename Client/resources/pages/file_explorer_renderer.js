@@ -1,4 +1,5 @@
 import FolderApi from "../rest_api/folder_api.mjs";
+import FileApi from "../rest_api/FileApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
@@ -40,6 +41,7 @@ async function onClickHandler_buttonAddNewFolder() {
 
   if(selectedFolderTree) {
       let folderApi = new FolderApi('localhost', 1234);
+      let fileApi = new FileApi('localhost', 1234);
       let stack = [selectedFolderTree];
       let fileList = [];
 
@@ -72,10 +74,11 @@ async function onClickHandler_buttonAddNewFolder() {
       }
 
       for(const currentFile of fileList) {
-        await sendAddFileRequest(currentFile.symbolFolderPath,
-                                  currentFile.pathToFile,
-                                  currentFile.description,
-                                  currentFile.isFrozen);
+        // TODO: Check return result
+        await fileApi.addFile(currentFile.symbolFolderPath,
+                              currentFile.pathToFile,
+                              currentFile.description,
+                              currentFile.isFrozen);
       }
   }
 }
@@ -228,16 +231,6 @@ async function sendSetRootSymbolFolderPath(rootPath) {
   return await postJSON('http://localhost:1234/postSetRootSymbolFolderPath', requestBody);    
 }
 
-
-async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
-  let requestBody = {};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-  requestBody["isFrozen"] = isFrozen;
-
-  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
-}
 
 async function postJSON(targetUrl, requestBody) {
   try {
