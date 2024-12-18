@@ -1,6 +1,7 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs";
 import ZipExportApi from "../rest_api/ZipExportApi.mjs";
+import ZipImportApi from "../rest_api/ZipImportApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
@@ -184,8 +185,9 @@ async function onClickHandler_buttonExport() {
 }
 
 async function onClickHandler_buttonImport() {
+  let importApi = new ZipImportApi('localhost', 1234);
   const filePath = document.getElementById("input-zip-import-path").value;
-  await sendSetImportZipFilePathRequest(filePath);
+  await importApi.setImportZipFilePath(filePath);
   window.router.routeToZipImport();
 }
 
@@ -207,30 +209,4 @@ function onShownHandler_importModal() {
 
 function createDirectoryChangeEvent(targetPath) {
   return new CustomEvent('directoryNavigation', {bubbles: true, detail: {'targetPath': targetPath}});
-}
-
-
-async function sendSetImportZipFilePathRequest(filePath) {
-  let requestBody = {"filePath": null};
-  requestBody["filePath"] = filePath;
-
-  return await postJSON('http://localhost:1234/zip/import/ZipFilePath', requestBody);
-}
-
-
-async function postJSON(targetUrl, requestBody) {
-  try {
-    const response = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Error:", error);
-  }
 }
