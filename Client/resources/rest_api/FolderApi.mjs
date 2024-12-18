@@ -10,7 +10,10 @@ export default class FolderApi {
     }
 
     async getFolderContent(symbolFolderPath) {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/getFolderContent?symbolPath=${symbolFolderPath}`);
+        let requestBody = {"symbolPath": null};
+        requestBody["symbolPath"] = symbolFolderPath;
+
+        return await postJSON(`http://${this.#host}:${this.#port}/getFolderContent`, requestBody);
     }
 
     async getFolderByUserPath(userFolderPath) {

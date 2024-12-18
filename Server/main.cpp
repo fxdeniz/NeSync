@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         return storageController.deleteFile(request);
     });
 
-    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFolderContent(request);
     });
 

@@ -334,7 +334,12 @@ QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &
 
 QHttpServerResponse FileStorageController::getFolderContent(const QHttpServerRequest &request)
 {
-    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
 
     auto fsm = FileStorageManager::instance();
