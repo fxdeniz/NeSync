@@ -1,8 +1,10 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
+import FileApi from "../rest_api/FileApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
     let folderApi = new FolderApi('localhost', 1234);
+    let fileApi = new FileApi('localhost', 1234);
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
@@ -73,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for (const symbolFilePath in filesJson) {
       appendLog(textAreaLog, `\t 👉 Checking file: ${symbolFilePath}`);
-      const file = await sendGetFileRequest(symbolFilePath);
+      const file = await fileApi.getFile(symbolFilePath);
 
       if(file.isExist)
         appendLog(textAreaLog, "\t\t File exists, no need to add.");
@@ -135,11 +137,6 @@ async function sendReadFoldersJsonRequest(symbolFolderPath) {
 
 async function sendReadFilesJsonRequest(symbolFolderPath) {
   return await fetchJSON("http://localhost:1234/zip/import/ReadFilesJson");
-}
-
-
-async function sendGetFileRequest(symbolFilePath) {
-  return await fetchJSON(`http://localhost:1234/getFileContent?symbolPath=${symbolFilePath}`);
 }
 
 

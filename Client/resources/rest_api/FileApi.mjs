@@ -7,6 +7,10 @@ export default class FileApi {
         this.#port = port;
     }
 
+    async getFile(symbolFilePath) {
+      return await fetchJSON(`http://${this.#host}:${this.#port}/getFileContent?symbolPath=${symbolFilePath}`);
+    }
+
     async getFileByUserPath(userFilePath) {
       return await fetchJSON(`http://${this.#host}:${this.#port}/getFileContentByUserPath?userFilePath=${userFilePath}`);
     }
