@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         return storageController.getFolderContent(request);
     });
 
-    httpServer.route("/getFolderContentByUserPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/getFolderContentByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFolderContentByUserPath(request);
     });
 
