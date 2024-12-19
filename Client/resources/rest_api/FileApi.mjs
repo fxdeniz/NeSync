@@ -13,7 +13,7 @@ export default class FileApi extends BaseApi {
       return await postJSON(`http://${this.host}:${this.port}/file/get`, requestBody);
     }
 
-    async getUserPath(userFilePath) {
+    async getByUserPath(userFilePath) {
       let requestBody = {};
       requestBody["userFilePath"] = userFilePath;
 

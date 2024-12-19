@@ -71,15 +71,15 @@ int main(int argc, char *argv[])
         return storageController.getFileByUserPath(request);
     });
 
-    httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/new", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.newAddedItems(request);
     });
 
-    httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/deleted", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.deletedItems(request);
     });
 
-    httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/updated", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.updatedFiles(request);
     });
 
