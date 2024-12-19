@@ -1,23 +1,20 @@
-import {fetchJSON, postJSON} from "./BaseApi.mjs";
+import {fetchJSON, BaseApi} from "./BaseApi.mjs";
 
-export default class MonitorApi {
-    #host;
-    #port;
+export default class MonitorApi extends BaseApi {
 
     constructor(hostName, port) {
-        this.#host = hostName;
-        this.#port = port;
+        super(hostName, port);
     }
 
     async getNewAddedList() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/newAddedList`);
+        return await fetchJSON(`http://${this.host}:${this.port}/newAddedList`);
     }
 
     async getDeletedList() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/deletedList`);
+        return await fetchJSON(`http://${this.host}:${this.port}/deletedList`);
     }
 
     async getUpdatedFileList() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/updatedFileList`);
+        return await fetchJSON(`http://${this.host}:${this.port}/updatedFileList`);
     }
 }

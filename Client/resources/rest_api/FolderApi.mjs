@@ -1,26 +1,23 @@
-import {fetchJSON, postJSON} from "./BaseApi.mjs";
+import {fetchJSON, postJSON, BaseApi} from "./BaseApi.mjs";
 
-export default class FolderApi {
-    #host;
-    #port;
+export default class FolderApi extends BaseApi {
 
     constructor(hostName, port) {
-        this.#host = hostName;
-        this.#port = port;
+      super(hostName, port);
     }
 
     async getFolderContent(symbolFolderPath) {
         let requestBody = {"symbolPath": null};
         requestBody["symbolPath"] = symbolFolderPath;
 
-        return await postJSON(`http://${this.#host}:${this.#port}/getFolderContent`, requestBody);
+        return await postJSON(`http://${this.host}:${this.port}/getFolderContent`, requestBody);
     }
 
     async getFolderByUserPath(userFolderPath) {
       let requestBody = {"userFolderPath": null};
       requestBody["userFolderPath"] = userFolderPath;
 
-      return await postJSON(`http://${this.#host}:${this.#port}/getFolderContentByUserPath`, requestBody);
+      return await postJSON(`http://${this.host}:${this.port}/getFolderContentByUserPath`, requestBody);
     }
 
     async addFolder(symbolFolderPath, userFolderPath) {
@@ -28,10 +25,10 @@ export default class FolderApi {
       requestBody["symbolFolderPath"] = symbolFolderPath;
       requestBody["userFolderPath"] = userFolderPath;
     
-      return await postJSON(`http://${this.#host}:${this.#port}/addNewFolder`, requestBody);    
+      return await postJSON(`http://${this.host}:${this.port}/addNewFolder`, requestBody);    
     }
 
     async deleteFolder(symbolFolderPath) {
-      return await fetchJSON(`http://${this.#host}:${this.#port}/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
+      return await fetchJSON(`http://${this.host}:${this.port}/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
     }
 }

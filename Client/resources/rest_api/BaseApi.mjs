@@ -32,4 +32,33 @@ async function fetchJSON(targetUrl, methodType = "GET") {
     }
   }
 
-  export {fetchJSON, postJSON};
+  class BaseApi {
+    #host;
+    #port;
+
+    constructor(hostName, port) {
+        this.host = hostName;
+        this.port = port;
+    }
+
+    get host() {
+      return this.#host;
+    }
+
+    set host(value) {
+      this.#host = value;
+    }
+
+    get port() {
+      return this.#port;
+    }
+
+    set port(value) {
+      if (typeof value === 'number' && value >= 0 && value <= 65535)
+        this.#port = value;
+      else
+        throw new TypeError(`Port number ${value} is not valid.`);
+    }
+  }
+
+  export {fetchJSON, postJSON, BaseApi};

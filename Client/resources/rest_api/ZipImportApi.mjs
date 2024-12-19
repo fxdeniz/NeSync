@@ -1,31 +1,28 @@
-import {fetchJSON, postJSON} from "./BaseApi.mjs";
+import {fetchJSON, postJSON, BaseApi} from "./BaseApi.mjs";
 
-export default class ZipExportApi {
-    #host;
-    #port;
+export default class ZipExportApi extends BaseApi {
 
     constructor(hostName, port) {
-        this.#host = hostName;
-        this.#port = port;
+        super(hostName, port);
     }
 
     async setImportZipFilePath(filePath) {
         let requestBody = {"filePath": null};
         requestBody["filePath"] = filePath;
         
-        return await postJSON(`http://${this.#host}:${this.#port}/zip/import/ZipFilePath`, requestBody);
+        return await postJSON(`http://${this.host}:${this.port}/zip/import/ZipFilePath`, requestBody);
     }
 
     async openImportZip() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/zip/import/OpenFile`);
+        return await fetchJSON(`http://${this.host}:${this.port}/zip/import/OpenFile`);
     }
 
     async readFoldersJson() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/zip/import/ReadFoldersJson`);
+        return await fetchJSON(`http://${this.host}:${this.port}/zip/import/ReadFoldersJson`);
     }
 
     async readFilesJson() {
-        return await fetchJSON(`http://${this.#host}:${this.#port}/zip/import/ReadFilesJson`);
+        return await fetchJSON(`http://${this.host}:${this.port}/zip/import/ReadFilesJson`);
     }
 
     async importFile(symbolFilePath, versionNumber) {
@@ -33,6 +30,6 @@ export default class ZipExportApi {
         requestBody["symbolFilePath"] = symbolFilePath;
         requestBody["versionNumber"] = versionNumber;
         
-        return await postJSON(`http://${this.#host}:${this.#port}/zip/import/file`, requestBody);    
+        return await postJSON(`http://${this.host}:${this.port}/zip/import/file`, requestBody);    
     }
 }
