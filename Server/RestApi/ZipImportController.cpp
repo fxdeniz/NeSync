@@ -9,7 +9,7 @@ ZipImportController::ZipImportController(QObject *parent)
     : QObject{parent}
 {}
 
-QHttpServerResponse ZipImportController::setZipFilePath(const QHttpServerRequest &request)
+QHttpServerResponse ZipImportController::setFilePath(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -29,7 +29,7 @@ QHttpServerResponse ZipImportController::setZipFilePath(const QHttpServerRequest
     return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipImportController::getZipFilePath(const QHttpServerRequest &request)
+QHttpServerResponse ZipImportController::getFilePath(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"filePath", service.getZipFilePath()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
@@ -37,7 +37,7 @@ QHttpServerResponse ZipImportController::getZipFilePath(const QHttpServerRequest
     return response;
 }
 
-QHttpServerResponse ZipImportController::openArchive(const QHttpServerRequest &request)
+QHttpServerResponse ZipImportController::openZip(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"isOpened", service.openArchive()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
@@ -59,7 +59,7 @@ QHttpServerResponse ZipImportController::readFilesJson(const QHttpServerRequest 
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipImportController::importFile(const QHttpServerRequest &request)
+QHttpServerResponse ZipImportController::importFileFromZip(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 

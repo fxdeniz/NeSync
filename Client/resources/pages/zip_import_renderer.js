@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     let textAreaLog = document.getElementById('text-area-log');
 
-    const responseOpenZip = await importApi.openImportZip();
+    const responseOpenZip = await importApi.openZip();
 
     appendLog(textAreaLog, "ℹ️ Trying to open zip file...");
     appendLog(textAreaLog, `\t File Opened Successfully: ${responseOpenZip.isOpened ? '✅' : '❌'}`);
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         for(const version of newFile.versionList) {
           const versionNumber = version.versionNumber;
           appendLog(textAreaLog, `\t\t\t Importing version ${versionNumber}:`);
-          const importVersion = await importApi.importFile(symbolFilePath, versionNumber);
+          const importVersion = await importApi.importFileFromZip(symbolFilePath, versionNumber);
           appendLog(textAreaLog, `\t\t\t\t Imported Successfully ${importVersion.isImported ? '✅' : '❌'}`);
 
           if(!importVersion.isImported) {

@@ -11,12 +11,12 @@ class ZipImportController : public QObject
     Q_OBJECT
 public:
     explicit ZipImportController(QObject *parent = nullptr);
-    QHttpServerResponse setZipFilePath(const QHttpServerRequest& request);
-    QHttpServerResponse getZipFilePath(const QHttpServerRequest& request);
-    QHttpServerResponse openArchive(const QHttpServerRequest& request);
+    QHttpServerResponse setFilePath(const QHttpServerRequest& request);
+    QHttpServerResponse getFilePath(const QHttpServerRequest& request);
+    QHttpServerResponse openZip(const QHttpServerRequest& request);
     QHttpServerResponse readFoldersJson(const QHttpServerRequest& request);
     QHttpServerResponse readFilesJson(const QHttpServerRequest& request);
-    QHttpServerResponse importFile(const QHttpServerRequest& request);
+    QHttpServerResponse importFileFromZip(const QHttpServerRequest& request);
 
 signals:
 

@@ -187,7 +187,7 @@ async function onClickHandler_buttonExport() {
 async function onClickHandler_buttonImport() {
   let importApi = new ZipImportApi('localhost', 1234);
   const filePath = document.getElementById("input-zip-import-path").value;
-  await importApi.setImportZipFilePath(filePath);
+  await importApi.setFilePath(filePath);
   window.router.routeToZipImport();
 }
 

@@ -115,28 +115,28 @@ int main(int argc, char *argv[])
         return zipExportController.addFile(request);
     });
 
-    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.setZipFilePath(request);
+    httpServer.route("/import/zip/setFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.setFilePath(request);
     });
 
-    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.getZipFilePath(request);
+    httpServer.route("/import/zip/getFilePath", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.getFilePath(request);
     });
 
-    httpServer.route("/zip/import/OpenFile", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.openArchive(request);
+    httpServer.route("/import/zip/open", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.openZip(request);
     });
 
-    httpServer.route("/zip/import/ReadFoldersJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+    httpServer.route("/import/zip/readFoldersJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
         return zipImportController.readFoldersJson(request);
     });
 
-    httpServer.route("/zip/import/ReadFilesJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+    httpServer.route("/import/zip/readFilesJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
         return zipImportController.readFilesJson(request);
     });
 
-    httpServer.route("/zip/import/file", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.importFile(request);
+    httpServer.route("/import/zip/importFileFromZip", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.importFileFromZip(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.
