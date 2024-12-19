@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     appendLog(textAreaLog, "ℹ️ Crearting zip file...");
 
-    const responseFilePath = await exportApi.getZipFilePath();
-    const responseCreate = await exportApi.createZipArchive(responseFilePath.filePath);
+    const responseFilePath = await exportApi.getFilePath();
+    const responseCreate = await exportApi.createZip(responseFilePath.filePath);
 
     appendLog(textAreaLog, `\t Created Successfully: ${responseCreate.isCreated ? '✅' : '❌'}`);
 
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       for (const versionObject of fileObject.versionList) {
         const versionNumber = versionObject.versionNumber;
         appendLog(textAreaLog, `\t\t Adding version: ${versionNumber}`);
-        const responseAddFileToZip = await exportApi.addFileToZip(symbolFilePath, versionNumber);
+        const responseAddFileToZip = await exportApi.addFile(symbolFilePath, versionNumber);
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${responseAddFileToZip.isAdded ? '✅' : '❌'}`);
 
         if(!responseAddFileToZip.isAdded) {

@@ -6,46 +6,50 @@ export default class ZipExportApi extends BaseApi {
         super(hostName, port);
     }
 
-    async setExportZipFilePath(filePath) {
+    async setFilePath(filePath) {
         let requestBody = {"filePath": null};
         requestBody["filePath"] = filePath;
         
-        return await postJSON(`http://${this.host}:${this.port}/postSetZipFilePath`, requestBody);
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/setFilePath`, requestBody);
     }
 
-    async getZipFilePath() {
-        return await fetchJSON(`http://${this.host}:${this.port}/getZipFilePath`);    
+    async getFilePath() {
+        return await fetchJSON(`http://${this.host}:${this.port}/export/zip/getFilePath`);    
     }
 
-    async setRootSymbolFolderPath(rootPath) {
+    async getRootFolder() {
+        return await fetchJSON(`http://${this.host}:${this.port}/export/zip/getRootFolder`);    
+    }
+
+    async setRootFolder(symbolPath) {
         let requestBody = {"rootSymbolFolderPath": null};
-        requestBody["rootSymbolFolderPath"] = rootPath;
+        requestBody["rootSymbolFolderPath"] = symbolPath;
         
-        return await postJSON(`http://${this.host}:${this.port}/postSetRootSymbolFolderPath`, requestBody);    
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/setRootFolder`, requestBody);    
     }
 
-    async createZipArchive(filePath) {
+    async createZip(filePath) {
         let requestBody = {"filePath": null};
         requestBody["filePath"] = filePath;
         
-        return await postJSON(`http://${this.host}:${this.port}/postCreateZipArchive`, requestBody);    
-    }
-
-    async addFilesJson() {
-        let requestBody = {};
-        return await postJSON(`http://${this.host}:${this.port}/postAddFileJson`, requestBody);    
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/create`, requestBody);    
     }
 
     async addFoldersJson() {
         let requestBody = {};
-        return await postJSON(`http://${this.host}:${this.port}/postAddFolderJson`, requestBody);    
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/addFoldersJson`, requestBody);    
     }
 
-    async addFileToZip(symbolFilePath, versionNumber) {
+    async addFilesJson() {
+        let requestBody = {};
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/addFilesJson`, requestBody);    
+    }
+
+    async addFile(symbolFilePath, versionNumber) {
         let requestBody = {"symbolFilePath": null, "versionNumber": null};
         requestBody["symbolFilePath"] = symbolFilePath;
         requestBody["versionNumber"] = versionNumber;
         
-        return await postJSON(`http://${this.host}:${this.port}/postAddFileToZip`, requestBody);    
+        return await postJSON(`http://${this.host}:${this.port}/export/zip/addFile`, requestBody);    
     }      
 }

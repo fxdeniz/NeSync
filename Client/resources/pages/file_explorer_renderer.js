@@ -179,8 +179,8 @@ async function onClickHandler_buttonExport() {
   const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-  await exportApi.setExportZipFilePath(filePath);
-  await exportApi.setRootSymbolFolderPath(rootSymbolFolderPath);
+  await exportApi.setFilePath(filePath);
+  await exportApi.setRootFolder(rootSymbolFolderPath);
   window.router.routeToZipExport();
 }
 

@@ -83,36 +83,36 @@ int main(int argc, char *argv[])
         return fsMonitorController.updatedFiles(request);
     });
 
-    httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postSetZipFilePath(request);
+    httpServer.route("/export/zip/setFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.setFilePath(request);
     });
 
-    httpServer.route("/getZipFilePath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.getZipFilePath(request);
+    httpServer.route("/export/zip/getFilePath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getFilePath(request);
     });
 
-    httpServer.route("/postSetRootSymbolFolderPath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postSetRootSymbolFolderPath(request);
+    httpServer.route("/export/zip/setRootFolder", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.setRootFolder(request);
     });
 
-    httpServer.route("/getRootSymbolFolderPath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.getRootSymbolFolderPath(request);
+    httpServer.route("export/zip/getRootFolder", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getRootFolder(request);
     });
 
-    httpServer.route("/postCreateZipArchive", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postCreateArchive(request);
+    httpServer.route("/export/zip/create", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.createZip(request);
     });
 
-    httpServer.route("/postAddFolderJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFoldersJson(request);
+    httpServer.route("/export/zip/addFoldersJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFoldersJson(request);
     });
 
-    httpServer.route("/postAddFileJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFileJson(request);
+    httpServer.route("/export/zip/addFilesJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFilesJson(request);
     });
 
-    httpServer.route("/postAddFileToZip", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFileToZip(request);
+    httpServer.route("/export/zip/addFile", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFile(request);
     });
 
     httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
