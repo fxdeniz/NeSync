@@ -10,14 +10,14 @@ export default class FileApi extends BaseApi {
       let requestBody = {};
       requestBody["symbolPath"] = symbolFilePath;
       
-      return await postJSON(`http://${this.host}:${this.port}/getFileContent`, requestBody);
+      return await postJSON(`http://${this.host}:${this.port}/file/get`, requestBody);
     }
 
     async getFileByUserPath(userFilePath) {
       let requestBody = {};
       requestBody["userFilePath"] = userFilePath;
 
-      return await postJSON(`http://${this.host}:${this.port}/getFileContentByUserPath`, requestBody);
+      return await postJSON(`http://${this.host}:${this.port}/file/getByUserPath`, requestBody);
     }
 
     async addFile(symbolFolderPath, pathToFile, description, isFrozen) {
@@ -27,7 +27,7 @@ export default class FileApi extends BaseApi {
       requestBody["description"] = description;
       requestBody["isFrozen"] = isFrozen;
     
-      return await postJSON(`http://${this.host}:${this.port}/addNewFile`, requestBody);    
+      return await postJSON(`http://${this.host}:${this.port}/file/add`, requestBody);    
     }
 
     async appendVersion(pathToFile, description) {
@@ -35,10 +35,10 @@ export default class FileApi extends BaseApi {
       requestBody["pathToFile"] = pathToFile;
       requestBody["description"] = description;
     
-      return await postJSON(`http://${this.host}:${this.port}/appendVersion`, requestBody);    
+      return await postJSON(`http://${this.host}:${this.port}/file/append`, requestBody);    
     }
 
     async deleteFile(symbolFilePath) {
-      return await fetchJSON(`http://${this.host}:${this.port}/deleteFile?symbolPath=${symbolFilePath}`, "DELETE");
+      return await fetchJSON(`http://${this.host}:${this.port}/file/delete?symbolPath=${symbolFilePath}`, "DELETE");
     }
 }

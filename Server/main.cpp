@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
         return storageController.postAddNewFolder(request);
     });
 
-    httpServer.route("/addNewFile", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/file/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.postAddNewFile(request);
     });
 
-    httpServer.route("/appendVersion", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.postAppendVersion(request);
     });
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         return storageController.deleteFolder(request);
     });
 
-    httpServer.route("/deleteFile", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFile(request);
     });
 
@@ -63,12 +63,12 @@ int main(int argc, char *argv[])
         return storageController.getFolderContentByUserPath(request);
     });
 
-    httpServer.route("/getFileContent", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFileContent(request);
+    httpServer.route("/file/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFile(request);
     });
 
-    httpServer.route("/getFileContentByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFileContentByUserPath(request);
+    httpServer.route("/file/getByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFileByUserPath(request);
     });
 
     httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {

@@ -366,7 +366,7 @@ QHttpServerResponse FileStorageController::getFolderContentByUserPath(const QHtt
     return response;
 }
 
-QHttpServerResponse FileStorageController::getFileContent(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -384,7 +384,7 @@ QHttpServerResponse FileStorageController::getFileContent(const QHttpServerReque
     return response;
 }
 
-QHttpServerResponse FileStorageController::getFileContentByUserPath(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 

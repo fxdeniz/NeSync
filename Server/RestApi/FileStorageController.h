@@ -21,8 +21,8 @@ public:
     QHttpServerResponse deleteFile(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContent(const QHttpServerRequest& request);
     QHttpServerResponse getFolderContentByUserPath(const QHttpServerRequest& request);
-    QHttpServerResponse getFileContent(const QHttpServerRequest& request);
-    QHttpServerResponse getFileContentByUserPath(const QHttpServerRequest& request);
+    QHttpServerResponse getFile(const QHttpServerRequest& request);
+    QHttpServerResponse getFileByUserPath(const QHttpServerRequest& request);
 
 signals:
 
