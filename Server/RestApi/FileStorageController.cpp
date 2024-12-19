@@ -71,7 +71,7 @@ QHttpServerResponse FileStorageController::postAddNewFolder_V1(const QHttpServer
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse FileStorageController::postAddNewFolder(const QHttpServerRequest& request)
+QHttpServerResponse FileStorageController::addNewFolder(const QHttpServerRequest& request)
 {
     QByteArray requestBody = request.body();
 
@@ -170,7 +170,7 @@ QHttpServerResponse FileStorageController::postAddNewFile_V1(const QHttpServerRe
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse FileStorageController::postAddNewFile(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::addNewFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -272,7 +272,7 @@ QHttpServerResponse FileStorageController::postAppendVersion_V1(const QHttpServe
 }
 
 // Version 2 more straight forward.
-QHttpServerResponse FileStorageController::postAppendVersion(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::appendVersion(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -332,7 +332,7 @@ QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &
     return response;
 }
 
-QHttpServerResponse FileStorageController::getFolderContent(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFolder(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -349,7 +349,7 @@ QHttpServerResponse FileStorageController::getFolderContent(const QHttpServerReq
     return response;
 }
 
-QHttpServerResponse FileStorageController::getFolderContentByUserPath(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::getFolderUserPath(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 

@@ -58,7 +58,7 @@ async function onClickHandler_buttonAddNewFolder() {
             currentFolder.symbolFolderPath += symbolFolderSuffix;
 
           // TODO: check return result
-          await folderApi.addFolder(currentFolder.symbolFolderPath, currentFolder.folderPath);
+          await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
 
           for(const filePath of currentFolder.childFiles) {
             let fileName = await window.pathApi.fileNameWithExtension(filePath);
@@ -77,10 +77,10 @@ async function onClickHandler_buttonAddNewFolder() {
 
       for(const currentFile of fileList) {
         // TODO: Check return result
-        await fileApi.addFile(currentFile.symbolFolderPath,
-                              currentFile.pathToFile,
-                              currentFile.description,
-                              currentFile.isFrozen);
+        await fileApi.add(currentFile.symbolFolderPath,
+                          currentFile.pathToFile,
+                          currentFile.description,
+                          currentFile.isFrozen);
       }
   }
 }
@@ -93,7 +93,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
   const folderApi = new FolderApi('localhost', 1234);
 
-  let folderJson = await folderApi.getFolderContent(event.detail.targetPath);
+  let folderJson = await folderApi.get(event.detail.targetPath);
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {

@@ -54,13 +54,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for (const symbolFolderPath of foldersJson) {
       appendLog(textAreaLog, `\t 👉 Checking folder: ${symbolFolderPath}`);
-      const folder = await folderApi.getFolderContent(symbolFolderPath);
+      const folder = await folderApi.get(symbolFolderPath);
 
       if(folder.isExist)
         appendLog(textAreaLog, "\t\t Folder exists, no need to create.");
       else {
         appendLog(textAreaLog, "\t\t Folder not exists, creating it...");
-        const responseCreateFolder = await folderApi.addFolder(symbolFolderPath, null);
+        const responseCreateFolder = await folderApi.add(symbolFolderPath, null);
         appendLog(textAreaLog, `\t\t\t Created Successfully: ${responseCreateFolder.isAdded ? '✅' : '❌'}`);
 
         if(!responseCreateFolder.isAdded) {
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     for (const symbolFilePath in filesJson) {
       appendLog(textAreaLog, `\t 👉 Checking file: ${symbolFilePath}`);
-      const file = await fileApi.getFile(symbolFilePath);
+      const file = await fileApi.get(symbolFilePath);
 
       if(file.isExist)
         appendLog(textAreaLog, "\t\t File exists, no need to add.");

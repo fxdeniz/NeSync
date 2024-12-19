@@ -35,19 +35,19 @@ int main(int argc, char *argv[])
     ZipImportController zipImportController;
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
-    httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAddNewFolder(request);
+    httpServer.route("/folder/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.addNewFolder(request);
     });
 
     httpServer.route("/file/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAddNewFile(request);
+        return storageController.addNewFile(request);
     });
 
     httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAppendVersion(request);
+        return storageController.appendVersion(request);
     });
 
-    httpServer.route("/deleteFolder", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFolder(request);
     });
 
@@ -55,12 +55,12 @@ int main(int argc, char *argv[])
         return storageController.deleteFile(request);
     });
 
-    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFolderContent(request);
+    httpServer.route("/folder/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFolder(request);
     });
 
-    httpServer.route("/getFolderContentByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFolderContentByUserPath(request);
+    httpServer.route("/folder/getByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFolderUserPath(request);
     });
 
     httpServer.route("/file/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
