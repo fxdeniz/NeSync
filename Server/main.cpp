@@ -39,22 +39,6 @@ int main(int argc, char *argv[])
         return storageController.addNewFolder(request);
     });
 
-    httpServer.route("/file/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.addNewFile(request);
-    });
-
-    httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.appendVersion(request);
-    });
-
-    httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
-        return storageController.deleteFolder(request);
-    });
-
-    httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
-        return storageController.deleteFile(request);
-    });
-
     httpServer.route("/folder/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFolder(request);
     });
@@ -63,12 +47,28 @@ int main(int argc, char *argv[])
         return storageController.getFolderUserPath(request);
     });
 
+    httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+        return storageController.deleteFolder(request);
+    });
+
+    httpServer.route("/file/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.addNewFile(request);
+    });
+
     httpServer.route("/file/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFile(request);
     });
 
     httpServer.route("/file/getByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.getFileByUserPath(request);
+    });
+
+    httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.appendVersion(request);
+    });
+
+    httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+        return storageController.deleteFile(request);
     });
 
     httpServer.route("/monitor/new", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
