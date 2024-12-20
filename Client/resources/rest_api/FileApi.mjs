@@ -39,6 +39,9 @@ export default class FileApi extends BaseApi {
     }
 
     async delete(symbolFilePath) {
-      return await fetchJSON(`http://${this.host}:${this.port}/file/delete?symbolPath=${symbolFilePath}`, "DELETE");
+      let requestBody = {};
+      requestBody["symbolPath"] = symbolFilePath;
+
+      return await postJSON(`http://${this.host}:${this.port}/file/delete`, requestBody, "DELETE");
     }
 }

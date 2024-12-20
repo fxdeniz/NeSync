@@ -29,6 +29,9 @@ export default class FolderApi extends BaseApi {
     }
 
     async delete(symbolFolderPath) {
-      return await fetchJSON(`http://${this.host}:${this.port}/folder/delete?symbolPath=${symbolFolderPath}`, "DELETE");
+      let requestBody = {};
+      requestBody["symbolPath"] = symbolFolderPath;
+
+      return await postJSON(`http://${this.host}:${this.port}/folder/delete`, requestBody, "DELETE");
     }
 }

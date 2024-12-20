@@ -306,7 +306,12 @@ QHttpServerResponse FileStorageController::appendVersion(const QHttpServerReques
 
 QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest &request)
 {
-    QString symbolFolderPath = request.query().queryItemValue("symbolPath");
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
 
     auto fsm = FileStorageManager::instance();
@@ -320,7 +325,12 @@ QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest
 
 QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
 {
-    QString symbolFilePath = request.query().queryItemValue("symbolPath");
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFilePath = " << symbolFilePath;
 
     auto fsm = FileStorageManager::instance();
