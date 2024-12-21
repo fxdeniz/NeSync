@@ -35,108 +35,108 @@ int main(int argc, char *argv[])
     ZipImportController zipImportController;
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
-    httpServer.route("/addNewFolder", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAddNewFolder(request);
+    httpServer.route("/folder/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.addNewFolder(request);
     });
 
-    httpServer.route("/addNewFile", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAddNewFile(request);
+    httpServer.route("/folder/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFolder(request);
     });
 
-    httpServer.route("/appendVersion", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.postAppendVersion(request);
+    httpServer.route("/folder/getByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFolderUserPath(request);
     });
 
-    httpServer.route("/deleteFolder", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFolder(request);
     });
 
-    httpServer.route("/deleteFile", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
+    httpServer.route("/file/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.addNewFile(request);
+    });
+
+    httpServer.route("/file/get", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFile(request);
+    });
+
+    httpServer.route("/file/getByUserPath", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getFileByUserPath(request);
+    });
+
+    httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.appendVersion(request);
+    });
+
+    httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFile(request);
     });
 
-    httpServer.route("/getFolderContent", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFolderContent(request);
-    });
-
-    httpServer.route("/getFolderContentByUserPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFolderContentByUserPath(request);
-    });
-
-    httpServer.route("/getFileContent", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFileContent(request);
-    });
-
-    httpServer.route("/getFileContentByUserPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
-        return storageController.getFileContentByUserPath(request);
-    });
-
-    httpServer.route("/newAddedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/new", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.newAddedItems(request);
     });
 
-    httpServer.route("/deletedList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/deleted", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.deletedItems(request);
     });
 
-    httpServer.route("/updatedFileList", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
+    httpServer.route("/monitor/updated", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.updatedFiles(request);
     });
 
-    httpServer.route("/postSetZipFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postSetZipFilePath(request);
+    httpServer.route("/export/zip/setFilePath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.setFilePath(request);
     });
 
-    httpServer.route("/getZipFilePath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.getZipFilePath(request);
+    httpServer.route("/export/zip/getFilePath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getFilePath(request);
     });
 
-    httpServer.route("/postSetRootSymbolFolderPath", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postSetRootSymbolFolderPath(request);
+    httpServer.route("/export/zip/setRootFolder", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.setRootFolder(request);
     });
 
-    httpServer.route("/getRootSymbolFolderPath", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.getRootSymbolFolderPath(request);
+    httpServer.route("export/zip/getRootFolder", QHttpServerRequest::Method::Get, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.getRootFolder(request);
     });
 
-    httpServer.route("/postCreateZipArchive", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postCreateArchive(request);
+    httpServer.route("/export/zip/create", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.createZip(request);
     });
 
-    httpServer.route("/postAddFolderJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFoldersJson(request);
+    httpServer.route("/export/zip/addFoldersJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFoldersJson(request);
     });
 
-    httpServer.route("/postAddFileJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFileJson(request);
+    httpServer.route("/export/zip/addFilesJson", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFilesJson(request);
     });
 
-    httpServer.route("/postAddFileToZip", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
-        return zipExportController.postAddFileToZip(request);
+    httpServer.route("/export/zip/addFile", QHttpServerRequest::Method::Post, [&zipExportController](const QHttpServerRequest &request) {
+        return zipExportController.addFile(request);
     });
 
-    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.setZipFilePath(request);
+    httpServer.route("/import/zip/setFilePath", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.setFilePath(request);
     });
 
-    httpServer.route("/zip/import/ZipFilePath", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.getZipFilePath(request);
+    httpServer.route("/import/zip/getFilePath", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.getFilePath(request);
     });
 
-    httpServer.route("/zip/import/OpenFile", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.openArchive(request);
+    httpServer.route("/import/zip/open", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.openZip(request);
     });
 
-    httpServer.route("/zip/import/ReadFoldersJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+    httpServer.route("/import/zip/readFoldersJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
         return zipImportController.readFoldersJson(request);
     });
 
-    httpServer.route("/zip/import/ReadFilesJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
+    httpServer.route("/import/zip/readFilesJson", QHttpServerRequest::Method::Get, [&zipImportController](const QHttpServerRequest &request) {
         return zipImportController.readFilesJson(request);
     });
 
-    httpServer.route("/zip/import/file", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
-        return zipImportController.importFile(request);
+    httpServer.route("/import/zip/importFileFromZip", QHttpServerRequest::Method::Post, [&zipImportController](const QHttpServerRequest &request) {
+        return zipImportController.importFileFromZip(request);
     });
 
     quint16 targetPort = 1234; // Making this 0, means random port.

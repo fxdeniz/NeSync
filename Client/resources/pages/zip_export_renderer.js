@@ -1,4 +1,8 @@
+import ZipExportApi from "../rest_api/ZipExportApi.mjs"
+
 document.addEventListener("DOMContentLoaded", async (event) => {
+
+    let exportApi = new ZipExportApi('localhost', 1234);
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
@@ -8,8 +12,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     appendLog(textAreaLog, "ℹ️ Crearting zip file...");
 
-    const responseFilePath = await sendGetZipFilePathRequest();
-    const responseCreate = await sendPostCreateZipArchiveRequest(responseFilePath.filePath);
+    const responseFilePath = await exportApi.getFilePath();
+    const responseCreate = await exportApi.createZip(responseFilePath.filePath);
 
     appendLog(textAreaLog, `\t Created Successfully: ${responseCreate.isCreated ? '✅' : '❌'}`);
 
@@ -22,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding folder tree metadata to zip file...");
 
-    const responseAddFoldersJson = await sendAddFoldersJsonRequest();
+    const responseAddFoldersJson = await exportApi.addFoldersJson();
 
     appendLog(textAreaLog, `\t Added Successfully: ${responseAddFoldersJson.isAdded ? '✅' : '❌'}`);
 
@@ -35,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     appendLog(textAreaLog, "");
     appendLog(textAreaLog, "ℹ️ Adding files' metadata to zip file...");
 
-    const responseAddFilesJson = await sendAddFilesJsonRequest();
+    const responseAddFilesJson = await exportApi.addFilesJson();
 
     appendLog(textAreaLog, `\t Added Successfully: ${responseAddFilesJson.isAdded ? '✅' : '❌'}`);
 
@@ -50,14 +54,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const files = responseAddFilesJson.files;
 
-    for (symbolFilePath in files) {
+    for (const symbolFilePath in files) {
       const fileObject = files[symbolFilePath];
       appendLog(textAreaLog, `\t 👉 Adding copies of file: ${fileObject.symbolFilePath}`);
 
-      for (versionObject of fileObject.versionList) {
+      for (const versionObject of fileObject.versionList) {
         const versionNumber = versionObject.versionNumber;
         appendLog(textAreaLog, `\t\t Adding version: ${versionNumber}`);
-        const responseAddFileToZip = await sendAddFileToZipRequest(symbolFilePath, versionNumber);
+        const responseAddFileToZip = await exportApi.addFile(symbolFilePath, versionNumber);
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${responseAddFileToZip.isAdded ? '✅' : '❌'}`);
 
         if(!responseAddFileToZip.isAdded) {
@@ -90,123 +94,4 @@ function disableButton(elementButton) {
 function enableButton(elementButton) {
   elementButton.disabled = false;
   elementButton.textContent = "Close";
-}
-
-
-async function sendGetZipFilePathRequest() {
-  return await fetchJSON('http://localhost:1234/getZipFilePath');    
-}
-
-
-async function sendPostCreateZipArchiveRequest(filePath) {
-  let requestBody = {"filePath": null};
-  requestBody["filePath"] = filePath;
-
-  return await postJSON('http://localhost:1234/postCreateZipArchive', requestBody);    
-}
-
-
-async function sendAddFilesJsonRequest() {
-  let requestBody = {};
-  return await postJSON('http://localhost:1234/postAddFileJson', requestBody);    
-}
-
-
-async function sendAddFoldersJsonRequest() {
-  let requestBody = {};
-  return await postJSON('http://localhost:1234/postAddFolderJson', requestBody);    
-}
-
-
-async function sendAddFileToZipRequest(symbolFilePath, versionNumber) {
-  let requestBody = {"symbolFilePath": null, "versionNumber": null};
-  requestBody["symbolFilePath"] = symbolFilePath;
-  requestBody["versionNumber"] = versionNumber;
-
-  return await postJSON('http://localhost:1234/postAddFileToZip', requestBody);    
-}
-
-
-async function sendGetFolderByUserPathRequest(userFolderPath) {
-  return await fetchJSON(`http://localhost:1234/getFolderContentByUserPath?userFolderPath=${userFolderPath}`);
-}
-
-
-async function sendGetFileByUserPathRequest(userFilePath) {
-  return await fetchJSON(`http://localhost:1234/getFileContentByUserPath?userFilePath=${userFilePath}`);
-}
-
-
-async function sendDeleteFolderRequest(symbolFolderPath) {
-  return await fetchJSON(`http://localhost:1234/deleteFolder?symbolPath=${symbolFolderPath}`, "DELETE");
-}
-
-
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
-}
-
-
-async function sendDeleteFileRequest(symbolFilePath) {
-  return await fetchJSON(`http://localhost:1234/deleteFile?symbolPath=${symbolFilePath}`, "DELETE");
-}
-
-
-async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
-  let requestBody = {};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-  requestBody["isFrozen"] = isFrozen;
-
-  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
-}
-
-
-async function sendAppendVersionRequest(pathToFile, description) {
-  let requestBody = {};
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-
-  return await postJSON('http://localhost:1234/appendVersion', requestBody);    
-}
-
-
-async function postJSON(targetUrl, requestBody) {
-  try {
-    const response = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-
-
-async function fetchJSON(targetUrl, methodType = "GET") {
-    try {
-      const response = await fetch(targetUrl, {method: methodType});
-      
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      
-      const result = await response.json();
-      
-      return result;
-  
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-    }
 }

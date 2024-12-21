@@ -10,7 +10,7 @@ ZipExportController::ZipExportController(QObject *parent)
     : QObject{parent}
 {}
 
-QHttpServerResponse ZipExportController::postSetZipFilePath(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::setFilePath(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -30,7 +30,7 @@ QHttpServerResponse ZipExportController::postSetZipFilePath(const QHttpServerReq
     return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipExportController::getZipFilePath(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::getFilePath(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"filePath", service.getZipFilePath()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
@@ -38,7 +38,7 @@ QHttpServerResponse ZipExportController::getZipFilePath(const QHttpServerRequest
     return response;
 }
 
-QHttpServerResponse ZipExportController::postSetRootSymbolFolderPath(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::setRootFolder(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 
@@ -59,7 +59,7 @@ QHttpServerResponse ZipExportController::postSetRootSymbolFolderPath(const QHttp
     return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipExportController::getRootSymbolFolderPath(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::getRootFolder(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"rootPath", service.getRootSymbolFolderPath()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
@@ -67,7 +67,7 @@ QHttpServerResponse ZipExportController::getRootSymbolFolderPath(const QHttpServ
     return response;
 }
 
-QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::createZip(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"isCreated", service.createArchive()}};
     QHttpServerResponse response = QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
@@ -75,14 +75,14 @@ QHttpServerResponse ZipExportController::postCreateArchive(const QHttpServerRequ
     return response;
 }
 
-QHttpServerResponse ZipExportController::postAddFoldersJson(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::addFoldersJson(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"isAdded", service.addFoldersJson()}};
 
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::addFilesJson(const QHttpServerRequest &request)
 {
     QJsonObject responseBody {{"isAdded", service.addFileJson()}};
     responseBody.insert("files", service.getFilesJson());
@@ -90,7 +90,7 @@ QHttpServerResponse ZipExportController::postAddFileJson(const QHttpServerReques
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
-QHttpServerResponse ZipExportController::postAddFileToZip(const QHttpServerRequest &request)
+QHttpServerResponse ZipExportController::addFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 

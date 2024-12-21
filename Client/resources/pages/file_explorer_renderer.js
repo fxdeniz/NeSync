@@ -1,3 +1,8 @@
+import FolderApi from "../rest_api/FolderApi.mjs";
+import FileApi from "../rest_api/FileApi.mjs";
+import ZipExportApi from "../rest_api/ZipExportApi.mjs";
+import ZipImportApi from "../rest_api/ZipImportApi.mjs";
+
 document.addEventListener("DOMContentLoaded", async (event) => {
 
     let inputCurrentPath = document.getElementById('input-current-path');
@@ -37,6 +42,8 @@ async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
 
   if(selectedFolderTree) {
+      let folderApi = new FolderApi('localhost', 1234);
+      let fileApi = new FileApi('localhost', 1234);
       let stack = [selectedFolderTree];
       let fileList = [];
 
@@ -50,9 +57,10 @@ async function onClickHandler_buttonAddNewFolder() {
           else
             currentFolder.symbolFolderPath += symbolFolderSuffix;
 
-          await sendAddFolderRequest(currentFolder.symbolFolderPath, currentFolder.folderPath);
+          // TODO: check return result
+          await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
 
-          for(filePath of currentFolder.childFiles) {
+          for(const filePath of currentFolder.childFiles) {
             let fileName = await window.pathApi.fileNameWithExtension(filePath);
             fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
                             pathToFile: filePath,
@@ -67,11 +75,12 @@ async function onClickHandler_buttonAddNewFolder() {
           }
       }
 
-      for(currentFile of fileList) {
-        await sendAddFileRequest(currentFile.symbolFolderPath,
-                                  currentFile.pathToFile,
-                                  currentFile.description,
-                                  currentFile.isFrozen);
+      for(const currentFile of fileList) {
+        // TODO: Check return result
+        await fileApi.add(currentFile.symbolFolderPath,
+                          currentFile.pathToFile,
+                          currentFile.description,
+                          currentFile.isFrozen);
       }
   }
 }
@@ -82,7 +91,9 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   let tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
-  let folderJson = await fetchJSON(`http://localhost:1234/getFolderContent?symbolPath=${event.detail.targetPath}`);
+  const folderApi = new FolderApi('localhost', 1234);
+
+  let folderJson = await folderApi.get(event.detail.targetPath);
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
@@ -164,17 +175,19 @@ async function onClickHandler_buttonSelectZipFileImportPath() {
 }
 
 async function onClickHandler_buttonExport() {
+  let exportApi = new ZipExportApi('localhost', 1234);
   const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
-  await sendSetExportZipFilePathRequest(filePath);
-  await sendSetRootSymbolFolderPath(rootSymbolFolderPath);
+  await exportApi.setFilePath(filePath);
+  await exportApi.setRootFolder(rootSymbolFolderPath);
   window.router.routeToZipExport();
 }
 
 async function onClickHandler_buttonImport() {
+  let importApi = new ZipImportApi('localhost', 1234);
   const filePath = document.getElementById("input-zip-import-path").value;
-  await sendSetImportZipFilePathRequest(filePath);
+  await importApi.setFilePath(filePath);
   window.router.routeToZipImport();
 }
 
@@ -196,81 +209,4 @@ function onShownHandler_importModal() {
 
 function createDirectoryChangeEvent(targetPath) {
   return new CustomEvent('directoryNavigation', {bubbles: true, detail: {'targetPath': targetPath}});
-}
-
-
-async function sendSetExportZipFilePathRequest(filePath) {
-  let requestBody = {"filePath": null};
-  requestBody["filePath"] = filePath;
-
-  return await postJSON('http://localhost:1234/postSetZipFilePath', requestBody);
-}
-
-
-async function sendSetImportZipFilePathRequest(filePath) {
-  let requestBody = {"filePath": null};
-  requestBody["filePath"] = filePath;
-
-  return await postJSON('http://localhost:1234/zip/import/ZipFilePath', requestBody);
-}
-
-
-async function sendSetRootSymbolFolderPath(rootPath) {
-  let requestBody = {"rootSymbolFolderPath": null};
-  requestBody["rootSymbolFolderPath"] = rootPath;
-
-  return await postJSON('http://localhost:1234/postSetRootSymbolFolderPath', requestBody);    
-}
-
-
-async function sendAddFolderRequest(symbolFolderPath, userFolderPath) {
-  let requestBody = {"symbolFolderPath": null, "userFolderPath": null};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["userFolderPath"] = userFolderPath;
-
-  return await postJSON('http://localhost:1234/addNewFolder', requestBody);    
-}
-
-async function sendAddFileRequest(symbolFolderPath, pathToFile, description, isFrozen) {
-  let requestBody = {};
-  requestBody["symbolFolderPath"] = symbolFolderPath;
-  requestBody["pathToFile"] = pathToFile;
-  requestBody["description"] = description;
-  requestBody["isFrozen"] = isFrozen;
-
-  return await postJSON('http://localhost:1234/addNewFile', requestBody);    
-}
-
-async function postJSON(targetUrl, requestBody) {
-  try {
-    const response = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-
-async function fetchJSON(targetUrl, methodType = "GET") {
-  try {
-    const response = await fetch(targetUrl, {method: methodType});
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    const result = await response.json();
-    
-    return result;
-
-  } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
-  }
 }

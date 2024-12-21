@@ -12,14 +12,14 @@ class ZipExportController : public QObject
     Q_OBJECT
 public:
     explicit ZipExportController(QObject *parent = nullptr);
-    QHttpServerResponse postSetZipFilePath(const QHttpServerRequest& request);
-    QHttpServerResponse getZipFilePath(const QHttpServerRequest& request);
-    QHttpServerResponse postSetRootSymbolFolderPath(const QHttpServerRequest& request);
-    QHttpServerResponse getRootSymbolFolderPath(const QHttpServerRequest& request);
-    QHttpServerResponse postCreateArchive(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFoldersJson(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFileJson(const QHttpServerRequest& request);
-    QHttpServerResponse postAddFileToZip(const QHttpServerRequest& request);
+    QHttpServerResponse setFilePath(const QHttpServerRequest& request);
+    QHttpServerResponse getFilePath(const QHttpServerRequest& request);
+    QHttpServerResponse setRootFolder(const QHttpServerRequest& request);
+    QHttpServerResponse getRootFolder(const QHttpServerRequest& request);
+    QHttpServerResponse createZip(const QHttpServerRequest& request);
+    QHttpServerResponse addFoldersJson(const QHttpServerRequest& request);
+    QHttpServerResponse addFilesJson(const QHttpServerRequest& request);
+    QHttpServerResponse addFile(const QHttpServerRequest& request);
 
 signals:
 
