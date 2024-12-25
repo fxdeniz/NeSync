@@ -16,6 +16,13 @@ function routeToFileMonitor (event) {
 }
 
 
+function routeAddFolder (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/pages/add_folder.html'));
+}
+
+
 function routeToSaveChanges (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
@@ -133,6 +140,7 @@ let fmState_UpdatedJson;
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
+  ipcMain.on('route:AddFolder', routeAddFolder);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.on('route:ZipExport', routeToZipExport);
   ipcMain.on('route:ZipImport', routeToZipImport);

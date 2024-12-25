@@ -82,6 +82,8 @@ async function onClickHandler_buttonAddNewFolder() {
                           currentFile.description,
                           currentFile.isFrozen);
       }
+
+      window.router.routeToAddFolder();
   }
 }
 
