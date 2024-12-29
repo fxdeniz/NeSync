@@ -3,6 +3,11 @@ import FileApi from "../rest_api/FileApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
+  let buttonClose = document.getElementById('button-close');
+  let textAreaLog = document.getElementById('text-area-log');
+  buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
+  disableButton(buttonClose);
+
   let stack = JSON.parse(sessionStorage.getItem('selectedFolderStack'));
 
   let folderApi = new FolderApi('localhost', 1234);
@@ -19,21 +24,24 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       else
         currentFolder.symbolFolderPath += symbolFolderSuffix;
 
-      // TODO: check return result
-      await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
+      appendLog(textAreaLog, `👉 Creating folder: ${currentFolder.folderPath}`);
+      const folderResult = await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
+      appendLog(textAreaLog, `\t Created Successfully: ${folderResult.isAdded ? '✅' : '❌'}:`);
 
-      for(const filePath of currentFolder.childFiles) {
-        let fileName = await window.pathApi.fileNameWithExtension(filePath);
-        fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
-                        pathToFile: filePath,
-                        description: `First version of <b>${fileName}</b>.`,
-                        isFrozen: false
-        });
-      }
-
-      for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
+      if(folderResult.isAdded) {
+        for(const filePath of currentFolder.childFiles) {
+          let fileName = await window.pathApi.fileNameWithExtension(filePath);
+          fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
+                          pathToFile: filePath,
+                          description: `First version of <b>${fileName}</b>.`,
+                          isFrozen: false
+          });
+        }
+  
+        for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
           currentFolder.childFolders[index].symbolFolderPath = currentFolder.symbolFolderPath;
           stack.push(currentFolder.childFolders[index]);
+        }
       }
   }
 
@@ -44,17 +52,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
                       currentFile.description,
                       currentFile.isFrozen);
   }
-
-
-  // start of new code
-  let buttonClose = document.getElementById('button-close');
-  let textAreaLog = document.getElementById('text-area-log');
   
-  buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
   appendLog(textAreaLog, "💯 Adding files & folders finished.");
   enableButton(buttonClose);
 });
-
 
 function appendLog(elementTextArea, logText) {
   elementTextArea.value += logText + '\n';
@@ -62,12 +63,10 @@ function appendLog(elementTextArea, logText) {
   elementTextArea.focus();
 }
 
-
 function disableButton(elementButton) {
   elementButton.disabled = true;
   elementButton.textContent = "In progress...";
 }
-
 
 function enableButton(elementButton) {
   elementButton.disabled = false;
