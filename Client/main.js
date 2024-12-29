@@ -1,6 +1,13 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('node:path');
-const fs = require('node:fs');
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { fileURLToPath } from 'url';
+import path from 'node:path';
+import fs from 'node:fs';
+import CacheApi from './CacheApi.mjs';
+
+// https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
+// https://byby.dev/node-dirname-not-defined
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
 
 function routeToFileExplorer (event) {
   const webContents = event.sender;
@@ -136,6 +143,7 @@ let fmState_CommitMessage;
 let fmState_NewAddedJson;
 let fmState_DeletedJson;
 let fmState_UpdatedJson;
+let cache = new CacheApi();
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
@@ -188,6 +196,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fmState:getUpdatedJson', async (event) => {
     return fmState_UpdatedJson ? fmState_UpdatedJson : null;
+  });
+
+  ipcMain.handle('cache:Get', async (event, key) => {
+    return cache.get(key);
+  });
+
+  ipcMain.handle('cache:Set', async (event, key, value) => {
+    cache.set(key, value);
   });
   
   createWindow();

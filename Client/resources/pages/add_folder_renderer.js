@@ -3,6 +3,7 @@ import FileApi from "../rest_api/FileApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
+  console.log(`${JSON.stringify(await window.cacheApi.get('tree'), 2, null)}`);
   let buttonClose = document.getElementById('button-close');
   let textAreaLog = document.getElementById('text-area-log');
   buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
