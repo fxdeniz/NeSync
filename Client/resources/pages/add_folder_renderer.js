@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   let fileApi = new FileApi('localhost', 1234);
   let fileList = [];
 
+  appendLog(textAreaLog, "ℹ️ Creating folders:");
   while (stack.length > 0) {
       let currentFolder = stack.pop();
       let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
@@ -25,16 +26,16 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         currentFolder.symbolFolderPath += symbolFolderSuffix;
 
       appendLog(textAreaLog, `👉 Creating folder: ${currentFolder.folderPath}`);
-      const folderResult = await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
-      appendLog(textAreaLog, `\t Created Successfully: ${folderResult.isAdded ? '✅' : '❌'}:`);
+      const result = await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
+      appendLog(textAreaLog, `\t Created Successfully: ${result.isAdded ? '✅' : '❌'}:`);
 
-      if(folderResult.isAdded) {
+      if(result.isAdded) {
         for(const filePath of currentFolder.childFiles) {
           let fileName = await window.pathApi.fileNameWithExtension(filePath);
           fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
-                          pathToFile: filePath,
-                          description: `First version of <b>${fileName}</b>.`,
-                          isFrozen: false
+                         pathToFile: filePath,
+                         description: `First version of <b>${fileName}</b>.`,
+                         isFrozen: false
           });
         }
   
@@ -45,14 +46,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       }
   }
 
+  appendLog(textAreaLog, "👍 Finished creating folders.")
+  appendLog(textAreaLog, "");
+  appendLog(textAreaLog, "ℹ️ Adding files:");
   for(const currentFile of fileList) {
-    // TODO: Check return result
-    await fileApi.add(currentFile.symbolFolderPath,
-                      currentFile.pathToFile,
-                      currentFile.description,
-                      currentFile.isFrozen);
+    appendLog(textAreaLog, `👉 Adding file: ${currentFile.pathToFile}`);
+    const result = await fileApi.add(currentFile.symbolFolderPath,
+                                     currentFile.pathToFile,
+                                     currentFile.description,
+                                     currentFile.isFrozen);
+    appendLog(textAreaLog, `\t Added Successfully: ${result.isAdded ? '✅' : '❌'}:`);
   }
   
+  appendLog(textAreaLog, "👍 Finished adding files.")
+  appendLog(textAreaLog, "");
   appendLog(textAreaLog, "💯 Adding files & folders finished.");
   enableButton(buttonClose);
 });
