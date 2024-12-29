@@ -1,5 +1,4 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
-import FileApi from "../rest_api/FileApi.mjs";
 import ZipExportApi from "../rest_api/ZipExportApi.mjs";
 import ZipImportApi from "../rest_api/ZipImportApi.mjs";
 
@@ -42,47 +41,8 @@ async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
 
   if(selectedFolderTree) {
-      let folderApi = new FolderApi('localhost', 1234);
-      let fileApi = new FileApi('localhost', 1234);
       let stack = [selectedFolderTree];
-      let fileList = [];
-
-      while (stack.length > 0) {
-          let currentFolder = stack.pop();
-          let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
-          let symbolFolderSuffix = pathTokens.pop() + "/";
-
-          if(currentFolder.symbolFolderPath === undefined) // Check symbol folder path of the root.
-            currentFolder.symbolFolderPath = "/" + symbolFolderSuffix;
-          else
-            currentFolder.symbolFolderPath += symbolFolderSuffix;
-
-          // TODO: check return result
-          await folderApi.add(currentFolder.symbolFolderPath, currentFolder.folderPath);
-
-          for(const filePath of currentFolder.childFiles) {
-            let fileName = await window.pathApi.fileNameWithExtension(filePath);
-            fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
-                            pathToFile: filePath,
-                            description: `First version of <b>${fileName}</b>.`,
-                            isFrozen: false
-            });
-          }
-  
-          for (let index = (currentFolder.childFolders.length - 1); index >= 0; index--) {
-              currentFolder.childFolders[index].symbolFolderPath = currentFolder.symbolFolderPath;
-              stack.push(currentFolder.childFolders[index]);
-          }
-      }
-
-      for(const currentFile of fileList) {
-        // TODO: Check return result
-        await fileApi.add(currentFile.symbolFolderPath,
-                          currentFile.pathToFile,
-                          currentFile.description,
-                          currentFile.isFrozen);
-      }
-
+      sessionStorage.setItem('selectedFolderStack', JSON.stringify(stack));
       window.router.routeToAddFolder();
   }
 }

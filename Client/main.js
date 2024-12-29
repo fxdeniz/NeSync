@@ -60,7 +60,7 @@ async function showFolderSelectDialog () {
         while (stack.length > 0) {
             const currentFolder = stack.pop();
     
-            const files = fs.readdirSync(currentFolder.folderPath);
+            const files = await fs.promises.readdir(currentFolder.folderPath);
     
             files.forEach(file => {
                 const fullPath = path.join(currentFolder.folderPath, file);
