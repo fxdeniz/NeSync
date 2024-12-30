@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   buttonSave.addEventListener('click', async (event) => {
     const commitMessage = document.getElementById(`input-commit-message`).value;
-    await window.fmState.setCommitMessage(commitMessage);
+    await window.appState.set("commitMessage", commitMessage);
     window.router.routeToSaveChanges();
   });
 
@@ -29,9 +29,9 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   let deletedJson = await monitorApi.getDeletedList();
   let updatedJson = await monitorApi.getUpdatedFileList();
 
-  await window.fmState.setNewAddedJson(newAddedJson);
-  await window.fmState.setDeletedJson(deletedJson);
-  await window.fmState.setUpdatedJson(updatedJson);
+  await window.appState.set("newAddedJson", newAddedJson);
+  await window.appState.set("deletedJson", deletedJson);
+  await window.appState.set("updatedJson", updatedJson);
 
   console.log(`newAdded: ${JSON.stringify(newAddedJson, null, 2)}`);
   console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);
