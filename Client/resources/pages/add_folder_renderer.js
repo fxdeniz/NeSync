@@ -3,14 +3,12 @@ import FileApi from "../rest_api/FileApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
-  console.log(`from state = ${JSON.stringify(await window.appState.get('tree'), 2, null)}`);
   let buttonClose = document.getElementById('button-close');
   let textAreaLog = document.getElementById('text-area-log');
   buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
   disableButton(buttonClose);
 
-  let stack = JSON.parse(sessionStorage.getItem('selectedFolderStack'));
-
+  let stack = await window.appState.get("selectedFolderStack");
   let folderApi = new FolderApi('localhost', 1234);
   let fileApi = new FileApi('localhost', 1234);
   let fileList = [];

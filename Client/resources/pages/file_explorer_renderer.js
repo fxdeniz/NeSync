@@ -42,8 +42,7 @@ async function onClickHandler_buttonAddNewFolder() {
 
   if(selectedFolderTree) {
       let stack = [selectedFolderTree];
-      sessionStorage.setItem('selectedFolderStack', JSON.stringify(stack));
-      await window.appState.set('tree', selectedFolderTree);
+      await window.appState.set("selectedFolderStack", stack);
       window.router.routeToAddFolder();
   }
 }
