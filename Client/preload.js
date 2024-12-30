@@ -33,10 +33,10 @@ contextBridge.exposeInMainWorld('pathApi', {
   }
 });
 
-contextBridge.exposeInMainWorld('cacheApi', {
+contextBridge.exposeInMainWorld('appState', {
   get: (key) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('cache:Get', key)
+      ipcRenderer.invoke('state:Get', key)
         .then(resolve)
         .catch(reject);
     });
@@ -44,7 +44,7 @@ contextBridge.exposeInMainWorld('cacheApi', {
 
   set: (key, value) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('cache:Set', key, value)
+      ipcRenderer.invoke('state:Set', key, value)
         .then(resolve)
         .catch(reject);
     });
