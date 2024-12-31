@@ -2,9 +2,9 @@ import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    let newAddedJson = await window.fmState.getNewAddedJson();
-    let deletedJson = await window.fmState.getDeletedJson();
-    let updatedJson = await window.fmState.getUpdatedJson();
+    let newAddedJson = await window.appState.get("newAddedJson");
+    let deletedJson = await window.appState.get("deletedJson");
+    let updatedJson = await window.appState.get("updatedJson");
 
     let folderApi = new FolderApi('localhost', 1234);
     let fileApi = new FileApi('localhost', 1234);
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       appendLog(textAreaLog, `\t Adding updated files inside folder: ${currentFolder}`);
       for (const fileName of updatedJson[currentFolder]) {
         appendLog(textAreaLog, `\t\t 👉 Adding new version of ${fileName}`);
-        const result = await fileApi.appendVersion(currentFolder + fileName, await window.fmState.getCommitMessage());
+        const result = await fileApi.appendVersion(currentFolder + fileName, await window.appState.get("commitMessage"));
         appendLog(textAreaLog, `\t\t\t Added Successfully: ${result.isAppended ? '✅' : '❌'}:`);
       }
     }

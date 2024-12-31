@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron/renderer');
 contextBridge.exposeInMainWorld('router', {
   routeToFileExplorer: () => ipcRenderer.send('route:FileExplorer'),
   routeToFileMonitor: () => ipcRenderer.send('route:FileMonitor'),
+  routeToAddFolder: () => ipcRenderer.send('route:AddFolder'),
   routeToSaveChanges: () => ipcRenderer.send('route:SaveChanges'),
   routeToZipExport: () => ipcRenderer.send('route:ZipExport'),
   routeToZipImport: () => ipcRenderer.send('route:ZipImport')
@@ -32,66 +33,18 @@ contextBridge.exposeInMainWorld('pathApi', {
   }
 });
 
-contextBridge.exposeInMainWorld('fmState', {
-  setCommitMessage: (input) => {
+contextBridge.exposeInMainWorld('appState', {
+  get: (key) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:setCommitMessage', input)
+      ipcRenderer.invoke('state:Get', key)
         .then(resolve)
         .catch(reject);
     });
   },
 
-  getCommitMessage: () => {
+  set: (key, value) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:getCommitMessage')
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  setNewAddedJson: (input) => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:setNewAddedJson', input)
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  getNewAddedJson: () => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:getNewAddedJson')
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  setDeletedJson: (input) => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:setDeletedJson', input)
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  getDeletedJson: () => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:getDeletedJson')
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  setUpdatedJson: (input) => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:setUpdatedJson', input)
-        .then(resolve)
-        .catch(reject);
-    });
-  },
-
-  getUpdatedJson: () => {
-    return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fmState:getUpdatedJson')
+      ipcRenderer.invoke('state:Set', key, value)
         .then(resolve)
         .catch(reject);
     });

@@ -1,6 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('node:path');
-const fs = require('node:fs');
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { fileURLToPath } from 'url';
+import path from 'node:path';
+import fs from 'node:fs';
+
+// https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
+// https://byby.dev/node-dirname-not-defined
+// https://nodejs.org/api/esm.html#importmeta
+// https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
 
 function routeToFileExplorer (event) {
   const webContents = event.sender;
@@ -13,6 +21,13 @@ function routeToFileMonitor (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
   win.loadFile(path.join(__dirname,'resources/pages/file_monitor.html'));
+}
+
+
+function routeAddFolder (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'resources/pages/add_folder.html'));
 }
 
 
@@ -53,7 +68,7 @@ async function showFolderSelectDialog () {
         while (stack.length > 0) {
             const currentFolder = stack.pop();
     
-            const files = fs.readdirSync(currentFolder.folderPath);
+            const files = await fs.promises.readdir(currentFolder.folderPath);
     
             files.forEach(file => {
                 const fullPath = path.join(currentFolder.folderPath, file);
@@ -129,10 +144,12 @@ let fmState_CommitMessage;
 let fmState_NewAddedJson;
 let fmState_DeletedJson;
 let fmState_UpdatedJson;
+let state = new Map();
 
 app.whenReady().then(() => {
   ipcMain.on('route:FileExplorer', routeToFileExplorer);
   ipcMain.on('route:FileMonitor', routeToFileMonitor);
+  ipcMain.on('route:AddFolder', routeAddFolder);
   ipcMain.on('route:SaveChanges', routeToSaveChanges);
   ipcMain.on('route:ZipExport', routeToZipExport);
   ipcMain.on('route:ZipImport', routeToZipImport);
@@ -150,36 +167,12 @@ app.whenReady().then(() => {
     return result;
   });
 
-  ipcMain.handle('fmState:setCommitMessage', async (event, input) => {
-    fmState_CommitMessage = input;
+  ipcMain.handle('state:Get', async (event, key) => {
+    return state.get(key);
   });
 
-  ipcMain.handle('fmState:getCommitMessage', async (event) => {
-    return fmState_CommitMessage ? fmState_CommitMessage : "";
-  });
-
-  ipcMain.handle('fmState:setNewAddedJson', async (event, input) => {
-    fmState_NewAddedJson = input;
-  });
-
-  ipcMain.handle('fmState:getNewAddedJson', async (event) => {
-    return fmState_NewAddedJson ? fmState_NewAddedJson : null;
-  });
-
-  ipcMain.handle('fmState:setDeletedJson', async (event, input) => {
-    fmState_DeletedJson = input;
-  });
-
-  ipcMain.handle('fmState:getDeletedJson', async (event) => {
-    return fmState_DeletedJson ? fmState_DeletedJson : null;
-  });
-
-  ipcMain.handle('fmState:setUpdatedJson', async (event, input) => {
-    fmState_UpdatedJson = input;
-  });
-
-  ipcMain.handle('fmState:getUpdatedJson', async (event) => {
-    return fmState_UpdatedJson ? fmState_UpdatedJson : null;
+  ipcMain.handle('state:Set', async (event, key, value) => {
+    state.set(key, value);
   });
   
   createWindow();
