@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('router', {
   routeToZipImport: () => ipcRenderer.send('route:ZipImport')
 });
 
-contextBridge.exposeInMainWorld('fileExplorerApi', {
+contextBridge.exposeInMainWorld('dialogApi', {
   showFolderSelectDialog: () => ipcRenderer.invoke("dialog:OpenFolder"),
   showFileSelectDialog: () => ipcRenderer.invoke("dialog:OpenFile"),
   showFileSaveDialog: () => ipcRenderer.invoke("dialog:SaveFile")

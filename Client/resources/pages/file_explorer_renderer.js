@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 });
 
 async function onClickHandler_buttonAddNewFolder() {
-  const selectedFolderTree = await window.fileExplorerApi.showFolderSelectDialog();
+  const selectedFolderTree = await window.dialogApi.showFolderSelectDialog();
 
   if(selectedFolderTree) {
       let stack = [selectedFolderTree];
@@ -104,7 +104,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
 async function onClickHandler_buttonSelectZipFileExportPath() {
   const inputZipExportPath = document.getElementById("input-zip-export-path");
-  const selectedPath = await window.fileExplorerApi.showFileSaveDialog();
+  const selectedPath = await window.dialogApi.showFileSaveDialog();
 
   if(selectedPath) {
     if(!selectedPath.endsWith(".zip")) {
@@ -121,7 +121,7 @@ async function onClickHandler_buttonSelectZipFileExportPath() {
 
 async function onClickHandler_buttonSelectZipFileImportPath() {
   const inputZipImportPath = document.getElementById("input-zip-import-path");
-  const selectedPath = await window.fileExplorerApi.showFileSelectDialog();
+  const selectedPath = await window.dialogApi.showFileSelectDialog();
 
   if(selectedPath) {
     if(!selectedPath.endsWith(".zip")) {
