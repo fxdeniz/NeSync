@@ -41,6 +41,7 @@ app.whenReady().then(() => {
   ipcMain.on('route:SaveChanges', router.routeToSaveChanges);
   ipcMain.on('route:ZipExport', router.routeToZipExport);
   ipcMain.on('route:ZipImport', router.routeToZipImport);
+  ipcMain.on('route:FileInfo', router.routeToFileInfo);
   ipcMain.handle('dialog:OpenFolder', DialogApi.showFolderSelectDialog);
   ipcMain.handle('dialog:OpenFile', DialogApi.showFileSelectDialog);
   ipcMain.handle('dialog:SaveFile', DialogApi.showFileSaveDialog);

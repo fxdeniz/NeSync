@@ -45,4 +45,10 @@ function routeToZipImport (event) {
   win.loadFile(path.join(__dirname,'gui/pages/zip_import.html'));
 }
 
-export {routeToFileExplorer, routeToFileMonitor, routeToAddFolder, routeToSaveChanges, routeToZipExport, routeToZipImport};
+function routeToFileInfo (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'gui/pages/file_info.html'));
+}
+
+export {routeToFileExplorer, routeToFileMonitor, routeToAddFolder, routeToSaveChanges, routeToZipExport, routeToZipImport, routeToFileInfo};
