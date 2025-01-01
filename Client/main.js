@@ -30,8 +30,7 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.loadFile("./resources/pages/file_explorer.html");
-
+  mainWindow.loadFile("./gui/pages/file_explorer.html");
   // mainWindow.webContents.openDevTools();
 };
 
