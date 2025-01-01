@@ -30,7 +30,7 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile("./resources/pages/file_explorer.html");
 
   // mainWindow.webContents.openDevTools();
 };
