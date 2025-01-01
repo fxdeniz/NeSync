@@ -97,9 +97,11 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
       row.dataset.symbolFolderPath = currentFile.symbolFolderPath;
       row.dataset.symbolFilePath = currentFile.symbolFilePath;
 
-      row.addEventListener('click', () => {
-        if(row.dataset.type === "file")
+      row.addEventListener('click', async () => {
+        if(row.dataset.type === "file") {
+          await window.appState.set("currentFile", row.dataset.symbolFilePath);
           window.router.routeToFileInfo();
+        }
       });
   
       tableExplorerBody.appendChild(row);
