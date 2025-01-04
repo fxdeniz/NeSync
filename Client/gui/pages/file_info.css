@@ -2,11 +2,3 @@
     max-height: 50vh;
     overflow-y: auto;
   }
-
-  .clickable:hover {
-    background-color: #e9ecef; /* Light gray */
-    cursor: pointer;
-  }
-  .clickable:active {
-    background-color: #ced4da; /* Darker gray */
-  }

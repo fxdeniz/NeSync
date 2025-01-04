@@ -12,31 +12,20 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     divFileName.textContent = info.fileName;
     inputCurrentPath.value = info.symbolFilePath;
 
-    const olVersions = document.getElementById("ol-versions");
-    info.versionList.forEach(item => olVersions.appendChild(createListItem(item.versionNumber, item.description)));
+    const ulVersions = document.getElementById("ul-versions");
+    info.versionList.forEach(item => ulVersions.appendChild(createListItem(item.versionNumber)));
 });
 
-function createListItem(versionNumber, description) {
-    const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-start clickable";
-    li.setAttribute("role", "button");
-  
-    const textDiv = document.createElement("div");
-    textDiv.className = "ms-2 me-auto";
+function createListItem(versionNumber) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "list-group-item list-group-item-action text-center";
 
-    const subheadingDiv = document.createElement('div');
-    subheadingDiv.className = "fw-bold";
-    subheadingDiv.textContent = "Subheading";
+    const span = document.createElement("span");
+    span.className = "badge rounded-pill text-bg-primary";
+    span.textContent = versionNumber;
 
-    textDiv.appendChild(subheadingDiv);
-    textDiv.appendChild(document.createTextNode(description));
+    button.appendChild(span);
 
-    const badge = document.createElement("span");
-    badge.className = "badge text-bg-primary rounded-pill";
-    badge.textContent = versionNumber;
-
-    li.appendChild(textDiv);
-    li.appendChild(badge);
-
-    return li;
+    return button;
 }
