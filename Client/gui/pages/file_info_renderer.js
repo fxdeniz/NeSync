@@ -5,37 +5,46 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const symbolPath = await window.appState.get("currentFile");
 
     const fileApi = new FileApi("localhost", 1234);
-    const info = await fileApi.get(symbolPath)
+    const fileInfo = await fileApi.get(symbolPath)
 
     const divFileName = document.getElementById("div-file-name");
     const inputCurrentPath = document.getElementById("input-current-path");
-    divFileName.textContent = info.fileName;
-    inputCurrentPath.value = info.symbolFilePath;
+    divFileName.textContent = fileInfo.fileName;
+    inputCurrentPath.value = fileInfo.symbolFilePath;
 
     const ulVersions = document.getElementById("ul-versions");
-    info.versionList.forEach(item => {
-        ulVersions.appendChild(createListItem(item.versionNumber, item.description, item.size, item.lastModifiedTimestamp));
+    fileInfo.versionList.reverse(); // Make latest version appear at the top.
+    fileInfo.versionList.forEach(info => {
+        ulVersions.appendChild(createListItem(info));
     });
+
+    const firstItem = document.querySelector(".list-group .list-group-item");
+    firstItem.click();
 });
 
-function createListItem(versionNumber, description, fileSize, timestamp) {
+function createListItem(versionInfo) {
+    console.log(`${JSON.stringify(versionInfo)}`);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "list-group-item list-group-item-action text-center";
 
     const span = document.createElement("span");
     span.className = "badge rounded-pill text-bg-primary";
-    span.textContent = versionNumber;
+    span.textContent = versionInfo.versionNumber;
 
     button.appendChild(span);
     button.addEventListener("click", () => {
         const pDescription = document.getElementById("p-description");
         const hFileSize = document.getElementById("h-file-size");
         const divTimePassed = document.getElementById("div-time-passed");
+
+        const items = document.querySelectorAll(".list-group .list-group-item");
+        items.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
     
-        pDescription.innerHTML = description;
-        hFileSize.innerText = formatFileSize(fileSize);
-        divTimePassed.innerText = timePassed(timestamp);
+        pDescription.innerHTML = versionInfo.description;
+        hFileSize.innerText = formatFileSize(versionInfo.size);
+        divTimePassed.innerText = timePassed(versionInfo.lastModifiedTimestamp);
     });
 
     return button;
@@ -68,7 +77,11 @@ function timePassed(date) {
 
     // Format the original date
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const originalDate = `${past.getFullYear()} ${monthNames[past.getMonth()]} ${String(past.getDate()).padStart(2, '0')} ${String(past.getHours()).padStart(2, '0')}:${String(past.getMinutes()).padStart(2, '0')}`;
+    const originalDate = `${past.getFullYear()} ` +
+                         `${monthNames[past.getMonth()]} ` +
+                         `${String(past.getDate()).padStart(2, '0')} ` +
+                         `${String(past.getHours()).padStart(2, '0')}:` +
+                         `${String(past.getMinutes()).padStart(2, '0')}`;
 
     // If it's today, return in hours and minutes
     if (days === 0) {
