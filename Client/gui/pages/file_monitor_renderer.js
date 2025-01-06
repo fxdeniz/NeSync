@@ -3,6 +3,7 @@ import MonitorApi from "../rest_api/MonitorApi.mjs";
 document.addEventListener("DOMContentLoaded", async (event) => {
   let buttonRefresh = document.getElementById(`button-refresh`);
   let buttonSave = document.getElementById('button-save');
+  const buttonFileExplorer = document.getElementById('button-file-explorer');
 
   buttonSave.addEventListener('click', async (event) => {
     const commitMessage = document.getElementById(`input-commit-message`).value;
@@ -12,6 +13,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   buttonRefresh.addEventListener(`click`, async (event) => {
     displayFileSystemStatus(buttonRefresh, buttonSave);
+  });
+
+  buttonFileExplorer.addEventListener('click', async clickEvent => {
+    window.router.routeToFileExplorer();
   });
 
   await displayFileSystemStatus(buttonRefresh, buttonSave);
