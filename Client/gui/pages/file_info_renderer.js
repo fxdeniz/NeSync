@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     divFileName.textContent = fileInfo.fileName;
     inputCurrentPath.value = fileInfo.symbolFilePath;
 
+    const buttonPrev = document.getElementById("button-prev");
+
+    buttonPrev.addEventListener('click', async clickEvent => {
+        window.router.routeToFileExplorer();
+    });
+
     const ulVersions = document.getElementById("ul-versions");
     fileInfo.versionList.reverse(); // Make latest version appear at the top.
     fileInfo.versionList.forEach(info => {
