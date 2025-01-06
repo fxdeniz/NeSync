@@ -1,13 +1,16 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
+import MonitorApi from "../rest_api/MonitorApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    let newAddedJson = await window.appState.get("newAddedJson");
-    let deletedJson = await window.appState.get("deletedJson");
-    let updatedJson = await window.appState.get("updatedJson");
 
     let folderApi = new FolderApi('localhost', 1234);
     let fileApi = new FileApi('localhost', 1234);
+    let monitorApi = new MonitorApi('localhost', 1234);
+
+    let newAddedJson = await monitorApi.getNewAddedList();
+    let deletedJson = await monitorApi.getDeletedList();
+    let updatedJson = await monitorApi.getUpdatedFileList();  
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
