@@ -33,8 +33,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
     importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
-    let navigationEvnet = createDirectoryChangeEvent('/');
-    inputCurrentPath.dispatchEvent(navigationEvnet);
+    let dir = await window.appState.get("currentFolder");
+
+    if(!dir) 
+      dir = '/';
+
+    let navigationEvent = createDirectoryChangeEvent(dir);
+    inputCurrentPath.dispatchEvent(navigationEvent);
 });
 
 async function onClickHandler_buttonAddNewFolder() {
@@ -49,6 +54,7 @@ async function onClickHandler_buttonAddNewFolder() {
 
 async function onDirectoryChangeHandler_inputCurrentPath(event) {
   event.target.value = event.detail.targetPath; // Set inputCurrentPath's new value.
+  await window.appState.set("currentFolder", event.detail.targetPath);
 
   let tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
