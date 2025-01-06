@@ -30,9 +30,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
     importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
+    const folderApi = new FolderApi('localhost', 1234);
     let dir = await window.appState.get("currentFolder");
+    const folder = await folderApi.get(dir);
 
-    if(!dir) dir = '/';
+    if(!dir || !folder.isExist) dir = '/';
 
     const navigationEvent = createDirectoryChangeEvent(dir);
     inputCurrentPath.dispatchEvent(navigationEvent);
