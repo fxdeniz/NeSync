@@ -1,4 +1,7 @@
 .vertical-scroll-area {
-    max-height: 50vh;
     overflow-y: auto;
-  }
+}
+
+.textarea-log {
+    height: 80vh;
+}

@@ -12,37 +12,43 @@ const __dirname = path.dirname(__filename); // get the name of the directory
 function routeToFileExplorer (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/file_explorer.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/file_explorer.html'));
 }
 
 function routeToFileMonitor (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/file_monitor.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/file_monitor.html'));
 }
 
 function routeToAddFolder (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/add_folder.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/add_folder.html'));
 }
 
 function routeToSaveChanges (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/save_changes.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/save_changes.html'));
 }
 
 function routeToZipExport (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/zip_export.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/zip_export.html'));
 }
 
 function routeToZipImport (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
-  win.loadFile(path.join(__dirname,'resources/pages/zip_import.html'));
+  win.loadFile(path.join(__dirname,'gui/pages/zip_import.html'));
 }
 
-export {routeToFileExplorer, routeToFileMonitor, routeToAddFolder, routeToSaveChanges, routeToZipExport, routeToZipImport};
+function routeToFileInfo (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'gui/pages/file_info.html'));
+}
+
+export {routeToFileExplorer, routeToFileMonitor, routeToAddFolder, routeToSaveChanges, routeToZipExport, routeToZipImport, routeToFileInfo};

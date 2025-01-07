@@ -3,6 +3,7 @@ import MonitorApi from "../rest_api/MonitorApi.mjs";
 document.addEventListener("DOMContentLoaded", async (event) => {
   let buttonRefresh = document.getElementById(`button-refresh`);
   let buttonSave = document.getElementById('button-save');
+  const buttonFileExplorer = document.getElementById('button-file-explorer');
 
   buttonSave.addEventListener('click', async (event) => {
     const commitMessage = document.getElementById(`input-commit-message`).value;
@@ -12,6 +13,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   buttonRefresh.addEventListener(`click`, async (event) => {
     displayFileSystemStatus(buttonRefresh, buttonSave);
+  });
+
+  buttonFileExplorer.addEventListener('click', async clickEvent => {
+    window.router.routeToFileExplorer();
   });
 
   await displayFileSystemStatus(buttonRefresh, buttonSave);
@@ -28,10 +33,6 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   let newAddedJson = await monitorApi.getNewAddedList();
   let deletedJson = await monitorApi.getDeletedList();
   let updatedJson = await monitorApi.getUpdatedFileList();
-
-  await window.appState.set("newAddedJson", newAddedJson);
-  await window.appState.set("deletedJson", deletedJson);
-  await window.appState.set("updatedJson", updatedJson);
 
   console.log(`newAdded: ${JSON.stringify(newAddedJson, null, 2)}`);
   console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);

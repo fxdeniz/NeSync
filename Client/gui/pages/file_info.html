@@ -1,0 +1,62 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src http: https: data:; connect-src http://localhost:*;">
+    <link href="../bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="../bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <link href="./style.css" rel="stylesheet">
+    <script src="./file_info_renderer.js" type="module" defer></script>
+    <title>NeSync 2.0 PoC</title>
+  </head>
+  <body>
+    <div id="content-container" class="container-fluid px-3 mt-3">
+      <div id="file-explorer-content">
+
+        <div class="input-group">
+            <div class="btn-group gap-2" role="group" aria-label="Basic example">
+                <button id="button-prev" type="button" class="btn btn-primary">&larr;</button>
+            </div>
+            <input id="input-current-path" type="text" class="form-control mx-2" placeholder="File Path" aria-label="File Path" aria-describedby="btnGroupAddon">
+        </div>
+    
+          <div class="row mt-3">
+                <div class="col-10">
+                  <div class="card mb-3">
+                    <div id="div-file-name" class="card-body">
+                    </div>
+                  </div>
+                  
+                  <div class="vertical-scroll-area">
+                    <div class="card">
+                      <div class="card-header">
+                        Version Details
+                      </div>
+                      <div class="card-body">
+                        <h5 id="h-file-size" class="card-title">File size will be here.</h5>
+                        <p id="p-description" class="card-text">Description will be here.</p>
+                        <a href="#" class="btn btn-primary disabled">Edit description</a>
+                      </div>
+                      <div id="div-time-passed" class="card-footer text-body-secondary">
+                        Date time will be here.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-2">
+                  <h5 class="text-center">Version List</h5>
+                  <div class="vertical-scroll-area">
+                      <ul id="ul-versions" class="list-group">
+                          <!--Will be filled dynamically.-->
+                      </ul>
+                    </div>
+                </div>
+          </div>          
+      </div>
+    </div>
+  </body>
+</html>

@@ -4,9 +4,8 @@ import ZipImportApi from "../rest_api/ZipImportApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
 
-    let inputCurrentPath = document.getElementById('input-current-path');
-    let buttonPrev = document.getElementById('button-prev');
-    let buttonNext = document.getElementById('button-next');
+    const inputCurrentPath = document.getElementById('input-current-path');
+    const buttonPrev = document.getElementById('button-prev');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
     const buttonSelectZipFileExportPath = document.getElementById("button-select-zip-export-path");
@@ -20,11 +19,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       window.router.routeToFileMonitor();
     });
 
-    buttonPrev.disabled = true;
-    buttonNext.disabled = true;
     inputCurrentPath.readOnly = true;
-
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
+    buttonPrev.addEventListener('click', onClickHandler_buttonPrev);
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
     buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
     buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
@@ -33,8 +30,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
     importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
-    let navigationEvnet = createDirectoryChangeEvent('/');
-    inputCurrentPath.dispatchEvent(navigationEvnet);
+    const folderApi = new FolderApi('localhost', 1234);
+    let dir = await window.appState.get("currentFolder");
+    const folder = await folderApi.get(dir);
+
+    if(!dir || !folder.isExist) dir = '/';
+
+    const navigationEvent = createDirectoryChangeEvent(dir);
+    inputCurrentPath.dispatchEvent(navigationEvent);
 });
 
 async function onClickHandler_buttonAddNewFolder() {
@@ -49,13 +52,19 @@ async function onClickHandler_buttonAddNewFolder() {
 
 async function onDirectoryChangeHandler_inputCurrentPath(event) {
   event.target.value = event.detail.targetPath; // Set inputCurrentPath's new value.
+  await window.appState.set("currentFolder", event.detail.targetPath);
 
-  let tableExplorerBody = document.querySelector('#table-explorer tbody');
+  const buttonPrev = document.getElementById('button-prev');
+  const tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
   const folderApi = new FolderApi('localhost', 1234);
+  const folderJson = await folderApi.get(event.detail.targetPath);
 
-  let folderJson = await folderApi.get(event.detail.targetPath);
+  if(folderJson.parentFolderPath === '')
+    buttonPrev.disabled = true;
+  else
+    buttonPrev.disabled = false;
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
@@ -96,10 +105,27 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
       row.dataset.type = "file";
       row.dataset.symbolFolderPath = currentFile.symbolFolderPath;
       row.dataset.symbolFilePath = currentFile.symbolFilePath;
+
+      row.addEventListener('click', async () => {
+        if(row.dataset.type === "file") {
+          await window.appState.set("currentFile", row.dataset.symbolFilePath);
+          window.router.routeToFileInfo();
+        }
+      });
   
       tableExplorerBody.appendChild(row);
     });
   }
+}
+
+async function onClickHandler_buttonPrev() {
+  const inputCurrentPath = document.getElementById('input-current-path');
+  const folderApi = new FolderApi('localhost', 1234);
+  const dir = await window.appState.get("currentFolder");
+  const folderJson = await folderApi.get(dir);
+
+  const navigationEvent = createDirectoryChangeEvent(folderJson.parentFolderPath);
+  inputCurrentPath.dispatchEvent(navigationEvent);
 }
 
 async function onClickHandler_buttonSelectZipFileExportPath() {
