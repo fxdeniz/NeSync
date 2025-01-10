@@ -33,9 +33,9 @@ contextBridge.exposeInMainWorld('fsApi', {
     });
   },
 
-  previewFile: (input) => {
+  previewFile: (path, extension) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('fs:Preview', input)
+      ipcRenderer.invoke('fs:Preview', path, extension)
         .then(resolve)
         .catch(reject);
     });

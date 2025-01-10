@@ -63,10 +63,11 @@ function createListItem(versionInfo) {
 async function onClickHandler_buttonPreview() {
     const folderApi = new FolderApi("localhost", 1234);
     const versionInfo = await window.appState.get("currentVersion");
+    const symbolFilePath = await window.appState.get("currentFile");
+    const extension = symbolFilePath.split(".").pop();
     const storagePath = await folderApi.getStorageFolderPath();
 
-    console.log(`passing ${JSON.stringify(versionInfo, 2, null)}`);
-    await window.fsApi.previewFile(storagePath + versionInfo.internalFileName);
+    await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
 }
 
 function formatFileSize(bytes) {

@@ -1,6 +1,8 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
+import { randomUUID } from 'crypto';
 import { shell } from 'electron';
 
 // https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
@@ -18,14 +20,28 @@ function fileNameWithExtension(givenPath) {
   return path.basename(givenPath);
 }
 
-async function previewFile(filePath) {
-  console.log(`received = ${filePath}`)
-    let tempPath = tmpdir();
+// TODO: add file existence check by filePath.
+async function previewFile(filePath, fileExtension) {
+  let tempPath = tmpdir();
 
-    if(!tempPath.endsWith(path.sep))
-        tempPath += path.sep;
+  if(!tempPath.endsWith(path.sep))
+      tempPath += path.sep;
 
-    await shell.openExternal(filePath);
+  const name = randomUUID().replace(/-/g, ''); // Generate UUID and remove dashes
+  let tempFilePath = path.join(tempPath, name);
+
+  if(fileExtension && fileExtension !== '')
+  {
+    if(!fileExtension.startsWith('.'))
+      fileExtension = `.${fileExtension}`;
+
+    tempFilePath += fileExtension;
+  }
+
+  await fs.copyFile(filePath, tempFilePath);
+
+  // TODO: Add temp file cleaning.
+  await shell.openPath(tempFilePath);
 }
 
 export {splitPath, fileNameWithExtension, previewFile};

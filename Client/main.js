@@ -47,8 +47,8 @@ app.whenReady().then(() => {
     return fileNameWithExtension(input);
   });
 
-  ipcMain.handle('fs:Preview', async (event, input) => {
-    return await previewFile(input);
+  ipcMain.handle('fs:Preview', async (event, path, extension) => {
+    return await previewFile(path, extension);
   });
 
   ipcMain.handle('state:Get', async (event, key) => {
