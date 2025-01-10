@@ -16,10 +16,10 @@ contextBridge.exposeInMainWorld('dialogApi', {
   showFileSaveDialog: () => ipcRenderer.invoke("dialog:SaveFile")
 });
 
-contextBridge.exposeInMainWorld('pathApi', {
+contextBridge.exposeInMainWorld('fsApi', {
   splitPath: (input) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('path:Split', input)
+      ipcRenderer.invoke('fs:SplitPath', input)
         .then(resolve)
         .catch(reject);
     });
@@ -27,7 +27,15 @@ contextBridge.exposeInMainWorld('pathApi', {
 
   fileNameWithExtension: (input) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('path:FileName', input)
+      ipcRenderer.invoke('fs:FileNameFromPath', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
+
+  previewFile: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:Preview', input)
         .then(resolve)
         .catch(reject);
     });

@@ -13,9 +13,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     inputCurrentPath.value = fileInfo.symbolFilePath;
 
     const buttonPrev = document.getElementById("button-prev");
+    const buttonPreview = document.getElementById("button-preview");
 
     buttonPrev.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
+    });
+
+    buttonPreview.addEventListener('click', async clickEvent => {
+        window.fsApi.previewFile("there will be path"); // TODO add path
     });
 
     const ulVersions = document.getElementById("ul-versions");
@@ -29,7 +34,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 });
 
 function createListItem(versionInfo) {
-    console.log(`${JSON.stringify(versionInfo)}`);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "list-group-item list-group-item-action text-center";

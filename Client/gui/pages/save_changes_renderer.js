@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       const parentUserFolderPath = newAddedJson.rootOfRootFolder[currentUserFolderPath];
 
       const parentFolderJson = await folderApi.getByUserPath(parentUserFolderPath);
-      let pathTokens = await window.pathApi.splitPath(currentUserFolderPath);
+      let pathTokens = await window.fsApi.splitPath(currentUserFolderPath);
       pathTokens.pop(); // remove last element whcih is ''
 
       const parentSymbolFolderPath = parentFolderJson.symbolFolderPath + pathTokens.pop() + "/";

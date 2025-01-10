@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import * as router from './router.mjs';
 import * as DialogApi from './DialogApi.mjs'
+import { splitPath, fileNameWithExtension, createTempCopy } from './FileSystemApi.mjs'
 
 // https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
 // https://byby.dev/node-dirname-not-defined
@@ -12,14 +13,6 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 let appState = new Map();
-
-async function splitPath(givenPath) {
-  return givenPath.split(path.sep);
-}
-
-async function fileNameWithExtension(givenPath) {
-  return path.basename(givenPath);
-}
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -46,14 +39,16 @@ app.whenReady().then(() => {
   ipcMain.handle('dialog:OpenFile', DialogApi.showFileSelectDialog);
   ipcMain.handle('dialog:SaveFile', DialogApi.showFileSaveDialog);
 
-  ipcMain.handle('path:Split', async (event, input) => {
-    const result = splitPath(input);
-    return result;
+  ipcMain.handle('fs:SplitPath', async (event, input) => {
+    return splitPath(input);
   });
 
-  ipcMain.handle('path:FileName', async (event, input) => {
-    const result = fileNameWithExtension(input);
-    return result;
+  ipcMain.handle('fs:FileNameFromPath', async (event, input) => {
+    return fileNameWithExtension(input);
+  });
+
+  ipcMain.handle('fs:Preview', async (event, input) => {
+    return createTempCopy(input);
   });
 
   ipcMain.handle('state:Get', async (event, key) => {

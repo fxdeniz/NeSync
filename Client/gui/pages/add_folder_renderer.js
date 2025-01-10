@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   appendLog(textAreaLog, "ℹ️ Creating folders:");
   while (stack.length > 0) {
       let currentFolder = stack.pop();
-      let pathTokens = await window.pathApi.splitPath(currentFolder.folderPath);
+      let pathTokens = await window.fsApi.splitPath(currentFolder.folderPath);
       let symbolFolderSuffix = pathTokens.pop() + "/";
 
       if(currentFolder.symbolFolderPath === undefined) // Check symbol folder path of the root.
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
       if(result.isAdded) {
         for(const filePath of currentFolder.childFiles) {
-          let fileName = await window.pathApi.fileNameWithExtension(filePath);
+          let fileName = await window.fsApi.fileNameWithExtension(filePath);
           fileList.push({symbolFolderPath: currentFolder.symbolFolderPath,
                          pathToFile: filePath,
                          description: `First version of <b>${fileName}</b>.`,
