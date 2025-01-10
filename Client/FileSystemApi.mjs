@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
+import { shell } from 'electron';
 
 // https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
 // https://byby.dev/node-dirname-not-defined
@@ -17,13 +18,14 @@ function fileNameWithExtension(givenPath) {
   return path.basename(givenPath);
 }
 
-function createTempCopy(filePath) {
+async function previewFile(filePath) {
+  console.log(`received = ${filePath}`)
     let tempPath = tmpdir();
 
     if(!tempPath.endsWith(path.sep))
         tempPath += path.sep;
 
-    console.log(`temp dir = ${tempPath}`);
+    await shell.openExternal(filePath);
 }
 
-export {splitPath, fileNameWithExtension, createTempCopy};
+export {splitPath, fileNameWithExtension, previewFile};

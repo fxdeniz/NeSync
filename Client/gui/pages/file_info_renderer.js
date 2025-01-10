@@ -19,9 +19,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         window.router.routeToFileExplorer();
     });
 
-    buttonPreview.addEventListener('click', async clickEvent => {
-        window.fsApi.previewFile("there will be path"); // TODO add path
-    });
+    buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
 
     const ulVersions = document.getElementById("ul-versions");
     fileInfo.versionList.reverse(); // Make latest version appear at the top.
@@ -43,10 +41,12 @@ function createListItem(versionInfo) {
     span.textContent = versionInfo.versionNumber;
 
     button.appendChild(span);
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         const pDescription = document.getElementById("p-description");
         const hFileSize = document.getElementById("h-file-size");
         const divTimePassed = document.getElementById("div-time-passed");
+
+        await window.appState.set("currentVersion", versionInfo);
 
         const items = document.querySelectorAll(".list-group .list-group-item");
         items.forEach(btn => btn.classList.remove("active"));
@@ -58,6 +58,15 @@ function createListItem(versionInfo) {
     });
 
     return button;
+}
+
+async function onClickHandler_buttonPreview() {
+    const folderApi = new FolderApi("localhost", 1234);
+    const versionInfo = await window.appState.get("currentVersion");
+    const storagePath = await folderApi.getStorageFolderPath();
+
+    console.log(`passing ${JSON.stringify(versionInfo, 2, null)}`);
+    await window.fsApi.previewFile(storagePath + versionInfo.internalFileName);
 }
 
 function formatFileSize(bytes) {
