@@ -12,10 +12,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     divFileName.textContent = fileInfo.fileName;
     inputCurrentPath.value = fileInfo.symbolFilePath;
 
-    const buttonPrev = document.getElementById("button-prev");
+    const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
 
-    buttonPrev.addEventListener('click', async clickEvent => {
+    buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
     });
 
