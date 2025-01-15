@@ -39,6 +39,14 @@ contextBridge.exposeInMainWorld('fsApi', {
         .then(resolve)
         .catch(reject);
     });
+  },
+
+  extractFile: (srcPath, destPath) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:Extract', srcPath, destPath)
+        .then(resolve)
+        .catch(reject);
+    });
   }
 });
 

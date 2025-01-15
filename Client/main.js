@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import * as router from './router.mjs';
 import * as DialogApi from './DialogApi.mjs'
-import { splitPath, fileNameWithExtension, previewFile } from './FileSystemApi.mjs'
+import { splitPath, fileNameWithExtension, previewFile, extractFile } from './FileSystemApi.mjs'
 
 // https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
 // https://byby.dev/node-dirname-not-defined
@@ -49,6 +49,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('fs:Preview', async (event, path, extension) => {
     return await previewFile(path, extension);
+  });
+
+  ipcMain.handle('fs:Extract', async (event, srcPath, destPath) => {
+    return await extractFile(srcPath, destPath);
   });
 
   ipcMain.handle('state:Get', async (event, key) => {

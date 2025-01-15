@@ -21,6 +21,7 @@ function fileNameWithExtension(givenPath) {
 }
 
 // TODO: add file existence check by filePath.
+// TODO: use try catch while copying the file.
 async function previewFile(filePath, fileExtension) {
   let tempPath = tmpdir();
 
@@ -44,4 +45,10 @@ async function previewFile(filePath, fileExtension) {
   await shell.openPath(tempFilePath);
 }
 
-export {splitPath, fileNameWithExtension, previewFile};
+// TODO: use try catch while copying the file.
+async function extractFile(srcPath, destPath) {
+  await fs.copyFile(srcPath, destPath);
+  shell.showItemInFolder(destPath);
+}
+
+export {splitPath, fileNameWithExtension, previewFile, extractFile};

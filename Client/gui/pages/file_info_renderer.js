@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
     const buttonSelectPath = document.getElementById("button-select-path");
+    const buttonExtract = document.getElementById("button-extract");
     const extractModal = document.getElementById("extract-modal");
 
     buttonBack.addEventListener('click', async clickEvent => {
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
+    buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
@@ -96,6 +98,17 @@ async function onClickHandler_buttonSelectPath() {
         buttonExtract.disabled = false;
         buttonExtract.focus();
     }
+}
+
+// TODO: Add progress UI.
+async function onClickHandler_buttonExtract() {
+    const folderApi = new FolderApi("localhost", 1234);
+    const version = await window.appState.get("currentVersion");
+    let src = await folderApi.getStorageFolderPath();
+    src += version.internalFileName;
+    const dest = document.getElementById("input-extract-path").value;
+
+    await window.fsApi.extractFile(src, dest);
 }
 
 function onShownHandler_extractModal() {
