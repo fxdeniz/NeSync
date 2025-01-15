@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
+    const buttonSelectPath = document.getElementById("button-select-path");
     const extractModal = document.getElementById("extract-modal");
 
     buttonBack.addEventListener('click', async clickEvent => {
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     });
 
     buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
-
+    buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
@@ -73,8 +74,34 @@ async function onClickHandler_buttonPreview() {
     await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
 }
 
+async function onClickHandler_buttonSelectPath() {
+    const inputExtractPath = document.getElementById("input-extract-path");
+    const selectedPath = await window.dialogApi.showFileSaveDialog();
+    let extension = await window.appState.get("currentFile");
+    extension = extension.split('.');
+
+    if(extension.length === 1)
+        extension = null;
+    else
+        extension = extension.pop();
+
+    if(selectedPath) {
+        if(extension && !selectedPath.endsWith(extension)) {
+            alert(`File name should end with \".${extension}\" extension.`);
+            return;
+        }
+
+        inputExtractPath.value = selectedPath;
+        const buttonExtract = document.getElementById("button-extract");
+        buttonExtract.disabled = false;
+        buttonExtract.focus();
+    }
+}
+
 function onShownHandler_extractModal() {
+    document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
+    document.getElementById("button-select-path").focus();
 }
 
 function formatFileSize(bytes) {
