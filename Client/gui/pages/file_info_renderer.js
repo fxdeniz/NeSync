@@ -14,12 +14,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
+    const extractModal = document.getElementById("extract-modal");
 
     buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
     });
 
     buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
+
+    extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
     fileInfo.versionList.reverse(); // Make latest version appear at the top.
@@ -68,6 +71,10 @@ async function onClickHandler_buttonPreview() {
     const storagePath = await folderApi.getStorageFolderPath();
 
     await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
+}
+
+function onShownHandler_extractModal() {
+    document.getElementById("button-extract").disabled = true;
 }
 
 function formatFileSize(bytes) {
