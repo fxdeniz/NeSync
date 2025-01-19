@@ -124,10 +124,21 @@ async function onClickHandler_buttonExtract() {
         alert("File couldn't extracted.");
 }
 
-function onShownHandler_extractModal() {
+async function onShownHandler_extractModal() {
     document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
     document.getElementById("button-select-path").focus();
+
+    const fileApi = new FileApi("localhost", 1234);
+    const pVersion = document.getElementById("p-extract-file-version");
+    const pName = document.getElementById("p-extract-file-name");
+
+    const symbolPath = await window.appState.get("currentFile");
+    const file = await fileApi.get(symbolPath);
+    const version = await window.appState.get("currentVersion");
+
+    pVersion.innerHTML = `Extracting version <strong>${version.versionNumber}</strong> of:`;
+    pName.innerHTML = `<strong>${file.fileName}</strong>`;
 }
 
 function disableUserControls() {
