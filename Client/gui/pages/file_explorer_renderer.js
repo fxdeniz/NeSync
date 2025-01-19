@@ -108,7 +108,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
       row.addEventListener('click', async () => {
         if(row.dataset.type === "file") {
-          await window.appState.set("currentFile", row.dataset.symbolFilePath);
+          await window.appState.set("currentFile", currentFile);
           window.router.routeToFileInfo();
         }
       });

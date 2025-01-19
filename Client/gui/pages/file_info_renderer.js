@@ -2,10 +2,10 @@ import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    const symbolPath = await window.appState.get("currentFile");
-
     const fileApi = new FileApi("localhost", 1234);
-    const fileInfo = await fileApi.get(symbolPath)
+    let fileInfo = await window.appState.get("currentFile");
+    fileInfo = await fileApi.get(fileInfo.symbolFilePath);
+    await window.appState.set("currentFile", fileInfo); // Update shared state with object containing `versionList`.
 
     const divFileName = document.getElementById("div-file-name");
     const inputCurrentPath = document.getElementById("input-current-path");
@@ -28,8 +28,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
-    fileInfo.versionList.reverse(); // Make latest version appear at the top.
-    fileInfo.versionList.forEach(info => {
+    const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
+    // TODO: Make this reversing on the server.
+    reverseList.reverse(); // Make latest version appear at the top.
+    reverseList.forEach(info => {
         ulVersions.appendChild(createListItem(info));
     });
 
@@ -69,7 +71,8 @@ function createListItem(versionInfo) {
 async function onClickHandler_buttonPreview() {
     const folderApi = new FolderApi("localhost", 1234);
     const versionInfo = await window.appState.get("currentVersion");
-    const symbolFilePath = await window.appState.get("currentFile");
+    const fileInfo = await window.appState.get("currentFile");
+    const symbolFilePath = fileInfo.symbolFilePath;
     const extension = symbolFilePath.split(".").pop();
     const storagePath = await folderApi.getStorageFolderPath();
 
@@ -86,7 +89,8 @@ async function onClickHandler_buttonPreview() {
 async function onClickHandler_buttonSelectPath() {
     const inputExtractPath = document.getElementById("input-extract-path");
     const selectedPath = await window.dialogApi.showFileSaveDialog();
-    let extension = await window.appState.get("currentFile");
+    const fileInfo = await window.appState.get("currentFile");
+    let extension = fileInfo.symbolFilePath;
     extension = extension.split('.');
 
     if(extension.length === 1)
@@ -129,12 +133,10 @@ async function onShownHandler_extractModal() {
     document.getElementById("button-extract").disabled = true;
     document.getElementById("button-select-path").focus();
 
-    const fileApi = new FileApi("localhost", 1234);
     const pVersion = document.getElementById("p-extract-file-version");
     const pName = document.getElementById("p-extract-file-name");
 
-    const symbolPath = await window.appState.get("currentFile");
-    const file = await fileApi.get(symbolPath);
+    const file = await window.appState.get("currentFile");
     const version = await window.appState.get("currentVersion");
 
     pVersion.innerHTML = `Extracting version <strong>${version.versionNumber}</strong> of:`;
