@@ -73,7 +73,9 @@ async function onClickHandler_buttonPreview() {
     const extension = symbolFilePath.split(".").pop();
     const storagePath = await folderApi.getStorageFolderPath();
 
+    displayAlertDiv("Generating file preview, please wait...");
     await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
+    closeAlertDiv();
 }
 
 async function onClickHandler_buttonSelectPath() {
@@ -100,7 +102,6 @@ async function onClickHandler_buttonSelectPath() {
     }
 }
 
-// TODO: Add progress UI.
 async function onClickHandler_buttonExtract() {
     const folderApi = new FolderApi("localhost", 1234);
     const version = await window.appState.get("currentVersion");
@@ -111,7 +112,7 @@ async function onClickHandler_buttonExtract() {
     const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
     buttonOpenExtractModal.disabled = true;
 
-    displayAlertDiv("Extracting file please wait...");
+    displayAlertDiv("Extracting file, please wait...");
     const result = await window.fsApi.extractFile(src, dest);
     buttonOpenExtractModal.disabled = false;
     closeAlertDiv();
