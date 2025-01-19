@@ -74,8 +74,13 @@ async function onClickHandler_buttonPreview() {
     const storagePath = await folderApi.getStorageFolderPath();
 
     displayAlertDiv("Generating file preview, please wait...");
-    await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
+    disableUserControls();
+    const result = await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
+    enableUserControls();
     closeAlertDiv();
+
+    if(!result)
+        alert("File preview couldn't generated.");
 }
 
 async function onClickHandler_buttonSelectPath() {
@@ -109,12 +114,10 @@ async function onClickHandler_buttonExtract() {
     src += version.internalFileName;
     const dest = document.getElementById("input-extract-path").value;
 
-    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
-    buttonOpenExtractModal.disabled = true;
-
     displayAlertDiv("Extracting file, please wait...");
+    disableUserControls();
     const result = await window.fsApi.extractFile(src, dest);
-    buttonOpenExtractModal.disabled = false;
+    enableUserControls();
     closeAlertDiv();
 
     if(!result)
@@ -125,6 +128,26 @@ function onShownHandler_extractModal() {
     document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
     document.getElementById("button-select-path").focus();
+}
+
+function disableUserControls() {
+    const buttonPreview = document.getElementById('button-preview');
+    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
+    const versionButtons = document.querySelectorAll("#ul-versions *");
+
+    buttonPreview.disabled = true;
+    buttonOpenExtractModal.disabled = true;
+    versionButtons.forEach(element => {element.disabled = true;});
+}
+
+function enableUserControls() {
+    const buttonPreview = document.getElementById('button-preview');
+    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
+    const versionButtons = document.querySelectorAll("#ul-versions *");
+
+    buttonPreview.disabled = false;
+    buttonOpenExtractModal.disabled = false;
+    versionButtons.forEach(element => {element.disabled = false;});
 }
 
 function displayAlertDiv(alertMessage) {

@@ -21,7 +21,7 @@ function fileNameWithExtension(givenPath) {
 }
 
 // TODO: add file existence check by filePath.
-// TODO: use try catch while copying the file.
+// TODO: Maybe move file copying part to separate function.
 async function previewFile(filePath, fileExtension) {
   let tempPath = tmpdir();
 
@@ -39,12 +39,17 @@ async function previewFile(filePath, fileExtension) {
     tempFilePath += fileExtension;
   }
 
-  await fs.copyFile(filePath, tempFilePath);
-
-  // TODO: Add temp file cleaning.
-  await shell.openPath(tempFilePath);
+  try {
+    await fs.copyFile(filePath, tempFilePath);
+    await shell.openPath(tempFilePath); // TODO: Add temp file cleaning.
+    return true;
+  } catch(error) {
+    console.error(`Error previewing file from ${filePath} to ${tempFilePath}:`, error);
+    return false;
+  }
 }
 
+// TODO: Maybe move file copying part to separate function.
 async function extractFile(srcPath, destPath) {
   try {
     await fs.copyFile(srcPath, destPath);
