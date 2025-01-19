@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     inputCurrentPath.readOnly = true;
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
     buttonBack.addEventListener('click', onClickHandler_buttonBack);
-    buttonBack.disabled = true;
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
     buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
     buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);

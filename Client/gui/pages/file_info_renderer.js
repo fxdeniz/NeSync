@@ -108,13 +108,41 @@ async function onClickHandler_buttonExtract() {
     src += version.internalFileName;
     const dest = document.getElementById("input-extract-path").value;
 
-    await window.fsApi.extractFile(src, dest);
+    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
+    buttonOpenExtractModal.disabled = true;
+
+    displayAlertDiv("Extracting file please wait...");
+    const result = await window.fsApi.extractFile(src, dest);
+    buttonOpenExtractModal.disabled = false;
+    closeAlertDiv();
+
+    if(!result)
+        alert("File couldn't extracted.");
 }
 
 function onShownHandler_extractModal() {
     document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
     document.getElementById("button-select-path").focus();
+}
+
+function displayAlertDiv(alertMessage) {
+    let divAlert = document.createElement("div");
+    divAlert.id = "div-alert";
+    divAlert.className = "alert alert-warning text-center mt-3";
+    divAlert.setAttribute("role", "alert");
+    divAlert.textContent = alertMessage;
+
+    const container = document.getElementById("content-container");
+    const targetRow = container.querySelector(".row.mt-3");
+    const parentElement = targetRow.parentNode;
+
+    parentElement.insertBefore(divAlert, targetRow);
+}
+  
+function closeAlertDiv() {
+    let divAlert = document.getElementById("div-alert");
+    divAlert.remove();
 }
 
 function formatFileSize(bytes) {

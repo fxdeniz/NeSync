@@ -24,7 +24,7 @@
             <input id="input-current-path" type="text" class="form-control mx-2" placeholder="File Path" aria-label="File Path" aria-describedby="btnGroupAddon">
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
               <button id="button-preview" type="button" class="btn btn-primary">👁️</button>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extract-modal">&uarr;</button>
+              <button id="button-open-extract-modal" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extract-modal">&uarr;</button>
             </div>
         </div>
     
@@ -80,7 +80,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button id="button-extract" type="button" class="btn btn-primary">Extract</button>
+            <button id="button-extract" type="button" class="btn btn-primary" data-bs-dismiss="modal">Extract</button>
           </div>
         </div>
       </div>

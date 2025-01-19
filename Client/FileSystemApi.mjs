@@ -45,10 +45,15 @@ async function previewFile(filePath, fileExtension) {
   await shell.openPath(tempFilePath);
 }
 
-// TODO: use try catch while copying the file.
 async function extractFile(srcPath, destPath) {
-  await fs.copyFile(srcPath, destPath);
-  shell.showItemInFolder(destPath);
+  try {
+    await fs.copyFile(srcPath, destPath);
+    shell.showItemInFolder(destPath);
+    return true;
+  } catch (error) {
+    console.error(`Error extracting file from ${srcPath} to ${destPath}:`, error);
+    return false;
+  }
 }
 
 export {splitPath, fileNameWithExtension, previewFile, extractFile};
