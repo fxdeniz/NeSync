@@ -110,8 +110,8 @@ function displayAlertDiv(alertMessage) {
   divAlert.setAttribute("role", "alert");
   divAlert.textContent = alertMessage;
 
-  let container = document.getElementById("content-container");
-  let referenceNode = container.querySelector(".row");
+  const container = document.getElementById("content-container");
+  const referenceNode = container.querySelector(".row");
 
   container.insertBefore(divAlert, referenceNode);
 }

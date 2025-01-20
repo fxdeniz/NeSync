@@ -19,9 +19,13 @@
 
         <div class="input-group">
             <div class="btn-group gap-2" role="group" aria-label="Basic example">
-                <button id="button-prev" type="button" class="btn btn-primary">&larr;</button>
+                <button id="button-back" type="button" class="btn btn-primary">&larr;</button>
             </div>
             <input id="input-current-path" type="text" class="form-control mx-2" placeholder="File Path" aria-label="File Path" aria-describedby="btnGroupAddon">
+            <div class="btn-group gap-2" role="group" aria-label="Basic example">
+              <button id="button-preview" type="button" class="btn btn-primary">👁️</button>
+              <button id="button-open-extract-modal" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extract-modal">&uarr;</button>
+            </div>
         </div>
     
           <div class="row mt-3">
@@ -56,6 +60,30 @@
                     </div>
                 </div>
           </div>          
+      </div>
+    </div>
+
+    <!--File extract modal.-->
+    <div id="extract-modal" class="modal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Extract file</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="align-baseline">Extracted version of the file will be created as new independent copy.</p>
+            <p id="p-extract-file-version" class="align-baseline"><b>Version here</b></p>
+            <p id="p-extract-file-name" class="align-baseline">File name here</p>
+            <div class="input-group mb-3">
+              <input id="input-extract-path" type="text" class="form-control" placeholder="Select path for copy" aria-label="Select path for copy" aria-describedby="button-extract" readonly>
+              <button id="button-select-path" class="btn btn-outline-secondary" type="button">📁</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="button-extract" type="button" class="btn btn-primary" data-bs-dismiss="modal">Extract</button>
+          </div>
+        </div>
       </div>
     </div>
   </body>

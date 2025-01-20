@@ -2,25 +2,36 @@ import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    const symbolPath = await window.appState.get("currentFile");
-
     const fileApi = new FileApi("localhost", 1234);
-    const fileInfo = await fileApi.get(symbolPath)
+    let fileInfo = await window.appState.get("currentFile");
+    fileInfo = await fileApi.get(fileInfo.symbolFilePath);
+    await window.appState.set("currentFile", fileInfo); // Update shared state with object containing `versionList`.
 
     const divFileName = document.getElementById("div-file-name");
     const inputCurrentPath = document.getElementById("input-current-path");
     divFileName.textContent = fileInfo.fileName;
     inputCurrentPath.value = fileInfo.symbolFilePath;
 
-    const buttonPrev = document.getElementById("button-prev");
+    const buttonBack = document.getElementById("button-back");
+    const buttonPreview = document.getElementById("button-preview");
+    const buttonSelectPath = document.getElementById("button-select-path");
+    const buttonExtract = document.getElementById("button-extract");
+    const extractModal = document.getElementById("extract-modal");
 
-    buttonPrev.addEventListener('click', async clickEvent => {
+    buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
     });
 
+    buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
+    buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
+    buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
+    extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
+
     const ulVersions = document.getElementById("ul-versions");
-    fileInfo.versionList.reverse(); // Make latest version appear at the top.
-    fileInfo.versionList.forEach(info => {
+    const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
+    // TODO: Make this reversing on the server.
+    reverseList.reverse(); // Make latest version appear at the top.
+    reverseList.forEach(info => {
         ulVersions.appendChild(createListItem(info));
     });
 
@@ -29,7 +40,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 });
 
 function createListItem(versionInfo) {
-    console.log(`${JSON.stringify(versionInfo)}`);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "list-group-item list-group-item-action text-center";
@@ -39,10 +49,12 @@ function createListItem(versionInfo) {
     span.textContent = versionInfo.versionNumber;
 
     button.appendChild(span);
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         const pDescription = document.getElementById("p-description");
         const hFileSize = document.getElementById("h-file-size");
         const divTimePassed = document.getElementById("div-time-passed");
+
+        await window.appState.set("currentVersion", versionInfo);
 
         const items = document.querySelectorAll(".list-group .list-group-item");
         items.forEach(btn => btn.classList.remove("active"));
@@ -54,6 +66,120 @@ function createListItem(versionInfo) {
     });
 
     return button;
+}
+
+async function onClickHandler_buttonPreview() {
+    const folderApi = new FolderApi("localhost", 1234);
+    const versionInfo = await window.appState.get("currentVersion");
+    const fileInfo = await window.appState.get("currentFile");
+    const symbolFilePath = fileInfo.symbolFilePath;
+    const extension = symbolFilePath.split(".").pop();
+    const storagePath = await folderApi.getStorageFolderPath();
+
+    displayAlertDiv("Generating file preview, please wait...");
+    disableUserControls();
+    const result = await window.fsApi.previewFile(storagePath + versionInfo.internalFileName, extension);
+    enableUserControls();
+    closeAlertDiv();
+
+    if(!result)
+        alert("File preview couldn't generated.");
+}
+
+async function onClickHandler_buttonSelectPath() {
+    const inputExtractPath = document.getElementById("input-extract-path");
+    const selectedPath = await window.dialogApi.showFileSaveDialog();
+    const fileInfo = await window.appState.get("currentFile");
+    let extension = fileInfo.symbolFilePath;
+    extension = extension.split('.');
+
+    if(extension.length === 1)
+        extension = null;
+    else
+        extension = extension.pop();
+
+    if(selectedPath) {
+        if(extension && !selectedPath.endsWith(extension)) {
+            alert(`File name should end with \".${extension}\" extension.`);
+            return;
+        }
+
+        inputExtractPath.value = selectedPath;
+        const buttonExtract = document.getElementById("button-extract");
+        buttonExtract.disabled = false;
+        buttonExtract.focus();
+    }
+}
+
+async function onClickHandler_buttonExtract() {
+    const folderApi = new FolderApi("localhost", 1234);
+    const version = await window.appState.get("currentVersion");
+    let src = await folderApi.getStorageFolderPath();
+    src += version.internalFileName;
+    const dest = document.getElementById("input-extract-path").value;
+
+    displayAlertDiv("Extracting file, please wait...");
+    disableUserControls();
+    const result = await window.fsApi.extractFile(src, dest);
+    enableUserControls();
+    closeAlertDiv();
+
+    if(!result)
+        alert("File couldn't extracted.");
+}
+
+async function onShownHandler_extractModal() {
+    document.getElementById("input-extract-path").value = "";
+    document.getElementById("button-extract").disabled = true;
+    document.getElementById("button-select-path").focus();
+
+    const pVersion = document.getElementById("p-extract-file-version");
+    const pName = document.getElementById("p-extract-file-name");
+
+    const file = await window.appState.get("currentFile");
+    const version = await window.appState.get("currentVersion");
+
+    pVersion.innerHTML = `Extracting version <strong>${version.versionNumber}</strong> of:`;
+    pName.innerHTML = `<strong>${file.fileName}</strong>`;
+}
+
+function disableUserControls() {
+    const buttonPreview = document.getElementById('button-preview');
+    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
+    const versionButtons = document.querySelectorAll("#ul-versions *");
+
+    buttonPreview.disabled = true;
+    buttonOpenExtractModal.disabled = true;
+    versionButtons.forEach(element => {element.disabled = true;});
+}
+
+function enableUserControls() {
+    const buttonPreview = document.getElementById('button-preview');
+    const buttonOpenExtractModal = document.getElementById('button-open-extract-modal');
+    const versionButtons = document.querySelectorAll("#ul-versions *");
+
+    buttonPreview.disabled = false;
+    buttonOpenExtractModal.disabled = false;
+    versionButtons.forEach(element => {element.disabled = false;});
+}
+
+function displayAlertDiv(alertMessage) {
+    let divAlert = document.createElement("div");
+    divAlert.id = "div-alert";
+    divAlert.className = "alert alert-warning text-center mt-3";
+    divAlert.setAttribute("role", "alert");
+    divAlert.textContent = alertMessage;
+
+    const container = document.getElementById("content-container");
+    const targetRow = container.querySelector(".row.mt-3");
+    const parentElement = targetRow.parentNode;
+
+    parentElement.insertBefore(divAlert, targetRow);
+}
+  
+function closeAlertDiv() {
+    let divAlert = document.getElementById("div-alert");
+    divAlert.remove();
 }
 
 function formatFileSize(bytes) {

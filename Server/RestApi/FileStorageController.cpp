@@ -183,6 +183,19 @@ QHttpServerResponse FileStorageController::getFolderUserPath(const QHttpServerRe
     return response;
 }
 
+QHttpServerResponse FileStorageController::getStorageFolderPath(const QHttpServerRequest &request)
+{
+    QJsonObject result;
+    auto fsm = FileStorageManager::instance();
+
+    qDebug() << "storageFolderPath = " << fsm->getStorageFolderPath();
+    qDebug() << "";
+
+    result.insert("storageFolderPath", fsm->getStorageFolderPath());
+
+    return result;
+}
+
 QHttpServerResponse FileStorageController::getFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();

@@ -5,7 +5,7 @@ import ZipImportApi from "../rest_api/ZipImportApi.mjs";
 document.addEventListener("DOMContentLoaded", async (event) => {
 
     const inputCurrentPath = document.getElementById('input-current-path');
-    const buttonPrev = document.getElementById('button-prev');
+    const buttonBack = document.getElementById('button-back');
     const buttonAddNewFolder = document.getElementById('button-add-new-folder');
     const buttonFileMonitor = document.getElementById("button-file-monitor");
     const buttonSelectZipFileExportPath = document.getElementById("button-select-zip-export-path");
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     inputCurrentPath.readOnly = true;
     inputCurrentPath.addEventListener('directoryNavigation', onDirectoryChangeHandler_inputCurrentPath);
-    buttonPrev.addEventListener('click', onClickHandler_buttonPrev);
+    buttonBack.addEventListener('click', onClickHandler_buttonBack);
     buttonAddNewFolder.addEventListener('click', onClickHandler_buttonAddNewFolder);
     buttonSelectZipFileExportPath.addEventListener("click", onClickHandler_buttonSelectZipFileExportPath);
     buttonSelectZipFileImportPath.addEventListener("click", onClickHandler_buttonSelectZipFileImportPath);
@@ -54,7 +54,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   event.target.value = event.detail.targetPath; // Set inputCurrentPath's new value.
   await window.appState.set("currentFolder", event.detail.targetPath);
 
-  const buttonPrev = document.getElementById('button-prev');
+  const buttonBack = document.getElementById('button-back');
   const tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
@@ -62,9 +62,9 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   const folderJson = await folderApi.get(event.detail.targetPath);
 
   if(folderJson.parentFolderPath === '')
-    buttonPrev.disabled = true;
+    buttonBack.disabled = true;
   else
-    buttonPrev.disabled = false;
+    buttonBack.disabled = false;
 
   if(folderJson.childFolders) {
     folderJson.childFolders.forEach(currentFolder => {
@@ -108,7 +108,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
       row.addEventListener('click', async () => {
         if(row.dataset.type === "file") {
-          await window.appState.set("currentFile", row.dataset.symbolFilePath);
+          await window.appState.set("currentFile", currentFile);
           window.router.routeToFileInfo();
         }
       });
@@ -118,7 +118,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   }
 }
 
-async function onClickHandler_buttonPrev() {
+async function onClickHandler_buttonBack() {
   const inputCurrentPath = document.getElementById('input-current-path');
   const folderApi = new FolderApi('localhost', 1234);
   const dir = await window.appState.get("currentFolder");

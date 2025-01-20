@@ -47,6 +47,10 @@ int main(int argc, char *argv[])
         return storageController.getFolderUserPath(request);
     });
 
+    httpServer.route("/folder/storageFolderPath", QHttpServerRequest::Method::Get, [&storageController](const QHttpServerRequest &request) {
+        return storageController.getStorageFolderPath(request);
+    });
+
     httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFolder(request);
     });
