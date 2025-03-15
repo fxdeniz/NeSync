@@ -21,6 +21,7 @@ public:
     QHttpServerResponse getStorageFolderPath(const QHttpServerRequest& request);
     QHttpServerResponse getFile(const QHttpServerRequest& request);
     QHttpServerResponse getFileByUserPath(const QHttpServerRequest& request);
+    QHttpServerResponse updateFileFrozenStatus(const QHttpServerRequest& request);
 
 signals:
 

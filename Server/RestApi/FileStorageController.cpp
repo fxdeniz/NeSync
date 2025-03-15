@@ -231,3 +231,32 @@ QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRe
     QHttpServerResponse response(responseBody);
     return response;
 }
+
+// TODO: improve input checking of this function.
+QHttpServerResponse FileStorageController::updateFileFrozenStatus(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
+    bool isFrozen = jsonObject["isFrozen"].toBool();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "isFrozen = " << isFrozen;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+
+    entity[JsonKeys::File::IsFrozen] = isFrozen;
+
+    bool isUpdated = fsm->updateFileEntity(entity);
+
+    entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+
+    entity["isUpdated"] = isUpdated;
+
+    QHttpServerResponse response(entity);
+    return response;
+}
