@@ -9,8 +9,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const divFileName = document.getElementById("div-file-name");
     const inputCurrentPath = document.getElementById("input-current-path");
+    const buttonFreeze = document.getElementById("button-freeze");
     divFileName.textContent = fileInfo.fileName;
     inputCurrentPath.value = fileInfo.symbolFilePath;
+    fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
     const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
