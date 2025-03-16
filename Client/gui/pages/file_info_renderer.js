@@ -9,16 +9,17 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const divFileName = document.getElementById("div-file-name");
     const inputCurrentPath = document.getElementById("input-current-path");
-    const buttonFreeze = document.getElementById("button-freeze");
     divFileName.textContent = fileInfo.fileName;
     inputCurrentPath.value = fileInfo.symbolFilePath;
-    fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
     const buttonBack = document.getElementById("button-back");
     const buttonPreview = document.getElementById("button-preview");
     const buttonSelectPath = document.getElementById("button-select-path");
     const buttonExtract = document.getElementById("button-extract");
     const extractModal = document.getElementById("extract-modal");
+    const buttonFreeze = document.getElementById("button-freeze");
+
+    fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
     buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
@@ -27,6 +28,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
+    buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
@@ -128,6 +130,14 @@ async function onClickHandler_buttonExtract() {
 
     if(!result)
         alert("File couldn't extracted.");
+}
+
+// TODO: Consider showing alert or toast by looking into result of fileApi.updateFrozenStatus().
+async function onClickHandler_buttonFreeze() {
+    let fileInfo = await window.appState.get("currentFile");
+    const fileApi = new FileApi("localhost", 1234);
+    await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+    window.location.reload(); // By reloading the page, update the "currentFile" shared state.
 }
 
 async function onShownHandler_extractModal() {
