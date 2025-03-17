@@ -79,6 +79,10 @@ int main(int argc, char *argv[])
         return storageController.deleteFile(request);
     });
 
+    httpServer.route("/version/update/description", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.updateFileVersionDescription(request);
+    });
+
     httpServer.route("/monitor/new", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
         return fsMonitorController.newAddedItems(request);
     });

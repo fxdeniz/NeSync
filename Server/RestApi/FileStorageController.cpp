@@ -258,3 +258,35 @@ QHttpServerResponse FileStorageController::updateFileFrozenStatus(const QHttpSer
     QHttpServerResponse response(entity);
     return response;
 }
+
+// TODO: Fix versionNumber boundries when converting from long long to unsigned long long.
+//       Also, check negative inputs.
+QHttpServerResponse FileStorageController::updateFileVersionDescription(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    qulonglong versionNumber = jsonObject["versionNumber"].toInteger();
+    QString description = jsonObject["description"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "versionNumber = " << versionNumber;
+    qDebug() << "description = " << description;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject entity = fsm->getFileVersionJson(symbolFilePath, versionNumber);
+
+    entity[JsonKeys::FileVersion::Description] = description;
+
+    bool isUpdated = fsm->updateFileVersionEntity(entity);
+
+    entity = fsm->getFileVersionJson(symbolFilePath, versionNumber);
+
+    entity["isUpdated"] = isUpdated;
+
+    QHttpServerResponse response(entity);
+    return response;
+}

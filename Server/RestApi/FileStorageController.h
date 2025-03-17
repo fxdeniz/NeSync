@@ -22,6 +22,7 @@ public:
     QHttpServerResponse getFile(const QHttpServerRequest& request);
     QHttpServerResponse getFileByUserPath(const QHttpServerRequest& request);
     QHttpServerResponse updateFileFrozenStatus(const QHttpServerRequest& request);
+    QHttpServerResponse updateFileVersionDescription(const QHttpServerRequest& request);
 
 signals:
 
