@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonExtract = document.getElementById("button-extract");
     const extractModal = document.getElementById("extract-modal");
     const buttonFreeze = document.getElementById("button-freeze");
+    const buttonDelete = document.getElementById("button-delete");
 
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
+    buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
 
     const ulVersions = document.getElementById("ul-versions");
@@ -138,6 +140,27 @@ async function onClickHandler_buttonFreeze() {
     const fileApi = new FileApi("localhost", 1234);
     await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
     window.location.reload(); // By reloading the page, update the "currentFile" shared state.
+}
+
+// TODO: This func. does not delete latest copy of active file from the user filesystem.
+//       Maybe deleting feature can be added in the future.
+async function onClickHandler_buttonDelete() {
+    const userConfirmed = confirm("Are you sure you want to delete this file ?\nAll versions also will be deleted.");
+    if (!userConfirmed)
+        return;
+
+    let fileInfo = await window.appState.get("currentFile");
+    const fileApi = new FileApi("localhost", 1234);
+    const result = await fileApi.delete(fileInfo.symbolFilePath);
+
+    if(result.isDeleted) {
+        alert("File deleted succesfully.");
+        window.router.routeToFileExplorer();
+    }
+    else {
+        alert("File couldn't deleted, please try again.");
+        window.location.reload();
+    }
 }
 
 async function onShownHandler_extractModal() {
