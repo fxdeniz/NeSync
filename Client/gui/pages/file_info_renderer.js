@@ -16,9 +16,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonPreview = document.getElementById("button-preview");
     const buttonSelectPath = document.getElementById("button-select-path");
     const buttonExtract = document.getElementById("button-extract");
-    const extractModal = document.getElementById("extract-modal");
     const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
+    const extractModal = document.getElementById("extract-modal");
+    const editDescriptionModal = document.getElementById("edit-description-modal");
 
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
+    editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
 
     const ulVersions = document.getElementById("ul-versions");
     const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
@@ -176,6 +178,12 @@ async function onShownHandler_extractModal() {
 
     pVersion.innerHTML = `Extracting version <strong>${version.versionNumber}</strong> of:`;
     pName.innerHTML = `<strong>${file.fileName}</strong>`;
+}
+
+async function onShownHandler_editDescriptionModal() {
+    const textareaDescription = document.getElementById("textarea-description");
+    const version = await window.appState.get("currentVersion");
+    textareaDescription.textContent = version.description;
 }
 
 function disableUserControls() {
