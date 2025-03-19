@@ -1,5 +1,6 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
+import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const fileApi = new FileApi("localhost", 1234);
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonExtract = document.getElementById("button-extract");
     const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
+    const buttonSaveDescription = document.getElementById("button-save-description");
     const extractModal = document.getElementById("extract-modal");
     const editDescriptionModal = document.getElementById("edit-description-modal");
 
@@ -32,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
+    buttonSaveDescription.addEventListener('click', onClickHandler_buttonSaveDescription);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
     editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
 
@@ -163,6 +166,27 @@ async function onClickHandler_buttonDelete() {
         alert("File couldn't deleted, please try again.");
         window.location.reload();
     }
+}
+
+async function onClickHandler_buttonSaveDescription() {
+    const description = document.getElementById("textarea-description").value;
+    const file = await window.appState.get("currentFile");
+    let version = await window.appState.get("currentVersion");
+    const versionApi = new VersionApi('localhost', 1234);
+
+    const result = await versionApi.updateDescription(file.symbolFilePath, version.versionNumber, description);
+
+    if(!result.isUpdated)
+        alert("Couldn't update the description, please try again later.");
+    else {
+        version.description = description;
+        await window.appState.set("currentVersion", version);
+        const pDescription = document.getElementById("p-description");
+        pDescription.innerHTML = description;
+    }
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("edit-description-modal"));
+    modal.hide();
 }
 
 async function onShownHandler_extractModal() {

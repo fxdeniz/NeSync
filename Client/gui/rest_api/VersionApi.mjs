@@ -12,6 +12,6 @@ export default class FileApi extends BaseApi {
       requestBody["versionNumber"] = versionNumber;
       requestBody["description"] = description;
       
-      return await postJSON(`http://${this.host}:${this.port}/version/update`, requestBody);
+      return await postJSON(`http://${this.host}:${this.port}/version/update/description`, requestBody);
     }
 }
