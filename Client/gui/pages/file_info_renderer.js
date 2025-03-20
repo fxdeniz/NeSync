@@ -139,12 +139,19 @@ async function onClickHandler_buttonExtract() {
         alert("File couldn't extracted.");
 }
 
-// TODO: Consider showing alert or toast by looking into result of fileApi.updateFrozenStatus().
 async function onClickHandler_buttonFreeze() {
     let fileInfo = await window.appState.get("currentFile");
     const fileApi = new FileApi("localhost", 1234);
-    await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
-    window.location.reload(); // By reloading the page, update the "currentFile" shared state.
+    const result = await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+
+    if(!result.isUpdated)
+        alert("Couldn't freeze the file, please try again.");
+    else {
+        fileInfo.isFrozen = !fileInfo.isFrozen;
+        await window.appState.set("currentFile", fileInfo);
+        const buttonFreeze = document.getElementById("button-freeze");
+        fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';    
+    }
 }
 
 // TODO: This func. does not delete latest copy of active file from the user filesystem.
