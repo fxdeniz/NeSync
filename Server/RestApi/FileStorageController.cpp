@@ -231,3 +231,64 @@ QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRe
     QHttpServerResponse response(responseBody);
     return response;
 }
+
+// TODO: improve input checking of this function.
+QHttpServerResponse FileStorageController::updateFileFrozenStatus(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
+    bool isFrozen = jsonObject["isFrozen"].toBool();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "isFrozen = " << isFrozen;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+
+    entity[JsonKeys::File::IsFrozen] = isFrozen;
+
+    bool isUpdated = fsm->updateFileEntity(entity);
+
+    entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+
+    entity["isUpdated"] = isUpdated;
+
+    QHttpServerResponse response(entity);
+    return response;
+}
+
+// TODO: Fix versionNumber boundries when converting from long long to unsigned long long.
+//       Also, check negative inputs.
+QHttpServerResponse FileStorageController::updateFileVersionDescription(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    qulonglong versionNumber = jsonObject["versionNumber"].toInteger();
+    QString description = jsonObject["description"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "versionNumber = " << versionNumber;
+    qDebug() << "description = " << description;
+    qDebug() << "";
+
+    auto fsm = FileStorageManager::instance();
+    QJsonObject entity = fsm->getFileVersionJson(symbolFilePath, versionNumber);
+
+    entity[JsonKeys::FileVersion::Description] = description;
+
+    bool isUpdated = fsm->updateFileVersionEntity(entity);
+
+    entity = fsm->getFileVersionJson(symbolFilePath, versionNumber);
+
+    entity["isUpdated"] = isUpdated;
+
+    QHttpServerResponse response(entity);
+    return response;
+}

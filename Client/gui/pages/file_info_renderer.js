@@ -1,5 +1,6 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 import FileApi from "../rest_api/FileApi.mjs"
+import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const fileApi = new FileApi("localhost", 1234);
@@ -16,7 +17,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonPreview = document.getElementById("button-preview");
     const buttonSelectPath = document.getElementById("button-select-path");
     const buttonExtract = document.getElementById("button-extract");
+    const buttonFreeze = document.getElementById("button-freeze");
+    const buttonDelete = document.getElementById("button-delete");
+    const buttonSaveDescription = document.getElementById("button-save-description");
     const extractModal = document.getElementById("extract-modal");
+    const editDescriptionModal = document.getElementById("edit-description-modal");
+
+    fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
 
     buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
@@ -25,7 +32,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonPreview.addEventListener('click', onClickHandler_buttonPreview);
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
+    buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
+    buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
+    buttonSaveDescription.addEventListener('click', onClickHandler_buttonSaveDescription);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
+    editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
 
     const ulVersions = document.getElementById("ul-versions");
     const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
@@ -128,6 +139,63 @@ async function onClickHandler_buttonExtract() {
         alert("File couldn't extracted.");
 }
 
+async function onClickHandler_buttonFreeze() {
+    let fileInfo = await window.appState.get("currentFile");
+    const fileApi = new FileApi("localhost", 1234);
+    const result = await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+
+    if(!result.isUpdated)
+        alert("Couldn't freeze the file, please try again.");
+    else {
+        fileInfo.isFrozen = !fileInfo.isFrozen;
+        await window.appState.set("currentFile", fileInfo);
+        const buttonFreeze = document.getElementById("button-freeze");
+        fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';    
+    }
+}
+
+// TODO: This func. does not delete latest copy of active file from the user filesystem.
+//       Maybe deleting feature can be added in the future.
+async function onClickHandler_buttonDelete() {
+    const userConfirmed = confirm("Are you sure you want to delete this file ?\nAll versions also will be deleted.");
+    if (!userConfirmed)
+        return;
+
+    let fileInfo = await window.appState.get("currentFile");
+    const fileApi = new FileApi("localhost", 1234);
+    const result = await fileApi.delete(fileInfo.symbolFilePath);
+
+    if(result.isDeleted) {
+        alert("File deleted succesfully.");
+        window.router.routeToFileExplorer();
+    }
+    else {
+        alert("File couldn't deleted, please try again.");
+        window.location.reload();
+    }
+}
+
+async function onClickHandler_buttonSaveDescription() {
+    const description = document.getElementById("textarea-description").value;
+    const file = await window.appState.get("currentFile");
+    let version = await window.appState.get("currentVersion");
+    const versionApi = new VersionApi('localhost', 1234);
+
+    const result = await versionApi.updateDescription(file.symbolFilePath, version.versionNumber, description);
+
+    if(!result.isUpdated)
+        alert("Couldn't update the description, please try again later.");
+    else {
+        version.description = description;
+        await window.appState.set("currentVersion", version);
+        const pDescription = document.getElementById("p-description");
+        pDescription.innerHTML = description;
+    }
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("edit-description-modal"));
+    modal.hide();
+}
+
 async function onShownHandler_extractModal() {
     document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
@@ -141,6 +209,12 @@ async function onShownHandler_extractModal() {
 
     pVersion.innerHTML = `Extracting version <strong>${version.versionNumber}</strong> of:`;
     pName.innerHTML = `<strong>${file.fileName}</strong>`;
+}
+
+async function onShownHandler_editDescriptionModal() {
+    const textareaDescription = document.getElementById("textarea-description");
+    const version = await window.appState.get("currentVersion");
+    textareaDescription.textContent = version.description;
 }
 
 function disableUserControls() {

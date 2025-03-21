@@ -67,12 +67,20 @@ int main(int argc, char *argv[])
         return storageController.getFileByUserPath(request);
     });
 
+    httpServer.route("/file/update/frozenStatus", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.updateFileFrozenStatus(request);
+    });
+
     httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.appendVersion(request);
     });
 
     httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFile(request);
+    });
+
+    httpServer.route("/version/update/description", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.updateFileVersionDescription(request);
     });
 
     httpServer.route("/monitor/new", QHttpServerRequest::Method::Get, [&fsMonitorController](const QHttpServerRequest &request) {
