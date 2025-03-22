@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   const buttonFileExplorer = document.getElementById('button-file-explorer');
 
   buttonSave.addEventListener('click', async (event) => {
-    const commitMessage = document.getElementById(`input-commit-message`).value;
+    const commitMessage = document.getElementById(`textarea-commit-message`).value;
     await window.appState.set("commitMessage", commitMessage);
     window.router.routeToSaveChanges();
   });

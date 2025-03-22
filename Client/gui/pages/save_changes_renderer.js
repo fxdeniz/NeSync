@@ -94,7 +94,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
       for (const fileName of newAddedJson.files[currentFolder]) {
         const folderJson = await folderApi.getByUserPath(currentFolder);
         appendLog(textAreaLog, `\t\t 👉 Adding new file  ${fileName}`);
-        const result = await fileApi.add(folderJson.symbolFolderPath, currentFolder + fileName, "", false);
+        const result = await fileApi.add(folderJson.symbolFolderPath,
+                                         currentFolder + fileName,
+                                         await window.appState.get("commitMessage"),
+                                         false);
         appendLog(textAreaLog, `\t\t\t Added  Successfully: ${result.isAdded ? '✅' : '❌'}:`);
       }
     }

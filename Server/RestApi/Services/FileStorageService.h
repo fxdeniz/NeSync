@@ -9,7 +9,8 @@ class FileStorageService : public QObject
 public:
     explicit FileStorageService(QObject *parent = nullptr);
 
-    bool deleteFile(const QString& symbolFilePath);
+    bool renameFile(const QString &symbolFilePath, const QString &fileName);
+    bool deleteFile(const QString &symbolFilePath);
 
 signals:
 };
