@@ -60,6 +60,8 @@ set(PROJECT_SOURCES
       RestApi/Services/ZipExportService.cpp
       RestApi/Services/ZipImportService.h
       RestApi/Services/ZipImportService.cpp
+      RestApi/Services/FileStorageService.h
+      RestApi/Services/FileStorageService.cpp
       RestApi/Services/FileSystemMonitorService.h
       RestApi/Services/FileSystemMonitorService.cpp
 

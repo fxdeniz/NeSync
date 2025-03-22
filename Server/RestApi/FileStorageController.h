@@ -1,6 +1,8 @@
 #ifndef FILESTORAGECONTROLLER_H
 #define FILESTORAGECONTROLLER_H
 
+#include "Services/FileStorageService.h"
+
 #include <QObject>
 #include <QHttpServerRequest>
 #include <QHttpServerResponse>
@@ -23,6 +25,9 @@ public:
     QHttpServerResponse getFileByUserPath(const QHttpServerRequest& request);
     QHttpServerResponse updateFileFrozenStatus(const QHttpServerRequest& request);
     QHttpServerResponse updateFileVersionDescription(const QHttpServerRequest& request);
+
+private:
+    FileStorageService service;
 
 signals:
 

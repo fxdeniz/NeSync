@@ -157,7 +157,9 @@ async function onClickHandler_buttonFreeze() {
 // TODO: This func. does not delete latest copy of active file from the user filesystem.
 //       Maybe deleting feature can be added in the future.
 async function onClickHandler_buttonDelete() {
-    const userConfirmed = confirm("Are you sure you want to delete this file ?\nAll versions also will be deleted.");
+    const userConfirmed = confirm(
+    "Are you sure you want to delete this file?\n" +
+    "This will delete all saved versions and current file in your working folder.");
     if (!userConfirmed)
         return;
 

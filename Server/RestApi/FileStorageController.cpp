@@ -140,8 +140,7 @@ QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &
     QString symbolFilePath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFilePath = " << symbolFilePath;
 
-    auto fsm = FileStorageManager::instance();
-    bool result = fsm->deleteFile(symbolFilePath);
+    bool result = service.deleteFile(symbolFilePath);
 
     QJsonObject responseBody {{"isDeleted", result}};
 
@@ -263,6 +262,8 @@ QHttpServerResponse FileStorageController::updateFileFrozenStatus(const QHttpSer
 
 // TODO: Fix versionNumber boundries when converting from long long to unsigned long long.
 //       Also, check negative inputs.
+// FIXME: This function only updates the isFrozen flag. It does not check the existence of the parent folder.
+//        Activating without the parent folder must be prevented.
 QHttpServerResponse FileStorageController::updateFileVersionDescription(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
