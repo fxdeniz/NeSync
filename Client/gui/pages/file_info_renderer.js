@@ -18,9 +18,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonSelectPath = document.getElementById("button-select-path");
     const buttonExtract = document.getElementById("button-extract");
     const buttonFreeze = document.getElementById("button-freeze");
+    const buttonRename = document.getElementById("button-rename");
     const buttonDelete = document.getElementById("button-delete");
     const buttonSaveDescription = document.getElementById("button-save-description");
     const extractModal = document.getElementById("extract-modal");
+    const renameModal = document.getElementById("rename-modal");
     const editDescriptionModal = document.getElementById("edit-description-modal");
 
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
@@ -33,10 +35,14 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
+    buttonRename.addEventListener('click', onClickHandler_buttonRename);
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     buttonSaveDescription.addEventListener('click', onClickHandler_buttonSaveDescription);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
+    renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
+
+    document.getElementById("input-filename").addEventListener("input", inputHandler_inputFileName);
 
     const ulVersions = document.getElementById("ul-versions");
     const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
@@ -154,6 +160,10 @@ async function onClickHandler_buttonFreeze() {
     }
 }
 
+function onClickHandler_buttonRename() {
+
+}
+
 // TODO: This func. does not delete latest copy of active file from the user filesystem.
 //       Maybe deleting feature can be added in the future.
 async function onClickHandler_buttonDelete() {
@@ -213,10 +223,50 @@ async function onShownHandler_extractModal() {
     pName.innerHTML = `<strong>${file.fileName}</strong>`;
 }
 
+async function onShownHandler_renameModal() {
+    const inputFilename = document.getElementById("input-filename");
+    const file = await window.appState.get("currentFile");
+    inputFilename.value = file.fileName;
+    inputFilename.select();
+
+    const modalBody = document.querySelector("#rename-modal .modal-body");
+    const existingAlert = modalBody.querySelector(".alert.alert-warning");
+
+    if (existingAlert)
+        existingAlert.remove();
+}
+
 async function onShownHandler_editDescriptionModal() {
     const textareaDescription = document.getElementById("textarea-description");
     const version = await window.appState.get("currentVersion");
     textareaDescription.textContent = version.description;
+}
+
+function inputHandler_inputFileName(event) {
+    const inputText = event.target.value;
+    const buttonSaveFileName = document.getElementById("button-save-filename");
+
+    const modalBody = document.querySelector("#rename-modal .modal-body");
+    const existingAlert = modalBody.querySelector(".alert.alert-warning");
+
+    if (existingAlert)
+        existingAlert.remove();
+
+    if(inputText.length === 0)
+        buttonSaveFileName.disabled = true;
+    else {
+        buttonSaveFileName.disabled = false;
+
+        if(inputText.split('.').length < 2 || inputText.split('.').pop() == '') {
+            const warningDiv = document.createElement("div");
+            warningDiv.className = "alert alert-warning";
+            warningDiv.setAttribute("role", "alert");
+            warningDiv.innerHTML = `
+                                    The file name appears to have no extension. Please check it. 
+                                    <br><b>You can still rename the file without an extension.</b>`;
+            modalBody.appendChild(warningDiv);
+        }
+    }
 }
 
 function disableUserControls() {
