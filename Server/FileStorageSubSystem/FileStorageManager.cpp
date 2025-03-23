@@ -565,7 +565,7 @@ QJsonObject FileStorageManager::fileEntityToJsonObject(const FileEntity &entity)
 
     FolderEntity parentEntity = folderRepository->findBySymbolPath(entity.symbolFolderPath);
 
-    if(!parentEntity.userFolderPath.isEmpty())
+    if(!parentEntity.userFolderPath.isEmpty() && !entity.isFrozen)
         result[JsonKeys::File::UserFilePath] = parentEntity.userFolderPath + entity.fileName;
 
     if(!entity.getVersionList().isEmpty())

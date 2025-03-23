@@ -52,11 +52,15 @@ bool FileStorageService::deleteFile(const QString &symbolFilePath)
 
     _lastSymbolFilePath = dto[JsonKeys::File::SymbolFilePath].toString();
 
+    bool isFrozen = dto[JsonKeys::File::IsFrozen].toBool();
+
+    if(isFrozen)
+        return true;
+
     QString userPath = dto[JsonKeys::File::UserFilePath].toString();
 
     QFile file(userPath);
 
-    // Delete when the file is exists. Even when the frozen file is exists.
     if(file.exists())
         file.remove(); // TODO: Also add delete operations result in the result.
 
