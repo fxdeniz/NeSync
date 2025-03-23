@@ -130,6 +130,26 @@ QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest
     return response;
 }
 
+QHttpServerResponse FileStorageController::renameFile(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    QString fileName = jsonObject["fileName"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "fileName = " << fileName;
+
+    bool result = service.renameFile(symbolFilePath, fileName);
+
+    QJsonObject responseBody {{"isRenamed", result}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();

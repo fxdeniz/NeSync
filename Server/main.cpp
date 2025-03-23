@@ -67,6 +67,10 @@ int main(int argc, char *argv[])
         return storageController.getFileByUserPath(request);
     });
 
+    httpServer.route("/file/update/name", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.renameFile(request);
+    });
+
     httpServer.route("/file/update/frozenStatus", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.updateFileFrozenStatus(request);
     });

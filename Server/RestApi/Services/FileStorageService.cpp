@@ -3,7 +3,9 @@
 #include "JsonDtoFormat.h"
 #include "FileStorageSubSystem/FileStorageManager.h"
 
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 
 FileStorageService::FileStorageService(QObject *parent)
     : QObject{parent}
@@ -14,10 +16,6 @@ bool FileStorageService::renameFile(const QString &symbolFilePath, const QString
     auto fsm = FileStorageManager::instance();
 
     QJsonObject dto = fsm->getFileJsonBySymbolPath(symbolFilePath);
-    bool isFrozen = dto[JsonKeys::File::IsFrozen].toBool();
-
-    if(isFrozen)
-        return false;
 
     dto[JsonKeys::File::FileName] = fileName;
     bool isRenamedInDb = fsm->updateFileEntity(dto);
@@ -25,10 +23,18 @@ bool FileStorageService::renameFile(const QString &symbolFilePath, const QString
     if(!isRenamedInDb)
         return false;
 
-    QString userPath = dto[JsonKeys::File::UserFilePath].toString();
-    QFile file(userPath);
+    bool isFrozen = dto[JsonKeys::File::IsFrozen].toBool();
 
-    bool result = file.rename(fileName); // TODO: Synchronize result of this operation with the db using transactions.
+    if(isFrozen)
+        return true;
+
+    QString userPath = dto[JsonKeys::File::UserFilePath].toString();
+
+    QFile file(userPath);
+    QFileInfo fileInfo(userPath);
+    QString newPath = fileInfo.dir().filePath(fileName);
+
+    bool result = file.rename(newPath); // TODO: Synchronize result of this operation with the db using transactions.
     return result;
 }
 

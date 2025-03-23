@@ -38,6 +38,14 @@ export default class FileApi extends BaseApi {
       return await postJSON(`http://${this.host}:${this.port}/file/append`, requestBody);    
     }
 
+    async rename(symbolFilePath, fileName) {
+      let requestBody = {};
+      requestBody["symbolFilePath"] = symbolFilePath;
+      requestBody["fileName"] = fileName;
+
+      return await postJSON(`http://${this.host}:${this.port}/file/update/name`, requestBody);
+    }
+
     async updateFrozenStatus(symbolFilePath, status) {
       let requestBody = {};
       requestBody["symbolPath"] = symbolFilePath;

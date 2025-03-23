@@ -18,9 +18,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonSelectPath = document.getElementById("button-select-path");
     const buttonExtract = document.getElementById("button-extract");
     const buttonFreeze = document.getElementById("button-freeze");
-    const buttonRename = document.getElementById("button-rename");
     const buttonDelete = document.getElementById("button-delete");
     const buttonSaveDescription = document.getElementById("button-save-description");
+    const buttonRename = document.getElementById("button-rename");
     const extractModal = document.getElementById("extract-modal");
     const renameModal = document.getElementById("rename-modal");
     const editDescriptionModal = document.getElementById("edit-description-modal");
@@ -35,9 +35,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     buttonExtract.addEventListener('click', onClickHandler_buttonExtract);
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
-    buttonRename.addEventListener('click', onClickHandler_buttonRename);
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     buttonSaveDescription.addEventListener('click', onClickHandler_buttonSaveDescription);
+    buttonRename.addEventListener('click', onClickHandler_buttonRename);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
     renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
@@ -160,10 +160,6 @@ async function onClickHandler_buttonFreeze() {
     }
 }
 
-function onClickHandler_buttonRename() {
-
-}
-
 // TODO: This func. does not delete latest copy of active file from the user filesystem.
 //       Maybe deleting feature can be added in the future.
 async function onClickHandler_buttonDelete() {
@@ -208,6 +204,28 @@ async function onClickHandler_buttonSaveDescription() {
     modal.hide();
 }
 
+async function onClickHandler_buttonRename() {
+    const fileName = document.getElementById("input-filename").value;
+    const file = await window.appState.get("currentFile");
+    const fileApi = new FileApi('localhost', 1234);
+
+    const result = await fileApi.rename(file.symbolFilePath, fileName);
+
+    if(!result.isRenamed)
+        alert("Couldn't rename the file, please try again later.");
+    else {
+        file.fileName = fileName;
+        await window.appState.set("currentFile", file);
+        const divFileName = document.getElementById("div-file-name");
+        divFileName.textContent = file.fileName;
+
+        console.log(`file = ${JSON.stringify(file, null, 2)}`);
+    }
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("rename-modal"));
+    modal.hide();
+}
+
 async function onShownHandler_extractModal() {
     document.getElementById("input-extract-path").value = "";
     document.getElementById("button-extract").disabled = true;
@@ -244,7 +262,7 @@ async function onShownHandler_editDescriptionModal() {
 
 function inputHandler_inputFileName(event) {
     const inputText = event.target.value;
-    const buttonSaveFileName = document.getElementById("button-save-filename");
+    const buttonRename = document.getElementById("button-rename");
 
     const modalBody = document.querySelector("#rename-modal .modal-body");
     const existingAlert = modalBody.querySelector(".alert.alert-warning");
@@ -253,9 +271,9 @@ function inputHandler_inputFileName(event) {
         existingAlert.remove();
 
     if(inputText.length === 0)
-        buttonSaveFileName.disabled = true;
+        buttonRename.disabled = true;
     else {
-        buttonSaveFileName.disabled = false;
+        buttonRename.disabled = false;
 
         if(inputText.split('.').length < 2 || inputText.split('.').pop() == '') {
             const warningDiv = document.createElement("div");
