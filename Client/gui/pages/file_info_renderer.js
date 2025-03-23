@@ -204,15 +204,8 @@ async function onClickHandler_buttonSaveDescription() {
 
     if(!result.isUpdated)
         alert("Couldn't update the description, please try again later.");
-    else {
-        version.description = description;
-        await window.appState.set("currentVersion", version);
-        const pDescription = document.getElementById("p-description");
-        pDescription.innerHTML = description;
-    }
-
-    const modal = bootstrap.Modal.getInstance(document.getElementById("edit-description-modal"));
-    modal.hide();
+    else
+        window.location.reload();
 }
 
 async function onClickHandler_buttonRename() {
