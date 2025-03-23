@@ -46,12 +46,12 @@ export default class FileApi extends BaseApi {
       return await postJSON(`http://${this.host}:${this.port}/file/update/name`, requestBody);
     }
 
-    async updateFrozenStatus(symbolFilePath, status) {
+    async freeze(symbolFilePath, status) {
       let requestBody = {};
       requestBody["symbolPath"] = symbolFilePath;
       requestBody["isFrozen"] = status;
 
-      return await postJSON(`http://${this.host}:${this.port}/file/update/frozenStatus`, requestBody);
+      return await postJSON(`http://${this.host}:${this.port}/file/update/freeze`, requestBody);
     }
 
     async delete(symbolFilePath) {

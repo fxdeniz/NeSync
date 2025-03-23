@@ -253,7 +253,7 @@ QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRe
 }
 
 // TODO: improve input checking of this function.
-QHttpServerResponse FileStorageController::updateFileFrozenStatus(const QHttpServerRequest &request)
+QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
 

@@ -159,16 +159,12 @@ async function onClickHandler_buttonExtract() {
 async function onClickHandler_buttonFreeze() {
     let fileInfo = await window.appState.get("currentFile");
     const fileApi = new FileApi("localhost", 1234);
-    const result = await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+    const result = await fileApi.freeze(fileInfo.symbolFilePath, !fileInfo.isFrozen);
 
     if(!result.isUpdated)
         alert("Couldn't freeze the file, please try again.");
-    else {
-        fileInfo.isFrozen = !fileInfo.isFrozen;
-        await window.appState.set("currentFile", fileInfo);
-        const buttonFreeze = document.getElementById("button-freeze");
-        fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';    
-    }
+    else
+        window.location.reload();
 }
 
 async function onClickHandler_buttonDelete() {
