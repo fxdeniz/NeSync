@@ -4,6 +4,7 @@ import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const fileApi = new FileApi("localhost", 1234);
+    const folderInfo = await window.appState.get("currentFolder");
     let fileInfo = await window.appState.get("currentFile");
     fileInfo = await fileApi.get(fileInfo.symbolFilePath);
     await window.appState.set("currentFile", fileInfo); // Update shared state with object containing `versionList`.
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const editDescriptionModal = document.getElementById("edit-description-modal");
 
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
+    folderInfo.isFrozen ? buttonFreeze.disabled = true : buttonFreeze.disabled = false;
 
     buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();

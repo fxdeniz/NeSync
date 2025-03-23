@@ -266,18 +266,10 @@ QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &
     qDebug() << "isFrozen = " << isFrozen;
     qDebug() << "";
 
-    auto fsm = FileStorageManager::instance();
-    QJsonObject entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+    bool isUpdated = service.freezeFile(symbolFilePath, isFrozen);
 
-    entity[JsonKeys::File::IsFrozen] = isFrozen;
-
-    bool isUpdated = fsm->updateFileEntity(entity);
-
-    entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
-
-    entity["isUpdated"] = isUpdated;
-
-    QHttpServerResponse response(entity);
+    QJsonObject responseBody {{"isUpdated", isUpdated}};
+    QHttpServerResponse response(responseBody);
     return response;
 }
 

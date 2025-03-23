@@ -30,13 +30,22 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     exportModal.addEventListener("shown.bs.modal", onShownHandler_exportModal);
     importModal.addEventListener("shown.bs.modal", onShownHandler_importModal);
 
-    const folderApi = new FolderApi('localhost', 1234);
-    let dir = await window.appState.get("currentFolder");
-    const folder = await folderApi.get(dir);
+    let target;
+    const currentFolder = await window.appState.get("currentFolder");
 
-    if(!dir || !folder.isExist) dir = '/';
+    if(!currentFolder)
+      target = '/';
+    else {
+      const folderApi = new FolderApi('localhost', 1234);
+      const folder = await folderApi.get(currentFolder.symbolFolderPath);
+  
+      if(!folder.isExist) // Current folder not exists in the server.
+        target = '/';
+      else
+        target = currentFolder.symbolFolderPath;
+    }
 
-    const navigationEvent = createDirectoryChangeEvent(dir);
+    const navigationEvent = createDirectoryChangeEvent(target);
     inputCurrentPath.dispatchEvent(navigationEvent);
 });
 
@@ -52,7 +61,6 @@ async function onClickHandler_buttonAddNewFolder() {
 
 async function onDirectoryChangeHandler_inputCurrentPath(event) {
   event.target.value = event.detail.targetPath; // Set inputCurrentPath's new value.
-  await window.appState.set("currentFolder", event.detail.targetPath);
 
   const buttonBack = document.getElementById('button-back');
   const tableExplorerBody = document.querySelector('#table-explorer tbody');
@@ -60,6 +68,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
   const folderApi = new FolderApi('localhost', 1234);
   const folderJson = await folderApi.get(event.detail.targetPath);
+  await window.appState.set("currentFolder", folderJson);
 
   if(folderJson.parentFolderPath === '')
     buttonBack.disabled = true;
@@ -121,11 +130,9 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
 
 async function onClickHandler_buttonBack() {
   const inputCurrentPath = document.getElementById('input-current-path');
-  const folderApi = new FolderApi('localhost', 1234);
-  const dir = await window.appState.get("currentFolder");
-  const folderJson = await folderApi.get(dir);
+  const folder = await window.appState.get("currentFolder");
 
-  const navigationEvent = createDirectoryChangeEvent(folderJson.parentFolderPath);
+  const navigationEvent = createDirectoryChangeEvent(folder.parentFolderPath);
   inputCurrentPath.dispatchEvent(navigationEvent);
 }
 

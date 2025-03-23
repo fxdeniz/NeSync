@@ -40,6 +40,28 @@ bool FileStorageService::renameFile(const QString &symbolFilePath, const QString
     return result;
 }
 
+bool FileStorageService::freezeFile(const QString &symbolFilePath, bool isFrozen)
+{
+    auto fsm = FileStorageManager::instance();
+    QJsonObject entity = fsm->getFileJsonBySymbolPath(symbolFilePath);
+    QJsonObject parent = fsm->getFolderJsonBySymbolPath(entity[JsonKeys::File::SymbolFolderPath].toString());
+
+    if(!parent[JsonKeys::IsExist].toBool())
+        return false;
+
+    if(parent[JsonKeys::Folder::IsFrozen].toBool() && !isFrozen) // Don't activate child of a frozen folder.
+        return false;
+
+    entity[JsonKeys::File::IsFrozen] = isFrozen;
+
+    bool result = fsm->updateFileEntity(entity);
+
+    if(result)
+        _lastSymbolFilePath = symbolFilePath;
+
+    return result;
+}
+
 bool FileStorageService::deleteFile(const QString &symbolFilePath)
 {
     auto fsm = FileStorageManager::instance();
