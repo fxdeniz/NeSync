@@ -109,6 +109,7 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
       row.addEventListener('click', async () => {
         if(row.dataset.type === "file") {
           await window.appState.set("currentFile", currentFile);
+          await window.appState.set("selectedVersionNumber", null);
           window.router.routeToFileInfo();
         }
       });

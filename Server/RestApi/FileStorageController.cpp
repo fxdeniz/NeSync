@@ -144,7 +144,8 @@ QHttpServerResponse FileStorageController::renameFile(const QHttpServerRequest &
 
     bool result = service.renameFile(symbolFilePath, fileName);
 
-    QJsonObject responseBody {{"isRenamed", result}};
+    QJsonObject responseBody {{"isRenamed", result},
+                              {"newSymbolFilePath", service.lastSymbolFilePath()}};
 
     QHttpServerResponse response(responseBody);
     return response;

@@ -12,7 +12,12 @@ public:
     bool renameFile(const QString &symbolFilePath, const QString &fileName);
     bool deleteFile(const QString &symbolFilePath);
 
+    QString lastSymbolFilePath() const;
+
 signals:
+
+private:
+    QString _lastSymbolFilePath;
 };
 
 #endif // FILESTORAGESERVICE_H

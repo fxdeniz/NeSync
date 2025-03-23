@@ -23,6 +23,8 @@ bool FileStorageService::renameFile(const QString &symbolFilePath, const QString
     if(!isRenamedInDb)
         return false;
 
+    _lastSymbolFilePath = dto[JsonKeys::File::SymbolFolderPath].toString() + fileName;
+
     bool isFrozen = dto[JsonKeys::File::IsFrozen].toBool();
 
     if(isFrozen)
@@ -48,6 +50,8 @@ bool FileStorageService::deleteFile(const QString &symbolFilePath)
     if(!isDeletedFromDb)
         return false;
 
+    _lastSymbolFilePath = dto[JsonKeys::File::SymbolFilePath].toString();
+
     QString userPath = dto[JsonKeys::File::UserFilePath].toString();
 
     QFile file(userPath);
@@ -57,4 +61,9 @@ bool FileStorageService::deleteFile(const QString &symbolFilePath)
         file.remove(); // TODO: Also add delete operations result in the result.
 
     return true;
+}
+
+QString FileStorageService::lastSymbolFilePath() const
+{
+    return _lastSymbolFilePath;
 }

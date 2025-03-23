@@ -48,12 +48,22 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
     // TODO: Make this reversing on the server.
     reverseList.reverse(); // Make latest version appear at the top.
+
+    const selectedVersion = await window.appState.get("selectedVersionNumber");
+    let buttonToClick = null;
+
     reverseList.forEach(info => {
-        ulVersions.appendChild(createListItem(info));
+        const button = createListItem(info);
+        ulVersions.appendChild(button);
+
+        if(info.versionNumber === selectedVersion)
+            buttonToClick = button;
     });
 
-    const firstItem = document.querySelector(".list-group .list-group-item");
-    firstItem.click();
+    if(!buttonToClick)
+        buttonToClick = document.querySelector(".list-group .list-group-item"); // Select the first item of the reversed.
+
+    buttonToClick.click();
 });
 
 function createListItem(versionInfo) {
@@ -72,6 +82,7 @@ function createListItem(versionInfo) {
         const divTimePassed = document.getElementById("div-time-passed");
 
         await window.appState.set("currentVersion", versionInfo);
+        await window.appState.set("selectedVersionNumber", versionInfo.versionNumber);
 
         const items = document.querySelectorAll(".list-group .list-group-item");
         items.forEach(btn => btn.classList.remove("active"));
@@ -214,16 +225,11 @@ async function onClickHandler_buttonRename() {
     if(!result.isRenamed)
         alert("Couldn't rename the file, please try again later.");
     else {
-        file.fileName = fileName;
+        const file = await window.appState.get("currentFile");
+        file.symbolFilePath = result.newSymbolFilePath;
         await window.appState.set("currentFile", file);
-        const divFileName = document.getElementById("div-file-name");
-        divFileName.textContent = file.fileName;
-
-        console.log(`file = ${JSON.stringify(file, null, 2)}`);
+        window.location.reload();
     }
-
-    const modal = bootstrap.Modal.getInstance(document.getElementById("rename-modal"));
-    modal.hide();
 }
 
 async function onShownHandler_extractModal() {
