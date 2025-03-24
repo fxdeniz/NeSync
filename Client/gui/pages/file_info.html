@@ -37,7 +37,7 @@
                       </div>
 
                       <div class="btn-group gap-1" role="group" aria-label="Basic example">
-                        <button type="button" class="btn btn-primary" disabled>✏️</button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rename-modal">✏️</button>
                         <button id="button-freeze" type="button" class="btn btn-primary">⏯️</button>
                         <button id="button-delete" type="button" class="btn btn-primary">❌</button>
                       </div>
@@ -96,6 +96,26 @@
       </div>
     </div>
 
+    <!--Rename modal.-->
+    <div id="rename-modal" class="modal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Rename file</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <input id="input-filename" type="text" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="button-rename" type="button" class="btn btn-primary" data-bs-dismiss="modal">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!--Edit description modal.-->
     <div id="edit-description-modal" class="modal" tabindex="-1">
       <div class="modal-dialog modal-lg">
@@ -115,6 +135,6 @@
           </div>
         </div>
       </div>
-    </div>    
+    </div>  
   </body>
 </html>

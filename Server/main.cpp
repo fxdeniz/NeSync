@@ -67,8 +67,12 @@ int main(int argc, char *argv[])
         return storageController.getFileByUserPath(request);
     });
 
-    httpServer.route("/file/update/frozenStatus", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
-        return storageController.updateFileFrozenStatus(request);
+    httpServer.route("/file/update/name", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.renameFile(request);
+    });
+
+    httpServer.route("/file/update/freeze", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.freezeFile(request);
     });
 
     httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {

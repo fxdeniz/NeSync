@@ -4,6 +4,7 @@ import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const fileApi = new FileApi("localhost", 1234);
+    const folderInfo = await window.appState.get("currentFolder");
     let fileInfo = await window.appState.get("currentFile");
     fileInfo = await fileApi.get(fileInfo.symbolFilePath);
     await window.appState.set("currentFile", fileInfo); // Update shared state with object containing `versionList`.
@@ -20,10 +21,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
     const buttonSaveDescription = document.getElementById("button-save-description");
+    const buttonRename = document.getElementById("button-rename");
     const extractModal = document.getElementById("extract-modal");
+    const renameModal = document.getElementById("rename-modal");
     const editDescriptionModal = document.getElementById("edit-description-modal");
 
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
+    folderInfo.isFrozen ? buttonFreeze.disabled = true : buttonFreeze.disabled = false;
 
     buttonBack.addEventListener('click', async clickEvent => {
         window.router.routeToFileExplorer();
@@ -35,19 +39,33 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     buttonSaveDescription.addEventListener('click', onClickHandler_buttonSaveDescription);
+    buttonRename.addEventListener('click', onClickHandler_buttonRename);
     extractModal.addEventListener("shown.bs.modal", onShownHandler_extractModal);
+    renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     editDescriptionModal.addEventListener("shown.bs.modal", onShownHandler_editDescriptionModal);
+
+    document.getElementById("input-filename").addEventListener("input", inputHandler_inputFileName);
 
     const ulVersions = document.getElementById("ul-versions");
     const reverseList = JSON.parse(JSON.stringify(fileInfo.versionList));
     // TODO: Make this reversing on the server.
     reverseList.reverse(); // Make latest version appear at the top.
+
+    const selectedVersion = await window.appState.get("selectedVersionNumber");
+    let buttonToClick = null;
+
     reverseList.forEach(info => {
-        ulVersions.appendChild(createListItem(info));
+        const button = createListItem(info);
+        ulVersions.appendChild(button);
+
+        if(info.versionNumber === selectedVersion)
+            buttonToClick = button;
     });
 
-    const firstItem = document.querySelector(".list-group .list-group-item");
-    firstItem.click();
+    if(!buttonToClick)
+        buttonToClick = document.querySelector(".list-group .list-group-item"); // Select the first item of the reversed.
+
+    buttonToClick.click();
 });
 
 function createListItem(versionInfo) {
@@ -66,6 +84,7 @@ function createListItem(versionInfo) {
         const divTimePassed = document.getElementById("div-time-passed");
 
         await window.appState.set("currentVersion", versionInfo);
+        await window.appState.set("selectedVersionNumber", versionInfo.versionNumber);
 
         const items = document.querySelectorAll(".list-group .list-group-item");
         items.forEach(btn => btn.classList.remove("active"));
@@ -142,26 +161,29 @@ async function onClickHandler_buttonExtract() {
 async function onClickHandler_buttonFreeze() {
     let fileInfo = await window.appState.get("currentFile");
     const fileApi = new FileApi("localhost", 1234);
-    const result = await fileApi.updateFrozenStatus(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+    const result = await fileApi.freeze(fileInfo.symbolFilePath, !fileInfo.isFrozen);
 
     if(!result.isUpdated)
         alert("Couldn't freeze the file, please try again.");
-    else {
-        fileInfo.isFrozen = !fileInfo.isFrozen;
-        await window.appState.set("currentFile", fileInfo);
-        const buttonFreeze = document.getElementById("button-freeze");
-        fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';    
-    }
+    else
+        window.location.reload();
 }
 
-// TODO: This func. does not delete latest copy of active file from the user filesystem.
-//       Maybe deleting feature can be added in the future.
 async function onClickHandler_buttonDelete() {
-    const userConfirmed = confirm("Are you sure you want to delete this file ?\nAll versions also will be deleted.");
+    let fileInfo = await window.appState.get("currentFile");
+
+    let message = `Are you sure you want to delete this file?\n
+                   This will delete all saved versions and current file in your working folder.`;
+
+    if(fileInfo.isFrozen) {
+        message = `Are you sure you want to delete this file?\n
+                   This will delete all saved versions.`;
+    }
+
+    const userConfirmed = confirm(message);
     if (!userConfirmed)
         return;
 
-    let fileInfo = await window.appState.get("currentFile");
     const fileApi = new FileApi("localhost", 1234);
     const result = await fileApi.delete(fileInfo.symbolFilePath);
 
@@ -185,15 +207,25 @@ async function onClickHandler_buttonSaveDescription() {
 
     if(!result.isUpdated)
         alert("Couldn't update the description, please try again later.");
-    else {
-        version.description = description;
-        await window.appState.set("currentVersion", version);
-        const pDescription = document.getElementById("p-description");
-        pDescription.innerHTML = description;
-    }
+    else
+        window.location.reload();
+}
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById("edit-description-modal"));
-    modal.hide();
+async function onClickHandler_buttonRename() {
+    const fileName = document.getElementById("input-filename").value;
+    const file = await window.appState.get("currentFile");
+    const fileApi = new FileApi('localhost', 1234);
+
+    const result = await fileApi.rename(file.symbolFilePath, fileName);
+
+    if(!result.isRenamed)
+        alert("Couldn't rename the file, please try again later.");
+    else {
+        const file = await window.appState.get("currentFile");
+        file.symbolFilePath = result.newSymbolFilePath;
+        await window.appState.set("currentFile", file);
+        window.location.reload();
+    }
 }
 
 async function onShownHandler_extractModal() {
@@ -211,10 +243,50 @@ async function onShownHandler_extractModal() {
     pName.innerHTML = `<strong>${file.fileName}</strong>`;
 }
 
+async function onShownHandler_renameModal() {
+    const inputFilename = document.getElementById("input-filename");
+    const file = await window.appState.get("currentFile");
+    inputFilename.value = file.fileName;
+    inputFilename.select();
+
+    const modalBody = document.querySelector("#rename-modal .modal-body");
+    const existingAlert = modalBody.querySelector(".alert.alert-warning");
+
+    if (existingAlert)
+        existingAlert.remove();
+}
+
 async function onShownHandler_editDescriptionModal() {
     const textareaDescription = document.getElementById("textarea-description");
     const version = await window.appState.get("currentVersion");
     textareaDescription.textContent = version.description;
+}
+
+function inputHandler_inputFileName(event) {
+    const inputText = event.target.value;
+    const buttonRename = document.getElementById("button-rename");
+
+    const modalBody = document.querySelector("#rename-modal .modal-body");
+    const existingAlert = modalBody.querySelector(".alert.alert-warning");
+
+    if (existingAlert)
+        existingAlert.remove();
+
+    if(inputText.length === 0)
+        buttonRename.disabled = true;
+    else {
+        buttonRename.disabled = false;
+
+        if(inputText.split('.').length < 2 || inputText.split('.').pop() == '') {
+            const warningDiv = document.createElement("div");
+            warningDiv.className = "alert alert-warning";
+            warningDiv.setAttribute("role", "alert");
+            warningDiv.innerHTML = `
+                                    The file name appears to have no extension. Please check it. 
+                                    <br><b>You can still rename the file without an extension.</b>`;
+            modalBody.appendChild(warningDiv);
+        }
+    }
 }
 
 function disableUserControls() {
