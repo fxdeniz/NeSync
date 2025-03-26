@@ -95,6 +95,11 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
             event.target.dispatchEvent(navigationEvnet);
           }
         });
+
+        row.addEventListener('contextmenu', () => {
+          if(row.dataset.type === "folder")
+            window.router.routeToFolderInfo();
+        });
     
         tableExplorerBody.appendChild(row);
     });

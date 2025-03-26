@@ -51,4 +51,17 @@ function routeToFileInfo (event) {
   win.loadFile(path.join(__dirname,'gui/pages/file_info.html'));
 }
 
-export {routeToFileExplorer, routeToFileMonitor, routeToAddFolder, routeToSaveChanges, routeToZipExport, routeToZipImport, routeToFileInfo};
+function routeToFolderInfo (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'gui/pages/folder_info.html'));
+}
+
+export {routeToFileExplorer,
+        routeToFileMonitor,
+        routeToAddFolder,
+        routeToSaveChanges,
+        routeToZipExport,
+        routeToZipImport,
+        routeToFileInfo,
+        routeToFolderInfo};

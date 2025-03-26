@@ -7,7 +7,8 @@ contextBridge.exposeInMainWorld('router', {
   routeToSaveChanges: () => ipcRenderer.send('route:SaveChanges'),
   routeToZipExport: () => ipcRenderer.send('route:ZipExport'),
   routeToZipImport: () => ipcRenderer.send('route:ZipImport'),
-  routeToFileInfo: () => ipcRenderer.send('route:FileInfo')
+  routeToFileInfo: () => ipcRenderer.send('route:FileInfo'),
+  routeToFolderInfo: () => ipcRenderer.send('route:FolderInfo')
 });
 
 contextBridge.exposeInMainWorld('dialogApi', {
