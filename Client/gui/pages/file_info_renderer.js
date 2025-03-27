@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     fileInfo.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
     folderInfo.isFrozen ? buttonFreeze.disabled = true : buttonFreeze.disabled = false;
 
-    buttonBack.addEventListener('click', async clickEvent => {
+    buttonBack.addEventListener('click', async () => {
         window.router.routeToFileExplorer();
     });
 

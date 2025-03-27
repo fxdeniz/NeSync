@@ -121,8 +121,7 @@ QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest
     QString symbolFolderPath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
 
-    auto fsm = FileStorageManager::instance();
-    bool result = fsm->deleteFolder(symbolFolderPath);
+    bool result = service.deleteFolder(symbolFolderPath);
 
     QJsonObject responseBody {{"isDeleted", result}};
 

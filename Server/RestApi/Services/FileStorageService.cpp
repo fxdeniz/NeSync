@@ -11,6 +11,25 @@ FileStorageService::FileStorageService(QObject *parent)
     : QObject{parent}
 {}
 
+bool FileStorageService::deleteFolder(const QString &symbolFolderPath)
+{
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+    bool isDeletedFromDb = fsm->deleteFolder(symbolFolderPath);
+
+    if(!isDeletedFromDb)
+        return false;
+
+    _lastSymbolFolderPath = dto[JsonKeys::File::SymbolFolderPath].toString();
+
+    // Delete whether existing folder is frozen or not.
+    QDir dir(dto[JsonKeys::Folder::UserFolderPath].toString());
+    dir.removeRecursively(); // TODO: Synchronize result of this operation with the db using transactions.
+
+    return true;
+}
+
 bool FileStorageService::renameFile(const QString &symbolFilePath, const QString &fileName)
 {
     auto fsm = FileStorageManager::instance();
@@ -87,6 +106,11 @@ bool FileStorageService::deleteFile(const QString &symbolFilePath)
         file.remove(); // TODO: Also add delete operations result in the result.
 
     return true;
+}
+
+QString FileStorageService::lastSymbolFolderPath() const
+{
+    return _lastSymbolFolderPath;
 }
 
 QString FileStorageService::lastSymbolFilePath() const
