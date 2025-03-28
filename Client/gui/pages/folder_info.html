@@ -43,12 +43,11 @@
                   <div class="vertical-scroll-area">
                     <div class="card">
                       <div class="card-header">
-                        Version Details
+                        Folder Details
                       </div>
                       <div class="card-body">
                         <h5 id="h-file-size" class="card-title">File size will be here.</h5>
                         <p id="p-description" class="card-text">Description will be here.</p>
-                        <button id="button-open-edit-description-modal" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-description-modal">Edit description</button>
                       </div>
                       <div id="div-time-passed" class="card-footer text-body-secondary">
                         Date time will be here.
@@ -78,6 +77,29 @@
           </div>
         </div>
       </div>
-    </div>  
+    </div>
+
+    <!--Relocate modal.-->
+    <div id="relocate-modal" class="modal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Relocate folder</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="align-baseline">All files & folders inside the folder below will be exported:</p>
+            <p id="p-export-source" class="align-baseline"><b>Source here</b></p>
+            <div class="input-group mb-3">
+              <input id="input-user-path" type="text" class="form-control" placeholder="Select zip file path" aria-label="Select zip file path" aria-describedby="button-relocate" readonly>
+              <button id="button-select-path" class="btn btn-outline-secondary" type="button">📁</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="button-relocate" type="button" class="btn btn-primary">Relocate</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

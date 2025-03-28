@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
     const buttonBack = document.getElementById("button-back");
     const buttonRename = document.getElementById("button-rename");
+    const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
     const renameModal = document.getElementById("rename-modal");
 
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     });
 
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
+    buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonRename.addEventListener('click', onClickHandler_buttonRename);
     renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     document.getElementById("input-foldername").addEventListener("input", inputHandler_inputFolderName);
@@ -42,6 +44,12 @@ async function onClickHandler_buttonRename() {
         await window.appState.set("currentFolder", folder);
         window.location.reload();
     }
+}
+
+function onClickHandler_buttonFreeze() {
+    const relocateModal = document.getElementById('relocate-modal');
+    const modal = new bootstrap.Modal(relocateModal);
+    modal.show();
 }
 
 async function onClickHandler_buttonDelete() {
