@@ -66,8 +66,6 @@ QHttpServerResponse FileStorageController::addNewFile(const QHttpServerRequest &
 
     auto fsm = FileStorageManager::instance();
 
-    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
-
     bool isAdded = fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
 
     qDebug() << "isAdded = " << isAdded;

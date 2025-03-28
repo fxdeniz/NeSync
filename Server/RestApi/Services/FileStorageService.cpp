@@ -30,38 +30,73 @@ bool FileStorageService::deleteFolder(const QString &symbolFolderPath)
     return true;
 }
 
+// TODO: Re-write this function using transactions.
 bool FileStorageService::renameFolder(const QString &symbolFolderPath, QString folderName)
 {
     auto fsm = FileStorageManager::instance();
 
-    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
-    QString oldName = dto[JsonKeys::Folder::SuffixPath].toString().chopped(1);
-    QString newUserPath = dto[JsonKeys::Folder::UserFolderPath].toString().split(oldName).first();
+    QJsonObject parentDto = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+    QString oldName = parentDto[JsonKeys::Folder::SuffixPath].toString();
+    QString newUserPath = parentDto[JsonKeys::Folder::UserFolderPath].toString().split(oldName).first();
     newUserPath += folderName;
+    newUserPath = QDir::toNativeSeparators(newUserPath);
+    bool isFrozen = parentDto[JsonKeys::Folder::IsFrozen].toBool();
 
     if(!folderName.endsWith(fsm->separator))
         return false;
 
-    dto[JsonKeys::Folder::SuffixPath] = folderName;
-    dto[JsonKeys::Folder::UserFolderPath] = newUserPath;
-    bool isRenamedInDb = fsm->updateFolderEntity(dto);
+    if(!isFrozen)
+    {
+        QJsonArray children = parentDto[JsonKeys::Folder::ChildFolders].toArray();
+        while(!children.isEmpty())
+        {
+            QString currentUserPath;
+            QJsonObject dto = children.first().toObject();
+            dto = fsm->getFolderJsonBySymbolPath(dto[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+            currentUserPath = dto[JsonKeys::Folder::UserFolderPath].toString();
 
-    if(!isRenamedInDb)
+            qlonglong index = currentUserPath.indexOf(oldName);
+
+            if (index != -1) // TODO: Cancel transaction
+            {
+                currentUserPath.replace(index, oldName.length(), folderName);
+                currentUserPath = QDir::toNativeSeparators(currentUserPath);
+            }
+
+            dto[JsonKeys::Folder::UserFolderPath] = currentUserPath;
+
+            bool isChildRenamed = fsm->updateFolderEntity(dto);
+
+            if(!isChildRenamed)
+                return false;
+
+            QJsonArray subChildren = dto[JsonKeys::Folder::ChildFolders].toArray();
+            if(!subChildren.isEmpty())
+                for(const QJsonValue &value : subChildren)
+                    children.append(value.toObject());
+
+            children.removeFirst();
+        }
+    }
+
+    parentDto[JsonKeys::Folder::SuffixPath] = folderName;
+    parentDto[JsonKeys::Folder::UserFolderPath] = newUserPath;
+    bool isParentRenamed = fsm->updateFolderEntity(parentDto);
+
+    if(!isParentRenamed)
         return false;
 
-    _lastSymbolFolderPath = dto[JsonKeys::Folder::ParentFolderPath].toString() + folderName;
-
-    bool isFrozen = dto[JsonKeys::Folder::IsFrozen].toBool();
+    _lastSymbolFolderPath = parentDto[JsonKeys::Folder::ParentFolderPath].toString() + folderName;
 
     if(isFrozen)
         return true;
 
-    QString userPath = dto[JsonKeys::Folder::UserFolderPath].toString();
+    QString userPath = parentDto[JsonKeys::Folder::UserFolderPath].toString();
 
     QDir dir(userPath);
     dir.cdUp();
 
-    bool result = dir.rename(oldName, folderName.chopped(1)); // TODO: Synchronize result of this operation with the db using transactions.
+    bool result = dir.rename(oldName.chopped(1), folderName.chopped(1)); // TODO: Synchronize result of this operation with the db using transactions.
     return result;
 }
 
