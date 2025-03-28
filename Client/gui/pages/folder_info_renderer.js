@@ -38,7 +38,7 @@ async function onClickHandler_buttonRename() {
     if(!result.isRenamed)
         alert("Couldn't rename the folder, please try again later.");
     else {
-        folder = folderApi.get(result.newSymbolFolderPath);
+        folder = await folderApi.get(result.newSymbolFolderPath);
         await window.appState.set("currentFolder", folder);
         window.location.reload();
     }
@@ -47,8 +47,8 @@ async function onClickHandler_buttonRename() {
 async function onClickHandler_buttonDelete() {
     let folder = await window.appState.get("currentFolder");
 
-    let message = `Are you sure you want to delete this folder?\n
-                   This will delete your working folder with everything inside.`;
+    const message = `Are you sure you want to delete this folder?\n
+                     This will delete your working folder with everything inside.`;
 
     const userConfirmed = confirm(message);
     if (!userConfirmed)
