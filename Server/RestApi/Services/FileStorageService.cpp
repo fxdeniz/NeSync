@@ -30,6 +30,41 @@ bool FileStorageService::deleteFolder(const QString &symbolFolderPath)
     return true;
 }
 
+bool FileStorageService::renameFolder(const QString &symbolFolderPath, QString folderName)
+{
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+    QString oldName = dto[JsonKeys::Folder::SuffixPath].toString().chopped(1);
+    QString newUserPath = dto[JsonKeys::Folder::UserFolderPath].toString().split(oldName).first();
+    newUserPath += folderName;
+
+    if(!folderName.endsWith(fsm->separator))
+        return false;
+
+    dto[JsonKeys::Folder::SuffixPath] = folderName;
+    dto[JsonKeys::Folder::UserFolderPath] = newUserPath;
+    bool isRenamedInDb = fsm->updateFolderEntity(dto);
+
+    if(!isRenamedInDb)
+        return false;
+
+    _lastSymbolFolderPath = dto[JsonKeys::Folder::ParentFolderPath].toString() + folderName;
+
+    bool isFrozen = dto[JsonKeys::Folder::IsFrozen].toBool();
+
+    if(isFrozen)
+        return true;
+
+    QString userPath = dto[JsonKeys::Folder::UserFolderPath].toString();
+
+    QDir dir(userPath);
+    dir.cdUp();
+
+    bool result = dir.rename(oldName, folderName.chopped(1)); // TODO: Synchronize result of this operation with the db using transactions.
+    return result;
+}
+
 bool FileStorageService::renameFile(const QString &symbolFilePath, const QString &fileName)
 {
     auto fsm = FileStorageManager::instance();

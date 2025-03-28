@@ -10,6 +10,7 @@ public:
     explicit FileStorageService(QObject *parent = nullptr);
 
     bool deleteFolder(const QString &symbolFolderPath);
+    bool renameFolder(const QString &symbolFolderPath, QString folderName);
     bool renameFile(const QString &symbolFilePath, const QString &fileName);
     bool freezeFile(const QString &symbolFilePath, bool isFrozen);
     bool deleteFile(const QString &symbolFilePath);

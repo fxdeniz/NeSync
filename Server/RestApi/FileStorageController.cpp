@@ -129,6 +129,45 @@ QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest
     return response;
 }
 
+QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+
+    bool result = service.deleteFile(symbolFilePath);
+
+    QJsonObject responseBody {{"isDeleted", result}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
+QHttpServerResponse FileStorageController::renameFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString folderName = jsonObject["folderName"].toString();
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "folderName = " << folderName;
+
+    bool result = service.renameFolder(symbolFolderPath, folderName);
+
+    QJsonObject responseBody {{"isRenamed", result},
+                             {"newSymbolFolderPath", service.lastSymbolFolderPath()}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 QHttpServerResponse FileStorageController::renameFile(const QHttpServerRequest &request)
 {
     QByteArray requestBody = request.body();
@@ -144,25 +183,7 @@ QHttpServerResponse FileStorageController::renameFile(const QHttpServerRequest &
     bool result = service.renameFile(symbolFilePath, fileName);
 
     QJsonObject responseBody {{"isRenamed", result},
-                              {"newSymbolFilePath", service.lastSymbolFilePath()}};
-
-    QHttpServerResponse response(responseBody);
-    return response;
-}
-
-QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
-{
-    QByteArray requestBody = request.body();
-
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
-    QJsonObject jsonObject = jsonDoc.object();
-
-    QString symbolFilePath = jsonObject["symbolPath"].toString();
-    qDebug() << "symbolFilePath = " << symbolFilePath;
-
-    bool result = service.deleteFile(symbolFilePath);
-
-    QJsonObject responseBody {{"isDeleted", result}};
+                             {"newSymbolFilePath", service.lastSymbolFilePath()}};
 
     QHttpServerResponse response(responseBody);
     return response;

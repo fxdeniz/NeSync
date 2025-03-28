@@ -33,6 +33,14 @@ export default class FolderApi extends BaseApi {
       return await postJSON(`http://${this.host}:${this.port}/folder/add`, requestBody);    
     }
 
+    async rename(symbolFolderPath, folderName) {
+      let requestBody = {};
+      requestBody["symbolFolderPath"] = symbolFolderPath;
+      requestBody["folderName"] = folderName;
+
+      return await postJSON(`http://${this.host}:${this.port}/folder/rename`, requestBody);
+    }
+
     async delete(symbolFolderPath) {
       let requestBody = {};
       requestBody["symbolPath"] = symbolFolderPath;

@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     inputCurrentPath.value = currentFolder.symbolFolderPath;
 
     const buttonBack = document.getElementById("button-back");
+    const buttonRename = document.getElementById("button-rename");
     const buttonDelete = document.getElementById("button-delete");
-
+    const renameModal = document.getElementById("rename-modal");
 
     buttonBack.addEventListener('click', async () => {
         await window.appState.set("currentFolder", parentFolder);
@@ -22,7 +23,26 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     });
 
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
+    buttonRename.addEventListener('click', onClickHandler_buttonRename);
+    renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
+    document.getElementById("input-foldername").addEventListener("input", inputHandler_inputFolderName);
 });
+
+async function onClickHandler_buttonRename() {
+    const folderName = document.getElementById("input-foldername").value + '/';
+    let folder = await window.appState.get("currentFolder");
+    const folderApi = new FolderApi('localhost', 1234);
+
+    const result = await folderApi.rename(folder.symbolFolderPath, folderName);
+
+    if(!result.isRenamed)
+        alert("Couldn't rename the folder, please try again later.");
+    else {
+        folder = folderApi.get(result.newSymbolFolderPath);
+        await window.appState.set("currentFolder", folder);
+        window.location.reload();
+    }
+}
 
 async function onClickHandler_buttonDelete() {
     let folder = await window.appState.get("currentFolder");
@@ -45,4 +65,21 @@ async function onClickHandler_buttonDelete() {
         alert("Folder couldn't deleted, please try again.");
         window.location.reload();
     }
+}
+
+async function onShownHandler_renameModal() {
+    const inputFoldername = document.getElementById("input-foldername");
+    const folder = await window.appState.get("currentFolder");
+    inputFoldername.value = folder.suffixPath.slice(0, -1);
+    inputFoldername.select();
+}
+
+function inputHandler_inputFolderName(event) {
+    const inputText = event.target.value;
+    const buttonRename = document.getElementById("button-rename");
+
+    if(inputText.length === 0)
+        buttonRename.disabled = true;
+    else
+        buttonRename.disabled = false;
 }
