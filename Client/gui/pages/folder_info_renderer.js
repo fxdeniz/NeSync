@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonRename = document.getElementById("button-rename");
     const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
+    const buttonSelectPath = document.getElementById("button-select-path");
     const renameModal = document.getElementById("rename-modal");
 
     buttonBack.addEventListener('click', async () => {
@@ -26,31 +27,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonDelete.addEventListener('click', onClickHandler_buttonDelete);
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonRename.addEventListener('click', onClickHandler_buttonRename);
+    buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     document.getElementById("input-foldername").addEventListener("input", inputHandler_inputFolderName);
 });
-
-async function onClickHandler_buttonRename() {
-    const folderName = document.getElementById("input-foldername").value + '/';
-    let folder = await window.appState.get("currentFolder");
-    const folderApi = new FolderApi('localhost', 1234);
-
-    const result = await folderApi.rename(folder.symbolFolderPath, folderName);
-
-    if(!result.isRenamed)
-        alert("Couldn't rename the folder, please try again later.");
-    else {
-        folder = await folderApi.get(result.newSymbolFolderPath);
-        await window.appState.set("currentFolder", folder);
-        window.location.reload();
-    }
-}
-
-function onClickHandler_buttonFreeze() {
-    const relocateModal = document.getElementById('relocate-modal');
-    const modal = new bootstrap.Modal(relocateModal);
-    modal.show();
-}
 
 async function onClickHandler_buttonDelete() {
     let folder = await window.appState.get("currentFolder");
@@ -72,6 +52,41 @@ async function onClickHandler_buttonDelete() {
     else {
         alert("Folder couldn't deleted, please try again.");
         window.location.reload();
+    }
+}
+
+function onClickHandler_buttonFreeze() {
+    const relocateModal = document.getElementById('relocate-modal');
+    const modal = new bootstrap.Modal(relocateModal);
+    modal.show();
+}
+
+async function onClickHandler_buttonRename() {
+    const folderName = document.getElementById("input-foldername").value + '/';
+    let folder = await window.appState.get("currentFolder");
+    const folderApi = new FolderApi('localhost', 1234);
+
+    const result = await folderApi.rename(folder.symbolFolderPath, folderName);
+
+    if(!result.isRenamed)
+        alert("Couldn't rename the folder, please try again later.");
+    else {
+        folder = await folderApi.get(result.newSymbolFolderPath);
+        await window.appState.set("currentFolder", folder);
+        window.location.reload();
+    }
+}
+
+async function onClickHandler_buttonSelectPath() {
+    const currentFolder = await window.appState.get("currentFolder");
+    const selectedFolderTree = await window.dialogApi.showFolderSelectDialog();
+
+    if(selectedFolderTree) {
+        let result = await window.fsApi.normalizePath(selectedFolderTree.folderPath);
+        result += currentFolder.suffixPath;
+        result = await window.fsApi.normalizePath(result);
+        
+        console.log(`result = ${JSON.stringify(result)}`);
     }
 }
 

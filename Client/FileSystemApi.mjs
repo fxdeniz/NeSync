@@ -16,6 +16,11 @@ function splitPath(givenPath) {
   return givenPath.split(path.sep);
 }
 
+function normalizePath(givenPath) {
+  const result = path.normalize(givenPath);
+  return result.endsWith(path.sep) ? givenPath : givenPath + path.sep;
+}
+
 function fileNameWithExtension(givenPath) {
   return path.basename(givenPath);
 }
@@ -61,4 +66,4 @@ async function extractFile(srcPath, destPath) {
   }
 }
 
-export {splitPath, fileNameWithExtension, previewFile, extractFile};
+export {splitPath, normalizePath, fileNameWithExtension, previewFile, extractFile};

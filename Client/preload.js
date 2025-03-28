@@ -25,7 +25,13 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
+  normalizePath: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:NormalizePath', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
   fileNameWithExtension: (input) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:FileNameFromPath', input)
@@ -33,7 +39,6 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
   previewFile: (path, extension) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:Preview', path, extension)
@@ -41,7 +46,6 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
   extractFile: (srcPath, destPath) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:Extract', srcPath, destPath)
