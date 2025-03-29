@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonDelete = document.getElementById("button-delete");
     const buttonSelectPath = document.getElementById("button-select-path");
     const renameModal = document.getElementById("rename-modal");
+    const relocateModal = document.getElementById("relocate-modal");
 
     buttonBack.addEventListener('click', async () => {
         await window.appState.set("currentFolder", parentFolder);
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonRename.addEventListener('click', onClickHandler_buttonRename);
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
     renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
+    relocateModal.addEventListener("shown.bs.modal", onShwownHandler_relocateModal);
     document.getElementById("input-foldername").addEventListener("input", inputHandler_inputFolderName);
 });
 
@@ -58,6 +60,7 @@ async function onClickHandler_buttonDelete() {
 function onClickHandler_buttonFreeze() {
     const relocateModal = document.getElementById('relocate-modal');
     const modal = new bootstrap.Modal(relocateModal);
+
     modal.show();
 }
 
@@ -95,6 +98,11 @@ async function onShownHandler_renameModal() {
     const folder = await window.appState.get("currentFolder");
     inputFoldername.value = folder.suffixPath.slice(0, -1);
     inputFoldername.select();
+}
+
+async function onShwownHandler_relocateModal() {
+    const currentFolder = await window.appState.get("currentFolder");
+    document.getElementById("input-user-path").value = currentFolder.userFolderPath;
 }
 
 function inputHandler_inputFolderName(event) {
