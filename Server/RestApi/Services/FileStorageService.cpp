@@ -133,7 +133,7 @@ bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
 {
     auto fsm = FileStorageManager::instance();
 
-    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
 
     QString userPath = dto[JsonKeys::Folder::UserFolderPath].toString();
     dto[JsonKeys::Folder::IsFrozen] = true;
@@ -145,6 +145,68 @@ bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
         dir.removeRecursively();
 
     return isUpdated;
+}
+
+bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const QString &destinationUserPath)
+{
+    auto fsm = FileStorageManager::instance();
+    QDir destination(destinationUserPath);
+
+    if(destination.exists()) // Prepare for overwrite.
+    {
+        bool isRemoved = destination.removeRecursively();
+
+        if(!isRemoved)
+            return false;
+    }
+
+    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
+
+    dto[JsonKeys::Folder::IsFrozen] = false;
+
+    bool isUpdated = fsm->updateFolderEntity(dto, true);
+
+    if(!isUpdated)
+        return false;
+
+    QJsonArray tree {dto};
+    bool isCreatingFirst = true;
+
+    while(!tree.isEmpty())
+    {
+        QJsonObject folder = tree.first().toObject();
+
+        folder = fsm->getFolderJsonBySymbolPath(folder[JsonKeys::Folder::SymbolFolderPath].toString(), true);
+        QJsonArray childFolders = folder[JsonKeys::Folder::ChildFolders].toArray();
+
+        if(!childFolders.isEmpty())
+        {
+            for(const QJsonValue &value : childFolders)
+                tree.append(value.toObject());
+        }
+
+        if(isCreatingFirst)
+        {
+            folder[JsonKeys::Folder::UserFolderPath] = destinationUserPath;
+            isCreatingFirst = false;
+        }
+        else
+        {
+            QJsonObject parent = fsm->getFolderJsonBySymbolPath(folder[JsonKeys::Folder::ParentFolderPath].toString());
+            QString path = parent[JsonKeys::Folder::UserFolderPath].toString();
+            path += folder[JsonKeys::Folder::SuffixPath].toString();
+            folder[JsonKeys::Folder::UserFolderPath] = path;
+        }
+
+        bool isFolderUpdated = fsm->updateFileEntity(folder);
+
+        if(!isFolderUpdated)
+            return false;
+
+        tree.removeFirst();
+    }
+
+    return true;
 }
 
 bool FileStorageService::freezeFile(const QString &symbolFilePath, bool isFrozen)

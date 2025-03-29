@@ -13,6 +13,7 @@ public:
     bool renameFolder(const QString &symbolFolderPath, QString folderName);
     bool renameFile(const QString &symbolFilePath, const QString &fileName);
     bool freezeFolder(const QString &symbolFolderPath);
+    bool relocateFolder(const QString &symbolFolderPath, const QString &destinationUserPath);
     bool freezeFile(const QString &symbolFilePath, bool isFrozen);
     bool deleteFile(const QString &symbolFilePath);
 

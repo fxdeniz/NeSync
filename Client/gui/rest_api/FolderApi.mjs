@@ -48,6 +48,14 @@ export default class FolderApi extends BaseApi {
       return await postJSON(`http://${this.host}:${this.port}/folder/freeze`, requestBody);
     }
 
+    async relocate(symbolFolderPath, userFolderPath) {
+      let requestBody = {};
+      requestBody["symbolFolderPath"] = symbolFolderPath;
+      requestBody["userFolderPath"] = userFolderPath;
+
+      return await postJSON(`http://${this.host}:${this.port}/folder/relocate`, requestBody);
+    }
+
     async delete(symbolFolderPath) {
       let requestBody = {};
       requestBody["symbolPath"] = symbolFolderPath;

@@ -61,13 +61,14 @@ async function onClickHandler_buttonFreeze() {
     if(currentFolder.isFrozen) {
         const relocateModal = document.getElementById('relocate-modal');
         const modal = new bootstrap.Modal(relocateModal);
-    
-        modal.show();    
+        modal.show();
     } else {
         const folderApi = new FolderApi('localhost', 1234);
-        const result = folderApi.freeze(currentFolder.symbolFolderPath);
+        const result = await folderApi.freeze(currentFolder.symbolFolderPath);
 
-        if(result.isFrozen) {
+        if(!result.isFrozen)
+            alert("Couldn't freeze the folder, please try again later.");
+        else {
             alert("Folder is frozen successfully.");
             window.location.reload();
         }

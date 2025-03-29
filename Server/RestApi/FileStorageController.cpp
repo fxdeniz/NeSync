@@ -309,6 +309,32 @@ QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &
     return response;
 }
 
+QHttpServerResponse FileStorageController::relocateFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString userFolderPath = jsonObject["userFolderPath"].toString();
+
+    userFolderPath = QDir::toNativeSeparators(userFolderPath);
+
+    if(!userFolderPath.endsWith(QDir::separator()))
+        userFolderPath.append(QDir::separator());
+
+    qDebug() << "symbolFilePath = " << symbolFolderPath;
+    qDebug() << "userFolderPath = " << userFolderPath;
+    qDebug() << "";
+
+    bool isRelocated = service.relocateFolder(symbolFolderPath, userFolderPath);
+
+    QJsonObject responseBody {{"isRelocated", isRelocated}};
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 // TODO: Fix versionNumber boundries when converting from long long to unsigned long long.
 //       Also, check negative inputs.
 // FIXME: This function only updates the isFrozen flag. It does not check the existence of the parent folder.
