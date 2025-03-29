@@ -2,7 +2,9 @@ import FolderApi from "../rest_api/FolderApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const folderApi = new FolderApi("localhost", 1234);
-    const currentFolder = await window.appState.get("currentFolder");
+    let currentFolder = await window.appState.get("currentFolder");
+    currentFolder = await folderApi.get(currentFolder.symbolFolderPath);
+    await window.appState.set("currentFolder", currentFolder); // Refresh
     const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
 
     const divFolderName = document.getElementById("div-folder-name");
