@@ -295,10 +295,11 @@ bool FileStorageManager::updateFolderEntity(QJsonObject folderDto, bool updateFr
     if(!isParentFolderPathExist || !isSuffixPathExist || !isSymbolFolderPathExist || !isUserFolderPathExist || !isFrozenExist)
         return false;
 
+    // Below isUserFolderPathString checks for isString & isNull. Because frozen folder contains null userFolderPath.
     bool isParentFolderPathString = folderDto[JsonKeys::Folder::ParentFolderPath].isString();
     bool isSuffixPathString = folderDto[JsonKeys::Folder::SuffixPath].isString();
     bool isSymbolFolderPathString = folderDto[JsonKeys::Folder::SymbolFolderPath].isString();
-    bool isUserFolderPathString = folderDto[JsonKeys::Folder::UserFolderPath].isString();
+    bool isUserFolderPathString = (folderDto[JsonKeys::Folder::UserFolderPath].isString() || folderDto[JsonKeys::Folder::UserFolderPath].isNull());
     bool isFrozenBool = folderDto[JsonKeys::Folder::IsFrozen].isBool();
 
     if(!isParentFolderPathString || !isSuffixPathString || !isSymbolFolderPathString || !isUserFolderPathString || !isFrozenBool)

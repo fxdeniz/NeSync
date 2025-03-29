@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let currentFolder = await window.appState.get("currentFolder");
     currentFolder = await folderApi.get(currentFolder.symbolFolderPath);
     await window.appState.set("currentFolder", currentFolder); // Refresh
-    const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
 
     const divFolderName = document.getElementById("div-folder-name");
     const inputCurrentPath = document.getElementById("input-current-path");
@@ -21,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const relocateModal = document.getElementById("relocate-modal");
 
     buttonBack.addEventListener('click', async () => {
+        const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
         await window.appState.set("currentFolder", parentFolder);
         window.router.routeToFileExplorer();
     });
@@ -59,13 +59,19 @@ async function onClickHandler_buttonDelete() {
 
 async function onClickHandler_buttonFreeze() {
     const currentFolder = await window.appState.get("currentFolder");
+    const folderApi = new FolderApi('localhost', 1234);
+    const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
 
     if(currentFolder.isFrozen) {
-        const relocateModal = document.getElementById('relocate-modal');
+        /*const relocateModal = document.getElementById('relocate-modal');
         const modal = new bootstrap.Modal(relocateModal);
-        modal.show();
+        modal.show();*/
+
+        const destination = parentFolder.userFolderPath + currentFolder.suffixPath;
+        const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
+
+        console.log(`relocate = ${JSON.stringify(result, null, 2)}`);
     } else {
-        const folderApi = new FolderApi('localhost', 1234);
         const result = await folderApi.freeze(currentFolder.symbolFolderPath);
 
         if(!result.isFrozen)

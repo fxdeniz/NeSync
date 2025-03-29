@@ -198,7 +198,7 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
             folder[JsonKeys::Folder::UserFolderPath] = path;
         }
 
-        bool isFolderUpdated = fsm->updateFileEntity(folder);
+        bool isFolderUpdated = fsm->updateFolderEntity(folder);
 
         if(!isFolderUpdated)
             return false;
