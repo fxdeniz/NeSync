@@ -270,6 +270,24 @@ QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRe
     return response;
 }
 
+QHttpServerResponse FileStorageController::freezeFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "";
+
+    bool isFrozen = service.freezeFolder(symbolFolderPath);
+
+    QJsonObject responseBody {{"isFrozen", isFrozen}};
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 // TODO: improve input checking of this function.
 QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &request)
 {

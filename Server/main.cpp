@@ -55,6 +55,10 @@ int main(int argc, char *argv[])
         return storageController.renameFolder(request);
     });
 
+    httpServer.route("/folder/freeze", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.freezeFolder(request);
+    });
+
     httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFolder(request);
     });

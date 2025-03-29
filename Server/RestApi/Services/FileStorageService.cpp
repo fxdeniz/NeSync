@@ -129,6 +129,24 @@ bool FileStorageService::renameFile(const QString &symbolFilePath, const QString
     return result;
 }
 
+bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
+{
+    auto fsm = FileStorageManager::instance();
+
+    QJsonObject dto = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
+
+    QString userPath = dto[JsonKeys::Folder::UserFolderPath].toString();
+    dto[JsonKeys::Folder::IsFrozen] = true;
+
+    bool isUpdated = fsm->updateFolderEntity(dto, true);
+    QDir dir(userPath);
+
+    if(isUpdated && dir.exists())
+        dir.removeRecursively();
+
+    return isUpdated;
+}
+
 bool FileStorageService::freezeFile(const QString &symbolFilePath, bool isFrozen)
 {
     auto fsm = FileStorageManager::instance();

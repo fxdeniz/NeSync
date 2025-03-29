@@ -1,6 +1,4 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
-import FileApi from "../rest_api/FileApi.mjs"
-import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     const folderApi = new FolderApi("localhost", 1234);
@@ -57,11 +55,23 @@ async function onClickHandler_buttonDelete() {
     }
 }
 
-function onClickHandler_buttonFreeze() {
-    const relocateModal = document.getElementById('relocate-modal');
-    const modal = new bootstrap.Modal(relocateModal);
+async function onClickHandler_buttonFreeze() {
+    const currentFolder = await window.appState.get("currentFolder");
 
-    modal.show();
+    if(currentFolder.isFrozen) {
+        const relocateModal = document.getElementById('relocate-modal');
+        const modal = new bootstrap.Modal(relocateModal);
+    
+        modal.show();    
+    } else {
+        const folderApi = new FolderApi('localhost', 1234);
+        const result = folderApi.freeze(currentFolder.symbolFolderPath);
+
+        if(result.isFrozen) {
+            alert("Folder is frozen successfully.");
+            window.location.reload();
+        }
+    }
 }
 
 async function onClickHandler_buttonRename() {
