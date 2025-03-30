@@ -133,6 +133,17 @@ async function onClickHandler_buttonRelocate() {
     const destination = await window.appState.get("relocationDestination");
     const folderApi = new FolderApi("localhost", 1234);
 
+    const isExists = await window.fsApi.isPathExists(destination);
+
+    if(isExists) {
+        const accepted = confirm(`Another folder with the same name already exists.
+                                  It will be overwritten with your last saved data. And sync will continue from that.
+                                  Would you like to continue ?`);
+
+        if(!accepted)
+            return;
+    }
+
     const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
 
     if(!result.isRelocated)

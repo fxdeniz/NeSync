@@ -39,6 +39,13 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
+  isPathExists: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:CheckPath', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
   previewFile: (path, extension) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:Preview', path, extension)

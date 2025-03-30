@@ -1,5 +1,5 @@
 import path from 'node:path';
-import fs from 'node:fs/promises';
+import fs from 'node:fs';
 import { fileURLToPath } from 'url';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
@@ -25,6 +25,10 @@ function fileNameWithExtension(givenPath) {
   return path.basename(givenPath);
 }
 
+function isPathExists(path) {
+  return fs.existsSync(path);
+}
+
 // TODO: add file existence check by filePath.
 // TODO: Maybe move file copying part to separate function.
 async function previewFile(filePath, fileExtension) {
@@ -45,7 +49,7 @@ async function previewFile(filePath, fileExtension) {
   }
 
   try {
-    await fs.copyFile(filePath, tempFilePath);
+    await fs.promises.copyFile(filePath, tempFilePath);
     await shell.openPath(tempFilePath); // TODO: Add temp file cleaning.
     return true;
   } catch(error) {
@@ -57,7 +61,7 @@ async function previewFile(filePath, fileExtension) {
 // TODO: Maybe move file copying part to separate function.
 async function extractFile(srcPath, destPath) {
   try {
-    await fs.copyFile(srcPath, destPath);
+    await fs.promises.copyFile(srcPath, destPath);
     shell.showItemInFolder(destPath);
     return true;
   } catch (error) {
@@ -66,4 +70,9 @@ async function extractFile(srcPath, destPath) {
   }
 }
 
-export {splitPath, normalizePath, fileNameWithExtension, previewFile, extractFile};
+export {splitPath,
+        normalizePath,
+        fileNameWithExtension,
+        isPathExists,
+        previewFile,
+        extractFile};
