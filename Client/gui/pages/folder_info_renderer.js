@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const folderApi = new FolderApi("localhost", 1234);
     let currentFolder = await window.appState.get("currentFolder");
     currentFolder = await folderApi.get(currentFolder.symbolFolderPath);
+    const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
     await window.appState.set("currentFolder", currentFolder); // Refresh
 
     const divFolderName = document.getElementById("div-folder-name");
@@ -19,8 +20,10 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const renameModal = document.getElementById("rename-modal");
     const relocateModal = document.getElementById("relocate-modal");
 
+    currentFolder.isFrozen ? buttonFreeze.textContent = '▶️' : buttonFreeze.textContent = '⏸️';
+    parentFolder.isFrozen ? buttonFreeze.disabled = true : buttonFreeze.disabled = false;
+
     buttonBack.addEventListener('click', async () => {
-        const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
         await window.appState.set("currentFolder", parentFolder);
         window.router.routeToFileExplorer();
     });
@@ -70,7 +73,12 @@ async function onClickHandler_buttonFreeze() {
         const destination = parentFolder.userFolderPath + currentFolder.suffixPath;
         const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
 
-        console.log(`relocate = ${JSON.stringify(result, null, 2)}`);
+        if(!result.isRelocated)
+            alert("Couldn't relocate the folder, please try again later.");
+        else{
+            alert("Folder is activated successfully, and ready for sync.");
+            window.location.reload();
+        }
     } else {
         const result = await folderApi.freeze(currentFolder.symbolFolderPath);
 

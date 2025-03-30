@@ -147,6 +147,22 @@ bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
     return isUpdated;
 }
 
+// TODO: Prevent child folder being mapped outside the parent folder.
+//       For example, consider this hierarchy:
+//       - Other Folder
+//          - Some Folder
+//
+//      - Folder A
+//          - Folder B
+//
+//     This should not happen:
+//       - Other Folder
+//          - Some Folder
+//          - Folder B
+//
+//      - Folder A
+//
+// TODO: Prevent relocating children of frozen parent.
 bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const QString &rootUserPath)
 {
     auto fsm = FileStorageManager::instance();
