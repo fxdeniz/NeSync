@@ -147,10 +147,10 @@ bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
     return isUpdated;
 }
 
-bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const QString &destinationUserPath)
+bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const QString &rootUserPath)
 {
     auto fsm = FileStorageManager::instance();
-    QDir destination(destinationUserPath);
+    QDir destination(rootUserPath);
 
     if(destination.exists()) // Prepare for overwrite.
     {
@@ -170,7 +170,7 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
         return false;
 
     QJsonArray tree {dto};
-    bool isCreatingFirst = true;
+    bool isCreatingRoot = true;
 
     while(!tree.isEmpty())
     {
@@ -185,10 +185,10 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
                 tree.append(value.toObject());
         }
 
-        if(isCreatingFirst)
+        if(isCreatingRoot)
         {
-            folder[JsonKeys::Folder::UserFolderPath] = destinationUserPath;
-            isCreatingFirst = false;
+            folder[JsonKeys::Folder::UserFolderPath] = rootUserPath;
+            isCreatingRoot = false;
         }
         else
         {
@@ -223,14 +223,14 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
                     QString dest = fsm->getStorageFolderPath() + latestVersion[JsonKeys::FileVersion::InternalFileName].toString();
                     bool isFileCopied = QFile::copy(dest,file[JsonKeys::File::UserFilePath].toString());
 
-                    QDateTime now = QDateTime::currentDateTime();
-                    QDateTime xmas(QDate(now.date().year(), 12, 25).startOfDay());
-
                     QFile copiedFile(file[JsonKeys::File::UserFilePath].toString());
                     copiedFile.open(QFile::OpenModeFlag::WriteOnly);
 
-                    // TODO: On linux check result of this.
-                    bool isTimeSet = copiedFile.setFileTime(xmas, QFileDevice::FileTime::FileModificationTime);
+                    QDateTime timestamp = QDateTime::fromString(latestVersion[JsonKeys::FileVersion::LastModifiedTimestamp].toString(),
+                                                                Qt::DateFormat::ISODateWithMs);
+
+                    // TODO: On linux, check result of this.
+                    copiedFile.setFileTime(timestamp, QFileDevice::FileTime::FileModificationTime);
 
                     if(!isFileCopied)
                         return false;
