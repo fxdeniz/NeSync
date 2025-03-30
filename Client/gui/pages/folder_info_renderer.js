@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const buttonFreeze = document.getElementById("button-freeze");
     const buttonDelete = document.getElementById("button-delete");
     const buttonSelectPath = document.getElementById("button-select-path");
+    const buttonRelocate = document.getElementById("button-relocate");
     const renameModal = document.getElementById("rename-modal");
     const relocateModal = document.getElementById("relocate-modal");
 
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     buttonFreeze.addEventListener('click', onClickHandler_buttonFreeze);
     buttonRename.addEventListener('click', onClickHandler_buttonRename);
     buttonSelectPath.addEventListener('click', onClickHandler_buttonSelectPath);
+    buttonRelocate.addEventListener('click', onClickHandler_buttonRelocate);
     renameModal.addEventListener("shown.bs.modal", onShownHandler_renameModal);
     relocateModal.addEventListener("shown.bs.modal", onShwownHandler_relocateModal);
     document.getElementById("input-foldername").addEventListener("input", inputHandler_inputFolderName);
@@ -66,18 +68,21 @@ async function onClickHandler_buttonFreeze() {
     const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
 
     if(currentFolder.isFrozen) {
-        /*const relocateModal = document.getElementById('relocate-modal');
-        const modal = new bootstrap.Modal(relocateModal);
-        modal.show();*/
+        if(currentFolder.parentFolderPath === '/') { // If relocating root.
+            const relocateModal = document.getElementById('relocate-modal');
+            const modal = new bootstrap.Modal(relocateModal);
+            modal.show();
+        }
+        else if(!parentFolder.isFrozen && parentFolder.userFolderPath) { // If relocating children of root.
+            const destination = parentFolder.userFolderPath + currentFolder.suffixPath;
+            const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
 
-        const destination = parentFolder.userFolderPath + currentFolder.suffixPath;
-        const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
-
-        if(!result.isRelocated)
-            alert("Couldn't relocate the folder, please try again later.");
-        else{
-            alert("Folder is activated successfully, and ready for sync.");
-            window.location.reload();
+            if(!result.isRelocated)
+                alert("Couldn't relocate the folder, please try again later.");
+            else{
+                alert("Folder is activated successfully, and ready for sync.");
+                window.location.reload();
+            }
         }
     } else {
         const result = await folderApi.freeze(currentFolder.symbolFolderPath);
@@ -112,13 +117,30 @@ async function onClickHandler_buttonSelectPath() {
     const selectedFolderTree = await window.dialogApi.showFolderSelectDialog();
 
     if(selectedFolderTree) {
-        let result = await window.fsApi.normalizePath(selectedFolderTree.folderPath);
-        result += currentFolder.suffixPath;
-        result = await window.fsApi.normalizePath(result);
-        
-        console.log(`result = ${JSON.stringify(result)}`);
+        let destination = await window.fsApi.normalizePath(selectedFolderTree.folderPath);
+        document.getElementById("input-user-path").value = destination;
+
+        destination += currentFolder.suffixPath;
+        destination = await window.fsApi.normalizePath(destination);
+
+        document.getElementById("button-relocate").disabled = false;
+        await window.appState.set("relocationDestination", destination);
     }
 }
+
+async function onClickHandler_buttonRelocate() {
+    const currentFolder = await window.appState.get("currentFolder");
+    const destination = await window.appState.get("relocationDestination");
+    const folderApi = new FolderApi("localhost", 1234);
+
+    const result = await folderApi.relocate(currentFolder.symbolFolderPath, destination);
+
+    if(!result.isRelocated)
+        alert("Couldn't relocate the folder, please try again later.");
+    else {
+        alert("Folder is activated successfully, and ready for sync.");
+        window.location.reload();
+    }}
 
 async function onShownHandler_renameModal() {
     const inputFoldername = document.getElementById("input-foldername");
@@ -128,8 +150,8 @@ async function onShownHandler_renameModal() {
 }
 
 async function onShwownHandler_relocateModal() {
-    const currentFolder = await window.appState.get("currentFolder");
-    document.getElementById("input-user-path").value = currentFolder.userFolderPath;
+    document.getElementById("input-user-path").value = "";
+    document.getElementById("button-relocate").disabled = true;
 }
 
 function inputHandler_inputFolderName(event) {
