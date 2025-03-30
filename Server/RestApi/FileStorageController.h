@@ -28,6 +28,7 @@ public:
     QHttpServerResponse freezeFolder(const QHttpServerRequest& request);
     QHttpServerResponse freezeFile(const QHttpServerRequest& request);
     QHttpServerResponse relocateFolder(const QHttpServerRequest& request);
+    QHttpServerResponse relocateFile(const QHttpServerRequest& request);
     QHttpServerResponse updateFileVersionDescription(const QHttpServerRequest& request);
 
 private:

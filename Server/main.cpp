@@ -91,6 +91,10 @@ int main(int argc, char *argv[])
         return storageController.appendVersion(request);
     });
 
+    httpServer.route("/file/relocate", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.relocateFile(request);
+    });
+
     httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFile(request);
     });

@@ -163,6 +163,7 @@ bool FileStorageService::freezeFolder(const QString &symbolFolderPath)
 //      - Folder A
 //
 // TODO: Prevent relocating children of frozen parent.
+// TODO: Improve overwriting logic to prevent accidental deletes.
 bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const QString &rootUserPath)
 {
     auto fsm = FileStorageManager::instance();
@@ -240,7 +241,7 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
                     bool isFileCopied = QFile::copy(dest,file[JsonKeys::File::UserFilePath].toString());
 
                     QFile copiedFile(file[JsonKeys::File::UserFilePath].toString());
-                    copiedFile.open(QFile::OpenModeFlag::WriteOnly);
+                    copiedFile.open(QFile::OpenModeFlag::ReadWrite);
 
                     QDateTime timestamp = QDateTime::fromString(latestVersion[JsonKeys::FileVersion::LastModifiedTimestamp].toString(),
                                                                 Qt::DateFormat::ISODateWithMs);
@@ -256,6 +257,45 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
 
         tree.removeFirst();
     }
+
+    return true;
+}
+
+// TODO: Prevent relocating child files of frozen parent.
+// TODO: Improve overwriting logic to prevent accidental deletes.
+bool FileStorageService::relocateFile(const QString &symbolFilePath)
+{
+    auto fsm = FileStorageManager::instance();
+    QJsonObject file = fsm->getFileJsonBySymbolPath(symbolFilePath, true);
+    QJsonObject latest = fsm->getFileVersionJson(symbolFilePath, file[JsonKeys::File::MaxVersionNumber].toInteger());
+    QJsonObject parent = fsm->getFolderJsonBySymbolPath(file[JsonKeys::File::SymbolFolderPath].toString());
+
+    QString userFilePath = parent[JsonKeys::Folder::UserFolderPath].toString() + file[JsonKeys::File::FileName].toString();
+    QFile previous(userFilePath);
+
+    if(previous.exists())
+        previous.remove();
+
+    bool isCopied = QFile::copy(fsm->getStorageFolderPath() + latest[JsonKeys::FileVersion::InternalFileName].toString(),
+                                userFilePath);
+
+    if(!isCopied)
+        return false;
+
+    QFile destination(userFilePath);
+    QDateTime timestamp = QDateTime::fromString(latest[JsonKeys::FileVersion::LastModifiedTimestamp].toString(),
+                                                Qt::DateFormat::ISODateWithMs);
+
+    destination.open(QFile::OpenModeFlag::ReadWrite);
+    destination.setFileTime(timestamp, QFileDevice::FileTime::FileModificationTime); // TODO: On linux check result of this.
+
+    file[JsonKeys::File::IsFrozen] = false;
+    file[JsonKeys::File::UserFilePath] = userFilePath;
+
+    bool isUpdated = fsm->updateFileEntity(file);
+
+    if(!isUpdated)
+        return false;
 
     return true;
 }

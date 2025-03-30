@@ -14,6 +14,7 @@ public:
     bool renameFile(const QString &symbolFilePath, const QString &fileName);
     bool freezeFolder(const QString &symbolFolderPath);
     bool relocateFolder(const QString &symbolFolderPath, const QString &rootUserPath);
+    bool relocateFile(const QString &symbolFilePath);
     bool freezeFile(const QString &symbolFilePath, bool isFrozen);
     bool deleteFile(const QString &symbolFilePath);
 

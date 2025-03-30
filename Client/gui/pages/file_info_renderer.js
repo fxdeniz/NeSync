@@ -161,12 +161,25 @@ async function onClickHandler_buttonExtract() {
 async function onClickHandler_buttonFreeze() {
     let fileInfo = await window.appState.get("currentFile");
     const fileApi = new FileApi("localhost", 1234);
-    const result = await fileApi.freeze(fileInfo.symbolFilePath, !fileInfo.isFrozen);
 
-    if(!result.isUpdated)
-        alert("Couldn't freeze the file, please try again.");
-    else
-        window.location.reload();
+    if(fileInfo.isFrozen) {
+        const result = await fileApi.relocate(fileInfo.symbolFilePath);
+
+        if(!result.isRelocated)
+            alert("Couldn't relocate the file, please try again.");
+        else {
+            alert("File is activated successfully, and ready for sync.");
+            window.location.reload();
+        }
+    }
+    else {
+        const result = await fileApi.freeze(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+
+        if(!result.isUpdated)
+            alert("Couldn't freeze the file, please try again.");
+        else
+            window.location.reload();
+    }
 }
 
 async function onClickHandler_buttonDelete() {
