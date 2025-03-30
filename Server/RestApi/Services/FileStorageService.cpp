@@ -202,6 +202,41 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
 
         if(!isFolderUpdated)
             return false;
+        else
+        {
+            QString path = folder[JsonKeys::Folder::UserFolderPath].toString();
+            bool isFolderCreated = QDir(path).mkdir(path);
+
+            if(!isFolderCreated)
+                return false;
+            else
+            {
+                QJsonArray files = folder[JsonKeys::Folder::ChildFiles].toArray();
+
+                for(const QJsonValue &value : files)
+                {
+                    QJsonObject file = value.toObject();
+                    file = fsm->getFileJsonBySymbolPath(file[JsonKeys::File::SymbolFilePath].toString(), true);
+
+                    QJsonObject latestVersion = file[JsonKeys::File::VersionList].toArray().last().toObject();
+
+                    QString dest = fsm->getStorageFolderPath() + latestVersion[JsonKeys::FileVersion::InternalFileName].toString();
+                    bool isFileCopied = QFile::copy(dest,file[JsonKeys::File::UserFilePath].toString());
+
+                    QDateTime now = QDateTime::currentDateTime();
+                    QDateTime xmas(QDate(now.date().year(), 12, 25).startOfDay());
+
+                    QFile copiedFile(file[JsonKeys::File::UserFilePath].toString());
+                    copiedFile.open(QFile::OpenModeFlag::WriteOnly);
+
+                    // TODO: On linux check result of this.
+                    bool isTimeSet = copiedFile.setFileTime(xmas, QFileDevice::FileTime::FileModificationTime);
+
+                    if(!isFileCopied)
+                        return false;
+                }
+            }
+        }
 
         tree.removeFirst();
     }
