@@ -8,6 +8,11 @@
 #include <QHttpServerResponse>
 
 
+// TODO: This class still accesses FileStorageManager instances directly without the FileStorageService.
+//       These types of codes must be refactored to go through FileStorageService.
+// TODO: When doing the refactor above, file copying operations must be done before the db operationns.
+//       Currently, opposite of this happnens and when file operations fails,
+//          db is updated with missing file info.
 class FileStorageController : public QObject
 {
     Q_OBJECT

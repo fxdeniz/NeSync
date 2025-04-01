@@ -49,6 +49,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     inputCurrentPath.dispatchEvent(navigationEvent);
 });
 
+// TODO: User should see a message when adding special folders such as Downloads, Documents, root etc.
+//       These folders can be overwritten by the app when relocating which is dangerous on some systems.
 async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.dialogApi.showFolderSelectDialog();
 
