@@ -173,7 +173,7 @@ async function onClickHandler_buttonFreeze() {
         }
     }
     else {
-        const result = await fileApi.freeze(fileInfo.symbolFilePath, !fileInfo.isFrozen);
+        const result = await fileApi.freeze(fileInfo.symbolFilePath, true);
 
         if(!result.isUpdated)
             alert("Couldn't freeze the file, please try again.");

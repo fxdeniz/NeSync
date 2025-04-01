@@ -300,6 +300,8 @@ bool FileStorageService::relocateFile(const QString &symbolFilePath)
     return true;
 }
 
+// TODO: Convert this function to accept symbolFilePath only. This means, it will only do the freezing sequence.
+//       When converting, also make this function to delete latest copy of the file.
 bool FileStorageService::freezeFile(const QString &symbolFilePath, bool isFrozen)
 {
     auto fsm = FileStorageManager::instance();

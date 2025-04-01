@@ -51,6 +51,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
 // TODO: User should see a message when adding special folders such as Downloads, Documents, root etc.
 //       These folders can be overwritten by the app when relocating which is dangerous on some systems.
+//
+// TODO: Consider these folders: C:/Documents/test and C:/Desktop/test
+//       And suppose either of them is added.
+//       When these files added, they both correspond to /test/ in terms of symbol paths.
+//       As a result, adding the scond folder will fail which is a correct behaviour.
+//       User must be warned why the second addition can't be made.
 async function onClickHandler_buttonAddNewFolder() {
   const selectedFolderTree = await window.dialogApi.showFolderSelectDialog();
 
