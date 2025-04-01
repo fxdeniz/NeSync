@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import * as router from './router.mjs';
 import * as DialogApi from './DialogApi.mjs'
-import { splitPath, fileNameWithExtension, previewFile, extractFile } from './FileSystemApi.mjs'
+import { splitPath, normalizePath, fileNameWithExtension, isPathExists, previewFile, extractFile } from './FileSystemApi.mjs'
 
 // https://iamwebwiz.medium.com/how-to-fix-dirname-is-not-defined-in-es-module-scope-34d94a86694d
 // https://byby.dev/node-dirname-not-defined
@@ -35,6 +35,7 @@ app.whenReady().then(() => {
   ipcMain.on('route:ZipExport', router.routeToZipExport);
   ipcMain.on('route:ZipImport', router.routeToZipImport);
   ipcMain.on('route:FileInfo', router.routeToFileInfo);
+  ipcMain.on('route:FolderInfo', router.routeToFolderInfo);
   ipcMain.handle('dialog:OpenFolder', DialogApi.showFolderSelectDialog);
   ipcMain.handle('dialog:OpenFile', DialogApi.showFileSelectDialog);
   ipcMain.handle('dialog:SaveFile', DialogApi.showFileSaveDialog);
@@ -43,8 +44,16 @@ app.whenReady().then(() => {
     return splitPath(input);
   });
 
+  ipcMain.handle('fs:NormalizePath', async (event, input) => {
+    return normalizePath(input);
+  });
+
   ipcMain.handle('fs:FileNameFromPath', async (event, input) => {
     return fileNameWithExtension(input);
+  });
+
+  ipcMain.handle('fs:CheckPath', async (event, input) => {
+    return isPathExists(input);
   });
 
   ipcMain.handle('fs:Preview', async (event, path, extension) => {

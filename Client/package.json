@@ -10,6 +10,6 @@
   "author": "fxdeniz",
   "license": "GPL-3.0",
   "devDependencies": {
-    "electron": "^35.0.3"
+    "electron": "^35.1.2"
   }
 }

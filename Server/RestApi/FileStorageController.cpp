@@ -13,6 +13,14 @@ FileStorageController::FileStorageController(QObject *parent)
 {
 }
 
+// TODO: Prevent parent folder being added after a children.
+//       Suppose we have this hierarchy:
+//
+//       C:/Parent/Child
+//
+//       User may add C:/Parent/Child first. Then may add the C:/Parent/.
+//       In this case, child will be monitored seperately.
+//       These kind of parents must be rejected by this function.
 QHttpServerResponse FileStorageController::addNewFolder(const QHttpServerRequest& request)
 {
     QByteArray requestBody = request.body();
@@ -65,8 +73,6 @@ QHttpServerResponse FileStorageController::addNewFile(const QHttpServerRequest &
     qDebug() << "isFrozen = " << isFrozen;
 
     auto fsm = FileStorageManager::instance();
-
-    QJsonObject folderJson = fsm->getFolderJsonBySymbolPath(symbolFolderPath);
 
     bool isAdded = fsm->addNewFile(symbolFolderPath, pathToFile, isFrozen, "", description);
 
@@ -121,10 +127,48 @@ QHttpServerResponse FileStorageController::deleteFolder(const QHttpServerRequest
     QString symbolFolderPath = jsonObject["symbolPath"].toString();
     qDebug() << "symbolFolderPath = " << symbolFolderPath;
 
-    auto fsm = FileStorageManager::instance();
-    bool result = fsm->deleteFolder(symbolFolderPath);
+    bool result = service.deleteFolder(symbolFolderPath);
 
     QJsonObject responseBody {{"isDeleted", result}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
+QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolPath"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+
+    bool result = service.deleteFile(symbolFilePath);
+
+    QJsonObject responseBody {{"isDeleted", result}};
+
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
+QHttpServerResponse FileStorageController::renameFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString folderName = jsonObject["folderName"].toString();
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "folderName = " << folderName;
+
+    bool result = service.renameFolder(symbolFolderPath, folderName);
+
+    QJsonObject responseBody {{"isRenamed", result},
+                             {"newSymbolFolderPath", service.lastSymbolFolderPath()}};
 
     QHttpServerResponse response(responseBody);
     return response;
@@ -145,25 +189,7 @@ QHttpServerResponse FileStorageController::renameFile(const QHttpServerRequest &
     bool result = service.renameFile(symbolFilePath, fileName);
 
     QJsonObject responseBody {{"isRenamed", result},
-                              {"newSymbolFilePath", service.lastSymbolFilePath()}};
-
-    QHttpServerResponse response(responseBody);
-    return response;
-}
-
-QHttpServerResponse FileStorageController::deleteFile(const QHttpServerRequest &request)
-{
-    QByteArray requestBody = request.body();
-
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
-    QJsonObject jsonObject = jsonDoc.object();
-
-    QString symbolFilePath = jsonObject["symbolPath"].toString();
-    qDebug() << "symbolFilePath = " << symbolFilePath;
-
-    bool result = service.deleteFile(symbolFilePath);
-
-    QJsonObject responseBody {{"isDeleted", result}};
+                             {"newSymbolFilePath", service.lastSymbolFilePath()}};
 
     QHttpServerResponse response(responseBody);
     return response;
@@ -252,6 +278,24 @@ QHttpServerResponse FileStorageController::getFileByUserPath(const QHttpServerRe
     return response;
 }
 
+QHttpServerResponse FileStorageController::freezeFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    qDebug() << "symbolFolderPath = " << symbolFolderPath;
+    qDebug() << "";
+
+    bool isFrozen = service.freezeFolder(symbolFolderPath);
+
+    QJsonObject responseBody {{"isFrozen", isFrozen}};
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
 // TODO: improve input checking of this function.
 QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &request)
 {
@@ -269,6 +313,50 @@ QHttpServerResponse FileStorageController::freezeFile(const QHttpServerRequest &
     bool isUpdated = service.freezeFile(symbolFilePath, isFrozen);
 
     QJsonObject responseBody {{"isUpdated", isUpdated}};
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
+QHttpServerResponse FileStorageController::relocateFolder(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFolderPath = jsonObject["symbolFolderPath"].toString();
+    QString userFolderPath = jsonObject["userFolderPath"].toString();
+
+    userFolderPath = QDir::toNativeSeparators(userFolderPath);
+
+    if(!userFolderPath.endsWith(QDir::separator()))
+        userFolderPath.append(QDir::separator());
+
+    qDebug() << "symbolFilePath = " << symbolFolderPath;
+    qDebug() << "userFolderPath = " << userFolderPath;
+    qDebug() << "";
+
+    bool isRelocated = service.relocateFolder(symbolFolderPath, userFolderPath);
+
+    QJsonObject responseBody {{"isRelocated", isRelocated}};
+    QHttpServerResponse response(responseBody);
+    return response;
+}
+
+QHttpServerResponse FileStorageController::relocateFile(const QHttpServerRequest &request)
+{
+    QByteArray requestBody = request.body();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(requestBody);
+    QJsonObject jsonObject = jsonDoc.object();
+
+    QString symbolFilePath = jsonObject["symbolFilePath"].toString();
+    qDebug() << "symbolFilePath = " << symbolFilePath;
+    qDebug() << "";
+
+    bool isRelocated = service.relocateFile(symbolFilePath);
+
+    QJsonObject responseBody {{"isRelocated", isRelocated}};
     QHttpServerResponse response(responseBody);
     return response;
 }

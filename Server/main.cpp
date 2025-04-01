@@ -51,6 +51,18 @@ int main(int argc, char *argv[])
         return storageController.getStorageFolderPath(request);
     });
 
+    httpServer.route("/folder/rename", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.renameFolder(request);
+    });
+
+    httpServer.route("/folder/freeze", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.freezeFolder(request);
+    });
+
+    httpServer.route("/folder/relocate", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.relocateFolder(request);
+    });
+
     httpServer.route("/folder/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {
         return storageController.deleteFolder(request);
     });
@@ -77,6 +89,10 @@ int main(int argc, char *argv[])
 
     httpServer.route("/file/append", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
         return storageController.appendVersion(request);
+    });
+
+    httpServer.route("/file/relocate", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
+        return storageController.relocateFile(request);
     });
 
     httpServer.route("/file/delete", QHttpServerRequest::Method::Delete, [&storageController](const QHttpServerRequest &request) {

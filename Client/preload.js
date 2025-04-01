@@ -7,7 +7,8 @@ contextBridge.exposeInMainWorld('router', {
   routeToSaveChanges: () => ipcRenderer.send('route:SaveChanges'),
   routeToZipExport: () => ipcRenderer.send('route:ZipExport'),
   routeToZipImport: () => ipcRenderer.send('route:ZipImport'),
-  routeToFileInfo: () => ipcRenderer.send('route:FileInfo')
+  routeToFileInfo: () => ipcRenderer.send('route:FileInfo'),
+  routeToFolderInfo: () => ipcRenderer.send('route:FolderInfo')
 });
 
 contextBridge.exposeInMainWorld('dialogApi', {
@@ -24,7 +25,13 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
+  normalizePath: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:NormalizePath', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
   fileNameWithExtension: (input) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:FileNameFromPath', input)
@@ -32,7 +39,13 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
+  isPathExists: (input) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('fs:CheckPath', input)
+        .then(resolve)
+        .catch(reject);
+    });
+  },
   previewFile: (path, extension) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:Preview', path, extension)
@@ -40,7 +53,6 @@ contextBridge.exposeInMainWorld('fsApi', {
         .catch(reject);
     });
   },
-
   extractFile: (srcPath, destPath) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.invoke('fs:Extract', srcPath, destPath)
