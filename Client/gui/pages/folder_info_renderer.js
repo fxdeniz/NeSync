@@ -12,6 +12,18 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     divFolderName.textContent = currentFolder.suffixPath.slice(0, -1); // Remove last '/'.
     inputCurrentPath.value = currentFolder.symbolFolderPath;
 
+    const pStatus = document.getElementById("p-status");
+    const hUserPath = document.getElementById("h-user-path");
+
+    if(currentFolder.isFrozen) {
+        pStatus.textContent = "This folder is archived and not in sync.";
+        hUserPath.textContent = "";
+    }
+    else {
+        pStatus.textContent = "This folder is in sync and source is:";
+        hUserPath.textContent = currentFolder.userFolderPath;
+    }
+
     const buttonBack = document.getElementById("button-back");
     const buttonRename = document.getElementById("button-rename");
     const buttonFreeze = document.getElementById("button-freeze");

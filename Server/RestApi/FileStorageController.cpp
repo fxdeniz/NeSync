@@ -13,6 +13,14 @@ FileStorageController::FileStorageController(QObject *parent)
 {
 }
 
+// TODO: Prevent parent folder being added after a children.
+//       Suppose we have this hierarchy:
+//
+//       C:/Parent/Child
+//
+//       User may add C:/Parent/Child first. Then may add the C:/Parent/.
+//       In this case, child will be monitored seperately.
+//       These kind of parents must be rejected by this function.
 QHttpServerResponse FileStorageController::addNewFolder(const QHttpServerRequest& request)
 {
     QByteArray requestBody = request.body();
