@@ -24,7 +24,10 @@
       "packagerConfig": {
         "extraResource": [
           "resources/cli/"
-        ]
+        ],
+        "osxUniversal": { 
+          "x64ArchFiles": "**/cli/nesync"
+        }
       },
       "makers": [
         {
