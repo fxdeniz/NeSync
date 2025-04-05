@@ -24,27 +24,45 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption portOption(QStringList() << "p" << "port",
-                                  "Specify the port number to use (default: 1234).",
-                                  "number", "1234");
-    parser.addOption(portOption);
+    QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
+    storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
+    storagePath += "nesync_server";
+    storagePath += QDir::separator();
+
+    QString pathMessage = "Specify the storage path (default: %1).";
+    pathMessage = pathMessage.arg(storagePath);
+
+    QCommandLineOption optionPort(QStringList() << "p" << "port",
+                                  "Specify the port number to use (default: 0).",
+                                  "number", 0);
+
+    QCommandLineOption optionPath(QStringList() << "d" << "dir",
+                                  pathMessage,
+                                  "path", storagePath);
+
+    parser.addOption(optionPort);
+    parser.addOption(optionPath);
     parser.process(app);
 
     bool isPortSet;
-    int portNumber = parser.value(portOption).toInt(&isPortSet);
+    int portNumber = parser.value(optionPort).toInt(&isPortSet);
+    storagePath = parser.value(optionPath);
 
-    if (!isPortSet || portNumber <= 0 || portNumber > 65535) {
+    if (!isPortSet || portNumber <= 0 || portNumber > 65535)
+    {
         qCritical() << "Invalid or missing port number.";
         return 10;
     }
 
-    QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
-    storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
-    storagePath += "nesync_server_";
-    storagePath += QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces).mid(0, 8);
-    storagePath += QDir::separator();
+    QDir dir(storagePath);
+    bool isPathValid = dir.mkpath(storagePath);
 
-    QDir().mkpath(storagePath);
+    if(!isPathValid)
+    {
+        qCritical() << "Invalid storage location.";
+        return 11;
+    }
+
     AppConfig().setStorageFolderPath(storagePath);
 
     QTcpServer tcpServer;
