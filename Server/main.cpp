@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QStandardPaths>
+#include <QCommandLineParser>
 #include <QtHttpServer/QHttpServer>
 #include <QtHttpServer/QHttpServerResponse>
 
@@ -16,7 +17,26 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("NeSync 2.0");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption portOption(QStringList() << "p" << "port",
+                                  "Specify the port number to use (default: 1234).",
+                                  "number", "1234");
+    parser.addOption(portOption);
+    parser.process(app);
+
+    bool isPortSet;
+    int portNumber = parser.value(portOption).toInt(&isPortSet);
+
+    if (!isPortSet || portNumber <= 0 || portNumber > 65535) {
+        qCritical() << "Invalid or missing port number.";
+        return 10;
+    }
 
     QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
     storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
@@ -171,11 +191,10 @@ int main(int argc, char *argv[])
         return zipImportController.importFileFromZip(request);
     });
 
-    quint16 targetPort = 1234; // Making this 0, means random port.
-    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
+    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, portNumber);
 
     if (tcpServer.isListening() && httpServer.bind(&tcpServer))
-        qDebug() << "running on = " << "localhost:" + QString::number(targetPort);
+        qDebug() << "running on = " << "localhost:" + QString::number(portNumber);
     else
     {
         qWarning() << QCoreApplication::translate("QHttpServerExample",
@@ -183,5 +202,5 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    return a.exec();
+    return app.exec();
 }
