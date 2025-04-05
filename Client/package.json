@@ -21,6 +21,11 @@
   },
   "config": {
     "forge": {
+      "packagerConfig": {
+        "extraResource": [
+          "resources/cli/"
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-dmg",
