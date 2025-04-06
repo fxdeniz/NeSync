@@ -49,9 +49,7 @@ QSqlDatabase DatabaseRegistry::fileSystemEventDatabase()
 
 void DatabaseRegistry::createDbFileStorage()
 {
-    AppConfig config;
-
-    QString dbPath = config.getStorageFolderPath();
+    QString dbPath = AppConfig::getStorageFolderPath();
 
     QDir().mkdir(dbPath);
 

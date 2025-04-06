@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         return 11;
     }
 
-    AppConfig().setStorageFolderPath(storagePath);
+    AppConfig::setStorageFolderPath(storagePath);
 
     QTcpServer tcpServer;
     QHttpServer httpServer;

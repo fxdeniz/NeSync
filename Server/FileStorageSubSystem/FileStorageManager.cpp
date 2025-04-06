@@ -25,10 +25,9 @@ FileStorageManager::FileStorageManager(const QSqlDatabase &db, const QString &ba
 
 QSharedPointer<FileStorageManager> FileStorageManager::instance()
 {
-    AppConfig config;
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    auto *rawPtr = new FileStorageManager(storageDb, config.getStorageFolderPath());
+    auto *rawPtr = new FileStorageManager(storageDb, AppConfig::getStorageFolderPath());
     auto result = QSharedPointer<FileStorageManager>(rawPtr);
 
     return result;
@@ -36,10 +35,9 @@ QSharedPointer<FileStorageManager> FileStorageManager::instance()
 
 FileStorageManager* FileStorageManager::rawInstance()
 {
-    AppConfig config;
     QSqlDatabase storageDb = DatabaseRegistry::fileStorageDatabase();
 
-    return new FileStorageManager(storageDb, config.getStorageFolderPath());
+    return new FileStorageManager(storageDb, AppConfig::getStorageFolderPath());
 }
 
 FileStorageManager::~FileStorageManager()
@@ -51,6 +49,9 @@ FileStorageManager::~FileStorageManager()
     delete fileVersionRepository;
 }
 
+// FIXME: When long non-existing path is given like /first/second/third/,
+//        this function creates the chain in db. However, only the /third/ is mapped to user path
+//        and is active. Parents created as frozen an non-mapped folders.
 bool FileStorageManager::addNewFolder(const QString &symbolFolderPath, const QString &userFolderPath)
 {
     bool result = false;
