@@ -22,6 +22,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
+        "asar": true,
         "extraResource": [
           "resources/cli/"
         ],
@@ -33,6 +34,7 @@
         {
           "name": "@electron-forge/maker-dmg",
           "config": {
+            "format": "ULFO"
           }
         }
       ]
