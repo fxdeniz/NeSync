@@ -6,6 +6,10 @@ export default class MonitorApi extends BaseApi {
         super(hostName, port);
     }
 
+    async getHeartBeat() {
+        return await fetchJSON(`http://${this.host}:${this.port}/`);
+    }
+
     async getNewAddedList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/new`);
     }
