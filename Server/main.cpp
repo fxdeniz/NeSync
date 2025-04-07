@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     {
         qWarning() << QCoreApplication::translate("QHttpServerExample",
                                                   "Server failed to listen on a port.");
-        return -1;
+        return 12;
     }
 
     return app.exec();

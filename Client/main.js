@@ -30,19 +30,30 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
 
-  if(app.isPackaged) {
-    // TODO: Does not generates path for .exe files on windows.
-    const serverPath = path.join(process.resourcesPath, "cli", "nesync");
+  // TODO: Does not generates path for .exe files on windows.
+  const serverPath = path.join(process.resourcesPath, "cli", "nesync");
 
-    const serverProcess = spawn(serverPath, ['--port', '1234'], {
-      stdio: "ignore"
-    });
+  let serverProcess = spawn(serverPath, ['--port', '1234'], {
+    stdio: "ignore"
+  });
 
-    app.on('before-quit', () => {
-      if (serverProcess && !serverProcess.killed)
-        serverProcess.kill(); // TODO: Does not properly kills the process.
-    });
-  }
+  serverProcess.on('exit', (code, signal) => {
+    if(code === 12) {
+      const min = 10000, max = 65535;
+      const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      serverProcess = spawn(serverPath, ['--port', portNumber], {
+        stdio: "ignore"
+      });
+
+      console.log(`server started on ${portNumber}`);
+    }
+  });
+
+  app.on('before-quit', () => {
+    if (serverProcess && !serverProcess.killed)
+      serverProcess.kill(); // TODO: Does not properly kills the process.
+  });
 
   ipcMain.on('route:FileExplorer', router.routeToFileExplorer);
   ipcMain.on('route:FileMonitor', router.routeToFileMonitor);
