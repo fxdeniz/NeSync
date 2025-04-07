@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { fileURLToPath } from 'url';
+import { spawn } from "node:child_process";
 import path from 'node:path';
 import * as router from './router.mjs';
 import * as DialogApi from './DialogApi.mjs'
@@ -28,6 +29,21 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
+
+  if(app.isPackaged) {
+    // TODO: Does not generates path for .exe files on windows.
+    const serverPath = path.join(process.resourcesPath, "cli", "nesync");
+
+    const serverProcess = spawn(serverPath, ['--port', '1234'], {
+      stdio: "ignore"
+    });
+
+    app.on('before-quit', () => {
+      if (serverProcess && !serverProcess.killed)
+        serverProcess.kill(); // TODO: Does not properly kills the process.
+    });
+  }
+
   ipcMain.on('route:FileExplorer', router.routeToFileExplorer);
   ipcMain.on('route:FileMonitor', router.routeToFileMonitor);
   ipcMain.on('route:AddFolder', router.routeToAddFolder);

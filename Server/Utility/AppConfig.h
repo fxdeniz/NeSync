@@ -1,34 +1,20 @@
 #ifndef APPCONFIG_H
 #define APPCONFIG_H
 
-#include <QSettings>
 #include <QReadWriteLock>
 
 class AppConfig
 {
 public:
-    AppConfig();
-    ~AppConfig();
+    AppConfig() = delete;
 
-    bool isDisclaimerAccepted() const;
-    void setDisclaimerAccepted(bool newDisclaimerAccepted);
-
-    bool isTrayIconInformed() const;
-    void setTrayIconInformed(bool newTrayIconInformed);
-
-    bool isStorageFolderPathValid() const;
-    QString getStorageFolderPath() const;
-    void setStorageFolderPath(const QString &newStorageFolderPath);
+    static bool isStorageFolderPathValid();
+    static QString getStorageFolderPath();
+    static void setStorageFolderPath(const QString &newPath);
 
 private:
-    static const inline QString KeyDisclaimerAccepted = "disclaimer_accepted";
-    static const inline QString KeyTrayIconInformed = "tray_icon_informed";
-    static const inline QString KeyStorageFolderPath = "storage_folder_path";
-
     static QReadWriteLock lock;
-
-private:
-    QSettings *settings;
+    static QString storageFolderPath;
 };
 
 #endif // APPCONFIG_H

@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QStandardPaths>
+#include <QCommandLineParser>
 #include <QtHttpServer/QHttpServer>
 #include <QtHttpServer/QHttpServerResponse>
 
@@ -16,16 +17,53 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("NeSync 2.0");
+    parser.addHelpOption();
+    parser.addVersionOption();
 
     QString storagePath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::HomeLocation);
     storagePath = QDir::toNativeSeparators(storagePath) + QDir::separator();
-    storagePath += "nesync_server_";
-    storagePath += QUuid::createUuid().toString(QUuid::StringFormat::WithoutBraces).mid(0, 8);
+    storagePath += "nesync_server";
     storagePath += QDir::separator();
 
-    QDir().mkpath(storagePath);
-    AppConfig().setStorageFolderPath(storagePath);
+    QString pathMessage = "Specify the storage path (default: %1).";
+    pathMessage = pathMessage.arg(storagePath);
+
+    QCommandLineOption optionPort(QStringList() << "p" << "port",
+                                  "Specify the port number to use (default: 0).",
+                                  "number", 0);
+
+    QCommandLineOption optionPath(QStringList() << "d" << "dir",
+                                  pathMessage,
+                                  "path", storagePath);
+
+    parser.addOption(optionPort);
+    parser.addOption(optionPath);
+    parser.process(app);
+
+    bool isPortSet;
+    int portNumber = parser.value(optionPort).toInt(&isPortSet);
+    storagePath = parser.value(optionPath);
+
+    if (!isPortSet || portNumber <= 0 || portNumber > 65535)
+    {
+        qCritical() << "Invalid or missing port number.";
+        return 10;
+    }
+
+    QDir dir(storagePath);
+    bool isPathValid = dir.mkpath(storagePath);
+
+    if(!isPathValid)
+    {
+        qCritical() << "Invalid storage location.";
+        return 11;
+    }
+
+    AppConfig::setStorageFolderPath(storagePath);
 
     QTcpServer tcpServer;
     QHttpServer httpServer;
@@ -171,11 +209,10 @@ int main(int argc, char *argv[])
         return zipImportController.importFileFromZip(request);
     });
 
-    quint16 targetPort = 1234; // Making this 0, means random port.
-    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, targetPort);
+    tcpServer.listen(QHostAddress::SpecialAddress::LocalHost, portNumber);
 
     if (tcpServer.isListening() && httpServer.bind(&tcpServer))
-        qDebug() << "running on = " << "localhost:" + QString::number(targetPort);
+        qDebug() << "running on = " << "localhost:" + QString::number(portNumber);
     else
     {
         qWarning() << QCoreApplication::translate("QHttpServerExample",
@@ -183,5 +220,5 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    return a.exec();
+    return app.exec();
 }

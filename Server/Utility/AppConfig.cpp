@@ -3,78 +3,28 @@
 #include <QDir>
 #include <QReadLocker>
 #include <QWriteLocker>
-#include <QCoreApplication>
 
 QReadWriteLock AppConfig::lock;
+QString AppConfig::storageFolderPath;
 
-AppConfig::AppConfig()
-{
-    QString settingsFilePath = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-    settingsFilePath += QDir::separator();
-    settingsFilePath += "settings.ini";
-
-    settings = new QSettings(settingsFilePath, QSettings::Format::IniFormat);
-}
-
-AppConfig::~AppConfig()
-{
-    delete settings;
-}
-
-bool AppConfig::isDisclaimerAccepted() const
+bool AppConfig::isStorageFolderPathValid()
 {
     QReadLocker readLocker(&lock);
 
-    if(settings->value(KeyDisclaimerAccepted).toString() == "true")
-        return true;
-
-    return false;
-}
-
-void AppConfig::setDisclaimerAccepted(bool newDisclaimerAccepted)
-{
-    QWriteLocker writeLocker(&lock);
-
-   settings->setValue(KeyDisclaimerAccepted, newDisclaimerAccepted);
-}
-
-bool AppConfig::isTrayIconInformed() const
-{
-    QReadLocker readLocker(&lock);
-
-    if(settings->value(KeyTrayIconInformed).toString() == "true")
-        return true;
-
-    return false;
-}
-
-void AppConfig::setTrayIconInformed(bool newTrayIconInformed)
-{
-    QWriteLocker writeLocker(&lock);
-
-    settings->setValue(KeyTrayIconInformed, newTrayIconInformed);
-}
-
-bool AppConfig::isStorageFolderPathValid() const
-{
-    QReadLocker readLocker(&lock);
-
-    QString readValue = settings->value(KeyStorageFolderPath).toString();
-
-    if(readValue.isNull() || readValue.isEmpty())
+    if(storageFolderPath.isNull() || storageFolderPath.isEmpty())
         return false;
 
-    if(!QDir(readValue).exists())
+    if(!QDir(storageFolderPath).exists())
         return false;
 
     return true;
 }
 
-QString AppConfig::getStorageFolderPath() const
+QString AppConfig::getStorageFolderPath()
 {
     QReadLocker readLocker(&lock);
 
-    QString readValue = settings->value(KeyStorageFolderPath).toString();
+    QString readValue = storageFolderPath;
     readValue = QDir::toNativeSeparators(readValue);
 
     if(!readValue.endsWith(QDir::separator()))
@@ -83,14 +33,14 @@ QString AppConfig::getStorageFolderPath() const
     return readValue;
 }
 
-void AppConfig::setStorageFolderPath(const QString &newStorageFolderPath)
+void AppConfig::setStorageFolderPath(const QString &newPath)
 {
     QWriteLocker writeLocker(&lock);
 
-    QString value = QDir::toNativeSeparators(newStorageFolderPath);
+    QString value = QDir::toNativeSeparators(newPath);
 
     if(!value.endsWith(QDir::separator()))
         value.append(QDir::separator());
 
-    settings->setValue(KeyStorageFolderPath, value);
+    storageFolderPath = newPath;
 }
