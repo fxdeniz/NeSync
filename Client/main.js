@@ -24,7 +24,7 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.loadFile("./gui/pages/file_explorer.html");
+  mainWindow.loadFile("./gui/pages/server_startup.html");
   // mainWindow.webContents.openDevTools();
 };
 
@@ -36,6 +36,9 @@ app.whenReady().then(() => {
   let serverProcess = spawn(serverPath, ['--port', '1234'], {
     stdio: "ignore"
   });
+  
+  appState.set("serverPid", serverProcess.pid);
+  appState.set("serverPort", 1234);
 
   serverProcess.on('exit', (code, signal) => {
     if(code === 12) {
@@ -45,6 +48,9 @@ app.whenReady().then(() => {
       serverProcess = spawn(serverPath, ['--port', portNumber], {
         stdio: "ignore"
       });
+
+      appState.set("serverPid", serverProcess.pid);
+      appState.set("serverPort", portNumber);
 
       console.log(`server started on ${portNumber}`);
     }
