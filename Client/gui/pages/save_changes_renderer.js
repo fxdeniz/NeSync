@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     let fileApi = new FileApi('localhost', serverPort);
     let monitorApi = new MonitorApi('localhost', serverPort);
 
-    let newAddedJson = await monitorApi.getNewAddedList();
-    let deletedJson = await monitorApi.getDeletedList();
-    let updatedJson = await monitorApi.getUpdatedFileList();  
+    let newAddedJson = await monitorApi.newAddedList();
+    let deletedJson = await monitorApi.deletedList();
+    let updatedJson = await monitorApi.updatedFileList();  
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
