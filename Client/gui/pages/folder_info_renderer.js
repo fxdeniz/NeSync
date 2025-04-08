@@ -1,7 +1,8 @@
 import FolderApi from "../rest_api/FolderApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    const folderApi = new FolderApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi("localhost", serverPort);
     let currentFolder = await window.appState.get("currentFolder");
     currentFolder = await folderApi.get(currentFolder.symbolFolderPath);
     const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
@@ -61,7 +62,8 @@ async function onClickHandler_buttonDelete() {
     if (!userConfirmed)
         return;
 
-    const folderApi = new FolderApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi("localhost", serverPort);
     const result = await folderApi.delete(folder.symbolFolderPath);
 
     if(result.isDeleted) {
@@ -76,7 +78,8 @@ async function onClickHandler_buttonDelete() {
 
 async function onClickHandler_buttonFreeze() {
     const currentFolder = await window.appState.get("currentFolder");
-    const folderApi = new FolderApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi('localhost', serverPort);
     const parentFolder = await folderApi.get(currentFolder.parentFolderPath);
 
     if(currentFolder.isFrozen) {
@@ -111,7 +114,8 @@ async function onClickHandler_buttonFreeze() {
 async function onClickHandler_buttonRename() {
     const folderName = document.getElementById("input-foldername").value + '/';
     let folder = await window.appState.get("currentFolder");
-    const folderApi = new FolderApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi('localhost', serverPort);
 
     const result = await folderApi.rename(folder.symbolFolderPath, folderName);
 
@@ -143,7 +147,8 @@ async function onClickHandler_buttonSelectPath() {
 async function onClickHandler_buttonRelocate() {
     const currentFolder = await window.appState.get("currentFolder");
     const destination = await window.appState.get("relocationDestination");
-    const folderApi = new FolderApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi("localhost", serverPort);
 
     const isExists = await window.fsApi.isPathExists(destination);
 

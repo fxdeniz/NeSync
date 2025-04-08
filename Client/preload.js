@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron/renderer');
 
 contextBridge.exposeInMainWorld('router', {
+  routeToServerStartup: () => ipcRenderer.send('route:ServerStartup'),
   routeToFileExplorer: () => ipcRenderer.send('route:FileExplorer'),
   routeToFileMonitor: () => ipcRenderer.send('route:FileMonitor'),
   routeToAddFolder: () => ipcRenderer.send('route:AddFolder'),

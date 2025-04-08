@@ -3,14 +3,14 @@ import FileApi from "../rest_api/FileApi.mjs"
 import MonitorApi from "../rest_api/MonitorApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
+    const serverPort = await window.appState.get("serverPort");
+    let folderApi = new FolderApi('localhost', serverPort);
+    let fileApi = new FileApi('localhost', serverPort);
+    let monitorApi = new MonitorApi('localhost', serverPort);
 
-    let folderApi = new FolderApi('localhost', 1234);
-    let fileApi = new FileApi('localhost', 1234);
-    let monitorApi = new MonitorApi('localhost', 1234);
-
-    let newAddedJson = await monitorApi.getNewAddedList();
-    let deletedJson = await monitorApi.getDeletedList();
-    let updatedJson = await monitorApi.getUpdatedFileList();  
+    let newAddedJson = await monitorApi.newAddedList();
+    let deletedJson = await monitorApi.deletedList();
+    let updatedJson = await monitorApi.updatedFileList();  
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());

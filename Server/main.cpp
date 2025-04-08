@@ -3,9 +3,12 @@
 #include <QDebug>
 #include <QTcpServer>
 #include <QJsonObject>
+#include <QStorageInfo>
+#include <QLibraryInfo>
 #include <QJsonDocument>
 #include <QStandardPaths>
 #include <QCommandLineParser>
+#include <QProcessEnvironment>
 #include <QtHttpServer/QHttpServer>
 #include <QtHttpServer/QHttpServerResponse>
 
@@ -71,6 +74,53 @@ int main(int argc, char *argv[])
     FileSystemMonitorController fsMonitorController;
     ZipExportController zipExportController;
     ZipImportController zipImportController;
+
+    httpServer.route("/", QHttpServerRequest::Method::Get, [portNumber, storagePath](const QHttpServerRequest &request) {
+        QStorageInfo storageInfo(QCoreApplication::applicationDirPath());
+        QFileInfoList deviceInfoList = QDir::drives().toList();
+        QStringList devices;
+
+        for(const QFileInfo &info : deviceInfoList)
+            devices << QString(QStorageInfo(info.absolutePath()).device());
+
+        QJsonObject body = {
+            {"appVersion", "2.0"},
+            {"port", portNumber},
+            {"storageFolderPath", storagePath},
+            {"cwd", QCoreApplication::applicationFilePath()},
+            {"cwdParent", QCoreApplication::applicationDirPath()},
+            {"pid", QCoreApplication::applicationPid()},
+            {"appBinaryName", QCoreApplication::applicationName()},
+            {"appBinaryVersion", QCoreApplication::applicationVersion()},
+            {"arguments", QJsonArray::fromStringList(QCoreApplication::arguments())},
+            {"dynamicLibPaths", QJsonArray::fromStringList(QCoreApplication::libraryPaths())},
+            {"hostName", QSysInfo::machineHostName()},
+            {"osName", QSysInfo::prettyProductName()},
+            {"osVersion", QSysInfo::productVersion()},
+            {"osType", QSysInfo::productType()},
+            {"kernelType", QSysInfo::kernelType()},
+            {"kernelVersion", QSysInfo::kernelVersion()},
+            {"currentCpuArch", QSysInfo::currentCpuArchitecture()},
+            {"buildCpuArch", QSysInfo::buildCpuArchitecture()},
+            {"buildAbi", QSysInfo::buildAbi()},
+            {"qtVersion", QLibraryInfo::version().toString()},
+            {"isDebugBuild", QLibraryInfo::isDebugBuild()},
+            {"isQtSharedBuild", QLibraryInfo::isSharedBuild()},
+            {"storageDevice", QString(storageInfo.device())},
+            {"storageDeviceName", storageInfo.displayName()},
+            {"storageDeviceCapacityTotal", storageInfo.bytesTotal()},
+            {"storageDeviceCapacityFree", storageInfo.bytesFree()},
+            {"storageDeviceCapacityAvailable", storageInfo.bytesAvailable()},
+            {"storageDeviceFileSystem", QString(storageInfo.fileSystemType())},
+            {"storageDeviceRoot", storageInfo.rootPath()},
+            {"storageDevices", {QJsonArray::fromStringList(devices)}},
+            {"environment", QJsonArray::fromStringList(QProcessEnvironment::systemEnvironment().toStringList())},
+            {"timestamp", QDateTime::currentDateTime().toString(Qt::DateFormat::ISODateWithMs)}
+        };
+
+        QHttpServerResponse response(body);
+        return response;
+    });
 
     // For routing checkout: https://www.qt.io/blog/2019/02/01/qhttpserver-routing-api
     httpServer.route("/folder/add", QHttpServerRequest::Method::Post, [&storageController](const QHttpServerRequest &request) {
@@ -217,7 +267,7 @@ int main(int argc, char *argv[])
     {
         qWarning() << QCoreApplication::translate("QHttpServerExample",
                                                   "Server failed to listen on a port.");
-        return -1;
+        return 12;
     }
 
     return app.exec();

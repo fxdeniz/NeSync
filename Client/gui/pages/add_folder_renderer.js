@@ -9,8 +9,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   disableButton(buttonClose);
 
   let stack = await window.appState.get("selectedFolderStack");
-  let folderApi = new FolderApi('localhost', 1234);
-  let fileApi = new FileApi('localhost', 1234);
+  const serverPort = await window.appState.get("serverPort");
+  let folderApi = new FolderApi('localhost', serverPort);
+  let fileApi = new FileApi('localhost', serverPort);
   let fileList = [];
 
   appendLog(textAreaLog, "ℹ️ Creating folders:");

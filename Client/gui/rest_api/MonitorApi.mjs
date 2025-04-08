@@ -6,15 +6,19 @@ export default class MonitorApi extends BaseApi {
         super(hostName, port);
     }
 
-    async getNewAddedList() {
+    async heartbeat() {
+        return await fetchJSON(`http://${this.host}:${this.port}/`);
+    }
+
+    async newAddedList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/new`);
     }
 
-    async getDeletedList() {
+    async deletedList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/deleted`);
     }
 
-    async getUpdatedFileList() {
+    async updatedFileList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/updated`);
     }
 }

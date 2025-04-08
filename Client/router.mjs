@@ -9,6 +9,12 @@ import path from "node:path";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
+function routeToServerStartup (event) {
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  win.loadFile(path.join(__dirname,'gui/pages/server_startup.html'));
+}
+
 function routeToFileExplorer (event) {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
@@ -57,7 +63,8 @@ function routeToFolderInfo (event) {
   win.loadFile(path.join(__dirname,'gui/pages/folder_info.html'));
 }
 
-export {routeToFileExplorer,
+export {routeToServerStartup, 
+        routeToFileExplorer,
         routeToFileMonitor,
         routeToAddFolder,
         routeToSaveChanges,
