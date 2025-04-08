@@ -30,40 +30,7 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-
-  /*
-  // TODO: Does not generates path for .exe files on windows.
-  const serverPath = path.join(process.resourcesPath, "cli", "nesync");
-
-  let serverProcess = spawn(serverPath, ['--port', '1234'], {
-    stdio: "ignore"
-  });
   
-  appState.set("serverPid", serverProcess.pid);
-  appState.set("serverPort", 1234);
-
-  serverProcess.on('exit', (code, signal) => {
-    if(code === 12) {
-      const min = 10000, max = 65535;
-      const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-
-      serverProcess = spawn(serverPath, ['--port', portNumber], {
-        stdio: "ignore"
-      });
-
-      appState.set("serverPid", serverProcess.pid);
-      appState.set("serverPort", portNumber);
-
-      console.log(`server started on ${portNumber}`);
-    }
-  });
-
-  app.on('before-quit', () => {
-    if (serverProcess && !serverProcess.killed)
-      serverProcess.kill(); // TODO: Does not properly kills the process.
-  });
-  */
-
   ipcMain.on('serverProcess:Run', () => {
     // TODO: Does not generates path for .exe files on windows.
     const serverPath = path.join(process.resourcesPath, "cli", "nesync");
@@ -79,12 +46,21 @@ app.whenReady().then(() => {
     appState.set("serverPort", portNumber);
 
     console.log(`server started on ${portNumber} with pid ${serverProcess.pid}`);
+    // Below line can't use router.routeToServerStartup() 
+    // because this function gets the browser window from the event sender.
+    // In here, event is sent by the child process.
+    serverProcess.on('exit', (code, signal) => {
+      const allWindows = BrowserWindow.getAllWindows();
+      
+      if(allWindows) // Prevent re-starting the server after client exited.
+        allWindows[0].loadFile("./gui/pages/server_startup.html")
+    });
   });
 
   app.on('before-quit', () => {
     console.log(`shutting server down.`);
     if (serverProcess && !serverProcess.killed)
-      serverProcess.kill(); // TODO: Does not properly kills the process.
+      serverProcess.kill(); // TODO: Does not properly kills the process, just sends the kill signal.
   });
 
   ipcMain.on('route:ServerStartup', router.routeToServerStartup);
