@@ -1,8 +1,8 @@
 import ZipExportApi from "../rest_api/ZipExportApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-
-    let exportApi = new ZipExportApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    let exportApi = new ZipExportApi('localhost', serverPort);
 
     let buttonClose = document.getElementById('button-close');
     buttonClose.addEventListener('click', async clickEvent => window.router.routeToFileExplorer());
