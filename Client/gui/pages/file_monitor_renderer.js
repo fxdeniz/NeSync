@@ -28,7 +28,8 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   buttonSave.disabled = true;
   displayAlertDiv("Analyzing file system changes, please wait...");
 
-  let monitorApi = new MonitorApi('localhost', 1234);
+  const serverPort = await window.appState.get("serverPort");
+  let monitorApi = new MonitorApi('localhost', serverPort);
 
   let newAddedJson = await monitorApi.getNewAddedList();
   let deletedJson = await monitorApi.getDeletedList();
