@@ -3,10 +3,10 @@ import FileApi from "../rest_api/FileApi.mjs"
 import MonitorApi from "../rest_api/MonitorApi.mjs";
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-
-    let folderApi = new FolderApi('localhost', 1234);
-    let fileApi = new FileApi('localhost', 1234);
-    let monitorApi = new MonitorApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    let folderApi = new FolderApi('localhost', serverPort);
+    let fileApi = new FileApi('localhost', serverPort);
+    let monitorApi = new MonitorApi('localhost', serverPort);
 
     let newAddedJson = await monitorApi.getNewAddedList();
     let deletedJson = await monitorApi.getDeletedList();
