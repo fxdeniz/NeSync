@@ -31,9 +31,9 @@ async function displayFileSystemStatus(buttonRefresh, buttonSave) {
   const serverPort = await window.appState.get("serverPort");
   let monitorApi = new MonitorApi('localhost', serverPort);
 
-  let newAddedJson = await monitorApi.getNewAddedList();
-  let deletedJson = await monitorApi.getDeletedList();
-  let updatedJson = await monitorApi.getUpdatedFileList();
+  let newAddedJson = await monitorApi.newAddedList();
+  let deletedJson = await monitorApi.deletedList();
+  let updatedJson = await monitorApi.updatedFileList();
 
   console.log(`newAdded: ${JSON.stringify(newAddedJson, null, 2)}`);
   console.log(`deleted: ${JSON.stringify(deletedJson, null, 2)}`);

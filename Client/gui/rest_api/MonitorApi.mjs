@@ -10,15 +10,15 @@ export default class MonitorApi extends BaseApi {
         return await fetchJSON(`http://${this.host}:${this.port}/`);
     }
 
-    async getNewAddedList() {
+    async newAddedList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/new`);
     }
 
-    async getDeletedList() {
+    async deletedList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/deleted`);
     }
 
-    async getUpdatedFileList() {
+    async updatedFileList() {
         return await fetchJSON(`http://${this.host}:${this.port}/monitor/updated`);
     }
 }
