@@ -14,6 +14,7 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 let appState = new Map();
+let serverProcess;
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -30,6 +31,7 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
 
+  /*
   // TODO: Does not generates path for .exe files on windows.
   const serverPath = path.join(process.resourcesPath, "cli", "nesync");
 
@@ -57,6 +59,30 @@ app.whenReady().then(() => {
   });
 
   app.on('before-quit', () => {
+    if (serverProcess && !serverProcess.killed)
+      serverProcess.kill(); // TODO: Does not properly kills the process.
+  });
+  */
+
+  ipcMain.on('serverProcess:Run', () => {
+    // TODO: Does not generates path for .exe files on windows.
+    const serverPath = path.join(process.resourcesPath, "cli", "nesync");
+
+    const min = 10000, max = 65535;
+    const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    serverProcess = spawn(serverPath, ['--port', portNumber], {
+      stdio: "ignore"
+    });
+
+    appState.set("serverPid", serverProcess.pid);
+    appState.set("serverPort", portNumber);
+
+    console.log(`server started on ${portNumber} with pid ${serverProcess.pid}`);
+  });
+
+  app.on('before-quit', () => {
+    console.log(`shutting server down.`);
     if (serverProcess && !serverProcess.killed)
       serverProcess.kill(); // TODO: Does not properly kills the process.
   });
@@ -105,6 +131,8 @@ app.whenReady().then(() => {
   ipcMain.handle('state:Set', async (event, key, value) => {
     appState.set(key, value);
   });
+
+  ipcMain.handle('app:IsPacked', () => app.isPackaged);
   
   createWindow();
 
