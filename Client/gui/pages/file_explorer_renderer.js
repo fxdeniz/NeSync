@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     if(!currentFolder)
       target = '/';
     else {
-      const folderApi = new FolderApi('localhost', 1234);
+      const serverPort = await window.appState.get("serverPort");
+      const folderApi = new FolderApi('localhost', serverPort);
       const folder = await folderApi.get(currentFolder.symbolFolderPath);
   
       if(!folder.isExist) // Current folder not exists in the server.
@@ -74,7 +75,8 @@ async function onDirectoryChangeHandler_inputCurrentPath(event) {
   const tableExplorerBody = document.querySelector('#table-explorer tbody');
   tableExplorerBody.innerHTML = "";  // Clean previous rows from table.
 
-  const folderApi = new FolderApi('localhost', 1234);
+  const serverPort = await window.appState.get("serverPort");
+  const folderApi = new FolderApi('localhost', serverPort);
   const folderJson = await folderApi.get(event.detail.targetPath);
   await window.appState.set("currentFolder", folderJson);
 
@@ -186,7 +188,8 @@ async function onClickHandler_buttonSelectZipFileImportPath() {
 }
 
 async function onClickHandler_buttonExport() {
-  let exportApi = new ZipExportApi('localhost', 1234);
+  const serverPort = await window.appState.get("serverPort");
+  let exportApi = new ZipExportApi('localhost', serverPort);
   const filePath = document.getElementById("input-zip-export-path").value;
   // Get rootSymbolFolderPath without the <b> tags
   const rootSymbolFolderPath = document.getElementById("p-export-source").textContent;
@@ -196,7 +199,8 @@ async function onClickHandler_buttonExport() {
 }
 
 async function onClickHandler_buttonImport() {
-  let importApi = new ZipImportApi('localhost', 1234);
+  const serverPort = await window.appState.get("serverPort");
+  let importApi = new ZipImportApi('localhost', serverPort);
   const filePath = document.getElementById("input-zip-import-path").value;
   await importApi.setFilePath(filePath);
   window.router.routeToZipImport();

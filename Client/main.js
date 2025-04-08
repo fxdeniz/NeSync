@@ -61,6 +61,7 @@ app.whenReady().then(() => {
       serverProcess.kill(); // TODO: Does not properly kills the process.
   });
 
+  ipcMain.on('route:ServerStartup', router.routeToServerStartup);
   ipcMain.on('route:FileExplorer', router.routeToFileExplorer);
   ipcMain.on('route:FileMonitor', router.routeToFileMonitor);
   ipcMain.on('route:AddFolder', router.routeToAddFolder);
