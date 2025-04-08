@@ -3,7 +3,8 @@ import FileApi from "../rest_api/FileApi.mjs"
 import VersionApi from "../rest_api/VersionApi.mjs"
 
 document.addEventListener("DOMContentLoaded", async (event) => {
-    const fileApi = new FileApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const fileApi = new FileApi("localhost", serverPort);
     const folderInfo = await window.appState.get("currentFolder");
     let fileInfo = await window.appState.get("currentFile");
     fileInfo = await fileApi.get(fileInfo.symbolFilePath);
@@ -99,7 +100,8 @@ function createListItem(versionInfo) {
 }
 
 async function onClickHandler_buttonPreview() {
-    const folderApi = new FolderApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi("localhost", serverPort);
     const versionInfo = await window.appState.get("currentVersion");
     const fileInfo = await window.appState.get("currentFile");
     const symbolFilePath = fileInfo.symbolFilePath;
@@ -142,7 +144,8 @@ async function onClickHandler_buttonSelectPath() {
 }
 
 async function onClickHandler_buttonExtract() {
-    const folderApi = new FolderApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const folderApi = new FolderApi("localhost", serverPort);
     const version = await window.appState.get("currentVersion");
     let src = await folderApi.getStorageFolderPath();
     src += version.internalFileName;
@@ -160,7 +163,8 @@ async function onClickHandler_buttonExtract() {
 
 async function onClickHandler_buttonFreeze() {
     let fileInfo = await window.appState.get("currentFile");
-    const fileApi = new FileApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const fileApi = new FileApi("localhost", serverPort);
 
     if(fileInfo.isFrozen) {
         const result = await fileApi.relocate(fileInfo.symbolFilePath);
@@ -197,7 +201,8 @@ async function onClickHandler_buttonDelete() {
     if (!userConfirmed)
         return;
 
-    const fileApi = new FileApi("localhost", 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const fileApi = new FileApi("localhost", serverPort);
     const result = await fileApi.delete(fileInfo.symbolFilePath);
 
     if(result.isDeleted) {
@@ -214,7 +219,8 @@ async function onClickHandler_buttonSaveDescription() {
     const description = document.getElementById("textarea-description").value;
     const file = await window.appState.get("currentFile");
     let version = await window.appState.get("currentVersion");
-    const versionApi = new VersionApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const versionApi = new VersionApi('localhost', serverPort);
 
     const result = await versionApi.updateDescription(file.symbolFilePath, version.versionNumber, description);
 
@@ -227,7 +233,8 @@ async function onClickHandler_buttonSaveDescription() {
 async function onClickHandler_buttonRename() {
     const fileName = document.getElementById("input-filename").value;
     const file = await window.appState.get("currentFile");
-    const fileApi = new FileApi('localhost', 1234);
+    const serverPort = await window.appState.get("serverPort");
+    const fileApi = new FileApi('localhost', serverPort);
 
     const result = await fileApi.rename(file.symbolFilePath, fileName);
 
