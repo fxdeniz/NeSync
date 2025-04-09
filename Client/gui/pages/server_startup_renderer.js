@@ -32,17 +32,26 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         modal.show();
     }
     else {
-        window.serverProcess.run();
-    
-        setTimeout(async () => {
+        setInterval(async () => {
             const port = await window.appState.get("serverPort");
             const pid = await window.appState.get("serverPid");
+
+            if(!port || !pid) { // Process is running for the first time.
+                window.serverProcess.run(); // Sets the pid and port.
+                return;
+            }
+
             const monitorApi = new MonitorApi("localhost", port);
             console.log(`requesting pid ${pid} from port ${port}`);
-            const heartbeat = await monitorApi.heartbeat(); // TODO: handle case when server is not running.
+            const heartbeat = await monitorApi.heartbeat();
+
+            if(!heartbeat) { // Server was ran previously but not running now.
+                window.serverProcess.run(); // Sets the pid and port.
+                return;
+            }
     
             if(heartbeat.pid === pid)
                 window.router.routeToFileExplorer();
-        }, 15000);
+        }, 2000);
     }
 });

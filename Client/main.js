@@ -52,7 +52,7 @@ app.whenReady().then(() => {
     serverProcess.on('exit', (code, signal) => {
       const allWindows = BrowserWindow.getAllWindows();
       
-      if(allWindows) // Prevent re-starting the server after client exited.
+      if(allWindows && allWindows[0]) // Prevent re-starting the server after client exited.
         allWindows[0].loadFile("./gui/pages/server_startup.html")
     });
   });

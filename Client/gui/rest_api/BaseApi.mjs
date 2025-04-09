@@ -12,6 +12,7 @@ async function fetchJSON(targetUrl, methodType = "GET") {
   
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
+      return null;
     }
   }
   
@@ -29,6 +30,7 @@ async function postJSON(targetUrl, requestBody, methodType = 'POST') {
     return result;
   } catch (error) {
     console.error("Error:", error);
+    return null;
   }
 }
 
