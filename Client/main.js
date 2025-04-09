@@ -14,6 +14,7 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 let appState = new Map();
+let serverProcess;
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -29,36 +30,37 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-
-  // TODO: Does not generates path for .exe files on windows.
-  const serverPath = path.join(process.resourcesPath, "cli", "nesync");
-
-  let serverProcess = spawn(serverPath, ['--port', '1234'], {
-    stdio: "ignore"
-  });
   
-  appState.set("serverPid", serverProcess.pid);
-  appState.set("serverPort", 1234);
+  ipcMain.on('serverProcess:Run', () => {
+    // TODO: Does not generates path for .exe files on windows.
+    const serverPath = path.join(process.resourcesPath, "cli", "nesync");
 
-  serverProcess.on('exit', (code, signal) => {
-    if(code === 12) {
-      const min = 10000, max = 65535;
-      const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    const min = 10000, max = 65535;
+    const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
-      serverProcess = spawn(serverPath, ['--port', portNumber], {
-        stdio: "ignore"
-      });
+    serverProcess = spawn(serverPath, ['--port', portNumber], {
+      stdio: "ignore"
+    });
 
-      appState.set("serverPid", serverProcess.pid);
-      appState.set("serverPort", portNumber);
+    appState.set("serverPid", serverProcess.pid);
+    appState.set("serverPort", portNumber);
 
-      console.log(`server started on ${portNumber}`);
-    }
+    console.log(`server started on ${portNumber} with pid ${serverProcess.pid}`);
+    // Below line can't use router.routeToServerStartup() 
+    // because this function gets the browser window from the event sender.
+    // In here, event is sent by the child process.
+    serverProcess.on('exit', (code, signal) => {
+      const allWindows = BrowserWindow.getAllWindows();
+      
+      if(allWindows && allWindows[0]) // Prevent re-starting the server after client exited.
+        allWindows[0].loadFile("./gui/pages/server_startup.html")
+    });
   });
 
   app.on('before-quit', () => {
+    console.log(`shutting server down.`);
     if (serverProcess && !serverProcess.killed)
-      serverProcess.kill(); // TODO: Does not properly kills the process.
+      serverProcess.kill(); // TODO: Does not properly kills the process, just sends the kill signal.
   });
 
   ipcMain.on('route:ServerStartup', router.routeToServerStartup);
@@ -105,6 +107,8 @@ app.whenReady().then(() => {
   ipcMain.handle('state:Set', async (event, key, value) => {
     appState.set(key, value);
   });
+
+  ipcMain.handle('app:IsPacked', () => app.isPackaged);
   
   createWindow();
 

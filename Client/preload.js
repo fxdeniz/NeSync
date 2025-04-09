@@ -78,5 +78,10 @@ contextBridge.exposeInMainWorld('appState', {
         .then(resolve)
         .catch(reject);
     });
-  }
+  },
+  isPacked: () => ipcRenderer.invoke("app:IsPacked")
+});
+
+contextBridge.exposeInMainWorld('serverProcess', {
+  run: () => ipcRenderer.send("serverProcess:Run")
 });
