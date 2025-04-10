@@ -32,26 +32,25 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         modal.show();
     }
     else {
-        setInterval(async () => {
+        while(true) {
             const port = await window.appState.get("serverPort");
             const pid = await window.appState.get("serverPid");
 
-            if(!port || !pid) { // Process is running for the first time.
-                window.serverProcess.run(); // Sets the pid and port.
-                return;
+            if (!port || !pid) // Process is running for the first time.
+                await window.serverProcess.run(); // Wait untill the initialize but not the exit.
+            else {
+                const monitorApi = new MonitorApi("localhost", port);
+                console.log(`requesting pid ${pid} from port ${port}`);
+                const heartbeat = await monitorApi.heartbeat();
+
+                if (!heartbeat) // Server was ran previously but not running now.
+                    await window.serverProcess.run(); // Wait untill the initialize but not the exit.
+                else if (heartbeat.pid === pid)
+                    window.router.routeToFileExplorer();
             }
 
-            const monitorApi = new MonitorApi("localhost", port);
-            console.log(`requesting pid ${pid} from port ${port}`);
-            const heartbeat = await monitorApi.heartbeat();
-
-            if(!heartbeat) { // Server was ran previously but not running now.
-                window.serverProcess.run(); // Sets the pid and port.
-                return;
-            }
-    
-            if(heartbeat.pid === pid)
-                window.router.routeToFileExplorer();
-        }, 2000);
+            // Wait for 2 seconds before next check.
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
     }
 });
