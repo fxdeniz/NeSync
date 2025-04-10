@@ -25,7 +25,9 @@ const createWindow = () => {
     }
   });
 
+  mainWindow.maximize();
   mainWindow.loadFile("./gui/pages/server_startup.html");
+  mainWindow.focus();
   // mainWindow.webContents.openDevTools();
 };
 
