@@ -15,6 +15,7 @@
     "@electron-forge/cli": "^7.8.0",
     "@electron-forge/maker-deb": "^7.8.0",
     "@electron-forge/maker-dmg": "^7.8.0",
+    "@electron-forge/maker-rpm": "^7.8.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
     "@electron-forge/plugin-fuses": "^7.8.0",
     "@electron/fuses": "^1.8.0",
@@ -34,14 +35,17 @@
       "makers": [
         {
           "name": "@electron-forge/maker-deb",
-          "config": {
-          }
+          "config": {}
         },
         {
           "name": "@electron-forge/maker-dmg",
           "config": {
             "format": "ULFO"
           }
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
         }
       ]
     }
