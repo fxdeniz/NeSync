@@ -47,8 +47,7 @@ QHttpServerResponse ZipImportController::openZip(const QHttpServerRequest &reque
 
 QHttpServerResponse ZipImportController::readFoldersJson(const QHttpServerRequest &request)
 {
-    QJsonArray responseBody {QJsonArray::fromStringList(service.readFoldersJson())};
-
+    QJsonArray responseBody = QJsonArray::fromStringList(service.readFoldersJson());
     return QHttpServerResponse(responseBody, QHttpServerResponse::StatusCode::Ok);
 }
 
