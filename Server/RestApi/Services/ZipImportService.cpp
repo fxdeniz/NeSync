@@ -53,7 +53,7 @@ bool ZipImportService::openArchive() const
 // TODO: On error this returns [], this can be seen as error when there is no folders in the array.
 // But having no folder implies error, because "/" should always be in the system.
 // Maybe, instead of returning array, returning {"success": true, "folders": []} will help.
-QJsonArray ZipImportService::readFoldersJson()
+QStringList ZipImportService::readFoldersJson()
 {
     QuaZip archive(getZipFilePath());
 
@@ -107,7 +107,7 @@ QJsonArray ZipImportService::readFoldersJson()
     result = QJsonArray::fromStringList(stringList);
 
     setFoldersJson(result);
-    return result;
+    return stringList;
 }
 
 // TODO: On error this returns {}, this can be seen as error when there is no files in the object.

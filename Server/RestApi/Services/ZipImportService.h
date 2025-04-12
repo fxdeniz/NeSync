@@ -16,7 +16,7 @@ public:
     QJsonArray getFoldersJson() const;
     QJsonObject getFilesJson() const;
     bool openArchive() const;
-    QJsonArray readFoldersJson();
+    QStringList readFoldersJson();
     QJsonObject readFilesJson();
     bool importFile(QString symbolFilePath, qulonglong versionNumber);
 
