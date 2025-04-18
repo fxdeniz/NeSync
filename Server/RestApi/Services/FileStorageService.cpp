@@ -36,7 +36,7 @@ bool FileStorageService::renameFolder(const QString &symbolFolderPath, QString f
     auto fsm = FileStorageManager::instance();
 
     QJsonObject parentDto = fsm->getFolderJsonBySymbolPath(symbolFolderPath, true);
-    QString oldName = parentDto[JsonKeys::Folder::SuffixPath].toString();
+    QString oldName = QDir::toNativeSeparators(parentDto[JsonKeys::Folder::SuffixPath].toString());
     QString newUserPath = parentDto[JsonKeys::Folder::UserFolderPath].toString().split(oldName).first();
     newUserPath += folderName;
     newUserPath = QDir::toNativeSeparators(newUserPath);
