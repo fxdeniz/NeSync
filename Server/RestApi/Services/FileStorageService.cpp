@@ -212,6 +212,11 @@ bool FileStorageService::relocateFolder(const QString &symbolFolderPath, const Q
             QJsonObject parent = fsm->getFolderJsonBySymbolPath(folder[JsonKeys::Folder::ParentFolderPath].toString());
             QString path = parent[JsonKeys::Folder::UserFolderPath].toString();
             path += folder[JsonKeys::Folder::SuffixPath].toString();
+            path = QDir::toNativeSeparators(path);
+
+            if(!path.endsWith(QDir::separator()))
+                path.append(QDir::separator());
+
             folder[JsonKeys::Folder::UserFolderPath] = path;
         }
 
