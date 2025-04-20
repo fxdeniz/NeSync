@@ -216,6 +216,8 @@ QJsonObject FileSystemMonitorService::generateFilesObject(QStringList rootFolder
                 if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
                     parentFolderPath = parentFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
 
+                parentFolderPath = QDir::toNativeSeparators(parentFolderPath);
+
                 if(!parentFolderPath.endsWith(QDir::separator()))
                     parentFolderPath.append(QDir::separator());
 
@@ -240,6 +242,8 @@ QJsonObject FileSystemMonitorService::generateFilesObject(QStringList rootFolder
 
                 if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::OSType::MacOS)
                     parentFolderPath = parentFolderPath.normalized(QString::NormalizationForm::NormalizationForm_D);
+
+                parentFolderPath = QDir::toNativeSeparators(parentFolderPath);
 
                 if(!parentFolderPath.endsWith(QDir::separator()))
                     parentFolderPath.append(QDir::separator());

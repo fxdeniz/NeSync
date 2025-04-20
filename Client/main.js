@@ -34,7 +34,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   
   ipcMain.on('serverProcess:Run', () => {
-    // TODO: Does not generates path for .exe files on windows.
+    // Also works on windows without .exe extension.
     const serverPath = path.join(process.resourcesPath, "cli", "nesync");
 
     const min = 10000, max = 65535;
