@@ -22,6 +22,9 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
+    qInfo() << "NeSync Server 2.0 Alpha - Copyright 2025 Deniz Yilmazok - Licensed under GPLv3";
+    qInfo() << "THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY! USE AT YOUR OWN RISK!";
+
     QCommandLineParser parser;
     parser.setApplicationDescription("NeSync 2.0");
     parser.addHelpOption();
