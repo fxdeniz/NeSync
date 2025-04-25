@@ -162,9 +162,11 @@ function handleSquirrelEvent() {
 
   const squirrelEvent = process.argv[1];
   switch (squirrelEvent) {
+    case '--squirrel-firstrun':
+      return true;
+      
     case '--squirrel-install':
     case '--squirrel-updated':
-    //case '--squirrel-firstrun';
       // Optionally do things such as:
       // - Add your .exe to the PATH
       // - Write to the registry for things like file associations and
