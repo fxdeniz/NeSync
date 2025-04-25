@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { fileURLToPath } from 'url';
-import { spawn } from "node:child_process";
 import path from 'node:path';
+import * as ChildProcess from "node:child_process";
 import * as router from './router.mjs';
 import * as DialogApi from './DialogApi.mjs'
 import { splitPath, normalizePath, fileNameWithExtension, isPathExists, previewFile, extractFile } from './FileSystemApi.mjs'
@@ -12,6 +12,13 @@ import { splitPath, normalizePath, fileNameWithExtension, isPathExists, previewF
 // https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
+
+// https://github.com/electron/windows-installer
+// this should be placed at top of main.js to handle setup events quickly
+if (process.platform === 'win32' && handleSquirrelEvent()) {
+  // squirrel event handled and app will exit in 1000ms, so don't do anything else
+  app.quit();
+}
 
 let appState = new Map();
 let serverProcess;
@@ -40,7 +47,7 @@ app.whenReady().then(() => {
     const min = 10000, max = 65535;
     const portNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
-    serverProcess = spawn(serverPath, ['--port', portNumber], {
+    serverProcess = ChildProcess.spawn(serverPath, ['--port', portNumber], {
       stdio: "ignore"
     });
 
@@ -127,3 +134,66 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 });
+
+// https://github.com/electron/windows-installer
+function handleSquirrelEvent() {
+  if (process.argv.length === 1) {
+    return false;
+  }
+
+  const appFolder = path.resolve(process.execPath, '..');
+  const rootAtomFolder = path.resolve(appFolder, '..');
+  const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
+  const exeName = path.basename(process.execPath);
+
+  const spawn = function(command, args) {
+    let spawnedProcess, error;
+
+    try {
+      spawnedProcess = ChildProcess.spawn(command, args, {detached: true});
+    } catch (error) {}
+
+    return spawnedProcess;
+  };
+
+  const spawnUpdate = function(args) {
+    return spawn(updateDotExe, args);
+  };
+
+  const squirrelEvent = process.argv[1];
+  switch (squirrelEvent) {
+    case '--squirrel-firstrun':
+      return true;
+      
+    case '--squirrel-install':
+    case '--squirrel-updated':
+      // Optionally do things such as:
+      // - Add your .exe to the PATH
+      // - Write to the registry for things like file associations and
+      //   explorer context menus
+
+      // Install desktop and start menu shortcuts
+      spawnUpdate(['--createShortcut', exeName]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case '--squirrel-uninstall':
+      // Undo anything you did in the --squirrel-install and
+      // --squirrel-updated handlers
+
+      // Remove desktop and start menu shortcuts
+      spawnUpdate(['--removeShortcut', exeName]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case '--squirrel-obsolete':
+      // This is called on the outgoing version of your app before
+      // we update to the new version - it's the opposite of
+      // --squirrel-updated
+
+      app.quit();
+      return true;
+  }
+}
