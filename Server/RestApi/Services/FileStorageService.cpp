@@ -321,12 +321,17 @@ bool FileStorageService::freezeFile(const QString &symbolFilePath, bool isFrozen
 
     entity[JsonKeys::File::IsFrozen] = isFrozen;
 
-    bool result = fsm->updateFileEntity(entity);
+    bool isUpdated = fsm->updateFileEntity(entity);
 
-    if(result)
+    if(isUpdated)
         _lastSymbolFilePath = symbolFilePath;
 
-    return result;
+    QFile file(entity[JsonKeys::File::UserFilePath].toString());
+
+    if(isUpdated && file.exists())
+        file.remove();
+
+    return isUpdated;
 }
 
 bool FileStorageService::deleteFile(const QString &symbolFilePath)
