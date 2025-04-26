@@ -25,7 +25,6 @@ add_subdirectory(Dependency/quazip)
 
 set(PROJECT_SOURCES
   main.cpp
-  resources.qrc
 
   Utility/DatabaseRegistry.h
   Utility/DatabaseRegistry.cpp
