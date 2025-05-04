@@ -20,12 +20,13 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
     "@electron-forge/plugin-fuses": "^7.8.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "^35.2.1"
+    "electron": "^36.0.1"
   },
   "config": {
     "forge": {
       "packagerConfig": {
         "asar": true,
+        "icon": "resources/icon/app_icon",
         "extraResource": [
           "resources/cli/"
         ],
@@ -36,21 +37,32 @@
       "makers": [
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "options": {
+              "icon": "resources/icon/app_icon.png"
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-dmg",
           "config": {
-            "format": "ULFO"
+            "format": "ULFO",
+            "icon": "resources/icon/app_icon.icns"
           }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "options": {
+              "icon": "resources/icon/app_icon.png"
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {}
+          "config": {
+            "setupIcon": "resources/icon/app_icon.ico"
+          }
         }
       ]
     }

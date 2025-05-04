@@ -25,7 +25,6 @@ add_subdirectory(Dependency/quazip)
 
 set(PROJECT_SOURCES
   main.cpp
-  resources.qrc
 
   Utility/DatabaseRegistry.h
   Utility/DatabaseRegistry.cpp
@@ -105,14 +104,15 @@ set_target_properties(nesync PROPERTIES
     # MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     # MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     # MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    # MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE FALSE # https://cmake.org/cmake/help/latest/prop_tgt/MACOSX_BUNDLE.html
+    WIN32_EXECUTABLE FALSE # https://cmake.org/cmake/help/latest/prop_tgt/WIN32_EXECUTABLE.html
 )
 
 include(GNUInstallDirs)
 install(TARGETS nesync
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    BUNDLE  DESTINATION ${CMAKE_SOURCE_DIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
